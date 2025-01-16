@@ -10,12 +10,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { useUserTransactionHistoryStore } from "@/store/userTransactionHistoryStore";
 import { formatMonthDateYear, formatTime } from "@/utils/function";
 import { ChartDataMember, DashboardEarnings } from "@/utils/types";
-import { alliance_earnings_table } from "@prisma/client";
+import { alliance_earnings_table, alliance_member_table } from "@prisma/client";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { Dispatch, SetStateAction, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 import { Button } from "../ui/button";
 import {
   Dialog,
@@ -34,6 +36,7 @@ type Props = {
   setChartData: Dispatch<SetStateAction<ChartDataMember[]>>;
   setEarnings: Dispatch<SetStateAction<alliance_earnings_table | null>>;
   setTotalEarnings: Dispatch<SetStateAction<DashboardEarnings | null>>;
+  teamMemberProfile: alliance_member_table;
 };
 
 const DashboardPackages = ({
@@ -41,11 +44,13 @@ const DashboardPackages = ({
   setChartData,
   setEarnings,
   setTotalEarnings,
+  teamMemberProfile,
 }: Props) => {
   const { toast } = useToast();
   const [openDialogId, setOpenDialogId] = useState<string | null>(null); // Track which dialog is open
   const [isLoading, setIsLoading] = useState<string | null>(null); // Track loading state for specific packages
-  console.log(chartData);
+  const { setAddTransactionHistory } = useUserTransactionHistoryStore();
+
   const handleClaimPackage = async (packageData: ChartDataMember) => {
     const { amount, profit_amount, package_connection_id } = packageData;
 
@@ -58,6 +63,16 @@ const DashboardPackages = ({
       });
 
       if (response.success) {
+        const transactionHistory = {
+          transaction_id: uuidv4(),
+          transaction_date: new Date(),
+          transaction_description: "Package Claimed",
+          transaction_amount: Number(profit_amount + amount),
+          transaction_member_id: teamMemberProfile?.alliance_member_id,
+        };
+
+        setAddTransactionHistory([transactionHistory]);
+
         toast({
           title: "Package claimed successfully",
           description: "You have successfully claimed the package",

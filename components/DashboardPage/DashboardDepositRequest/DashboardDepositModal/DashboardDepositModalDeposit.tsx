@@ -23,6 +23,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { logError } from "@/services/Error/ErrorLogs";
 import { getMerchantOptions } from "@/services/Options/Options";
+import { useUserTransactionHistoryStore } from "@/store/userTransactionHistoryStore";
 import { escapeFormData } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,8 +33,8 @@ import Image from "next/image";
 import { NextResponse } from "next/server";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
-
 type Props = {
   teamMemberProfile: alliance_member_table;
   className: string;
@@ -64,11 +65,15 @@ const topUpFormSchema = z.object({
 
 export type TopUpFormValues = z.infer<typeof topUpFormSchema>;
 
-const DashboardDepositModalDeposit = ({ className }: Props) => {
+const DashboardDepositModalDeposit = ({
+  className,
+  teamMemberProfile,
+}: Props) => {
   const supabaseClient = createClientSide();
   const [topUpOptions, setTopUpOptions] = useState<merchant_table[]>([]);
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
+  const { setAddTransactionHistory } = useUserTransactionHistoryStore();
   const {
     control,
     handleSubmit,
@@ -136,6 +141,15 @@ const DashboardDepositModalDeposit = ({ className }: Props) => {
         TopUpFormValues: sanitizedData,
         publicUrl,
       });
+
+      const transactionHistory = {
+        transaction_id: uuidv4(),
+        transaction_date: new Date(),
+        transaction_description: "Deposit Ongoing",
+        transaction_amount: Number(sanitizedData.amount),
+        transaction_member_id: teamMemberProfile?.alliance_member_id,
+      };
+      setAddTransactionHistory([transactionHistory]);
 
       toast({
         title: "Deposit Request Successfully",
@@ -209,7 +223,10 @@ const DashboardDepositModalDeposit = ({ className }: Props) => {
             <DialogDescription></DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="space-y-6 w-full max-w-xs sm:max-w-max "
+          >
             {/* Amount Field */}
 
             {/* Top-Up Mode */}
@@ -355,7 +372,7 @@ const DashboardDepositModalDeposit = ({ className }: Props) => {
               )}
             </div>
 
-            <div>
+            <div className="">
               <Controller
                 name="file"
                 control={control}

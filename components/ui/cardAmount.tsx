@@ -58,13 +58,7 @@ const CardAmount = ({
             <RefreshCcw />
           </Button>
         )}{" "}
-        {refresh ? (
-          <div className="flex items-center gap-2">
-            <Skeleton className="h-9 w-[100px]" />
-          </div>
-        ) : (
-          `₱ ${value}`
-        )}
+        {refresh ? <Skeleton className="h-9 w-[100px]" /> : `₱ ${value}`}
       </CardContent>
     </Card>
   );

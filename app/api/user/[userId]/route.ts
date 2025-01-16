@@ -6,6 +6,14 @@ import {
 } from "@/utils/serversideProtection";
 import { createServiceRoleClientServerSide } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
+import { z } from "zod";
+
+const updateUserSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+  iv: z.string().min(6),
+  clientpass: z.string().min(6),
+});
 
 export async function PUT(
   request: Request,
@@ -31,7 +39,22 @@ export async function PUT(
     loginRateLimit(ip);
 
     const { userId } = await context.params;
+
     const { email, password, iv, clientpass } = await request.json();
+
+    const validate = updateUserSchema.safeParse({
+      email,
+      password,
+      iv,
+      clientpass,
+    });
+
+    if (!validate.success) {
+      return NextResponse.json(
+        { error: validate.error.message },
+        { status: 400 }
+      );
+    }
 
     if (!password || !email || !userId) {
       return NextResponse.json(

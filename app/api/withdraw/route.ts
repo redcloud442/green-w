@@ -11,6 +11,15 @@ import { createClientServerSide } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+const getWithdrawalHistorySchema = z.object({
+  page: z.number().min(1),
+  limit: z.number().min(1),
+  search: z.string().min(3),
+  columnAccessor: z.string().min(3),
+  isAscendingSort: z.boolean(),
+  teamMemberId: z.string().uuid(),
+});
+
 export async function GET(request: Request) {
   try {
     const ip =
@@ -32,8 +41,20 @@ export async function GET(request: Request) {
     const isAscendingSort = url.searchParams.get("isAscendingSort") || "false";
     const userId = url.searchParams.get("userId") || "";
 
-    if (limit !== "10") {
-      return NextResponse.json({ error: "Invalid request." }, { status: 400 });
+    const validate = getWithdrawalHistorySchema.safeParse({
+      page,
+      limit,
+      search,
+      columnAccessor,
+      isAscendingSort,
+      userId,
+    });
+
+    if (!validate.success) {
+      return NextResponse.json(
+        { error: validate.error.message },
+        { status: 400 }
+      );
     }
 
     const params = {

@@ -2,6 +2,14 @@ import { applyRateLimit } from "@/utils/function";
 import prisma from "@/utils/prisma";
 import { protectionAdminUser } from "@/utils/serversideProtection";
 import { NextResponse } from "next/server";
+import { z } from "zod";
+
+const createPackageSchema = z.object({
+  packageName: z.string().min(3),
+  packageDescription: z.string().min(3),
+  packagePercentage: z.number().min(1),
+  packageDays: z.number().min(1),
+});
 
 export async function POST(request: Request) {
   try {
@@ -11,6 +19,12 @@ export async function POST(request: Request) {
       "unknown";
 
     const body = await request.json();
+
+    const validate = createPackageSchema.safeParse(body);
+
+    if (!validate.success) {
+      throw new Error(validate.error.message);
+    }
 
     if (!body) {
       return NextResponse.json(

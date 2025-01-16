@@ -495,7 +495,6 @@ export const protectionAllUser = async (ip?: string) => {
       referal: referal as alliance_referral_link_table,
     };
   } catch (e) {
-    console.log(e);
     if (e instanceof Error) {
       await logError(supabase, {
         errorMessage: e.message,

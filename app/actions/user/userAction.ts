@@ -9,6 +9,7 @@ import {
   alliance_notification_table,
 } from "@prisma/client";
 import { redirect } from "next/navigation";
+import { z } from "zod";
 
 export const getUserNotification = async () => {
   try {
@@ -73,10 +74,16 @@ export const getUserNotification = async () => {
       count: count,
     };
   } catch (error) {
-    console.log(error);
     throw new Error("Failed to fetch user notification");
   }
 };
+
+const getUnserNotificationWithLimitSchema = z.object({
+  page: z.number().min(1),
+  limit: z.number().min(1),
+  teamMemberId: z.string().uuid(),
+  isRead: z.boolean(),
+});
 
 export const getUnserNotificationWithLimit = async (params: {
   page: number;
@@ -85,6 +92,12 @@ export const getUnserNotificationWithLimit = async (params: {
   isRead: boolean;
 }) => {
   try {
+    const validate = getUnserNotificationWithLimitSchema.safeParse(params);
+
+    if (!validate.success) {
+      throw new Error(validate.error.message);
+    }
+
     const { page, limit, teamMemberId, isRead } = params;
 
     // Apply rate limiting if necessary
@@ -125,11 +138,22 @@ export const getUnserNotificationWithLimit = async (params: {
   }
 };
 
+const convertUnreadToReadSchema = z.object({
+  notificationId: z.string().uuid(),
+  teamMemberId: z.string().uuid(),
+});
+
 export const convertUnreadToRead = async (params: {
   notificationId: string;
   teamMemberId: string;
 }) => {
   try {
+    const validate = convertUnreadToReadSchema.safeParse(params);
+
+    if (!validate.success) {
+      throw new Error(validate.error.message);
+    }
+
     const { notificationId, teamMemberId } = params;
 
     applyRateLimitMember(teamMemberId);
@@ -149,8 +173,18 @@ export const convertUnreadToRead = async (params: {
   }
 };
 
+const getUserEarningsSchema = z.object({
+  memberId: z.string().uuid(),
+});
+
 export const getUserEarnings = async (params: { memberId: string }) => {
   try {
+    const validate = getUserEarningsSchema.safeParse(params);
+
+    if (!validate.success) {
+      throw new Error(validate.error.message);
+    }
+
     const { memberId } = params;
 
     await protectionMemberUser(memberId);

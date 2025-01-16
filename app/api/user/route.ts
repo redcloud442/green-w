@@ -2,7 +2,15 @@ import { applyRateLimit } from "@/utils/function";
 import prisma from "@/utils/prisma";
 import { protectionMemberUser } from "@/utils/serversideProtection";
 import { createClientServerSide } from "@/utils/supabase/server";
+import { alliance_preferred_withdrawal_table } from "@prisma/client";
 import { NextResponse } from "next/server";
+import { z } from "zod";
+
+const updateUserSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+  iv: z.string().min(6),
+});
 
 export async function PUT(request: Request) {
   try {
@@ -24,6 +32,19 @@ export async function PUT(request: Request) {
     applyRateLimit(profile?.alliance_member_id || "", ip);
 
     const { email, password, userId } = await request.json();
+
+    const validate = updateUserSchema.safeParse({
+      email,
+      password,
+      userId,
+    });
+
+    if (!validate.success) {
+      return NextResponse.json(
+        { error: validate.error.message },
+        { status: 400 }
+      );
+    }
 
     if (!password || !email || !userId) {
       return NextResponse.json(
@@ -105,7 +126,20 @@ export async function GET(request: Request) {
     });
     if (error) throw error;
 
-    return NextResponse.json({ success: true, data: data });
+    const preferredWithdrawal =
+      await prisma.alliance_preferred_withdrawal_table.findMany({
+        where: {
+          alliance_preferred_withdrawal_member_id:
+            teamMemberProfile?.alliance_member_id,
+        },
+      });
+
+    return NextResponse.json({
+      success: true,
+      data: data,
+      preferredWithdrawal:
+        preferredWithdrawal as alliance_preferred_withdrawal_table[],
+    });
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unknown error." },

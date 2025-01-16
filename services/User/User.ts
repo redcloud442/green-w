@@ -1,5 +1,3 @@
-import { alliance_earnings_table } from "@prisma/client";
-
 export const getEarnings = async () => {
   const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/user`, {
     method: "GET",
@@ -13,9 +11,12 @@ export const getEarnings = async () => {
     );
   }
 
-  const { data } = result;
+  const { data, preferredWithdrawal } = result;
 
-  return data as alliance_earnings_table;
+  return {
+    earnings: data,
+    preferredWithdrawal: preferredWithdrawal,
+  };
 };
 
 export const getUserSponsor = async (params: { userId: string }) => {

@@ -6,10 +6,16 @@ import {
   protectionMerchantUser,
 } from "@/utils/serversideProtection";
 import { NextResponse } from "next/server";
+import { z } from "zod";
 
 function sendErrorResponse(message: string, status: number = 400) {
   return NextResponse.json({ error: message }, { status });
 }
+
+const updateMerchantBalanceSchema = z.object({
+  amount: z.number().min(1),
+  memberId: z.string().uuid(),
+});
 
 export async function PATCH(request: Request) {
   try {
@@ -26,7 +32,15 @@ export async function PATCH(request: Request) {
     await protectionAdminUser(ip);
     loginRateLimit(ip);
 
-    const { amount, memberId } = await request.json();
+    const validate = updateMerchantBalanceSchema.safeParse(
+      await request.json()
+    );
+
+    if (!validate.success) {
+      throw new Error(validate.error.message);
+    }
+
+    const { amount, memberId } = validate.data;
 
     const result = await prisma.$transaction(async (tx) => {
       const merchant = await tx.merchant_member_table.findFirst({

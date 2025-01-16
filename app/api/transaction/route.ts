@@ -1,11 +1,29 @@
 import prisma from "@/utils/prisma";
 import { protectionMemberUser } from "@/utils/serversideProtection";
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+
+const createTransactionSchema = z.object({
+  limit: z.number().min(1),
+  page: z.number().min(1),
+});
 
 export async function POST(request: NextRequest) {
   try {
     // Extract `limit` and `page` from the request body
     const { limit = 10, page = 1 } = await request.json();
+
+    const validate = createTransactionSchema.safeParse({
+      limit,
+      page,
+    });
+
+    if (!validate.success) {
+      return NextResponse.json(
+        { error: validate.error.message },
+        { status: 400 }
+      );
+    }
 
     // Validate `limit` and `page` to avoid misuse
     const safeLimit = Math.min(Math.max(Number(limit), 1), 100); // Limit between 1 and 100

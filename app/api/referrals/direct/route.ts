@@ -2,6 +2,15 @@ import { applyRateLimit, escapeFormData } from "@/utils/function";
 import { protectionMemberUser } from "@/utils/serversideProtection";
 import { createClientServerSide } from "@/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+
+const getDirectReferralsSchema = z.object({
+  page: z.number().min(1),
+  limit: z.number().min(1),
+  search: z.string().min(3),
+  columnAccessor: z.string().min(3),
+  isAscendingSort: z.boolean(),
+});
 
 export const GET = async (request: NextRequest) => {
   try {
@@ -21,6 +30,21 @@ export const GET = async (request: NextRequest) => {
     const search = url.searchParams.get("search");
     const columnAccessor = url.searchParams.get("columnAccessor");
     const isAscendingSort = url.searchParams.get("isAscendingSort");
+
+    const validate = getDirectReferralsSchema.safeParse({
+      page,
+      limit,
+      search,
+      columnAccessor,
+      isAscendingSort,
+    });
+
+    if (!validate.success) {
+      return NextResponse.json(
+        { error: validate.error.message },
+        { status: 400 }
+      );
+    }
 
     const supabaseClient = await createClientServerSide();
 

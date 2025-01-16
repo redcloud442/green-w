@@ -87,6 +87,7 @@ model alliance_member_table {
   package_earnings_log package_earnings_log[]
   alliance_transaction_table alliance_transaction_table[]
   alliance_notification_table alliance_notification_table[]
+  alliance_preferred_withdrawal_table alliance_preferred_withdrawal_table[]
   
   package_ally_bounty_log_from package_ally_bounty_log[] @relation("FromMember")
   @@schema("alliance_schema")
@@ -130,6 +131,17 @@ model dashboard_earnings_summary {
   indirect_referral_count Int     @default(0) @map("indirect_referral_count")
 
   @@map("dashboard_earnings_summary")
+  @@schema("alliance_schema")
+}
+
+model alliance_preferred_withdrawal_table {
+  alliance_preferred_withdrawal_id String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  alliance_preferred_withdrawal_account_name String
+  alliance_preferred_withdrawal_account_number String
+  alliance_preferred_withdrawal_bank_name String 
+  alliance_preferred_withdrawal_member_id String @db.Uuid
+
+  alliance_member_table alliance_member_table @relation(fields: [alliance_preferred_withdrawal_member_id], references: [alliance_member_id], onDelete: Cascade, onUpdate: Cascade)
   @@schema("alliance_schema")
 }
 

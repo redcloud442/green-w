@@ -43,7 +43,6 @@ const NotificationTable = ({ teamMemberProfile }: DataTableProps) => {
         0 &&
       count > 0
     ) {
-      console.log("cached");
       return;
     }
 
@@ -54,7 +53,6 @@ const NotificationTable = ({ teamMemberProfile }: DataTableProps) => {
         teamMemberId: teamMemberProfile.alliance_member_id,
         isRead: activeTab === "unread" ? false : true,
       });
-      console.log(count);
 
       setUserNotification({
         unread: isUnread ? data : [],

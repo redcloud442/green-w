@@ -109,7 +109,7 @@ const MobileNavBar = () => {
   return (
     <>
       <nav
-        className="fixed bottom-0 left-0 right-0 z-50 bg-white h-16 shadow-md"
+        className="fixed bottom-0 left-0 right-0 z-50 border-2 border-zinc-400 bg-white h-16 shadow-md"
         aria-label="Mobile Navigation"
       >
         <ul className="flex justify-around items-center h-full w-full">

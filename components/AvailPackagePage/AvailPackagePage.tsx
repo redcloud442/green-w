@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { createPackageConnection } from "@/services/Package/Member";
+import { useUserTransactionHistoryStore } from "@/store/userTransactionHistoryStore";
 import { escapeFormData } from "@/utils/function";
 import { ChartDataMember } from "@/utils/types";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,6 +16,7 @@ import {
 import { Loader2 } from "lucide-react";
 import { Dispatch, SetStateAction, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { v4 as uuidv4 } from "uuid";
 import * as z from "zod";
 import { Label } from "../ui/label";
 import PackageCard from "../ui/packageCard";
@@ -44,6 +46,8 @@ const AvailPackagePage = ({
     earnings?.alliance_combined_earnings ?? 0
   );
 
+  const { setAddTransactionHistory } = useUserTransactionHistoryStore();
+
   const formattedMaxAmount = new Intl.NumberFormat("en-PH", {
     style: "currency",
     currency: "PHP",
@@ -52,11 +56,11 @@ const AvailPackagePage = ({
   const formSchema = z.object({
     amount: z
       .string()
-      .min(3, "Minimum amount is 200 pesos")
-      .refine((val) => !isNaN(Number(val)), {
+      .min(1, "Minimum amount is 1 pesos")
+      .refine((val) => !isNaN(parseFloat(val)), {
         message: "Amount must be a number",
       })
-      .refine((val) => Number(val) <= maxAmount, {
+      .refine((val) => parseFloat(val) <= parseFloat(maxAmount.toFixed(2)), {
         message: `Amount cannot exceed ${formattedMaxAmount}`,
       }),
     packageId: z.string(),
@@ -101,6 +105,16 @@ const AvailPackagePage = ({
         },
         teamMemberId: teamMemberProfile.alliance_member_id,
       });
+
+      const transactionHistory = {
+        transaction_id: uuidv4(),
+        transaction_date: new Date(),
+        transaction_description: "Package Enrolled",
+        transaction_amount: Number(result.amount),
+        transaction_member_id: teamMemberProfile?.alliance_member_id,
+      };
+
+      setAddTransactionHistory([transactionHistory]);
 
       toast({
         title: "Package Enrolled",

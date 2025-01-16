@@ -11,6 +11,7 @@ import {
   alliance_earnings_table,
   alliance_member_table,
   alliance_referral_link_table,
+  alliance_transaction_table,
   package_table,
   user_table,
 } from "@prisma/client";
@@ -28,6 +29,7 @@ import { Skeleton } from "../ui/skeleton";
 import TableLoading from "../ui/tableLoading";
 import DashboardDepositModalDeposit from "./DashboardDepositRequest/DashboardDepositModal/DashboardDepositModalDeposit";
 import DashboardDepositModalPackages from "./DashboardDepositRequest/DashboardDepositModal/DashboardDepositPackagesModal";
+import DashboardGenerateQrCode from "./DashboardDepositRequest/DashboardDepositModal/DashboardGenerateQrCode";
 import DashboardPackages from "./DashboardPackages";
 import DashboardWithdrawModalWithdraw from "./DashboardWithdrawRequest/DashboardWithdrawModal/DashboardWithdrawModalWithdraw";
 
@@ -45,6 +47,7 @@ const DashboardPage = ({
   teamMemberProfile,
   packages,
   profile,
+  referal,
 }: Props) => {
   const supabaseClient = createClientSide();
   const router = useRouter();
@@ -57,10 +60,13 @@ const DashboardPage = ({
     teamMemberProfile.alliance_member_is_active
   );
   const [refresh, setRefresh] = useState(false);
-
   const [totalEarnings, setTotalEarnings] = useState<DashboardEarnings | null>(
     null
   );
+  const [transactionHistory, setTransactionHistory] = useState<
+    alliance_transaction_table[]
+  >([]);
+
   const { role } = useRole();
 
   const getDasboardEarningsData = async () => {
@@ -165,7 +171,7 @@ const DashboardPage = ({
     }
   };
   return (
-    <div className="relative min-h-screen mx-auto space-y-4 py-2 px-2 sm:px-0 mt-0 sm:mt-20 sm:mb-10 overflow-x-hidden">
+    <div className="relative min-h-screen mx-auto space-y-4 py-2 px-2 sm:px-0 mt-0 sm:mt-20 sm:mb-20 overflow-x-hidden">
       {isLoading && <TableLoading />}
 
       <div className="flex flex-row sm:fixed w-full sm:w-fit justify-between px-4 py-4 sm:px-2 items-center top-2 bg-transparent sm:bg-cardColor sm:rounded-tr-lg sm:rounded-br-lg z-50 ">
@@ -223,7 +229,7 @@ const DashboardPage = ({
           />
         )}
       </div>
-
+      <DashboardGenerateQrCode url={referal.alliance_referral_link} />
       <div className="w-full space-y-4 md:px-10">
         <div className="flex flex-col gap-4 justify-center items-center ">
           <CardAmount
@@ -356,6 +362,7 @@ const DashboardPage = ({
                 teamMemberProfile={teamMemberProfile}
                 earnings={earnings}
                 setEarnings={setEarnings}
+                profile={profile}
               />
             </div>
 
@@ -416,6 +423,7 @@ const DashboardPage = ({
               My Current Package
             </p>
             <DashboardPackages
+              teamMemberProfile={teamMemberProfile}
               chartData={chartData}
               setChartData={setChartData}
               setEarnings={setEarnings}

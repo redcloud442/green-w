@@ -1,4 +1,4 @@
-import { WithdrawalFormValues } from "@/components/DashboardPage/DashboardWithdrawRequest/DashboardWithdrawModal/DashboardWithdrawModalWithdraw";
+import { WithdrawalFormValues } from "@/components/DashboardPage/DashboardWithdrawRequest/DashboardWithdrawModal/DashboardWithdrawalModalForm";
 import { AdminWithdrawaldata, WithdrawalRequestData } from "@/utils/types";
 import { SupabaseClient } from "@supabase/supabase-js";
 
@@ -100,4 +100,38 @@ export const getWithdrawalRequestAccountant = async (
   if (error) throw error;
 
   return data as AdminWithdrawaldata;
+};
+
+export const sendWithdrawalEmail = async (params: {
+  email: string;
+  accountHolderName: string;
+  accountNumber: string;
+  transactionDetails: {
+    date: string;
+    description: string;
+    amount: string;
+    balance: string;
+  };
+  message: string;
+  greetingPhrase: string;
+  closingPhrase: string;
+  signature: string;
+}) => {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/resend`,
+    {
+      method: "POST",
+      body: JSON.stringify(params),
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.error || "An error occurred while sending the email."
+    );
+  }
+
+  return result;
 };
