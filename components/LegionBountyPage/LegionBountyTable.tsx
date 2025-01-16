@@ -23,11 +23,14 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "../ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Input } from "../ui/input";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
+import { Separator } from "../ui/separator";
 import TableLoading from "../ui/tableLoading";
 import { LegionBountyColumn } from "./LegionBountyColumn";
 
@@ -112,69 +115,102 @@ const LegionBountyTable = ({ teamMemberProfile }: DataTableProps) => {
 
   const pageCount = Math.ceil(requestCount / 10);
 
+  const handleFilter = async () => {
+    try {
+      await fetchAdminRequest();
+    } catch (e) {}
+  };
+
   return (
-    <ScrollArea className="w-full overflow-x-auto ">
+    <ScrollArea className="w-full overflow-x-auto p-2">
       {isFetchingList && <TableLoading />}
+      <Card className="w-full p-4">
+        <CardHeader className="text-center text-[30px] sm:text-[60px] font-extrabold">
+          <CardTitle>NETWORK INCOME</CardTitle>
+        </CardHeader>
+        <Separator />
+        <form
+          className="flex justify-end flex-wrap gap-2 pt-4 pb-4"
+          onSubmit={handleSubmit(handleFilter)}
+        >
+          <Input
+            {...register("emailFilter")}
+            placeholder="Filter username..."
+            className="w-full sm:w-auto"
+          />
+          <Button
+            type="submit"
+            disabled={isFetchingList}
+            size="sm"
+            variant="card"
+          >
+            <Search />
+          </Button>
+        </form>
 
-      <Table className="w-full border-collapse border border-black font-bold">
-        <TableHeader className="border-b border-black dark:text-pageColor font-bold">
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow
-              key={headerGroup.id}
-              className="border-b border-black  dark:text-pageColor font-bold"
-            >
-              {headerGroup.headers.map((header) => (
-                <TableHead
-                  className="border-r border-black px-4 py-2 dark:text-pageColor hover:bg-transparent font-bold"
-                  key={header.id}
+        <CardContent className="space-y-4">
+          <Table className="w-full border-collapse border border-white font-bold">
+            <TableHeader className="border-b border-white text-white font-bold">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow
+                  key={headerGroup.id}
+                  className="border-b border-white text-blue-500 font-bold"
                 >
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                </TableHead>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead
+                      className="border-r border-black px-4 py-2 text-blue-500 hover:bg-transparent font-bold"
+                      key={header.id}
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
+                  ))}
+                </TableRow>
               ))}
-            </TableRow>
-          ))}
-        </TableHeader>
+            </TableHeader>
 
-        <TableBody>
-          {table.getRowModel().rows.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-                className="border-none font-bold"
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell
-                    className="border-r border-black px-4 py-2"
-                    key={cell.id}
+            <TableBody>
+              {table.getRowModel().rows.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                    className="border-none font-bold"
                   >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell
+                        className="border-r border-black px-4 py-2"
+                        key={cell.id}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow className="border-b border-black">
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center border-r border-black"
+                  >
+                    No results.
                   </TableCell>
-                ))}
-              </TableRow>
-            ))
-          ) : (
-            <TableRow className="border-b border-black">
-              <TableCell
-                colSpan={columns.length}
-                className="h-24 text-center border-r border-black"
-              >
-                No results.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
 
-      <ScrollBar orientation="horizontal" />
+          <ScrollBar orientation="horizontal" />
 
-      <div className="flex items-center justify-between gap-x-4 py-4">
-        {/* <div className="flex justify-between items-center px-2 pt-2">
+          <div className="flex items-center justify-between gap-x-4 py-4">
+            {/* <div className="flex justify-between items-center px-2 pt-2">
       <span className="text-sm dark:text-pageColor font-bold ">
         Rows per page
       </span>
@@ -192,33 +228,37 @@ const LegionBountyTable = ({ teamMemberProfile }: DataTableProps) => {
         </SelectContent>
       </Select>
     </div> */}
-        <div className="flex items-center justify-start gap-x-4">
-          {/* Left Arrow */}
-          <Button
-            className="shadow-none"
-            size="sm"
-            onClick={() => setActivePage((prev) => Math.max(prev - 1, 1))}
-            disabled={activePage <= 1}
-          >
-            <ChevronLeft />
-          </Button>
+            <div className="flex items-center justify-start gap-x-4">
+              {/* Left Arrow */}
+              <Button
+                variant="card"
+                className="shadow-none"
+                size="sm"
+                onClick={() => setActivePage((prev) => Math.max(prev - 1, 1))}
+                disabled={activePage <= 1}
+              >
+                <ChevronLeft />
+              </Button>
 
-          {/* Active Page */}
-          <span className="text-lg font-semibold">{activePage}</span>
+              {/* Active Page */}
+              <span className="text-lg font-semibold">{activePage}</span>
 
-          {/* Right Arrow */}
-          <Button
-            className="shadow-none"
-            size="sm"
-            onClick={() =>
-              setActivePage((prev) => Math.min(prev + 1, pageCount))
-            }
-            disabled={activePage >= pageCount}
-          >
-            <ChevronRight />
-          </Button>
-        </div>
-      </div>
+              {/* Right Arrow */}
+              <Button
+                variant="card"
+                className="shadow-none"
+                size="sm"
+                onClick={() =>
+                  setActivePage((prev) => Math.min(prev + 1, pageCount))
+                }
+                disabled={activePage >= pageCount}
+              >
+                <ChevronRight />
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </ScrollArea>
   );
 };

@@ -14,7 +14,6 @@ import {
 } from "@prisma/client";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
-import Image from "next/image";
 import { useState } from "react";
 
 type Props = {
@@ -39,25 +38,10 @@ const DashboardDepositModalRefer = ({
     >
       <DialogTrigger asChild>
         <Button
-          className={`relative h-48 flex sm:flex-row flex-col items-start justify-start sm:justify-between sm:items-start px-4 text-lg sm:text-2xl pt-6 sm:pt-8 ${className}`}
+          className="bg-transparent p-0 shadow-none"
           onClick={() => setOpen(true)}
         >
-          <div className="flex flex-col items-start justify-start sm:justify-start sm:items-start ">
-            <p className="font-bold">Transaction</p>
-            <p className=" font-bold">History</p>
-          </div>
-
-          {/* Position the image in the corner */}
-          <div className="flex flex-col items-end justify-start sm:justify-center sm:items-center">
-            <Image
-              src="/assets/transaction-history.png"
-              alt="Transaction History"
-              width={250}
-              height={250}
-              priority
-              className="absolute sm:relative bottom-0 sm:bottom-2 sm:left-10 -right-8"
-            />
-          </div>
+          Transaction History
         </Button>
       </DialogTrigger>
 

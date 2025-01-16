@@ -4,6 +4,16 @@ const nextConfig = {
       bodySizeLimit: "12mb",
     },
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "vhgdbzosfxfdloxdfrir.supabase.co",
+        port: "",
+        pathname: "/storage/v1/object/public/**",
+      },
+    ],
+  },
   async headers() {
     return [
       {

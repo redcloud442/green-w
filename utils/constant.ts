@@ -32,3 +32,15 @@ export const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
 export const ACTIVE = "ACTIVE";
 export const ENDED = "ENDED";
+
+export const rankMapping = {
+  3: "bronze",
+  6: "silver",
+  10: "gold",
+  20: "platinum",
+  50: "emeralds",
+  100: "diamond",
+  150: "ruby",
+  200: "sapphire",
+  500: "diamond",
+};

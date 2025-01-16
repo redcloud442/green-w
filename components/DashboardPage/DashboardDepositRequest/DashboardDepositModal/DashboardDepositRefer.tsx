@@ -19,7 +19,6 @@ import {
   alliance_member_table,
   alliance_referral_link_table,
 } from "@prisma/client";
-import Image from "next/image";
 import { useState } from "react";
 import DashboardDirectReferral from "./DashboardDirectReferral";
 import DashboardIndirectReferral from "./DashboardIndirectReferral";
@@ -62,20 +61,10 @@ const DashboardDepositModalRefer = ({
     >
       <DialogTrigger asChild>
         <Button
-          className={`relative h-48 flex flex-col items-start justify-start sm:justify-center sm:items-center px-4 text-lg sm:text-2xl pt-8 sm:pt-8 ${className}`}
+          className="bg-transparent p-0 shadow-none"
           onClick={() => setOpen(true)}
         >
           Refer & Earn
-          <div className="flex flex-col items-end justify-start sm:justify-center sm:items-center">
-            <Image
-              src="/assets/refer-a-friend.png"
-              alt="Refer a Friend"
-              width={200}
-              height={200}
-              priority
-              className="absolute sm:relative top-10 sm:-top-4 sm:left-0 left-4"
-            />
-          </div>
         </Button>
       </DialogTrigger>
 

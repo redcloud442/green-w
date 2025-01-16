@@ -11,16 +11,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { logError } from "@/services/Error/ErrorLogs";
-import { createPackage } from "@/services/Package/Admin";
-import { escapeFormData } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
 
+import { logError } from "@/services/Error/ErrorLogs";
+import { createPackage } from "@/services/Package/Admin";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
+import FileUpload from "../ui/dropZone";
 
 type Props = {
   fetchPackages: () => void;
@@ -35,6 +35,24 @@ const PackagesSchema = z.object({
   packageDays: z.string().refine((value) => Number(value) > 0, {
     message: "Days must be greater than 0",
   }),
+  packageColor: z
+    .instanceof(File)
+    .refine((file) => !!file, { message: "File is required" })
+    .refine(
+      (file) =>
+        ["image/jpeg", "image/png", "image/jpg"].includes(file.type) &&
+        file.size <= 12 * 1024 * 1024, // 12MB limit
+      { message: "File must be a valid image and less than 12MB." }
+    ),
+  file: z
+    .instanceof(File)
+    .refine((file) => !!file, { message: "File is required" })
+    .refine(
+      (file) =>
+        ["image/jpeg", "image/png", "image/jpg"].includes(file.type) &&
+        file.size <= 12 * 1024 * 1024, // 12MB limit
+      { message: "File must be a valid image and less than 12MB." }
+    ),
 });
 
 export type PackagesFormValues = z.infer<typeof PackagesSchema>;
@@ -48,6 +66,7 @@ const CreatePackageModal = ({ fetchPackages }: Props) => {
     control,
     handleSubmit,
     reset,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<PackagesFormValues>({
     resolver: zodResolver(PackagesSchema),
@@ -59,35 +78,73 @@ const CreatePackageModal = ({ fetchPackages }: Props) => {
     },
   });
 
+  const uploadedFile = watch("file");
+
   const onSubmit = async (data: PackagesFormValues) => {
+    const filesToUpload = [
+      {
+        file: data.file,
+        path: `uploads/${Date.now()}_${data.file.name}`,
+      },
+      {
+        file: data.packageColor,
+        path: `uploads/${Date.now()}_${data.packageColor.name}`,
+      },
+    ];
+
     try {
-      const sanitizedData = escapeFormData(data);
-      await createPackage({
-        packageName: sanitizedData.packageName,
-        packageDescription: sanitizedData.packageDescription,
-        packagePercentage: sanitizedData.packagePercentage,
-        packageDays: sanitizedData.packageDays,
+      // Upload all files concurrently
+      const uploadResults = await Promise.all(
+        filesToUpload.map(async ({ file, path }) => {
+          const { error } = await supabaseClient.storage
+            .from("PACKAGE_IMAGES")
+            .upload(path, file, { upsert: true });
+
+          if (error) {
+            throw new Error(`Failed to upload file: ${file.name}`);
+          }
+
+          const {
+            data: { publicUrl },
+          } = supabaseClient.storage.from("PACKAGE_IMAGES").getPublicUrl(path);
+
+          return { path, publicUrl };
+        })
+      );
+
+      uploadResults.forEach(({ path, publicUrl }) => {
+        console.log(`File uploaded: ${path}, Public URL: ${publicUrl}`);
       });
+
+      const packageBanner = uploadResults[0].publicUrl;
+      const packageColor = uploadResults[1].publicUrl;
+
+      await createPackage({
+        packageName: data.packageName,
+        packageDescription: data.packageDescription,
+        packagePercentage: data.packagePercentage,
+        packageDays: data.packageDays,
+        packageImage: packageBanner,
+        packageColor: packageColor,
+      });
+
       toast({
-        title: "Package Updated Successfully",
-        description: "Please wait",
+        title: "Success",
+        description: "Files uploaded successfully.",
         variant: "success",
       });
-      setOpen(false);
-      reset();
-
-      fetchPackages();
-    } catch (e) {
-      if (e instanceof Error) {
+    } catch (error) {
+      if (error instanceof Error) {
         await logError(supabaseClient, {
-          errorMessage: e.message,
-          stackTrace: e.stack,
-          stackPath: "components/AdminPackagesPage/EditPackagesModal.tsx",
+          errorMessage: error.message,
+          stackTrace: error.stack,
+          stackPath: "components/AdminPackagesPage/CreatePackageModal.tsx",
         });
       }
       toast({
         title: "Error",
-        description: e instanceof Error ? e.message : "An error occurred",
+        description:
+          error instanceof Error ? error.message : "An error occurred",
         variant: "destructive",
       });
     }
@@ -105,7 +162,7 @@ const CreatePackageModal = ({ fetchPackages }: Props) => {
     >
       <DialogTrigger asChild>
         <Button
-          variant="outline"
+          variant="card"
           onClick={() => {
             setOpen(true);
           }}
@@ -206,6 +263,53 @@ const CreatePackageModal = ({ fetchPackages }: Props) => {
               </p>
             )}
           </div>
+
+          <div>
+            <Controller
+              name="file"
+              control={control}
+              render={({ field }) => (
+                <FileUpload
+                  label="Upload Package Image"
+                  onFileChange={(file) => field.onChange(file)}
+                />
+              )}
+            />
+            {!errors.file && uploadedFile && (
+              <p className="text-md font-bold text-green-700">
+                {"File Uploaded Successfully"}
+              </p>
+            )}
+            {errors.file && (
+              <p className="text-primaryRed text-sm mt-1">
+                {errors.file?.message}
+              </p>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Controller
+              name="packageColor"
+              control={control}
+              render={({ field }) => (
+                <FileUpload
+                  label="Upload Package Banner"
+                  onFileChange={(file) => field.onChange(file)}
+                />
+              )}
+            />
+            {!errors.packageColor && uploadedFile && (
+              <p className="text-md font-bold text-green-700">
+                {"File Uploaded Successfully"}
+              </p>
+            )}
+            {errors.packageColor && (
+              <p className="text-primaryRed text-sm mt-1">
+                {errors.packageColor?.message}
+              </p>
+            )}
+          </div>
+
           <div className="flex justify-center items-center">
             <Button
               type="submit"

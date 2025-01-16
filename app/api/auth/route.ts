@@ -55,11 +55,17 @@ export async function POST(request: Request) {
     });
 
     if (!user) {
-      return NextResponse.json({ error: "Invalid request." }, { status: 401 });
+      return NextResponse.json(
+        { error: "Invalid username or password" },
+        { status: 401 }
+      );
     }
 
     if (userProfile && userProfile.alliance_member_restricted) {
-      return NextResponse.json({ error: "User is banned." }, { status: 403 });
+      return NextResponse.json(
+        { error: "Invalid username or password" },
+        { status: 401 }
+      );
     }
     // const banned = await prisma.user_history_log.findFirst({
     //   where: {
@@ -128,6 +134,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, redirect });
   } catch (error) {
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
     return NextResponse.json(
       { error: "Internal Server Error." },
       { status: 500 }

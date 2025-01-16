@@ -19,7 +19,7 @@ const Page = async () => {
   }
 
   return (
-    <main className="max-w-full min-h-screen flex flex-col items-center justify-center bg-pageColor">
+    <main className="max-w-full min-h-screen flex flex-col items-center justify-center">
       <LoginPage />
     </main>
   );

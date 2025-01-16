@@ -1,4 +1,3 @@
-import { PackagesFormValues } from "@/components/AdminPackagesPage/EditPackagesModal";
 import { package_table } from "@prisma/client";
 import { SupabaseClient } from "@supabase/supabase-js";
 
@@ -18,7 +17,15 @@ export const getAdminPackages = async (
 };
 
 export const updatePackagesData = async (params: {
-  packageData: PackagesFormValues;
+  packageData: {
+    packageName: string;
+    packageDescription: string;
+    packagePercentage: string;
+    packageDays: string;
+    packageIsDisabled: boolean;
+    packageColor: string | null;
+    package_image: string | null;
+  };
   packageId: string;
   teamMemberId: string;
 }) => {
@@ -51,6 +58,8 @@ export const createPackage = async (params: {
   packageDescription: string;
   packagePercentage: string;
   packageDays: string;
+  packageImage: string;
+  packageColor: string;
 }) => {
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_BASE_URL}/api/package/create`,

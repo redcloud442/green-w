@@ -1,35 +1,21 @@
 "use client";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { logError } from "@/services/Error/ErrorLogs";
 import { getTransactionHistory } from "@/services/Transaction/Transaction";
+import { formatMonthDateYear, formatTime } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
 import {
   alliance_member_table,
   alliance_transaction_table,
 } from "@prisma/client";
-import {
-  ColumnFiltersState,
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  useReactTable,
-  VisibilityState,
-} from "@tanstack/react-table";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
-import TableLoading from "../ui/tableLoading";
-import { TransactionHistoryColumn } from "./TransactionHistoryColumn";
+import { Separator } from "../ui/separator";
+import { Skeleton } from "../ui/skeleton";
 
 type DataTableProps = {
   teamMemberProfile: alliance_member_table;
@@ -37,9 +23,7 @@ type DataTableProps = {
 
 const TransactionHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
   const supabaseClient = createClientSide();
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = useState({});
+
   const [requestData, setRequestData] = useState<alliance_transaction_table[]>(
     []
   );
@@ -73,137 +57,113 @@ const TransactionHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
     }
   };
 
-  const columns = TransactionHistoryColumn();
-
-  const table = useReactTable({
-    data: requestData,
-    columns,
-    onColumnFiltersChange: setColumnFilters,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    state: {
-      columnFilters,
-      columnVisibility,
-      rowSelection,
-    },
-  });
-
   useEffect(() => {
     fetchRequest();
-  }, [supabaseClient, teamMemberProfile, activePage]);
+  }, [activePage]);
 
   const pageCount = Math.ceil(requestCount / 10);
 
-  return (
+  return isFetchingList ? (
+    <Skeleton className="h-[400px] bg-zinc-300 w-full" />
+  ) : (
     <ScrollArea className="w-full overflow-x-auto ">
-      {isFetchingList && <TableLoading />}
+      <Card className="w-full shadow-2xl rounded-2xl bg-white">
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <p className="text-xl text-black sm:text-2xl font-thin">
+              Account History
+            </p>
 
-      <Table className="w-full border-collapse border border-black font-bold">
-        <TableHeader className="border-b border-black dark:text-pageColor font-bold">
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow
-              key={headerGroup.id}
-              className="border-b border-black  dark:text-pageColor font-bold"
-            >
-              {headerGroup.headers.map((header) => (
-                <TableHead
-                  className="border-r border-black px-4 py-2 dark:text-pageColor hover:bg-transparent font-bold"
-                  key={header.id}
+            <div className="flex items-center justify-start gap-x-4">
+              {activePage > 1 && (
+                <Button
+                  variant="outline"
+                  className="shadow-none"
+                  size="sm"
+                  onClick={() => setActivePage((prev) => Math.max(prev - 1, 1))}
+                  disabled={activePage <= 1}
                 >
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
+                  <ChevronLeft />
+                </Button>
+              )}
 
-        <TableBody>
-          {table.getRowModel().rows.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-                className="border-none font-bold"
+              {activePage >= pageCount && (
+                <Button
+                  variant="outline"
+                  className="shadow-none"
+                  size="sm"
+                  onClick={() =>
+                    setActivePage((prev) => Math.min(prev + 1, pageCount))
+                  }
+                  disabled={activePage >= pageCount}
+                >
+                  <ChevronRight />
+                </Button>
+              )}
+            </div>
+          </CardTitle>
+          <Separator className="my-2 bg-zinc-800" />
+        </CardHeader>
+
+        {requestData.map((data, index) => (
+          <CardContent
+            key={data.transaction_id || `transaction-${index}`}
+            className="space-y-4 px-10"
+          >
+            {/* History Item */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {data.transaction_description.includes("Success") ? (
+                  <Image
+                    src="/assets/plus.png"
+                    alt="success"
+                    width={40}
+                    height={40}
+                  />
+                ) : (
+                  <Image
+                    src="/assets/plus.png"
+                    alt="failed"
+                    width={40}
+                    height={40}
+                  />
+                )}
+
+                <div>
+                  <p className="text-sm sm:text-xl font-medium">
+                    {data.transaction_description}
+                  </p>
+                  <p className="text-[10px] sm:text-[12px] text-gray-500">
+                    {data.transaction_description}
+                  </p>
+                  <p className="text-[10px] sm:text-[12px] text-gray-500">
+                    {formatMonthDateYear(data.transaction_date)}{" "}
+                    {formatTime(data.transaction_date)}
+                  </p>
+                </div>
+              </div>
+              <div
+                className={`flex items-center justify-center text-black font-bold text-lg sm:text-3xl ${
+                  data.transaction_description.includes("Success")
+                    ? "text-green-500"
+                    : "text-black"
+                }`}
               >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell
-                    className="border-r border-black px-4 py-2"
-                    key={cell.id}
-                  >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))
-          ) : (
-            <TableRow className="border-b border-black">
-              <TableCell
-                colSpan={columns.length}
-                className="h-24 text-center border-r border-black"
-              >
-                No results.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+                ₱{" "}
+                {data.transaction_amount
+                  ? data.transaction_amount.toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })
+                  : "0.00"}
+              </div>
+            </div>
+            <Separator className="bg-zinc-200" />
+          </CardContent>
+        ))}
+      </Card>
 
       <ScrollBar orientation="horizontal" />
-
-      <div className="flex items-center justify-between gap-x-4 py-4">
-        {/* <div className="flex justify-between items-center px-2 pt-2">
-          <span className="text-sm dark:text-pageColor font-bold ">
-            Rows per page
-          </span>
-          <Select
-            defaultValue="10"
-            onValueChange={(value) => setLimit(Number(value))}
-          >
-            <SelectTrigger className="w-[70px] h-8 dark:bg-transparent space-x-2 dark:text-pageColor font-bold border-none border-b-2 shadow-none border-black">
-              <SelectValue placeholder="10" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="10">10</SelectItem>
-              <SelectItem value="20">20</SelectItem>
-              <SelectItem value="30">30</SelectItem>
-            </SelectContent>
-          </Select>
-        </div> */}
-        <div className="flex items-center justify-start gap-x-4">
-          {/* Left Arrow */}
-          <Button
-            className="shadow-none"
-            size="sm"
-            onClick={() => setActivePage((prev) => Math.max(prev - 1, 1))}
-            disabled={activePage <= 1}
-          >
-            <ChevronLeft />
-          </Button>
-
-          {/* Active Page */}
-          <span className="text-lg font-semibold">{activePage}</span>
-
-          {/* Right Arrow */}
-          <Button
-            className="shadow-none"
-            size="sm"
-            onClick={() =>
-              setActivePage((prev) => Math.min(prev + 1, pageCount))
-            }
-            disabled={activePage >= pageCount}
-          >
-            <ChevronRight />
-          </Button>
-        </div>
-      </div>
     </ScrollArea>
   );
 };

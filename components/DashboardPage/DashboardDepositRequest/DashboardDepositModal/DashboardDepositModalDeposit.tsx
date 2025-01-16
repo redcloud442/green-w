@@ -9,7 +9,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import FileUpload from "@/components/ui/dropZone";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -20,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { logError } from "@/services/Error/ErrorLogs";
 import { getMerchantOptions } from "@/services/Options/Options";
@@ -42,11 +42,11 @@ type Props = {
 const topUpFormSchema = z.object({
   amount: z
     .string()
-    .min(3, "Amount is required and must be at least 200 pesos")
+    .min(3, "Amount is required and must be at least 300 pesos")
     .max(6, "Amount must be less than 6 digits")
     .regex(/^\d+$/, "Amount must be a number")
-    .refine((amount) => parseInt(amount, 10) >= 200, {
-      message: "Amount must be at least 200 pesos",
+    .refine((amount) => parseInt(amount, 10) >= 300, {
+      message: "Amount must be at least 300 pesos",
     }),
   topUpMode: z.string().min(1, "Top up mode is required"),
   accountName: z.string().min(1, "Field is required"),
@@ -172,24 +172,6 @@ const DashboardDepositModalDeposit = ({ className }: Props) => {
   };
   const uploadedFile = watch("file");
 
-  const handleCopy = (text: string) => {
-    if (!text) {
-      toast({
-        title: "Error",
-        description: "Nothing to copy!",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    navigator.clipboard.writeText(text);
-
-    toast({
-      title: "Copied to clipboard",
-      variant: "success",
-    });
-  };
-
   return (
     <Dialog
       open={open}
@@ -202,91 +184,37 @@ const DashboardDepositModalDeposit = ({ className }: Props) => {
     >
       <DialogTrigger asChild className={className}>
         <Button
-          className=" relative h-60 sm:h-80 flex flex-col gap-8 items-start justify-start sm:justify-center sm:items-center pt-8 sm:pt-0 px-4 text-lg sm:text-2xl "
+          className="p-0 bg-transparent shadow-none h-full flex flex-col items-center justify-center"
           onClick={() => setOpen(true)}
         >
-          Deposit
-          <div className="flex flex-col items-end justify-start sm:justify-center sm:items-center">
-            <Image
-              src="/assets/deposit.png"
-              alt="deposit"
-              width={250}
-              height={250}
-              className="absolute sm:relative bottom-10 sm:bottom-0 sm:left-0 left-2"
-            />
-          </div>
+          <Image
+            src="/assets/deposit.png"
+            alt="deposit"
+            width={200}
+            height={200}
+          />
+          <p className="text-sm sm:text-lg font-thin absolute bottom-1/4">
+            DEPOSIT
+          </p>
         </Button>
       </DialogTrigger>
+
       <DialogContent className="sm:max-w-[425px]">
         <ScrollArea className="h-[500px] sm:h-full">
-          <DialogHeader className="text-start text-2xl font-bold">
-            <DialogTitle className="text-2xl font-bold mb-4">
+          <DialogHeader className="flex flex-col items-center text-2xl font-bold">
+            <DialogTitle className="text-2xl sm:text-3xl font-bold mb-4">
               Deposit
             </DialogTitle>
+            <Separator className="w-full" />
             <DialogDescription></DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Amount Field */}
-            <div>
-              <Label htmlFor="amount">Amount</Label>
-              <Controller
-                name="amount"
-                control={control}
-                render={({ field }) => (
-                  <Input
-                    variant="default"
-                    type="text"
-                    id="amount"
-                    className="text-center"
-                    placeholder="Deposit Amount"
-                    {...field}
-                    autoFocus
-                    value={field.value}
-                    onChange={(e) => {
-                      let inputValue = e.target.value;
-
-                      // Allow clearing the value
-                      if (inputValue === "") {
-                        field.onChange("");
-                        return;
-                      }
-
-                      // Remove non-numeric characters
-                      inputValue = inputValue.replace(/[^0-9.]/g, "");
-
-                      // Ensure only one decimal point
-                      const parts = inputValue.split(".");
-                      if (parts.length > 2) {
-                        inputValue = parts[0] + "." + parts[1];
-                      }
-
-                      // Limit to two decimal places
-                      if (parts[1]?.length > 2) {
-                        inputValue = `${parts[0]}.${parts[1].substring(0, 2)}`;
-                      }
-
-                      // Update the field value
-                      field.onChange(inputValue);
-
-                      // Enforce max amount
-                      const numericValue = Number(inputValue);
-
-                      setValue("amount", numericValue.toString());
-                    }}
-                  />
-                )}
-              />
-              {errors.amount && (
-                <p className="text-primaryRed text-sm mt-1">
-                  {errors.amount.message}
-                </p>
-              )}
-            </div>
 
             {/* Top-Up Mode */}
             <div>
-              <Label htmlFor="topUpMode">Cashier Bank</Label>
+              <Label htmlFor="topUpMode">Account Number</Label>
               <Controller
                 name="topUpMode"
                 control={control}
@@ -332,7 +260,6 @@ const DashboardDepositModalDeposit = ({ className }: Props) => {
                     control={control}
                     render={({ field }) => (
                       <Input
-                        className="text-center"
                         readOnly
                         variant="default"
                         id="accountName"
@@ -341,13 +268,6 @@ const DashboardDepositModalDeposit = ({ className }: Props) => {
                       />
                     )}
                   />
-                  <Button
-                    type="button"
-                    onClick={() => handleCopy(watch("accountName") || "")}
-                    className="w-20 bg-pageColor text-white h-12"
-                  >
-                    Copy
-                  </Button>
                 </div>
                 {errors.accountName && (
                   <p className="text-primaryRed text-sm mt-1">
@@ -356,7 +276,7 @@ const DashboardDepositModalDeposit = ({ className }: Props) => {
                 )}
               </div>
               <div className="flex-1">
-                <Label htmlFor="accountNumber">Account Number</Label>
+                <Label htmlFor="accountNumber">E-wallet/Bank</Label>
                 <div className="flex gap-2">
                   <Controller
                     name="accountNumber"
@@ -364,20 +284,12 @@ const DashboardDepositModalDeposit = ({ className }: Props) => {
                     render={({ field }) => (
                       <Input
                         readOnly
-                        className="text-center"
                         id="accountNumber"
                         placeholder="Account Number"
                         {...field}
                       />
                     )}
                   />
-                  <Button
-                    type="button"
-                    onClick={() => handleCopy(watch("accountNumber") || "")}
-                    className="w-20 bg-pageColor text-white h-12"
-                  >
-                    Copy
-                  </Button>
                 </div>
                 {errors.accountNumber && (
                   <p className="text-primaryRed text-sm mt-1">
@@ -388,21 +300,110 @@ const DashboardDepositModalDeposit = ({ className }: Props) => {
             </div>
 
             <div>
+              <Label htmlFor="amount">Amount</Label>
               <Controller
-                name="file"
+                name="amount"
                 control={control}
                 render={({ field }) => (
-                  <FileUpload
-                    label="Upload Receipt"
-                    onFileChange={(file) => field.onChange(file)}
+                  <Input
+                    variant="default"
+                    type="text"
+                    id="amount"
+                    className=""
+                    placeholder="Ex. 300"
+                    {...field}
+                    autoFocus
+                    value={field.value}
+                    onChange={(e) => {
+                      let inputValue = e.target.value;
+
+                      // Allow clearing the value
+                      if (inputValue === "") {
+                        field.onChange("");
+                        return;
+                      }
+
+                      // Remove non-numeric characters
+                      inputValue = inputValue.replace(/[^0-9.]/g, "");
+
+                      // Ensure only one decimal point
+                      const parts = inputValue.split(".");
+                      if (parts.length > 2) {
+                        inputValue = parts[0] + "." + parts[1];
+                      }
+
+                      // Limit to two decimal places
+                      if (parts[1]?.length > 2) {
+                        inputValue = `${parts[0]}.${parts[1].substring(0, 2)}`;
+                      }
+
+                      // Update the field value
+                      field.onChange(inputValue);
+
+                      // Enforce max amount
+                      const numericValue = Number(inputValue);
+
+                      setValue("amount", numericValue.toString());
+                    }}
                   />
                 )}
               />
-              {uploadedFile && (
-                <p className="text-md font-bold text-green-700">
-                  {"File Uploaded Successfully"}
+              {errors.amount && (
+                <p className="text-primaryRed text-sm mt-1">
+                  {errors.amount.message}
                 </p>
               )}
+            </div>
+
+            <div>
+              <Controller
+                name="file"
+                control={control}
+                render={({ field: { value, onChange, ...field } }) => (
+                  <div className="space-y-2">
+                    <Label htmlFor="file-input">
+                      Upload Receipt or Proof of Payment
+                    </Label>
+                    <div className="flex justify-center font-bold">
+                      <p className="text-md">STATUS: </p>{" "}
+                      {uploadedFile ? (
+                        <p className="text-md font-thin text-green-700">
+                          RECIEPT UPLOADED SUCCESSFULLY
+                        </p>
+                      ) : (
+                        <p className="text-md font-thin text-red-700">
+                          NO RECIEPT UPLOADED
+                        </p>
+                      )}
+                    </div>
+                    {/* Hidden file input */}
+                    <Input
+                      {...field}
+                      id="file-input"
+                      className="hidden"
+                      type="file"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        onChange(file);
+                      }}
+                    />
+                    {/* Trigger button */}
+                    <Button
+                      onClick={() => {
+                        document.getElementById("file-input")?.click();
+                      }}
+                      type="button"
+                      variant="card"
+                      className="w-full rounded-md"
+                    >
+                      CLICK HERE TO UPLOAD RECEIPT
+                    </Button>
+                  </div>
+                )}
+              />
+              {/* Uploaded file status */}
+
+              {/* Error message */}
               {errors.file && (
                 <p className="text-primaryRed text-sm mt-1">
                   {errors.file?.message}
@@ -410,16 +411,15 @@ const DashboardDepositModalDeposit = ({ className }: Props) => {
               )}
             </div>
 
-            <div className="flex justify-center items-center">
-              <Button
-                type="submit"
-                className=" bg-pageColor text-white h-12 "
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? <Loader2 className="animate-spin" /> : null}{" "}
-                Submit
-              </Button>
-            </div>
+            <Button
+              variant="card"
+              className="w-full rounded-md"
+              type="submit"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? <Loader2 className="animate-spin" /> : null}{" "}
+              SUBMIT
+            </Button>
           </form>
           <DialogFooter></DialogFooter>
         </ScrollArea>

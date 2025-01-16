@@ -69,9 +69,9 @@ const withdrawalFormSchema = z.object({
   earnings: z.string(),
   amount: z
     .string()
-    .min(3, "Minimum amount is required atleast 200 pesos")
-    .refine((amount) => parseInt(amount, 10) > 200, {
-      message: "Amount must be at least 200 pesos",
+    .min(2, "Minimum amount is required atleast 30 pesos")
+    .refine((amount) => parseInt(amount, 10) > 30, {
+      message: "Amount must be at least 30 pesos",
     }),
   bank: z.string().min(1, "Please select a bank"),
   accountName: z
@@ -110,7 +110,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid request." }, { status: 400 });
     }
 
-    if (Number(amount) <= 0 || Number(amount) < 200) {
+    if (Number(amount) <= 0 || Number(amount) < 30) {
       return NextResponse.json({ error: "Invalid request." }, { status: 400 });
     }
 
@@ -220,8 +220,15 @@ export async function POST(request: Request) {
       prisma.alliance_transaction_table.create({
         data: {
           transaction_amount: Number(calculateFee(Number(amount), earnings)),
-          transaction_description: "Withdrawal Pending",
+          transaction_description: "Withdrawal Ongoing",
           transaction_member_id: teamMemberId,
+        },
+      }),
+
+      prisma.alliance_notification_table.create({
+        data: {
+          alliance_notification_user_id: teamMemberId,
+          alliance_notification_message: `Withdrawal request is Ongoing amounting to ${amount}, Please wait for approval.`,
         },
       }),
     ]);

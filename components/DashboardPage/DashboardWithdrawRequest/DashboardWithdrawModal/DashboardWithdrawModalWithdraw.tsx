@@ -216,17 +216,18 @@ const DashboardWithdrawModalWithdraw = ({
     >
       <DialogTrigger asChild>
         <Button
-          className=" relative h-60 sm:h-80 flex flex-col items-start sm:justify-center sm:items-center px-4 text-lg sm:text-2xl border-2"
+          className="bg-transparent p-0 shadow-none h-full flex flex-col items-center justify-center"
           onClick={() => setOpen(true)}
         >
-          Withdraw
           <Image
             src="/assets/withdraw.png"
-            alt="deposit"
-            width={200}
-            height={200}
-            priority
+            alt="withdraw"
+            width={240}
+            height={240}
           />
+          <p className="text-sm sm:text-lg font-thin absolute bottom-1/4">
+            WITHDRAW
+          </p>
         </Button>
       </DialogTrigger>
 

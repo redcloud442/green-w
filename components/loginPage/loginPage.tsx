@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { loginValidation } from "@/services/auth/auth";
-import { logError } from "@/services/Error/ErrorLogs";
 import { escapeFormData } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,14 +12,17 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { Card } from "../ui/card";
+import { Label } from "../ui/label";
 import NavigationLoader from "../ui/NavigationLoader";
+import { PasswordInput } from "../ui/passwordInput";
 
 // Zod Schema for Login Form
 export const LoginSchema = z.object({
   userName: z
     .string()
-    .min(6, "Username must be at least 6 characters long")
-    .max(20, "Username must be at most 20 characters long")
+    .min(6, "Username must be at least 6 characters")
+    .max(20, "Username must be at most 20 characters")
     .regex(
       /^[a-zA-Z0-9_]+$/,
       "Username can only contain letters, numbers, and underscores"
@@ -58,116 +60,73 @@ const LoginPage = () => {
       });
 
       toast({
-        title: "Login Successfully",
+        title: "Infinity Login Successfully",
       });
 
       setIsSuccess(true);
       router.push(result);
     } catch (e) {
       if (e instanceof Error) {
-        await logError(supabase, {
-          errorMessage: e.message,
-          stackTrace: e.stack,
-          stackPath:
-            "components/AdminTopUpApprovalPage/AdminTopUpApprovalColumn.tsx",
+        toast({
+          title: e.message,
+          variant: "destructive",
         });
       }
-      toast({
-        title: "Check user credentials",
-        description: "Invalid username or password",
-        variant: "destructive",
-      });
 
       setIsLoading(false); // Stop loader on error
     }
   };
 
   return (
-    <div className="flex w-full flex-col items-center justify-center sm:justify-center min-h-screen h-full p-10">
+    <div className="flex w-full flex-col items-center justify-start  min-h-screen h-full  p-2">
       <NavigationLoader visible={isSubmitting || isLoading || isSuccess} />
 
-      <div className="fixed top-20 -right-6  z-10 ">
-        <Image
-          src="/assets/lightning-2.svg"
-          alt="thunder"
-          width={300}
-          height={300}
-          style={{
-            objectFit: "contain",
-          }}
-          quality={100}
-          className="sm:hidden"
-        />
+      <div className="">
+        <Image src="/app-logo.png" alt="logo" width={400} height={250} />
       </div>
-
-      <div className="fixed -top-12 z-10">
-        <Image
-          src="/assets/lightning.svg"
-          alt="thunder"
-          width={300}
-          height={300}
-          quality={100}
-          className="w-full sm:hidden"
-        />
-      </div>
-
-      <div className="fixed top-[16%]  left-54 sm:relative sm:top-0 sm:left-0 ">
-        <Image src="/app-logo.svg" alt="logo" width={120} height={120} />
-      </div>
-
-      <form
-        className="flex flex-col items-center gap-6 w-full max-w-lg m-4 z-40"
-        onSubmit={handleSubmit(handleSignIn)}
-      >
-        <div className="w-full">
-          <Input
-            variant="non-card"
-            id="username"
-            placeholder="Username"
-            {...register("userName")}
-          />
-          {errors.userName && (
-            <p className="text-sm text-red-500">{errors.userName.message}</p>
-          )}
-        </div>
-        <div className="w-full">
-          <Input
-            variant="non-card"
-            id="password"
-            type="password"
-            placeholder="Password"
-            {...register("password")}
-          />
-          {errors.password && (
-            <p className="text-sm text-red-500">{errors.password.message}</p>
-          )}
-        </div>
-
-        <Button
-          disabled={isSubmitting || isLoading}
-          type="submit"
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleSubmit(handleSignIn);
-            }
-          }}
+      <Card className="w-full max-w-lg z-40 relative p-6">
+        <form
+          className="flex flex-col items-center gap-6 "
+          onSubmit={handleSubmit(handleSignIn)}
         >
-          {isSubmitting || isLoading ? "Signing in..." : "Login"}
-        </Button>
-      </form>
+          <div className="w-full text-center">
+            <Label htmlFor="username">Username</Label>
+            <Input variant="non-card" id="username" {...register("userName")} />
+            {errors.userName && (
+              <p className="text-sm text-primaryRed">
+                {errors.userName.message}
+              </p>
+            )}
+          </div>
+          <div className="w-full text-center">
+            <Label htmlFor="password">Password</Label>
+            <PasswordInput
+              variant="non-card"
+              id="password"
+              {...register("password")}
+            />
+            {errors.password && (
+              <p className="text-sm text-primaryRed">
+                {errors.password.message}
+              </p>
+            )}
+          </div>
 
-      <Image
-        src="/assets/login-page.png"
-        alt="background"
-        width={1200}
-        height={1200}
-        style={{
-          objectFit: "none", // Keeps the original size without scaling
-        }}
-        quality={100}
-        priority={true}
-        className="hidden sm:block fixed bottom-64 left-[40%] -rotate-45 z-10 w-full h-full"
-      />
+          <Button
+            variant="card"
+            className="w-72 rounded-md"
+            disabled={isSubmitting || isLoading}
+            type="submit"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSubmit(handleSignIn);
+              }
+            }}
+          >
+            {isSubmitting || isLoading ? "Signing in..." : "Login"}
+          </Button>
+        </form>
+      </Card>
     </div>
   );
 };

@@ -10,12 +10,12 @@ type Props = {
 
 const UserProfilePage = ({ userProfile }: Props) => {
   return (
-    <div className="mx-auto py-8">
+    <div className="mx-auto py-8 px-8">
       <div className="w-full flex flex-col gap-6">
         {/* Page Title */}
         <header>
-          <h1 className="Title">User Profile</h1>
-          <p className="text-gray-600 dark:text-white">
+          <h1 className="Title text-white">User Profile</h1>
+          <p className="text-white ">
             View your personal information and change your password.
           </p>
         </header>

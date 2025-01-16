@@ -1,5 +1,6 @@
 "use client";
 import { alliance_member_table } from "@prisma/client";
+import Image from "next/image";
 import AllyBountyTable from "./AllyBountyTable";
 
 type Props = {
@@ -9,16 +10,17 @@ type Props = {
 
 const AllyBountyPage = ({ teamMemberProfile, sponsor }: Props) => {
   return (
-    <div className="md:p-10">
+    <div className="p-4 sm:p-10">
       <div>
         {/* Header Section */}
-        <header className="mb-4">
-          <h1 className="Title">Direct Referral Page</h1>
-          <p className="text-gray-600 dark:text-white">
-            View all your direct referral that are currently in the system.
-          </p>
-        </header>
-
+        <div className="flex justify-center items-start">
+          <Image
+            src="/app-logo.png"
+            alt="referral-header"
+            width={200}
+            height={200}
+          />
+        </div>
         <section className=" rounded-lg ">
           <AllyBountyTable
             teamMemberProfile={teamMemberProfile}

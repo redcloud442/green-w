@@ -45,12 +45,11 @@ const DashboardDepositModalPackages = ({
   const supabaseClient = createClientSide();
   const [open, setOpen] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState<package_table | null>(
-    initialPackage[0] || null
+    null
   );
   const [packages, setPackages] = useState<package_table[]>(initialPackage);
 
   const handlePackageSelect = (pkg: package_table) => {
-    if (earnings?.alliance_combined_earnings === 0) return null;
     setSelectedPackage(pkg);
   };
 
@@ -91,52 +90,55 @@ const DashboardDepositModalPackages = ({
     >
       <DialogTrigger asChild className={className}>
         <Button
-          className=" h-44 flex items-center justify-start px-4 sm:justify-around sm:items-center text-lg sm:text-2xl "
+          className="bg-transparent p-0 shadow-none h-full flex flex-col items-center justify-center"
           onClick={() => setOpen(true)}
         >
-          Buy Pr1me Plans
           <Image
             src="/assets/packages.png"
-            alt="deposit"
-            width={170}
-            height={170}
-            className="relative "
+            alt="plans"
+            width={300}
+            height={300}
           />
+          <p className="text-sm sm:text-lg font-thin absolute bottom-1/4">
+            PACKAGES
+          </p>
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[425px]">
-        <ScrollArea className="h-[600px] sm:h-full">
+      <DialogContent
+        className={`sm:max-w-[425px] ${selectedPackage ? "bg-cardColor" : "bg-transparent"} p-0`}
+      >
+        <ScrollArea className="h-[650px] sm:h-full">
           <DialogHeader className="text-start text-2xl font-bold">
-            <DialogTitle className="text-2xl font-bold mb-4">
-              Avail Pr1me Plans
-            </DialogTitle>
+            <DialogTitle className="text-2xl font-bold mb-4"></DialogTitle>
             <DialogDescription></DialogDescription>
           </DialogHeader>
-          <div className="flex justify-between gap-4 p-2">
-            {packages.map((pkg) => (
-              <PackageCard
-                key={pkg.package_id}
-                packageId={pkg.package_id}
-                packageName={pkg.package_name}
-                selectedPackage={selectedPackage}
-                packageColor={pkg.package_color || undefined}
-                onClick={() => handlePackageSelect(pkg)}
-              />
-            ))}
+          <div className="flex flex-col justify-between gap-6">
+            {!selectedPackage &&
+              packages.map((pkg) => (
+                <PackageCard
+                  key={pkg.package_id}
+                  packageId={pkg.package_id}
+                  packageImage={pkg.package_image || undefined}
+                  packageName={pkg.package_name}
+                  selectedPackage={selectedPackage || null}
+                  packageColor={pkg.package_color || undefined}
+                  onClick={() => handlePackageSelect(pkg)}
+                />
+              ))}
           </div>
-
-          <AvailPackagePage
-            setOpen={setOpen}
-            setSelectedPackage={setSelectedPackage}
-            earnings={earnings}
-            pkg={selectedPackage || []}
-            teamMemberProfile={teamMemberProfile}
-            setEarnings={setEarnings}
-            setChartData={setChartData}
-            selectedPackage={selectedPackage}
-          />
-
+          {selectedPackage && (
+            <AvailPackagePage
+              setOpen={setOpen}
+              setSelectedPackage={setSelectedPackage}
+              earnings={earnings}
+              pkg={selectedPackage}
+              teamMemberProfile={teamMemberProfile}
+              setEarnings={setEarnings}
+              setChartData={setChartData}
+              selectedPackage={selectedPackage}
+            />
+          )}
           <DialogFooter></DialogFooter>
         </ScrollArea>
       </DialogContent>

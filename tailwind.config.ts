@@ -11,7 +11,7 @@ export default {
     extend: {
       colors: {
         pageColor: "#1E1E1E",
-        cardColor: "#D9D9D9",
+        cardColor: "#bae6fd",
         inputColor: "#1E1E1E",
         primaryRed: "#A30000",
         primaryYellow: "#F6DB4E",
@@ -27,6 +27,38 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+      },
+      animation: {
+        slideIn: "slideIn 1s ease-in-out",
+        spinInfinity: "spinInfinity 1.5s linear infinite",
+      },
+      keyframes: {
+        anim: {
+          "12.5%": {
+            "stroke-dasharray": "33.98873px, 242.77666px",
+            "stroke-dashoffset": "-26.70543px",
+          },
+          "43.75%": {
+            "stroke-dasharray": "84.97183px, 242.77666px",
+            "stroke-dashoffset": "-84.97183px",
+          },
+          "100%": {
+            "stroke-dasharray": "2.42777px, 242.77666px",
+            "stroke-dashoffset": "-240.34889px",
+          },
+        },
+      },
+      width: {
+        xs: "1rem",
+        sm: "1.5rem",
+        md: "2rem",
+        lg: "3rem",
+      },
+      height: {
+        xs: "1rem",
+        sm: "1.5rem",
+        md: "2rem",
+        lg: "3rem",
       },
       borderRadius: {
         lg: "var(--radius)",

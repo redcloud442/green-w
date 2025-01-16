@@ -10,11 +10,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { formatMonthDateYear, formatTime } from "@/utils/function";
 import { ChartDataMember, DashboardEarnings } from "@/utils/types";
 import { alliance_earnings_table } from "@prisma/client";
 import { Loader2 } from "lucide-react";
+import Image from "next/image";
 import { Dispatch, SetStateAction, useState } from "react";
-import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import {
   Dialog,
@@ -44,7 +45,7 @@ const DashboardPackages = ({
   const { toast } = useToast();
   const [openDialogId, setOpenDialogId] = useState<string | null>(null); // Track which dialog is open
   const [isLoading, setIsLoading] = useState<string | null>(null); // Track loading state for specific packages
-
+  console.log(chartData);
   const handleClaimPackage = async (packageData: ChartDataMember) => {
     const { amount, profit_amount, package_connection_id } = packageData;
 
@@ -110,75 +111,76 @@ const DashboardPackages = ({
         {chartData.map((data) => (
           <Card
             key={data.package_connection_id}
-            style={{
-              background: `linear-gradient(110deg, ${
-                data.package_color || "#F6DB4E"
-              } 60%, #ED9738)`,
-            }}
-            className="min-w-[260px] max-w-[500px] h-auto dark:bg-cardColor transition-all duration-300"
+            className="min-w-[260px] max-w-[500px] h-auto dark:bg-cardColor transition-all duration-300 rounded-2xl shadow-2xl relative overflow-hidden"
           >
-            <CardHeader>
-              <CardTitle className="flex justify-end items-end">
-                <div className="text-xs rounded-full bg-black p-2">
-                  {data.completion.toFixed(2)}%
+            <Image
+              src={data.package_color}
+              alt="package background"
+              layout="fill" // Ensures the image covers the entire card
+              objectFit="cover" // Ensures the image scales properly
+              objectPosition="center" // Centers the image
+              className="absolute inset-0 z-0"
+            />
+            <div className="bg-black bg-opacity-50 absolute inset-0 z-0" />{" "}
+            {/* Overlay for better text visibility */}
+            <CardHeader className="py-4 relative z-10">
+              <CardTitle className="flex justify-center items-end">
+                <div className="text-2xl text-white font-extrabold rounded-full shadow-2xl">
+                  {data.package} PACKAGE
                 </div>
               </CardTitle>
-              <CardDescription className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <Badge className="dark:bg-black dark:text-white min-w-[80px] text-center flex items-center justify-center">
-                    Amount
-                  </Badge>
-                  <span className="text-lg font-extrabold text-black">
-                    ₱{" "}
-                    {data.amount.toLocaleString("en-US", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
+              <CardDescription className="space-y-2 pb-2">
+                <div className="flex flex-col items-start">
+                  <span className="text-md font-extrabold text-white">
+                    Date Availed: {formatMonthDateYear(data.completion_date)}
                   </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <Badge className="dark:bg-black dark:text-white min-w-[80px] text-center flex items-center justify-center">
-                    Profit
-                  </Badge>
-                  <span className="text-lg font-extrabold text-black">
-                    ₱{" "}
-                    {data.profit_amount.toLocaleString("en-US", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
+                  <span className="text-sm font-extrabold text-white">
+                    Time Availed: {formatTime(data.completion_date)}
                   </span>
                 </div>
               </CardDescription>
+
+              <Separator />
+              <div className="flex flex-col items-start">
+                <span className="text-sm font-extrabold text-white">
+                  Date of Claim: {formatMonthDateYear(data.completion_date)}
+                </span>
+              </div>
               <Separator />
             </CardHeader>
-
-            <CardContent className="space-y-1 pb-0">
-              <div className="flex flex-col items-center">
-                <Badge className="dark:bg-black dark:text-white dark:hover:bg-black hover:bg-black hover:text-white">
-                  Total Amount
-                </Badge>
-                <span className="text-2xl font-extrabold text-black">
-                  ₱{" "}
-                  {(data.amount + data.profit_amount).toLocaleString("en-US", {
+            <CardContent className="space-y-4 pt-0 pb-2 relative z-10">
+              <div className="flex flex-col items-start">
+                <span className="text-sm font-extrabold text-white">
+                  Time of Claim: {formatTime(data.completion_date)}
+                </span>
+                <span className="text-sm font-extrabold text-white">
+                  Amount Deposited: ₱{" "}
+                  {data.amount.toLocaleString("en-US", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
                   })}
                 </span>
-                <span className="text-xl text-black font-extrabold">
-                  {data.package} Plan
+                <span className="text-sm font-extrabold text-white">
+                  Amount to Claim: ₱{" "}
+                  {data.profit_amount.toLocaleString("en-US", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
                 </span>
               </div>
-              <Separator />
-            </CardContent>
 
-            <CardFooter className="flex-col items-center gap-2 text-sm">
-              <div className="font-extrabold text-sm text-black">
-                {new Intl.DateTimeFormat("en-US", {
-                  month: "long",
-                  day: "numeric",
-                  year: "numeric",
-                }).format(new Date(data.completion_date))}
+              <div className="flex flex-col items-center bg-white rounded-xl p-2">
+                <span className="text-sm font-extrabold text-black">
+                  Total Generated Income
+                </span>
+                ₱{" "}
+                {data.amount.toLocaleString("en-US", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
               </div>
+            </CardContent>
+            <CardFooter className="flex-col gap-2 text-sm relative z-10">
               {data.is_ready_to_claim && (
                 <Dialog
                   open={openDialogId === data.package_connection_id}
@@ -188,8 +190,8 @@ const DashboardPackages = ({
                 >
                   <DialogDescription></DialogDescription>
                   <DialogTrigger asChild>
-                    <Button className="dark:bg-black dark:text-white dark:hover:bg-black hover:bg-black hover:text-white cursor-pointer px-10 py-2">
-                      Collect
+                    <Button className="dark:bg-black dark:text-white dark:hover:bg-black hover:bg-black hover:text-white bg-white text-black cursor-pointer rounded-lg w-full px-10 py-2">
+                      CLICK HERE TO CLAIM
                     </Button>
                   </DialogTrigger>
                   <DialogContent>

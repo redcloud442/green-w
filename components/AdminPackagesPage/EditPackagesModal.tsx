@@ -22,6 +22,7 @@ import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
+import FileUpload from "../ui/dropZone";
 
 type Props = {
   teamMemberProfile: alliance_member_table;
@@ -40,7 +41,26 @@ const PackagesSchema = z.object({
     message: "Days must be greater than 0",
   }),
   packageIsDisabled: z.boolean().optional(),
-  packageColor: z.string().optional(),
+  packageColor: z
+    .instanceof(File)
+    .refine((file) => !!file, { message: "File is required" })
+    .refine(
+      (file) =>
+        ["image/jpeg", "image/png", "image/jpg"].includes(file.type) &&
+        file.size <= 12 * 1024 * 1024, // 12MB limit
+      { message: "File must be a valid image and less than 12MB." }
+    )
+    .optional(),
+  file: z
+    .instanceof(File)
+    .refine((file) => !!file, { message: "File is required" })
+    .refine(
+      (file) =>
+        ["image/jpeg", "image/png", "image/jpg"].includes(file.type) &&
+        file.size <= 12 * 1024 * 1024, // 12MB limit
+      { message: "File must be a valid image and less than 12MB." }
+    )
+    .optional(),
 });
 
 export type PackagesFormValues = z.infer<typeof PackagesSchema>;
@@ -59,6 +79,7 @@ const EditPackagesModal = ({
     control,
     handleSubmit,
     reset,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<PackagesFormValues>({
     resolver: zodResolver(PackagesSchema),
@@ -68,7 +89,6 @@ const EditPackagesModal = ({
       packagePercentage: "",
       packageDays: "",
       packageIsDisabled: false,
-      packageColor: "",
     },
   });
 
@@ -80,16 +100,63 @@ const EditPackagesModal = ({
         packagePercentage: selectedPackage.package_percentage.toString(),
         packageDays: selectedPackage.packages_days.toString(),
         packageIsDisabled: selectedPackage.package_is_disabled,
-        packageColor: selectedPackage.package_color ?? "",
       });
     }
   }, [selectedPackage, reset]);
 
   const onSubmit = async (data: PackagesFormValues) => {
+    const filesToUpload = [
+      {
+        file: data.file,
+        path: `uploads/${Date.now()}_${data.file?.name}`,
+      },
+      {
+        file: data.packageColor,
+        path: `uploads/${Date.now()}_${data.packageColor?.name}`,
+      },
+    ];
+
+    const sanitizedData = escapeFormData(data);
+
     try {
-      const sanitizedData = escapeFormData(data);
+      // Upload all files concurrently
+      const uploadResults = await Promise.all(
+        filesToUpload.map(async ({ file, path }) => {
+          if (!file) return { path, publicUrl: null };
+
+          const { error } = await supabaseClient.storage
+            .from("PACKAGE_IMAGES")
+            .upload(path, file, { upsert: true });
+
+          if (error) {
+            throw new Error(`Failed to upload file: ${file.name}`);
+          }
+
+          const {
+            data: { publicUrl },
+          } = supabaseClient.storage.from("PACKAGE_IMAGES").getPublicUrl(path);
+
+          return { path, publicUrl };
+        })
+      );
+
+      uploadResults.forEach(({ path, publicUrl }) => {
+        console.log(`File uploaded: ${path}, Public URL: ${publicUrl}`);
+      });
+
+      const packageBanner = uploadResults[0].publicUrl;
+      const packageColor = uploadResults[1].publicUrl;
+
       await updatePackagesData({
-        packageData: sanitizedData,
+        packageData: {
+          packageName: sanitizedData.packageName,
+          packageDescription: sanitizedData.packageDescription,
+          packagePercentage: sanitizedData.packagePercentage,
+          packageDays: sanitizedData.packageDays,
+          packageIsDisabled: sanitizedData.packageIsDisabled ?? false,
+          packageColor: packageColor ?? null,
+          package_image: packageBanner ?? null,
+        },
         teamMemberId: teamMemberProfile.alliance_member_id,
         packageId: selectedPackage?.package_id ?? "",
       });
@@ -123,6 +190,8 @@ const EditPackagesModal = ({
     reset();
   };
 
+  const uploadedFile = watch("file");
+
   return (
     <Dialog
       open={open}
@@ -130,7 +199,7 @@ const EditPackagesModal = ({
     >
       <DialogTrigger asChild>
         <Button
-          variant="outline"
+          variant="card"
           onClick={() => {
             setOpen(true);
             handleSelectPackage();
@@ -212,27 +281,6 @@ const EditPackagesModal = ({
             )}
           </div>
 
-          <div>
-            <Label htmlFor="packageColor">Package Color</Label>
-            <Controller
-              name="packageColor"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  id="packageColor"
-                  className="w-full py-0"
-                  type="color"
-                  {...field}
-                />
-              )}
-            />
-            {errors.packageColor && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.packageColor.message}
-              </p>
-            )}
-          </div>
-
           {/* Package Percentage */}
           <div>
             <Label htmlFor="packagePercentage">Package Percentage</Label>
@@ -280,6 +328,45 @@ const EditPackagesModal = ({
               </p>
             )}
           </div>
+
+          <div className="flex flex-col gap-2">
+            <Controller
+              name="packageColor"
+              control={control}
+              render={({ field }) => (
+                <FileUpload
+                  label="Upload Package Banner"
+                  onFileChange={(file) => field.onChange(file)}
+                />
+              )}
+            />
+
+            {errors.packageColor && (
+              <p className="text-primaryRed text-sm mt-1">
+                {errors.packageColor?.message}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <Controller
+              name="file"
+              control={control}
+              render={({ field }) => (
+                <FileUpload
+                  label="Upload Package Image"
+                  onFileChange={(file) => field.onChange(file)}
+                />
+              )}
+            />
+
+            {errors.file && (
+              <p className="text-primaryRed text-sm mt-1">
+                {errors.file?.message}
+              </p>
+            )}
+          </div>
+
           <div className="flex justify-center items-center">
             <Button
               type="submit"

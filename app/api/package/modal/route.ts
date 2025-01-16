@@ -23,6 +23,7 @@ export async function GET(request: Request) {
           package_description: true,
           packages_days: true,
           package_color: true,
+          package_image: true,
         },
       });
       return data;

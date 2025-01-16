@@ -1,4 +1,4 @@
-import { registerUser } from "@/app/actions/auth/authAction";
+import { handleSignInUser, registerUser } from "@/app/actions/auth/authAction";
 import { decryptData } from "@/utils/function";
 import { UserRequestdata } from "@/utils/types";
 import { SupabaseClient } from "@supabase/supabase-js";
@@ -8,10 +8,19 @@ export const createTriggerUser = async (params: {
   firstName: string;
   lastName: string;
   password: string;
+  activeMobile: string;
   referalLink?: string;
   url: string;
 }) => {
-  const { userName, password, referalLink, url, firstName, lastName } = params;
+  const {
+    userName,
+    password,
+    referalLink,
+    url,
+    firstName,
+    lastName,
+    activeMobile,
+  } = params;
 
   const checkUserNameResult = await checkUserName({ userName });
 
@@ -22,6 +31,7 @@ export const createTriggerUser = async (params: {
   await registerUser({
     userName,
     password,
+    activeMobile,
     firstName,
     lastName,
     referalLink: referalLink ?? "",
@@ -54,7 +64,7 @@ export const loginValidation = async (
 
   if (!response.ok) {
     if (response.status === 403) {
-      throw new Error("Something went wrong.");
+      throw new Error("Too many requests. Please try again later.");
     }
 
     try {
@@ -62,21 +72,21 @@ export const loginValidation = async (
       throw new Error(
         result.error || "An error occurred while validating the login."
       );
-    } catch (e) {
-      throw new Error("An unexpected error occurred.");
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        throw new Error(e.message);
+      }
+      throw new Error("An unknown error occurred");
     }
   }
 
   if (role === "ADMIN") {
     const decryptedPassword = await decryptData(password, iv ?? "");
 
-    const { error: signInError } = await supabaseClient.auth.signInWithPassword(
-      {
-        email: formattedUserName,
-        password: decryptedPassword,
-      }
-    );
-    if (signInError) throw signInError;
+    await handleSignInUser(supabaseClient, {
+      formattedUserName,
+      password: decryptedPassword,
+    });
   } else {
     const { error: signInError } = await supabaseClient.auth.signInWithPassword(
       {

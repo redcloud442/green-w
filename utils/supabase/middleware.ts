@@ -42,17 +42,12 @@ export async function updateSession(request: NextRequest) {
   const result = await ensureValidSession();
 
   if (!result && user) {
-    const response = NextResponse.redirect(new URL("/auth/login", request.url));
+    const response = NextResponse.redirect(new URL("/login", request.url));
     response.headers.set("x-session-checked", "true");
     return addSecurityHeaders(response);
   }
 
-  const publicRoutes = [
-    "/auth/login",
-    "/auth/register",
-    "/api/auth",
-    "/api/health",
-  ];
+  const publicRoutes = ["/login", "/register", "/api/auth", "/api/health"];
   const privateRoutes = [
     "/",
     "/dashboard",
@@ -69,7 +64,7 @@ export async function updateSession(request: NextRequest) {
 
     if (privateRoutes.some((route) => currentPath.startsWith(route))) {
       const loginUrl = request.nextUrl.clone();
-      loginUrl.pathname = "/auth/login";
+      loginUrl.pathname = "/login";
       const response = NextResponse.redirect(loginUrl);
       response.headers.set("x-session-checked", "true");
       return addSecurityHeaders(response);

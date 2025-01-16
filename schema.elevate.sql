@@ -75,6 +75,7 @@ plv8.subtransaction(function() {
     referalLink,
     firstName,
     lastName,
+    activeMobile,
     url,
     iv
   } = input_data;
@@ -91,11 +92,11 @@ plv8.subtransaction(function() {
 
 
   const insertUserQuery = `
-    INSERT INTO user_schema.user_table (user_id, user_email, user_password, user_iv, user_first_name, user_last_name, user_username)
-    VALUES ($1, $2, $3, $4, $5, $6, $7)
+    INSERT INTO user_schema.user_table (user_id, user_email, user_password, user_iv, user_first_name, user_last_name, user_username, user_active_mobile)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
     RETURNING user_id, user_email
   `;
-  const result = plv8.execute(insertUserQuery, [userId, email, password, iv, firstName, lastName, userName]);
+  const result = plv8.execute(insertUserQuery, [userId, email, password, iv, firstName, lastName, userName, activeMobile]);
 
   if (!result || result.length === 0) {
     throw new Error('Failed to create user');
@@ -1368,47 +1369,7 @@ plv8.subtransaction(function() {
     const isReadyToClaim = percentage === 100;
 
     if (isReadyToClaim) {
-      const earnings = row.amount;
-      totalCompletedAmount += earnings; 
-
-      // Update earnings and package status
-      plv8.execute(
-        `UPDATE alliance_schema.alliance_earnings_table
-         SET alliance_olympus_earnings = alliance_olympus_earnings + $1
-         WHERE alliance_earnings_member_id = $2`,
-        [earnings, row.package_member_member_id]
-      );
-
-      plv8.execute(
-        `UPDATE packages_schema.package_member_connection_table
-         SET package_member_status = 'ENDED'
-         WHERE package_member_connection_id = $1`,
-        [row.package_member_connection_id]
-      );
-
-      plv8.execute(
-        `INSERT INTO packages_schema.package_earnings_log (
-          package_member_connection_id,
-          package_member_package_id,
-          package_member_member_id,
-          package_member_connection_created,
-          package_member_amount,
-          package_member_amount_earnings,
-          package_member_status
-        ) VALUES (
-          $1, $2, $3, $4, $5, $6, 'ENDED'
-        )`,
-        [
-          row.package_member_connection_id,
-          row.package_member_package_id,
-          row.package_member_member_id,
-          row.package_member_connection_created,
-          row.package_member_amount,
-          row.package_amount_earnings
-        ]
-      );
-
-      return acc; // Skip adding this package to the return data
+      return acc; 
     }
 
     acc.push({
@@ -1418,7 +1379,7 @@ plv8.subtransaction(function() {
       completion_date: completionDate.toISOString(),
       amount: parseFloat(row.amount),
       completion: percentage,
-      is_ready_to_claim: true,
+      is_ready_to_claim: isReadyToClaim,
     });
 
     return acc;
@@ -1432,6 +1393,7 @@ plv8.subtransaction(function() {
 });
 return returnData;
 $$ LANGUAGE plv8;
+
 
 
 CREATE OR REPLACE FUNCTION get_dashboard_earnings(

@@ -2,11 +2,15 @@
 
 import { applyRateLimitMember, hashData } from "@/utils/function";
 import prisma from "@/utils/prisma";
-import { protectionMemberUser } from "@/utils/serversideProtection";
+import {
+  protectionAdminUser,
+  protectionMemberUser,
+} from "@/utils/serversideProtection";
 import {
   createClientServerSide,
   createServiceRoleClientServerSide,
 } from "@/utils/supabase/server";
+import { SupabaseClient } from "@supabase/supabase-js";
 import crypto from "crypto";
 
 export const changeUserPassword = async (params: {
@@ -113,14 +117,22 @@ export const registerUser = async (params: {
   password: string;
   firstName: string;
   lastName: string;
+  activeMobile: string;
   referalLink: string;
   url: string;
 }) => {
   try {
     const supabaseClient = await createClientServerSide();
 
-    const { userName, password, firstName, lastName, referalLink, url } =
-      params;
+    const {
+      userName,
+      password,
+      firstName,
+      lastName,
+      activeMobile,
+      referalLink,
+      url,
+    } = params;
 
     const formatUsername = userName + "@gmail.com";
 
@@ -133,6 +145,7 @@ export const registerUser = async (params: {
 
     const userParams = {
       userName,
+      activeMobile,
       email: formatUsername,
       password: encryptedData,
       userId: userData.user?.id,
@@ -150,6 +163,32 @@ export const registerUser = async (params: {
     if (error) throw error;
 
     return { success: true };
+  } catch (error) {
+    throw new Error(
+      error instanceof Error ? error.message : "An unknown error occurred."
+    );
+  }
+};
+
+export const handleSignInUser = async (
+  supabaseClient: SupabaseClient,
+  params: {
+    formattedUserName: string;
+    password: string;
+  }
+) => {
+  try {
+    const { formattedUserName, password } = params;
+    await protectionAdminUser();
+
+    const { error: signInError } = await supabaseClient.auth.signInWithPassword(
+      {
+        email: formattedUserName,
+        password: password,
+      }
+    );
+
+    if (signInError) throw signInError;
   } catch (error) {
     throw new Error(
       error instanceof Error ? error.message : "An unknown error occurred."

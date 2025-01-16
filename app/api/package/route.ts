@@ -56,7 +56,7 @@ export async function GET(request: Request) {
 const topupSchema = z.object({
   amount: z
     .number()
-    .min(3, "Minimum amount is 200 pesos")
+    .min(1, "Minimum amount is 1 pesos")
     .refine((val) => !isNaN(Number(val)), {
       message: "Amount must be a number",
     }),
@@ -81,16 +81,17 @@ export async function POST(request: Request) {
       );
     }
 
+    const integerLength = Math.floor(amount).toString().length;
+
     if (
       !amount ||
       !packageId ||
       !teamMemberId ||
-      amount <= 0 ||
-      Math.floor(amount.toString().length) > 7 ||
-      Math.floor(amount.toString().length) < 3
+      amount === 0 ||
+      integerLength < 1
     ) {
       return NextResponse.json(
-        { error: "Invalid input or amount must be between 3 and 7 digits." },
+        { error: "Invalid input or amount must be between 1 and 1 digits." },
         { status: 400 }
       );
     }
@@ -152,8 +153,10 @@ export async function POST(request: Request) {
       alliance_combined_earnings,
     } = earningsData;
 
-    // Ensure sufficient balance in the combined wallet
-    if (alliance_combined_earnings < amount) {
+    const combinedEarnings = Math.round(alliance_combined_earnings * 100) / 100; // Normalize to 2 decimal places
+    const requestedAmount = Math.round(amount * 100) / 100; // Normalize to 2 decimal places
+
+    if (combinedEarnings < requestedAmount) {
       return NextResponse.json(
         { error: "Insufficient balance in the combined wallet." },
         { status: 400 }
@@ -168,7 +171,7 @@ export async function POST(request: Request) {
       updatedCombinedWallet,
     } = deductFromWallets(
       amount,
-      alliance_combined_earnings,
+      combinedEarnings,
       alliance_olympus_wallet,
       alliance_olympus_earnings,
       alliance_referral_bounty
@@ -219,12 +222,22 @@ export async function POST(request: Request) {
       return connectionData;
     });
 
+    let bountyLogs: Prisma.package_ally_bounty_logCreateManyInput[] = [];
+    let transactionLogs: Prisma.alliance_transaction_tableCreateManyInput[] =
+      [];
+
     if (referralChain.length > 0) {
       const batchSize = 100;
-      for (let i = 0; i < referralChain.length; i += batchSize) {
-        const batch = referralChain.slice(i, i + batchSize);
+      const limitedReferralChain = [];
+      for (let i = 0; i < referralChain.length; i++) {
+        if (referralChain[i].level > 10) break;
+        limitedReferralChain.push(referralChain[i]);
+      }
 
-        const bountyLogs = batch.map((ref) => ({
+      for (let i = 0; i < limitedReferralChain.length; i += batchSize) {
+        const batch = limitedReferralChain.slice(i, i + batchSize);
+
+        bountyLogs = batch.map((ref) => ({
           package_ally_bounty_member_id: ref.referrerId,
           package_ally_bounty_percentage: ref.percentage,
           package_ally_bounty_earnings: decimalAmount
@@ -238,7 +251,7 @@ export async function POST(request: Request) {
           package_ally_bounty_from: teamMemberId,
         }));
 
-        const transactionLogs = batch.map((ref) => ({
+        transactionLogs = batch.map((ref) => ({
           transaction_member_id: ref.referrerId,
           transaction_amount: decimalAmount
             .mul(ref.percentage)
@@ -246,13 +259,6 @@ export async function POST(request: Request) {
             .toNumber(),
           transaction_description: "Refer & Earn",
         }));
-
-        await Promise.all([
-          prisma.package_ally_bounty_log.createMany({ data: bountyLogs }),
-          prisma.alliance_transaction_table.createMany({
-            data: transactionLogs,
-          }),
-        ]);
 
         await Promise.all(
           batch.map((ref) =>
@@ -278,6 +284,13 @@ export async function POST(request: Request) {
       }
     }
 
+    await Promise.all([
+      prisma.package_ally_bounty_log.createMany({ data: bountyLogs }),
+      prisma.alliance_transaction_table.createMany({
+        data: transactionLogs,
+      }),
+    ]);
+
     if (!teamMemberProfile?.alliance_member_is_active) {
       await prisma.alliance_member_table.update({
         where: { alliance_member_id: teamMemberId },
@@ -291,7 +304,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, transaction: connectionData });
   } catch (error) {
     return NextResponse.json(
-      { error: "Internal Server Error." },
+      { error: error instanceof Error ? error.message : "Unknown error." },
       { status: 500 }
     );
   }
@@ -324,9 +337,9 @@ function generateReferralChain(
 function getBonusPercentage(level: number): number {
   const bonusMap: Record<number, number> = {
     1: 10,
-    2: 3,
-    3: 2,
-    4: 1,
+    2: 1.5,
+    3: 1.5,
+    4: 1.5,
     5: 1,
     6: 1,
     7: 1,

@@ -41,6 +41,7 @@ const Page = async () => {
       package_description: true,
       package_color: true,
       package_is_disabled: true,
+      package_image: true,
     },
   });
 

@@ -4,21 +4,17 @@ import { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
-  title: "Indirect Referral",
-  description: "Indirect Referral Page",
+  title: "Network",
+  description: "Network Page",
   openGraph: {
-    url: "/indirect-referral",
+    url: "/network",
   },
 };
 
 const Page = async () => {
   const { teamMemberProfile } = await protectionAllUser();
 
-  if (!teamMemberProfile) return redirect("/500");
-
-  if (teamMemberProfile) {
-    redirect("/");
-  }
+  if (!teamMemberProfile) return redirect("/");
 
   return <LegionBountyPage teamMemberProfile={teamMemberProfile} />;
 };

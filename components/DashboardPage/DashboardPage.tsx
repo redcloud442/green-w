@@ -1,7 +1,9 @@
 "use client";
 
+import { getUserEarnings } from "@/app/actions/user/userAction";
 import { getDashboard, getDashboardEarnings } from "@/services/Dasboard/Member";
 import { logError } from "@/services/Error/ErrorLogs";
+import { rankMapping } from "@/utils/constant";
 import { useRole } from "@/utils/context/roleContext";
 import { createClientSide } from "@/utils/supabase/client";
 import { ChartDataMember, DashboardEarnings } from "@/utils/types";
@@ -13,20 +15,19 @@ import {
   user_table,
 } from "@prisma/client";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Button } from "../ui/button";
-import {
-  Carousel,
-  CarouselApi,
-  CarouselContent,
-  CarouselItem,
-} from "../ui/carousel";
+import TransactionHistoryTable from "../TransactionHistoryPage/TransactionHistoryTable";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Badge } from "../ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import CardAmount from "../ui/cardAmount";
+import { ScrollArea, ScrollBar } from "../ui/scroll-area";
+import { Separator } from "../ui/separator";
+import { Skeleton } from "../ui/skeleton";
 import TableLoading from "../ui/tableLoading";
 import DashboardDepositModalDeposit from "./DashboardDepositRequest/DashboardDepositModal/DashboardDepositModalDeposit";
 import DashboardDepositModalPackages from "./DashboardDepositRequest/DashboardDepositModal/DashboardDepositPackagesModal";
-import DashboardDepositProfile from "./DashboardDepositRequest/DashboardDepositModal/DashboardDepositProfile";
-import DashboardDepositModalRefer from "./DashboardDepositRequest/DashboardDepositModal/DashboardDepositRefer";
-import DashboardTransactionHistory from "./DashboardDepositRequest/DashboardDepositModal/DashboardTransactionHistory";
 import DashboardPackages from "./DashboardPackages";
 import DashboardWithdrawModalWithdraw from "./DashboardWithdrawRequest/DashboardWithdrawModal/DashboardWithdrawModalWithdraw";
 
@@ -41,14 +42,12 @@ type Props = {
 
 const DashboardPage = ({
   earnings: initialEarnings,
-  referal,
   teamMemberProfile,
   packages,
   profile,
-  sponsor,
 }: Props) => {
   const supabaseClient = createClientSide();
-
+  const router = useRouter();
   const [chartData, setChartData] = useState<ChartDataMember[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [earnings, setEarnings] = useState<alliance_earnings_table | null>(
@@ -57,14 +56,11 @@ const DashboardPage = ({
   const [isActive, setIsActive] = useState(
     teamMemberProfile.alliance_member_is_active
   );
-  const [activeSlide, setActiveSlide] = useState(0);
+  const [refresh, setRefresh] = useState(false);
+
   const [totalEarnings, setTotalEarnings] = useState<DashboardEarnings | null>(
     null
   );
-
-  const [api, setApi] = useState<CarouselApi>();
-  const [current, setCurrent] = useState(0);
-  const [count, setCount] = useState(0);
   const { role } = useRole();
 
   const getDasboardEarningsData = async () => {
@@ -117,168 +113,125 @@ const DashboardPage = ({
     getPackagesData();
   }, [role]);
 
-  useEffect(() => {
-    if (!api) {
-      return;
+  const rank = (Number(totalEarnings?.directReferralCount || 0) +
+    Number(
+      totalEarnings?.indirectReferralCount || 0
+    )) as keyof typeof rankMapping;
+
+  const handleRefresh = async () => {
+    try {
+      setRefresh(true);
+      const { totalEarnings, userEarningsData } = await getUserEarnings({
+        memberId: teamMemberProfile.alliance_member_id,
+      });
+
+      if (!totalEarnings || !userEarningsData) return;
+
+      setTotalEarnings({
+        directReferralAmount: totalEarnings.directReferralAmount ?? 0,
+        indirectReferralAmount: totalEarnings.indirectReferralAmount ?? 0,
+        totalEarnings: totalEarnings.totalEarnings ?? 0,
+        withdrawalAmount: totalEarnings.withdrawalAmount ?? 0,
+        directReferralCount: totalEarnings.directReferralCount ?? 0,
+        indirectReferralCount: totalEarnings.indirectReferralCount ?? 0,
+      });
+
+      setEarnings((prev) => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          alliance_combined_earnings:
+            userEarningsData.alliance_combined_earnings ??
+            prev.alliance_combined_earnings,
+          alliance_olympus_earnings:
+            userEarningsData.alliance_olympus_earnings ??
+            prev.alliance_olympus_earnings,
+          alliance_olympus_wallet:
+            userEarningsData.alliance_olympus_wallet ??
+            prev.alliance_olympus_wallet,
+          alliance_referral_bounty:
+            userEarningsData.alliance_referral_bounty ??
+            prev.alliance_referral_bounty,
+        };
+      });
+    } catch (e) {
+      if (e instanceof Error) {
+        await logError(supabaseClient, {
+          errorMessage: e.message,
+        });
+      }
+    } finally {
+      setRefresh(false);
     }
-
-    setCount(api.scrollSnapList().length);
-    setCurrent(api.selectedScrollSnap() + 1);
-    setActiveSlide(api.selectedScrollSnap() + 1 - 1);
-
-    api.on("select", () => {
-      setCurrent(api.selectedScrollSnap() + 1);
-      setActiveSlide(api.selectedScrollSnap() + 1 - 1);
-    });
-  }, [api]);
-
-  const carouselItems = [
-    { label: "Direct Income", value: totalEarnings?.directReferralAmount },
-    { label: "Multiple Income", value: totalEarnings?.indirectReferralAmount },
-    { label: "Total Earnings", value: totalEarnings?.totalEarnings },
-    { label: "Total Withdrawal", value: totalEarnings?.withdrawalAmount },
-  ];
-
+  };
   return (
-    <div className="relative min-h-screen h-full mx-auto py-4">
+    <div className="relative min-h-screen mx-auto space-y-4 py-2 px-2 sm:px-0 mt-0 sm:mt-20 sm:mb-10 overflow-x-hidden">
       {isLoading && <TableLoading />}
 
+      <div className="flex flex-row sm:fixed w-full sm:w-fit justify-between px-4 py-4 sm:px-2 items-center top-2 bg-transparent sm:bg-cardColor sm:rounded-tr-lg sm:rounded-br-lg z-50 ">
+        {/* Profile Section */}
+        <div className="flex gap-2 justify-center items-center">
+          {/* Avatar */}
+          <div className="flex items-center justify-center">
+            <Avatar className="w-8 h-8 sm:w-12 sm:h-12">
+              <AvatarImage src={profile.user_profile_picture ?? ""} />
+              <AvatarFallback>
+                {profile.user_first_name?.charAt(0)}
+                {profile.user_last_name?.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
+          </div>
+
+          {/* Info Section */}
+          <div className="flex flex-col items-start gap-1">
+            {/* Name and Badge */}
+            <div className="flex flex-col">
+              <div className="flex gap-2 items-center">
+                <p className="text-[12px] sm:text-sm font-semibold">
+                  {profile.user_first_name} {profile.user_last_name}
+                </p>
+                <Badge className="h-4 sm:h-5 text-[9px] sm:text-xs bg-green-500 text-white cursor-pointer rounded-sm px-2">
+                  BILLIONAIRE
+                </Badge>
+              </div>
+            </div>
+
+            {isActive && (
+              <div className="flex items-center gap-1 text-white sm:text-black">
+                <p className="text-[9px] sm:text-xs italic">Referral: </p>
+                <p className="text-[9px] sm:text-xs bg-indigo-400 truncate text-white rounded-xl px-1">
+                  https://elevateglobal.app/ref/9900924
+                </p>
+
+                <Badge className="h-3 sm:h-5 bg-sky-400 text-[9px] sm:text-xs text-white cursor-pointer rounded-sm px-2">
+                  Copy
+                </Badge>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Image */}
+        {rank > 3 && (
+          <Image
+            src={`/ranking/${rankMapping[rank]}.png`}
+            alt="ranking"
+            width={800}
+            height={800}
+            quality={100}
+            className="w-20 h-20 object-contain "
+          />
+        )}
+      </div>
+
       <div className="w-full space-y-4 md:px-10">
-        <div className="flex justify-between items-center gap-4">
-          <div className="flex items-center justify-between gap-2">
-            <DashboardDepositProfile
-              sponsor={sponsor}
-              teamMemberProfile={teamMemberProfile}
-              profile={profile}
-            />
-
-            <div>
-              <p className="text-xs font-medium">{profile.user_username}</p>
-              <p className="text-xs">
-                {profile.user_first_name} {profile.user_last_name}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-center gap-2">
-            <Image src="/app-logo.png" alt="logo" width={55} height={55} />
-            <div>
-              <p className="text-sm font-medium">Balance</p>
-              <p className="text-sm">
-                {"₱ "}
-                {earnings?.alliance_combined_earnings.toLocaleString("en-US", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-4 justify-center">
-          <div className="flex items-center justify-between">
-            <Button className="w-full max-w-[140px] min-w-[120px] h-7">
-              {carouselItems[activeSlide]?.label}{" "}
-            </Button>
-            <Button className="w-full max-w-[120px] h-7 text-white bg-blue-700">
-              facebook
-            </Button>
-          </div>
-
-          <Carousel
-            opts={{
-              loop: true,
-              align: "start",
-              slidesToScroll: 1,
-            }}
-            setApi={setApi}
-          >
-            <CarouselContent>
-              {carouselItems.map((item, index) => (
-                <CarouselItem key={index}>
-                  <p className="text-3xl font-bold text-center">
-                    {"₱ " +
-                      (item.value ?? 0).toLocaleString("en-US", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                  </p>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-          </Carousel>
-          <div className="flex justify-center items-center gap-2 py-2">
-            {Array.from({ length: count }).map((_, index) => (
-              <button
-                key={index}
-                className={`h-2 w-2 rounded-full ${
-                  current === index + 1 ? "bg-gray-500" : "bg-gray-200"
-                }`}
-              />
-            ))}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4">
-          <div className="flex flex-col gap-4 ">
-            <DashboardDepositModalDeposit
-              teamMemberProfile={teamMemberProfile}
-              className="w-full"
-            />
-            <DashboardTransactionHistory
-              teamMemberProfile={teamMemberProfile}
-              referal={referal}
-              className="w-full"
-            />
-          </div>
-
-          <div className="flex flex-col justify-start gap-4 ">
-            <DashboardDepositModalRefer
-              teamMemberProfile={teamMemberProfile}
-              referal={referal}
-              isActive={isActive}
-              className="w-full"
-              totalEarnings={totalEarnings}
-            />
-
-            <DashboardWithdrawModalWithdraw
-              teamMemberProfile={teamMemberProfile}
-              earnings={earnings}
-              setEarnings={setEarnings}
-            />
-          </div>
-
-          {/* <CardAmount
+        <div className="flex flex-col gap-4 justify-center items-center ">
+          <CardAmount
             title="Total Earnings"
+            handleClick={handleRefresh}
+            refresh={refresh}
             value={
-              Number(totalEarnings.totalEarnings).toLocaleString("en-US", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              }) as unknown as number
-            }
-            description={
-              <>
-                <DashboardPackageRequest
-                  teamMemberProfile={teamMemberProfile}
-                />
-              </>
-            }
-            descriptionClassName="text-sm text-green-600"
-          />
-          <CardAmount
-            title="Total Withdraw"
-            value={
-              Number(
-                totalEarnings.withdrawalAmount
-              ).toLocaleString() as unknown as number
-            }
-            description=""
-            descriptionClassName="text-sm text-gray-500"
-          />
-          <CardAmount
-            title="Direct Referral"
-            value={
-              Number(totalEarnings.directReferralAmount).toLocaleString(
+              Number(earnings?.alliance_combined_earnings ?? 0).toLocaleString(
                 "en-US",
                 {
                   minimumFractionDigits: 2,
@@ -286,32 +239,182 @@ const DashboardPage = ({
                 }
               ) as unknown as number
             }
-            description={
-              <>
-                <Button
-                  size={"sm"}
-                  onClick={() => router.push("/direct-referral")}
-                >
-                  Direct Referral
-                </Button>
-              </>
-            }
-            descriptionClassName="text-sm text-green-600"
-          /> */}
+            description=""
+          />
+
+          <Card className="w-full bg-opacity-70 shadow-2xl rounded-2xl mx-auto m-2">
+            <CardHeader>
+              <CardTitle></CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex justify-between sm:justify-between px-0 sm:px-32">
+                <div className="flex flex-col justify-start  items-start">
+                  <p className="text-xl sm:text-2xl font-thin">Total Income</p>
+                  <p className="text-xl sm:text-2xl font-extrabold">
+                    {refresh ? (
+                      <div className="flex items-center gap-2">
+                        <Skeleton className="h-7 sm:h-8 w-[100px] sm:w-[250px]" />
+                      </div>
+                    ) : (
+                      "₱ " + (totalEarnings?.totalEarnings ?? 0)
+                    )}
+                  </p>
+                </div>
+
+                <div className="flex flex-col justify-start  items-start">
+                  <p className="text-xl sm:text-2xl font-thin">
+                    Total Withdrawal
+                  </p>
+                  <p className="text-xl sm:text-2xl font-extrabold">
+                    {refresh ? (
+                      <div className="flex items-center gap-2">
+                        <Skeleton className="h-7 sm:h-8 w-[100px] sm:w-[250px]" />
+                      </div>
+                    ) : (
+                      "₱ " + (totalEarnings?.withdrawalAmount ?? 0)
+                    )}
+                  </p>
+                </div>
+              </div>
+
+              <Separator className="text-white" />
+
+              <div className="flex justify-evenly gap-2">
+                <div className="flex flex-col justify-start  items-start">
+                  <p className="text-sm sm:text-lg font-thin">Package Income</p>
+                  <p className="text-sm sm:text-lg font-bold">
+                    {refresh ? (
+                      <div className="flex items-center gap-2">
+                        <Skeleton className="h-5 sm:h-8 w-[100px] sm:w-[250px]" />
+                      </div>
+                    ) : (
+                      "₱ " + (totalEarnings?.totalEarnings ?? 0)
+                    )}
+                  </p>
+                </div>
+
+                <div className="flex flex-col justify-start  items-start">
+                  <p className="text-sm sm:text-lg font-light">
+                    Referral Income
+                  </p>
+                  <p className="text-sm sm:text-lg font-bold">
+                    {refresh ? (
+                      <div className="flex items-center gap-2">
+                        <Skeleton className="h-5 sm:h-8 w-[100px] sm:w-[250px]" />
+                      </div>
+                    ) : (
+                      "₱ " + (totalEarnings?.directReferralAmount ?? 0)
+                    )}
+                  </p>
+                </div>
+
+                <div className="flex flex-col justify-start  items-start">
+                  <p className="text-sm sm:text-lg font-light">
+                    Network Income
+                  </p>
+                  <p className="text-sm sm:text-lg font-bold">
+                    {refresh ? (
+                      <div className="flex items-center gap-2">
+                        <Skeleton className="h-5 sm:h-8 w-[100px] sm:w-[250px]" />
+                      </div>
+                    ) : (
+                      "₱ " + (totalEarnings?.indirectReferralAmount ?? 0)
+                    )}
+                  </p>
+                </div>
+              </div>
+
+              <Separator className="text-white" />
+
+              <div className="flex justify-center gap-2">
+                <div className="flex flex-col text-center">
+                  <p className="text-md sm:text-lg font-extralight">
+                    DAILY INTEREST RATE
+                  </p>
+                  <p className="text-md sm:text-lg font-extrabold">
+                    EARN 3.1 % UP TO 4.3 % PER DAY
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        <DashboardDepositModalPackages
-          packages={packages}
-          earnings={earnings}
-          setEarnings={setEarnings}
-          setChartData={setChartData}
-          setIsActive={setIsActive}
-          teamMemberProfile={teamMemberProfile}
-          className="w-full"
-        />
+        <ScrollArea className="w-full h-32 overflow-y-hidden">
+          <div className="flex justify-around items-center bg-white rounded-2xl shadow-2xl gap-4 border-2 h-32 overflow-y-hidden">
+            {/* Deposit Modal */}
+            <div className="flex-shrink-0 relative w-[200px]">
+              <DashboardDepositModalDeposit
+                teamMemberProfile={teamMemberProfile}
+                className="w-full"
+              />
+            </div>
+
+            {/* Withdraw Modal */}
+            <div className="flex-shrink-0 relative w-[200px]">
+              <DashboardWithdrawModalWithdraw
+                teamMemberProfile={teamMemberProfile}
+                earnings={earnings}
+                setEarnings={setEarnings}
+              />
+            </div>
+
+            {/* Packages */}
+            <div className="flex-shrink-0 relative w-[200px]">
+              <DashboardDepositModalPackages
+                packages={packages}
+                earnings={earnings}
+                setEarnings={setEarnings}
+                setChartData={setChartData}
+                setIsActive={setIsActive}
+                teamMemberProfile={teamMemberProfile}
+                className="w-full"
+              />
+            </div>
+
+            {/* Direct Referrals */}
+            <div
+              onClick={() => router.push("/referral")}
+              className="flex-shrink-0 relative w-[200px] flex flex-col items-center cursor-pointer"
+            >
+              <Image
+                src="/assets/referral.png"
+                alt="referrals"
+                width={200}
+                height={200}
+              />
+              <p className="text-sm sm:text-lg font-thin absolute  bottom-1/4">
+                REFERRAL
+              </p>
+            </div>
+
+            {/* Indirect Referrals */}
+            <div
+              onClick={() => router.push("/network")}
+              className="flex-shrink-0 relative w-[200px] flex flex-col items-center cursor-pointer"
+            >
+              <Image
+                src="/assets/network.png"
+                alt="network"
+                width={200}
+                height={200}
+                style={{
+                  objectFit: "cover",
+                }}
+              />
+              <p className="text-sm sm:text-lg font-thin absolute bottom-1/4">
+                NETWORK
+              </p>
+            </div>
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
 
         {chartData.length > 0 && (
           <div className=" gap-6">
+            <p className="text-xl text-white sm:text-2xl font-thin">
+              My Current Package
+            </p>
             <DashboardPackages
               chartData={chartData}
               setChartData={setChartData}
@@ -320,21 +423,7 @@ const DashboardPage = ({
             />
           </div>
         )}
-
-        {/* <div className="w-full flex flex-col lg:flex-row space-6 gap-6">
-          <DashboardDepositRequest
-            setChartData={setChartData}
-            earnings={earnings}
-            setEarnings={setEarnings}
-            packages={packages}
-            setIsActive={setIsActive}
-            teamMemberProfile={teamMemberProfile}
-          />
-          <DashboardWithdrawRequest
-            earnings={earnings}
-            teamMemberProfile={teamMemberProfile}
-          />
-        </div> */}
+        <TransactionHistoryTable teamMemberProfile={teamMemberProfile} />
       </div>
     </div>
   );

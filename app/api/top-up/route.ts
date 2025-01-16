@@ -158,7 +158,7 @@ export async function POST(request: Request) {
         await tx.alliance_transaction_table.create({
           data: {
             transaction_amount: Number(amount),
-            transaction_description: "Deposit Pending",
+            transaction_description: "Deposit Ongoing",
             transaction_member_id: teamMemberId,
           },
         });

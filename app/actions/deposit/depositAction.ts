@@ -10,11 +10,11 @@ import { z } from "zod";
 const topUpFormSchema = z.object({
   amount: z
     .string()
-    .min(3, "Amount is required and must be at least 200 pesos")
+    .min(3, "Amount is required and must be at least 300 pesos")
     .max(6, "Amount must be less than 6 digits")
     .regex(/^\d+$/, "Amount must be a number")
-    .refine((amount) => parseInt(amount, 10) >= 200, {
-      message: "Amount must be at least 200 pesos",
+    .refine((amount) => parseInt(amount, 10) >= 300, {
+      message: "Amount must be at least 300 pesos",
     }),
   topUpMode: z.string().min(1, "Top up mode is required"),
   accountName: z.string().min(1, "Field is required"),
@@ -62,7 +62,7 @@ export const depositWalletData = async (params: {
       throw new Error("Invalid Request.");
     }
 
-    if (parseInt(amount, 10) < 200) {
+    if (parseInt(amount, 10) < 300) {
       throw new Error("Invalid Request.");
     }
 

@@ -427,40 +427,50 @@ export const protectionAllUser = async (ip?: string) => {
   try {
     const { data: authData, error: authError } = await supabase.auth.getUser();
 
-    if (authError || !authData?.user) {
-      return { redirect: "/auth/login" };
+    if (authError || !authData) {
+      return { redirect: "/login" };
     }
 
     const userId = authData.user.id;
 
     const [profile, teamMember] = await Promise.all([
-      prisma.user_table.findUnique({ where: { user_id: userId } }),
+      prisma.user_table.findUnique({
+        where: { user_id: userId },
+        select: {
+          user_id: true,
+          user_first_name: true,
+          user_last_name: true,
+          user_profile_picture: true,
+          user_username: true,
+          user_active_mobile: true,
+        },
+      }),
       prisma.alliance_member_table.findFirst({
         where: { alliance_member_user_id: userId },
+        select: {
+          alliance_member_id: true,
+          alliance_member_role: true,
+          alliance_member_alliance_id: true,
+          alliance_member_restricted: true,
+        },
       }),
     ]);
 
     if (!profile) {
-      return { redirect: "/auth/login" };
+      return { redirect: "/login" };
     }
 
     if (
       !teamMember?.alliance_member_alliance_id ||
-      !["MEMBER", "MERCHANT", "ACCOUNTING"].includes(
+      !["MEMBER", "MERCHANT", "ACCOUNTING", "ADMIN"].includes(
         teamMember.alliance_member_role
       )
     ) {
       return { redirect: "/" };
     }
-    if (
-      !teamMember?.alliance_member_alliance_id ||
-      !["ADMIN"].includes(teamMember.alliance_member_role)
-    ) {
-      return { redirect: "/admin" };
-    }
 
     if (teamMember.alliance_member_restricted) {
-      return { redirect: "/auth/login" };
+      return { redirect: "/login" };
     }
 
     const [referal, earnings] = await Promise.all([
@@ -475,7 +485,7 @@ export const protectionAllUser = async (ip?: string) => {
     ]);
 
     if (!earnings) {
-      return { redirect: "/auth/login" };
+      return { redirect: "/login" };
     }
 
     return {
@@ -485,6 +495,7 @@ export const protectionAllUser = async (ip?: string) => {
       referal: referal as alliance_referral_link_table,
     };
   } catch (e) {
+    console.log(e);
     if (e instanceof Error) {
       await logError(supabase, {
         errorMessage: e.message,
@@ -492,6 +503,6 @@ export const protectionAllUser = async (ip?: string) => {
         stackPath: "utils/serversideProtection.ts",
       });
     }
-    return { redirect: "/auth/login" };
+    return { redirect: "/login" };
   }
 };

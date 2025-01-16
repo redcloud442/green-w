@@ -22,12 +22,14 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "../ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Input } from "../ui/input";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
-import TableLoading from "../ui/tableLoading";
+import { Separator } from "../ui/separator";
 import { AllyBountyColumn } from "./AllyBountyColum";
 
 type DataTableProps = {
@@ -101,11 +103,17 @@ const AllyBountyTable = ({ teamMemberProfile }: DataTableProps) => {
     },
   });
 
-  const { getValues } = useForm<FilterFormValues>({
+  const { getValues, handleSubmit, register } = useForm<FilterFormValues>({
     defaultValues: {
       emailFilter: "",
     },
   });
+
+  const handleFilter = async () => {
+    try {
+      await fetchAdminRequest();
+    } catch (e) {}
+  };
 
   useEffect(() => {
     fetchAdminRequest();
@@ -115,67 +123,92 @@ const AllyBountyTable = ({ teamMemberProfile }: DataTableProps) => {
 
   return (
     <ScrollArea className="w-full overflow-x-auto ">
-      {isFetchingList && <TableLoading />}
-
-      <Table className="w-full border-collapse border border-black font-bold">
-        <TableHeader className="border-b border-black dark:text-pageColor font-bold">
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow
-              key={headerGroup.id}
-              className="border-b border-black  dark:text-pageColor font-bold"
+      <Card className="w-full p-4">
+        <CardHeader className="text-center text-[30px] sm:text-[60px] font-extrabold">
+          <CardTitle>REFERRAL INCOME</CardTitle>
+        </CardHeader>
+        <Separator />
+        <CardContent className="space-y-4">
+          <form
+            className="flex justify-end flex-wrap gap-2 pt-4"
+            onSubmit={handleSubmit(handleFilter)}
+          >
+            <Input
+              {...register("emailFilter")}
+              placeholder="Filter username..."
+              className="w-full sm:w-auto"
+            />
+            <Button
+              type="submit"
+              disabled={isFetchingList}
+              size="sm"
+              variant="card"
             >
-              {headerGroup.headers.map((header) => (
-                <TableHead
-                  className="border-r border-black px-4 py-2 dark:text-pageColor hover:bg-transparent font-bold"
-                  key={header.id}
+              <Search />
+            </Button>
+          </form>
+          <Table className="w-full border-collapse border border-white font-bold">
+            <TableHeader className="border-b border-white text-white font-bold">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow
+                  key={headerGroup.id}
+                  className="border-b border-white text-blue-500 font-bold"
                 >
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                </TableHead>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead
+                      className="border-r border-black px-4 py-2 text-blue-500 hover:bg-transparent font-bold"
+                      key={header.id}
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
+                  ))}
+                </TableRow>
               ))}
-            </TableRow>
-          ))}
-        </TableHeader>
+            </TableHeader>
 
-        <TableBody>
-          {table.getRowModel().rows.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-                className="border-none font-bold"
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell
-                    className="border-r border-black px-4 py-2"
-                    key={cell.id}
+            <TableBody>
+              {table.getRowModel().rows.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                    className="border-none font-bold"
                   >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell
+                        className="border-r border-black px-4 py-2"
+                        key={cell.id}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow className="border-b border-black">
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center border-r border-black"
+                  >
+                    No results.
                   </TableCell>
-                ))}
-              </TableRow>
-            ))
-          ) : (
-            <TableRow className="border-b border-black">
-              <TableCell
-                colSpan={columns.length}
-                className="h-24 text-center border-r border-black"
-              >
-                No results.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
 
-      <ScrollBar orientation="horizontal" />
+          <ScrollBar orientation="horizontal" />
 
-      <div className="flex items-center justify-between gap-x-4 py-4">
-        {/* <div className="flex justify-between items-center px-2 pt-2">
+          <div className="flex items-center justify-between gap-x-4 py-4">
+            {/* <div className="flex justify-between items-center px-2 pt-2">
         <span className="text-sm dark:text-pageColor font-bold ">
           Rows per page
         </span>
@@ -193,33 +226,39 @@ const AllyBountyTable = ({ teamMemberProfile }: DataTableProps) => {
           </SelectContent>
         </Select>
       </div> */}
-        <div className="flex items-center justify-start gap-x-4">
-          {/* Left Arrow */}
-          <Button
-            className="shadow-none"
-            size="sm"
-            onClick={() => setActivePage((prev) => Math.max(prev - 1, 1))}
-            disabled={activePage <= 1}
-          >
-            <ChevronLeft />
-          </Button>
+            <div className="flex items-center justify-start gap-x-4">
+              {/* Left Arrow */}
+              <Button
+                variant="card"
+                className="shadow-none"
+                size="sm"
+                onClick={() => setActivePage((prev) => Math.max(prev - 1, 1))}
+                disabled={activePage <= 1}
+              >
+                <ChevronLeft />
+              </Button>
 
-          {/* Active Page */}
-          <span className="text-lg font-semibold">{activePage}</span>
+              {/* Active Page */}
+              <span className="text-lg font-semibold text-white">
+                {activePage}
+              </span>
 
-          {/* Right Arrow */}
-          <Button
-            className="shadow-none"
-            size="sm"
-            onClick={() =>
-              setActivePage((prev) => Math.min(prev + 1, pageCount))
-            }
-            disabled={activePage >= pageCount}
-          >
-            <ChevronRight />
-          </Button>
-        </div>
-      </div>
+              {/* Right Arrow */}
+              <Button
+                variant="card"
+                className="shadow-none"
+                size="sm"
+                onClick={() =>
+                  setActivePage((prev) => Math.min(prev + 1, pageCount))
+                }
+                disabled={activePage >= pageCount}
+              >
+                <ChevronRight />
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </ScrollArea>
   );
 };

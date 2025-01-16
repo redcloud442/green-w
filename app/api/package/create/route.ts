@@ -25,6 +25,7 @@ export async function POST(request: Request) {
       packagePercentage,
       packageDays,
       packageColor,
+      packageImage,
     } = body;
 
     if (
@@ -32,7 +33,8 @@ export async function POST(request: Request) {
       !packageDescription ||
       !packagePercentage ||
       !packageDays ||
-      !packageColor
+      !packageColor ||
+      !packageImage
     ) {
       return NextResponse.json({ error: "Invalid input" }, { status: 400 });
     }
@@ -68,7 +70,7 @@ export async function POST(request: Request) {
       );
     }
 
-    await prisma.$transaction([
+    const result = await prisma.$transaction([
       prisma.package_table.create({
         data: {
           package_name: packageName,
@@ -76,11 +78,12 @@ export async function POST(request: Request) {
           package_percentage: parsedPackagePercentage,
           packages_days: parsedPackageDays,
           package_color: packageColor,
+          package_image: packageImage,
         },
       }),
     ]);
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, data: result });
   } catch (error) {
     return NextResponse.json(
       { error: "Internal Server Error." },

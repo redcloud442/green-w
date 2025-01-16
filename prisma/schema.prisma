@@ -24,7 +24,6 @@ enum ReferralType {
   @@schema("alliance_schema")
 }
 
-
 model user_table {
   user_id               String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   user_date_created     DateTime        @default(now())
@@ -34,6 +33,7 @@ model user_table {
   user_email            String          @unique
   user_password         String
   user_iv               String?
+  user_active_mobile    String?
   user_profile_picture  String?
 
   alliance_member_table alliance_member_table[]
@@ -86,6 +86,7 @@ model alliance_member_table {
   package_ally_bounty_log package_ally_bounty_log[]
   package_earnings_log package_earnings_log[]
   alliance_transaction_table alliance_transaction_table[]
+  alliance_notification_table alliance_notification_table[]
   
   package_ally_bounty_log_from package_ally_bounty_log[] @relation("FromMember")
   @@schema("alliance_schema")
@@ -224,6 +225,7 @@ model package_table {
   packages_days      Int
   package_is_disabled Boolean @default(false)
   package_color      String?
+  package_image      String?
   
   package_member_connection_table package_member_connection_table[]
   package_earnings_log package_earnings_log[]
@@ -322,4 +324,18 @@ model error_table {
 
   @@schema("public")
 }
+
+
+model alliance_notification_table {
+  alliance_notification_id                String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  alliance_notification_message           String
+  alliance_notification_date_created      DateTime     @default(now())
+  alliance_notification_user_id           String   @db.Uuid
+  alliance_notification_is_read           Boolean   @default(false)
+
+  alliance_member_table alliance_member_table @relation(fields: [alliance_notification_user_id], references: [alliance_member_id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@schema("alliance_schema")
+}
+
 

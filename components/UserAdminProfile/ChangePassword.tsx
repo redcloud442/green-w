@@ -10,8 +10,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Input } from "../ui/input";
 import { Label } from "../ui/label";
+import { PasswordInput } from "../ui/passwordInput";
 const ChangePasswordSchema = z
   .object({
     password: z.string().min(6, "Password must be at least 6 characters"),
@@ -102,9 +102,8 @@ const ChangePassword = ({ userProfile, setUserProfile }: Props) => {
           {/* Password */}
           <div>
             <Label className="text-sm font-medium ">New Password</Label>
-            <Input
+            <PasswordInput
               id="password"
-              type="password"
               className="mt-1 border-gray-300"
               {...register("password", {
                 required: "Password is required",
@@ -124,7 +123,7 @@ const ChangePassword = ({ userProfile, setUserProfile }: Props) => {
           {/* Confirm Password */}
           <div>
             <Label className="text-sm font-medium ">Confirm New Password</Label>
-            <Input
+            <PasswordInput
               id="confirmPassword"
               type="password"
               className="mt-1 border-gray-300"
@@ -140,7 +139,12 @@ const ChangePassword = ({ userProfile, setUserProfile }: Props) => {
           </div>
 
           {/* Submit Button */}
-          <Button disabled={isSubmitting} type="submit" className="w-full">
+          <Button
+            variant="card"
+            disabled={isSubmitting}
+            type="submit"
+            className="w-full"
+          >
             {isSubmitting && <Loader2 className="animate-spin" />}
             Save Changes
           </Button>

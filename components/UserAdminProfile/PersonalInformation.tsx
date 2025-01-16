@@ -2,12 +2,15 @@ import { useToast } from "@/hooks/use-toast";
 import { logError } from "@/services/Error/ErrorLogs";
 import { handleSignInUser } from "@/services/User/Admin";
 import { getUserSponsor } from "@/services/User/User";
+import { MAX_FILE_SIZE_MB, ROLE } from "@/utils/constant";
 import { useRole } from "@/utils/context/roleContext";
 import { createClientSide } from "@/utils/supabase/client";
 import { UserRequestdata } from "@/utils/types";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { z } from "zod";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Input } from "../ui/input";
@@ -18,6 +21,22 @@ type Props = {
   userProfile: UserRequestdata;
   type?: "ADMIN" | "MEMBER" | "ACCOUNTING" | "MERCHANT";
 };
+
+const schema = z.object({
+  file: z
+    .instanceof(File)
+    .refine((file) => !!file, {
+      message: "Please upload a file for validation.",
+    })
+    .refine(
+      (file) =>
+        ["image/jpeg", "image/png", "image/jpg"].includes(file.type) &&
+        file.size <= 12 * 1024 * 1024, // 12MB limit
+      { message: "The file must be a JPEG or PNG image and less than 12MB." }
+    ),
+});
+
+export type PersonalInformationSchema = z.infer<typeof schema>;
 const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
   const supabaseClient = createClientSide();
   const router = useRouter();
@@ -27,6 +46,12 @@ const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
   } | null>(null);
   const { setRole } = useRole();
   const { toast } = useToast();
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState(
+    userProfile.user_profile_picture || ""
+  );
+  const [isUploading, setIsUploading] = useState(false);
+
   const handleSignIn = async () => {
     try {
       setIsLoading(true);
@@ -72,11 +97,79 @@ const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
     fetchUserSponsor();
   }, [userProfile.user_id]);
 
+  const handleUploadProfilePicture = async (file: File) => {
+    const result = schema.safeParse({ file });
+    if (!result.success) {
+      toast({
+        title: "Error",
+        description: `File size exceeds the ${MAX_FILE_SIZE_MB} MB limit.`,
+        variant: "destructive",
+      });
+      return;
+    }
+    const filePath = `profile-pictures/${Date.now()}_${file.name}`;
+    try {
+      setIsUploading(true);
+      const { error: uploadError } = await supabaseClient.storage
+        .from("USER_PROFILE")
+        .upload(filePath, file);
+
+      if (uploadError) {
+        throw new Error(`File upload failed: ${uploadError.message}`);
+      }
+
+      const { data: publicUrlData } = supabaseClient.storage
+        .from("USER_PROFILE")
+        .getPublicUrl(filePath);
+
+      if (!publicUrlData?.publicUrl) {
+        throw new Error(
+          "Failed to retrieve the public URL of the uploaded file."
+        );
+      }
+
+      // Update user profile with new avatar URL
+      const { error: updateError } = await supabaseClient
+        .schema("user_schema")
+        .from("user_table")
+        .update({ user_profile_picture: publicUrlData.publicUrl })
+        .eq("user_id", userProfile.user_id);
+
+      if (updateError) {
+        throw new Error(`Failed to update profile: ${updateError.message}`);
+      }
+
+      setAvatarUrl(publicUrlData.publicUrl);
+
+      toast({
+        title: "Profile Picture Updated Successfully",
+      });
+    } catch (error) {
+      await supabaseClient.storage.from("USER_PROFILE").remove([filePath]);
+      if (error instanceof Error) {
+        await logError(supabaseClient, {
+          errorMessage: error.message,
+          stackTrace: error.stack,
+          stackPath: "components/UserAdminProfile/PersonalInformation.tsx",
+        });
+      }
+      toast({
+        title: "Error",
+        description: "Something went wrong",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  if (isUploading) return <TableLoading />;
+
   return (
     <Card className="shadow-md">
       {isLoading && <TableLoading />}
       <CardHeader className=" border-b pb-4">
-        <div className="flex flex-wrap justify-between">
+        <div className="flex flex-wrap justify-start gap-4">
           <CardTitle className="text-lg font-semibold flex items-center gap-2 ">
             Personal Information
             {userSponsor === null ? (
@@ -87,9 +180,9 @@ const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
               </span>
             )}
           </CardTitle>
-          {type === "ADMIN" && (
+          {type === ROLE.ADMIN && (
             <Button
-              variant="outline"
+              variant="card"
               onClick={async () => {
                 await handleSignIn();
                 if (userProfile.alliance_member_restricted) {
@@ -108,6 +201,38 @@ const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
             >
               Sign In as {userProfile.user_username}
             </Button>
+          )}
+
+          <Avatar
+            onClick={() => inputRef.current?.click()}
+            className="absolute top-14 right-4 w-32 h-32 z-50 cursor-pointer"
+          >
+            <AvatarImage
+              src={avatarUrl || ""}
+              alt={`${userProfile.user_first_name} ${userProfile.user_last_name}`}
+            />
+            <AvatarFallback
+              onClick={() => inputRef.current?.click()}
+              className="text-white bg-cardColor border-2 border-zinc-400 rounded-full mb-4 cursor-pointer"
+            >
+              {userProfile.user_first_name?.slice(0, 1).toUpperCase()}
+              {userProfile.user_last_name?.slice(0, 1).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+
+          {type === ROLE.MEMBER && (
+            <Input
+              ref={inputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  await handleUploadProfilePicture(file);
+                }
+              }}
+            />
           )}
         </div>
       </CardHeader>
@@ -142,16 +267,18 @@ const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
             className="mt-1 border-gray-300"
           />
         </div>
-        <div>
-          <Label className="text-sm font-medium ">Role</Label>
-          <Input
-            id="role"
-            type="text"
-            value={userProfile.alliance_member_role || "N/A"}
-            readOnly
-            className="mt-1 border-gray-300"
-          />
-        </div>
+        {type === ROLE.ADMIN && (
+          <div>
+            <Label className="text-sm font-medium ">Role</Label>
+            <Input
+              id="role"
+              type="text"
+              value={userProfile.alliance_member_role || "N/A"}
+              readOnly
+              className="mt-1 border-gray-300"
+            />
+          </div>
+        )}
       </CardContent>
     </Card>
   );

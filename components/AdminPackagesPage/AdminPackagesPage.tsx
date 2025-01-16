@@ -4,6 +4,7 @@ import { logError } from "@/services/Error/ErrorLogs";
 import { getAdminPackages } from "@/services/Package/Admin";
 import { createClientSide } from "@/utils/supabase/client";
 import { alliance_member_table, package_table } from "@prisma/client";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import EditPackagesModal from "../AdminPackagesPage/EditPackagesModal";
 import { Card } from "../ui/card";
@@ -57,17 +58,19 @@ const AdminPackageList = ({ teamMemberProfile }: Props) => {
         {packages.map((pkg) => (
           <Card
             key={pkg.package_id}
-            style={{
-              background: pkg.package_is_disabled
-                ? "gray"
-                : `linear-gradient(110deg, ${pkg.package_color || "#F6DB4E"} 60%, #ED9738)`, // Make package color dominate
-            }}
             className={`border rounded-lg shadow-md p-6 flex flex-col items-center space-y-4 ${
               pkg.package_is_disabled
                 ? "bg-gray-200 border-gray-400 opacity-50"
                 : "border-gray-200"
             }`}
           >
+            <Image
+              src={pkg.package_image || "/images/package-default.png"}
+              alt={pkg.package_name}
+              width={300}
+              height={300}
+              className="object-cover"
+            />
             <h2
               className={`text-xl font-bold ${pkg.package_is_disabled ? "text-gray-500" : ""}`}
             >

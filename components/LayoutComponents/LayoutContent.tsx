@@ -1,11 +1,10 @@
 "use client";
 
-import MobileNavBar from "@/components/ui/MobileNavBar";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ROLE } from "@/utils/constant";
 import { useRole } from "@/utils/context/roleContext";
 import { alliance_member_table, user_table } from "@prisma/client";
-import Image from "next/image";
+import MobileNavBar from "../ui/MobileNavBar";
 import AppSidebar from "../ui/side-bar";
 
 type LayoutContentProps = {
@@ -32,33 +31,14 @@ export default function LayoutContent({
         </div>
       )}
 
-      <div className="flex-1 flex flex-col overflow-x-auto relative">
+      <div className="flex-1 flex flex-col overflow-x-auto relative ">
         {role === ROLE.ADMIN && (
           <div className="p-4 md:hidden">
             <SidebarTrigger />
           </div>
         )}
+        <div className="relative z-50 flex-grow pb-20 sm:pb-0">{children}</div>
 
-        {role !== ROLE.ADMIN && (
-          <div className="absolute inset-0 -z-10">
-            {/* Background Image */}
-            <Image
-              src="/assets/bg-primary.jpeg"
-              alt="Background"
-              quality={100}
-              fill
-              priority
-              className="object-cover"
-            />
-            {/* Overlay */}
-            <div className="absolute inset-0 bg-zinc-900/80 dark:bg-zinc-900/90"></div>
-          </div>
-        )}
-
-        {/* Content Section */}
-        <div className="pb-24 p-4 relative z-50 flex-grow">{children}</div>
-
-        {/* Mobile Navigation */}
         {role !== ROLE.ADMIN && <MobileNavBar />}
       </div>
     </div>

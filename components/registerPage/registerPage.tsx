@@ -11,14 +11,16 @@ import { BASE_URL } from "@/utils/constant";
 import { escapeFormData } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CheckCircleIcon, XCircleIcon } from "lucide-react";
+import { CheckIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { useController, useForm } from "react-hook-form";
 import { z } from "zod";
 import NavigationLoader from "../ui/NavigationLoader";
 import { PasswordInput } from "../ui/passwordInput";
+import { ScrollArea } from "../ui/scroll-area";
+import { Separator } from "../ui/separator";
 import Text from "../ui/text";
 
 const RegisterSchema = z
@@ -39,6 +41,13 @@ const RegisterSchema = z
         /^[a-zA-Z0-9_]+$/,
         "Username can only contain letters, numbers, and underscores"
       ),
+    activeMobile: z
+      .string()
+      .regex(
+        /^0\d{10}$/,
+        "Active Mobile must start with '0' and contain exactly 11 digits."
+      ),
+
     password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z
       .string()
@@ -71,20 +80,11 @@ const RegisterPage = ({ referralLink }: Props) => {
     setError,
     clearErrors,
   } = useForm<RegisterFormData>({
-    mode: "onBlur",
     resolver: zodResolver(RegisterSchema),
   });
-  function debounce<T extends (...args: Parameters<T>) => void>(
-    func: T,
-    wait: number
-  ): (...args: Parameters<T>) => void {
-    let timeout: NodeJS.Timeout;
-    return (...args: Parameters<T>) => {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => func(...args), wait);
-    };
-  }
+
   const lastNameSchema = z.string().min(4).max(50);
+  const activeMobileSchema = z.number().min(10);
 
   const supabase = createClientSide();
   const router = useRouter();
@@ -100,28 +100,25 @@ const RegisterPage = ({ referralLink }: Props) => {
     control,
   });
 
-  const validateUserName = useCallback(
-    debounce(async (value: string) => {
-      if (!value) return;
+  const validateUserName = async (value: string) => {
+    if (!value) return null;
 
-      setIsUsernameLoading(true);
+    setIsUsernameLoading(true);
 
-      try {
-        const result = await checkUserName({ userName: value });
-        if (result.error) {
-          setError("userName", { message: result.error });
-        } else {
-          clearErrors("userName");
-          setIsUsernameValidated(true);
-        }
-      } catch (e) {
-        setError("userName", { message: "Validation failed. Try again." });
-      } finally {
-        setIsUsernameLoading(false);
+    try {
+      const result = await checkUserName({ userName: value });
+      if (result.error) {
+        setError("userName", { message: result.error });
+      } else {
+        clearErrors("userName");
+        setIsUsernameValidated(true);
       }
-    }, 3000),
-    [clearErrors, setError]
-  );
+    } catch (e) {
+      setError("userName", { message: "Validation failed. Try again." });
+    } finally {
+      setIsUsernameLoading(false);
+    }
+  };
 
   const handleRegistrationSubmit = async (data: RegisterFormData) => {
     if (isUsernameLoading || !isUsernameValidated) {
@@ -133,10 +130,12 @@ const RegisterPage = ({ referralLink }: Props) => {
     }
     const sanitizedData = escapeFormData(data);
 
-    const { userName, password, firstName, lastName } = sanitizedData;
+    const { userName, password, firstName, lastName, activeMobile } =
+      sanitizedData;
 
     try {
       await createTriggerUser({
+        activeMobile: activeMobile,
         userName: userName,
         password: password,
         firstName,
@@ -168,168 +167,205 @@ const RegisterPage = ({ referralLink }: Props) => {
   };
 
   return (
-    <Card className="w-full max-w-lg mx-auto p-2">
-      <NavigationLoader visible={isSubmitting || isSuccess} />
-      <CardTitle className="font-bold text-2xl">Register</CardTitle>
-      <CardContent className="p-4">
-        <form
-          className="flex flex-col gap-4"
-          onSubmit={handleSubmit(handleRegistrationSubmit)}
-        >
-          {/* Username Field */}
-          <div className="relative">
-            <Label htmlFor="userName">Your Username</Label>
-            <div className="flex items-center">
-              <Input
-                id="userName"
-                placeholder="Username"
-                onChange={(e) => {
-                  userNameField.onChange(e.target.value);
-                  validateUserName(e.target.value);
-                }}
-                onBlur={() => validateUserName(userNameField.value)}
-                className="pr-10"
-              />
+    <ScrollArea className="h-[670px] rounded-md sm:h-auto w-full max-w-lg mx-auto">
+      <Card className="w-full mx-auto ">
+        <NavigationLoader visible={isSubmitting || isSuccess} />
+        <CardTitle className="font-extrabold text-4xl text-center">
+          Register
+        </CardTitle>
+        <Separator className="w-full my-2 bg-white" />
+        <CardContent className="p-4">
+          <form
+            className="flex flex-col gap-4"
+            onSubmit={handleSubmit(handleRegistrationSubmit)}
+          >
+            {/* Username Field */}
 
-              {!isUsernameLoading &&
-                isUsernameValidated &&
-                !errors.userName && (
-                  <CheckCircleIcon className="w-5 h-5 text-green-500 absolute right-3" />
+            {/* First Name Field */}
+            <div className="relative">
+              <Label htmlFor="firstName">First Name</Label>
+              <div className="flex items-center">
+                <Input
+                  id="firstName"
+                  placeholder="First Name"
+                  {...register("firstName")}
+                  className="pr-10"
+                />
+                {touchedFields.firstName && !errors.firstName && (
+                  <CheckIcon className="w-5 h-5 text-green-500 absolute right-3" />
                 )}
-
-              {/* Show error icon if validation failed */}
-              {!isUsernameLoading && errors.userName && (
-                <XCircleIcon className="w-5 h-5 text-primaryRed absolute right-3" />
+              </div>
+              {errors.firstName && (
+                <p className="text-sm text-primaryRed">
+                  {errors.firstName.message}
+                </p>
               )}
             </div>
-            {errors.userName && (
-              <p className="text-sm text-primaryRed">
-                {errors.userName.message}
-              </p>
-            )}
-          </div>
 
-          {/* First Name Field */}
-          <div className="relative">
-            <Label htmlFor="firstName">First Name</Label>
-            <div className="flex items-center">
-              <Input
-                id="firstName"
-                placeholder="First Name"
-                {...register("firstName")}
-                className="pr-10"
-              />
-              {touchedFields.firstName && !errors.firstName && (
-                <CheckCircleIcon className="w-5 h-5 text-green-500 absolute right-3" />
+            {/* Last Name Field */}
+            <div className="relative">
+              <Label htmlFor="lastName">Last Name</Label>
+              <div className="flex items-center">
+                <Input
+                  id="lastName"
+                  placeholder="Last Name"
+                  {...register("lastName")}
+                  className="pr-10"
+                />
+                {touchedFields.lastName &&
+                  !errors.lastName &&
+                  lastNameSchema.safeParse(watch("lastName")).success && (
+                    <CheckIcon className="w-5 h-5 text-green-500 absolute right-3" />
+                  )}
+              </div>
+              {errors.lastName && (
+                <p className="text-sm text-primaryRed">
+                  {errors.lastName.message}
+                </p>
               )}
             </div>
-            {errors.firstName && (
-              <p className="text-sm text-primaryRed">
-                {errors.firstName.message}
-              </p>
-            )}
-          </div>
 
-          {/* Last Name Field */}
-          <div className="relative">
-            <Label htmlFor="lastName">Last Name</Label>
-            <div className="flex items-center">
-              <Input
-                id="lastName"
-                placeholder="Last Name"
-                {...register("lastName")}
+            <div className="relative">
+              <Label htmlFor="userName">Username</Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  id="userName"
+                  placeholder="Username"
+                  className="pr-10"
+                  {...register("userName")}
+                />
+
+                {!isUsernameLoading &&
+                  isUsernameValidated &&
+                  !errors.userName && (
+                    <CheckIcon className="w-5 h-5 text-green-500 absolute right-24" />
+                  )}
+
+                {/* Show error icon if validation failed */}
+
+                <Button
+                  type="button"
+                  disabled={isUsernameLoading}
+                  onClick={() => validateUserName(userNameField.value)}
+                  className=" bg-sky-500 border-white border-2 rounded-md text-gray-800 font-bold px-2 "
+                >
+                  Check
+                </Button>
+              </div>
+              {errors.userName && (
+                <p className="text-sm text-primaryRed">
+                  {errors.userName.message}
+                </p>
+              )}
+            </div>
+
+            <div className="relative">
+              <Label htmlFor="userName">Active Mobile Number</Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  id="activeMobile"
+                  maxLength={11}
+                  placeholder="Active Mobile"
+                  className="pr-10"
+                  {...register("activeMobile")}
+                />
+
+                {touchedFields.activeMobile &&
+                  !errors.activeMobile &&
+                  activeMobileSchema.safeParse(watch("activeMobile"))
+                    .success && (
+                    <CheckIcon className="w-5 h-5 text-green-500 absolute right-3" />
+                  )}
+
+                {/* Show error icon if validation failed */}
+              </div>
+              {errors.activeMobile && (
+                <p className="text-sm text-primaryRed">
+                  {errors.activeMobile.message}
+                </p>
+              )}
+            </div>
+
+            {/* Password Field */}
+            <div className="relative">
+              <Label htmlFor="password">Password</Label>
+
+              <PasswordInput
+                id="password"
+                placeholder="Password"
+                {...register("password")}
                 className="pr-10"
               />
-              {touchedFields.lastName &&
-                !errors.lastName &&
-                lastNameSchema.safeParse(watch("lastName")).success && (
-                  <CheckCircleIcon className="w-5 h-5 text-green-500 absolute right-3" />
+              {touchedFields.password && !errors.password && (
+                <CheckIcon className="w-5 h-5 text-green-500 absolute right-10 top-8" />
+              )}
+
+              {errors.password && (
+                <p className="text-sm text-red-500">
+                  {errors.password.message}
+                </p>
+              )}
+            </div>
+
+            {/* Confirm Password Field */}
+            <div className="relative">
+              <Label htmlFor="confirmPassword">Repeat Password</Label>
+
+              <PasswordInput
+                id="confirmPassword"
+                placeholder="Confirm Password"
+                {...register("confirmPassword")}
+                className="pr-10"
+              />
+              {touchedFields.confirmPassword &&
+                !errors.confirmPassword &&
+                touchedFields.password &&
+                !errors.password &&
+                watch("password") === watch("confirmPassword") && (
+                  <CheckIcon className="w-5 h-5 text-green-500 absolute right-10 top-8 " />
                 )}
             </div>
-            {errors.lastName && (
+            {errors.confirmPassword && (
               <p className="text-sm text-primaryRed">
-                {errors.lastName.message}
+                {errors.confirmPassword.message}
               </p>
             )}
-          </div>
 
-          {/* Password Field */}
-          <div className="relative">
-            <Label htmlFor="password">Password</Label>
-
-            <PasswordInput
-              id="password"
-              placeholder="Password"
-              {...register("password")}
-              className="pr-10"
-            />
-            {touchedFields.password && !errors.password && (
-              <CheckCircleIcon className="w-5 h-5 text-green-500 absolute right-10 top-10" />
-            )}
-
-            {errors.password && (
-              <p className="text-sm text-red-500">{errors.password.message}</p>
-            )}
-          </div>
-
-          {/* Confirm Password Field */}
-          <div className="relative">
-            <Label htmlFor="confirmPassword">Confirm Password</Label>
-
-            <PasswordInput
-              id="confirmPassword"
-              placeholder="Confirm Password"
-              {...register("confirmPassword")}
-              className="pr-10"
-            />
-            {touchedFields.confirmPassword &&
-              !errors.confirmPassword &&
-              touchedFields.password &&
-              !errors.password &&
-              watch("password") === watch("confirmPassword") && (
-                <CheckCircleIcon className="w-5 h-5 text-green-500 absolute right-10 top-10 " />
-              )}
-          </div>
-          {errors.confirmPassword && (
-            <p className="text-sm text-primaryRed">
-              {errors.confirmPassword.message}
-            </p>
-          )}
-
-          <div className="relative">
-            <Label htmlFor="confirmPassword">Sponsor</Label>
-            <div className="flex items-center">
-              <Input
-                id="sponsor"
-                readOnly
-                placeholder="Sponsor"
-                value={referralLink}
-                className="pr-10"
-              />
+            <div className="relative">
+              <Label htmlFor="confirmPassword">Sponsor</Label>
+              <div className="flex text-black">
+                <Input
+                  id="sponsor"
+                  readOnly
+                  placeholder="Sponsor"
+                  value={referralLink}
+                  className="pr-10"
+                />
+              </div>
             </div>
-          </div>
 
-          <div className="w-full flex justify-center">
-            <Button
-              variant="card"
-              className="px-4 font-medium"
-              disabled={isSubmitting || isSuccess}
-              type="submit"
-            >
-              Submit
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-      <CardFooter>
-        <Text>
-          Already have an account?{" "}
-          <Link href="/auth/login" className="text-blue-500">
-            Login
-          </Link>
-        </Text>
-      </CardFooter>
-    </Card>
+            <div className="w-full flex ">
+              <Button
+                variant="card"
+                className="px-4  w-full font-extrabold text-lg rounded-md"
+                disabled={isSubmitting || isSuccess}
+                type="submit"
+              >
+                SIGN UP
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+        <CardFooter>
+          <Text>
+            Already have Elevate account?{" "}
+            <Link href="/login" className="text-blue-500">
+              Login
+            </Link>
+          </Text>
+        </CardFooter>
+      </Card>
+    </ScrollArea>
   );
 };
 

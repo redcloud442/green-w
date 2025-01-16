@@ -1,4 +1,5 @@
 import { package_table } from "@prisma/client";
+import Image from "next/image"; // Import Next.js Image component
 import Link from "next/link";
 import { Button } from "./button";
 import { Card } from "./card";
@@ -12,6 +13,7 @@ type Props = {
   packageDays?: string;
   packageColor?: string;
   packageId?: string;
+  packageImage?: string;
   href?: string;
   type?: string;
 };
@@ -24,29 +26,31 @@ const PackageCard = ({
   packageDescription,
   packageColor,
   type,
+  packageImage,
   href,
 }: Props) => {
   return (
     <Card
       onClick={onClick}
-      style={{
-        background: `linear-gradient(110deg, ${packageColor || "#F6DB4E"} 60%, #ED9738)`,
-      }}
-      className={`w-full h-36 rounded-lg cursor-pointer shadow-lg p-6 flex flex-col items-center justify-center space-y-4 relative ${
+      className={`w-full rounded-lg cursor-pointer shadow-lg flex flex-col items-center px-4 py-12 justify-center space-y-4 relative overflow-hidden ${
         selectedPackage?.package_id === packageId
-          ? "border-2 dark:border-pageColor shadow-lg"
+          ? " dark:border-pageColor border-none shadow-none "
           : "border-none"
       }`}
     >
-      <h2 className="text-xl font-bold z-10">{packageName}</h2>
-
-      <p className="text-gray-600 text-center dark:text-white z-10">
-        {packageDescription}
-      </p>
-      {/* <p className="text-2xl text-center font-extrabold text-gray-800 dark:text-white z-10">
-        {packagePercentage} Earnings in {packageDays}{" "}
-        {Number(packageDays) > 1 ? `Days` : ` Day`}
-      </p> */}
+      {/* Responsive Image */}
+      {packageImage && (
+        <div className="w-full flex items-center justify-center ">
+          <Image
+            src={packageImage}
+            alt={`${packageName} image`}
+            width={400}
+            height={300}
+            style={{ objectFit: "cover" }}
+            className="rounded-lg"
+          />
+        </div>
+      )}
 
       {href && type === "MEMBER" && (
         <Link href={href} className="w-full z-10">
@@ -54,6 +58,16 @@ const PackageCard = ({
             Select
           </Button>
         </Link>
+      )}
+
+      {!selectedPackage && (
+        <Button
+          onClick={onClick}
+          variant="card"
+          className=" rounded-lg text-black font-semibold py-2  "
+        >
+          CLICK HERE TO AVAIL
+        </Button>
       )}
     </Card>
   );
