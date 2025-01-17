@@ -9,6 +9,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { getEarnings } from "@/services/User/User";
 import {
@@ -42,11 +43,13 @@ const DashboardWithdrawModalWithdraw = ({
   const [preferredWithdrawalList, setPreferredWithdrawalList] = useState<
     alliance_preferred_withdrawal_table[]
   >([]);
+  const [isFetching, setIsFetching] = useState(false);
   const { toast } = useToast();
 
   const fetchEarnings = async () => {
     try {
       if (!open) return;
+      setIsFetching(true);
       const { earnings, preferredWithdrawal } = await getEarnings();
       setEarnings(earnings);
       setPreferredWithdrawalList(preferredWithdrawal);
@@ -58,6 +61,8 @@ const DashboardWithdrawModalWithdraw = ({
         description: errorMessage,
         variant: "destructive",
       });
+    } finally {
+      setIsFetching(false);
     }
   };
 
@@ -69,6 +74,10 @@ const DashboardWithdrawModalWithdraw = ({
     <Dialog
       open={open}
       onOpenChange={(isOpen) => {
+        if (!isOpen) {
+          setPreferredEarnings(null);
+          setPreferredType(null);
+        }
         setOpen(isOpen);
       }}
     >
@@ -92,9 +101,10 @@ const DashboardWithdrawModalWithdraw = ({
       <DialogContent className="w-full max-w-xl">
         <ScrollArea className="w-full relative sm:max-w-[400px] h-[600px] sm:h-full">
           <DialogHeader className="text-start text-2xl font-bold">
-            <DialogTitle className="text-2xl font-bold mb-4">
+            <DialogTitle className="text-3xl font-bold text-center">
               Withdraw
             </DialogTitle>
+            <Separator />
             <DialogDescription></DialogDescription>
           </DialogHeader>
 
@@ -129,6 +139,7 @@ const DashboardWithdrawModalWithdraw = ({
               </div>
 
               <DashboardAddUserPreferredBank
+                isFetching={isFetching}
                 preferredWithdrawalList={preferredWithdrawalList}
                 setPreferredEarnings={setPreferredEarnings}
                 setPreferredWithdrawalList={setPreferredWithdrawalList}

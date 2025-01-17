@@ -130,7 +130,7 @@ const AllyBountyTable = ({ teamMemberProfile }: DataTableProps) => {
         <Separator />
         <CardContent className="space-y-4">
           <form
-            className="flex justify-end flex-wrap gap-2 pt-4"
+            className="flex  gap-2 pt-4"
             onSubmit={handleSubmit(handleFilter)}
           >
             <Input

@@ -208,6 +208,17 @@ export const getUserEarnings = async (params: { memberId: string }) => {
         alliance_referral_bounty: true,
       },
     });
+
+    const userRanking = await prisma.alliance_ranking_table.findFirst({
+      where: {
+        alliance_ranking_member_id: memberId,
+      },
+      select: {
+        alliance_rank: true,
+        alliance_total_income_tag: true,
+      },
+    });
+
     const totalEarnings = {
       directReferralAmount: user?.direct_referral_amount,
       indirectReferralAmount: user?.indirect_referral_amount,
@@ -215,15 +226,18 @@ export const getUserEarnings = async (params: { memberId: string }) => {
       withdrawalAmount: user?.total_withdrawals,
       directReferralCount: user?.direct_referral_count,
       indirectReferralCount: user?.indirect_referral_count,
+      package_income: user?.package_income,
     };
 
     const userEarningsData = {
       ...userEarnings,
+      package_income: user?.package_income,
     };
 
     return {
       totalEarnings,
       userEarningsData: userEarningsData as unknown as alliance_earnings_table,
+      userRanking,
     };
   } catch (error) {
     throw new Error("Failed to fetch user earnings");

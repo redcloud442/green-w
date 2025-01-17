@@ -5,11 +5,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 const getDirectReferralsSchema = z.object({
-  page: z.number().min(1),
-  limit: z.number().min(1),
-  search: z.string().min(3),
+  page: z.string().min(1),
+  limit: z.string().min(1),
+  search: z.string().optional(),
   columnAccessor: z.string().min(3),
-  isAscendingSort: z.boolean(),
+  isAscendingSort: z.string(),
 });
 
 export const GET = async (request: NextRequest) => {

@@ -103,14 +103,18 @@ export const getWithdrawalRequestAccountant = async (
 };
 
 export const sendWithdrawalEmail = async (params: {
-  email: string;
+  to: string;
+  from: string;
+  subject: string;
   accountHolderName: string;
   accountNumber: string;
+  accountType: string;
+  accountBank: string;
   transactionDetails: {
     date: string;
     description: string;
     amount: string;
-    balance: string;
+    balance?: string;
   };
   message: string;
   greetingPhrase: string;

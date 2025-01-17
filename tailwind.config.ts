@@ -29,22 +29,15 @@ export default {
         },
       },
       animation: {
-        slideIn: "slideIn 1s ease-in-out",
-        spinInfinity: "spinInfinity 1.5s linear infinite",
+        "stroke-anim": "stroke-dash 1.6s linear infinite",
       },
       keyframes: {
-        anim: {
-          "12.5%": {
-            "stroke-dasharray": "33.98873px, 242.77666px",
-            "stroke-dashoffset": "-26.70543px",
-          },
-          "43.75%": {
-            "stroke-dasharray": "84.97183px, 242.77666px",
-            "stroke-dashoffset": "-84.97183px",
-          },
+        "stroke-dash": {
+          "0%": { "stroke-dasharray": "1, 200", "stroke-dashoffset": "0" },
+          "50%": { "stroke-dasharray": "89, 200", "stroke-dashoffset": "-35" },
           "100%": {
-            "stroke-dasharray": "2.42777px, 242.77666px",
-            "stroke-dashoffset": "-240.34889px",
+            "stroke-dasharray": "89, 200",
+            "stroke-dashoffset": "-124",
           },
         },
       },

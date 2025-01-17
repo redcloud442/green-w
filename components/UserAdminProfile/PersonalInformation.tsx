@@ -168,21 +168,25 @@ const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
   return (
     <Card className="shadow-md">
       {isLoading && <TableLoading />}
-      <CardHeader className=" border-b pb-4">
-        <div className="flex flex-wrap justify-start gap-4">
-          <CardTitle className="text-lg font-semibold flex items-center gap-2 ">
+      <CardHeader className="border-b pb-6 relative">
+        <div className="flex flex-col lg:flex-row flex-wrap items-start lg:items-center justify-between gap-4">
+          {/* Title Section */}
+          <CardTitle className="text-lg font-semibold flex flex-wrap items-center gap-2">
             Personal Information
             {userSponsor === null ? (
-              <Loader2 className="animate-spin" />
+              <Loader2 className="animate-spin text-primary" />
             ) : (
-              <span className="text-md">
-                ( Sponsored by: {userSponsor.user_username} )
+              <span className="text-md ">
+                (Sponsored by: {userSponsor.user_username})
               </span>
             )}
           </CardTitle>
+
+          {/* Admin Button */}
           {type === ROLE.ADMIN && (
             <Button
               variant="card"
+              className="lg:ml-auto"
               onClick={async () => {
                 await handleSignIn();
                 if (userProfile.alliance_member_restricted) {
@@ -202,10 +206,13 @@ const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
               Sign In as {userProfile.user_username}
             </Button>
           )}
+        </div>
 
+        {/* Avatar Section */}
+        <div className="relative flex justify-center lg:justify-end items-center mt-4">
           <Avatar
             onClick={() => inputRef.current?.click()}
-            className="absolute top-14 right-4 w-32 h-32 z-50 cursor-pointer"
+            className="w-32 h-32 z-50 cursor-pointer"
           >
             <AvatarImage
               src={avatarUrl || ""}
@@ -219,23 +226,25 @@ const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
               {userProfile.user_last_name?.slice(0, 1).toUpperCase()}
             </AvatarFallback>
           </Avatar>
-
-          {type === ROLE.MEMBER && (
-            <Input
-              ref={inputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={async (e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  await handleUploadProfilePicture(file);
-                }
-              }}
-            />
-          )}
         </div>
+
+        {/* Upload Input for Members */}
+        {type === ROLE.MEMBER && (
+          <Input
+            ref={inputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                await handleUploadProfilePicture(file);
+              }
+            }}
+          />
+        )}
       </CardHeader>
+
       <CardContent className="grid grid-cols-1 gap-6 sm:grid-cols-2 p-6">
         <div>
           <Label className="text-sm font-medium ">First Name</Label>

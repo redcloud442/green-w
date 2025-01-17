@@ -1,5 +1,7 @@
+import { formatMonthDateYear, formatTime } from "@/utils/function";
 import { AdminWithdrawaldata } from "@/utils/types";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { sendWithdrawalEmail } from "./Member";
 
 export const getAdminWithdrawalRequest = async (
   supabaseClient: SupabaseClient,
@@ -52,6 +54,40 @@ export const updateWithdrawalStatus = async (params: {
     throw new Error(
       result.error || "An error occurred while creating the top-up request."
     );
+  }
+  const { data } = result;
+
+  if (data.alliance_withdrawal_request_email) {
+    await sendWithdrawalEmail({
+      to: data.alliance_withdrawal_request_email,
+      from: "Elevate Team",
+      subject: `Withdrawal Request ${data.alliance_withdrawal_request_status.slice(0, 1).toUpperCase() + data.alliance_withdrawal_request_status.slice(1)} !`,
+      accountHolderName: data.user_username ?? "",
+      accountType: data.alliance_preferred_withdrawal_account_name ?? "",
+      accountBank: data.alliance_preferred_withdrawal_bank_name ?? "",
+      accountNumber: data.alliance_preferred_withdrawal_account_number ?? "",
+      transactionDetails: {
+        balance: "",
+        date:
+          formatMonthDateYear(data.alliance_withdrawal_request_date) +
+          ", " +
+          formatTime(data.alliance_withdrawal_request_date),
+        description: "Withdrawal Request Ongoing !",
+        amount:
+          "₱" +
+          Number(
+            data.alliance_withdrawal_request_amount -
+              data.alliance_withdrawal_request_fee || 0
+          ).toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }),
+      },
+      message: `Your withdrawal request has been ${data.alliance_withdrawal_request_status.slice(0, 1).toUpperCase() + data.alliance_withdrawal_request_status.slice(1)} !`,
+      greetingPhrase: "Hello!",
+      closingPhrase: "Thank you for continuous Elevating with us.",
+      signature: "The Elevate Team",
+    });
   }
 
   return response;

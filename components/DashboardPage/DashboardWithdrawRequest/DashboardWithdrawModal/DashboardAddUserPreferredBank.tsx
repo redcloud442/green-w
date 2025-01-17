@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { FINANCIAL_SERVICES } from "@/utils/constant";
 import { alliance_preferred_withdrawal_table } from "@prisma/client";
@@ -26,6 +27,7 @@ type DashboardAddUserPreferredBankProps = {
   setPreferredWithdrawalList: Dispatch<
     SetStateAction<alliance_preferred_withdrawal_table[]>
   >;
+  isFetching: boolean;
 };
 
 export const preferredWithdrawalSchema = z.object({
@@ -38,6 +40,7 @@ const DashboardAddUserPreferredBank = ({
   preferredWithdrawalList,
   setPreferredEarnings,
   setPreferredWithdrawalList,
+  isFetching,
 }: DashboardAddUserPreferredBankProps) => {
   const { toast } = useToast();
   const [selectedOption, setSelectedOption] = useState<string>("");
@@ -138,13 +141,24 @@ const DashboardAddUserPreferredBank = ({
 
               {/* Hidden input to store selected bankName */}
               <Input type="hidden" id="bankName" name="bankName" />
+
               <Button
                 disabled={isLoading}
                 variant="card"
-                className="w-full rounded-md"
+                className="rounded-md"
                 type="submit"
               >
                 {isLoading ? "Adding..." : "SET ACCOUNT TO FAVORITES"}
+              </Button>
+              <Button
+                className="w-full rounded-md"
+                variant="outline"
+                onClick={() => {
+                  setOpen(false);
+                  setSelectedOption("");
+                }}
+              >
+                Exit
               </Button>
             </form>
           </Card>
@@ -153,38 +167,45 @@ const DashboardAddUserPreferredBank = ({
         {/* Favorite Card with Radio Button */}
         <ScrollArea className="min-h-auto max-h-[200px]">
           <div className="flex flex-col gap-2 border-2 border-white p-2">
-            {preferredWithdrawalList?.map((item) => (
-              <Card
-                key={item.alliance_preferred_withdrawal_id}
-                className="flex items-center justify-between bg-sky-300 px-4 py-1"
-              >
-                <div className="flex flex-col gap-1">
-                  <p className="text-sm font-extrabold">
-                    {item.alliance_preferred_withdrawal_bank_name}
-                  </p>
-                  <p className="text-sm">
-                    ACCOUNT NAME:{" "}
-                    {item.alliance_preferred_withdrawal_account_name}
-                  </p>
-                  <p className="text-sm">
-                    ACCOUNT NUMBER:{" "}
-                    {item.alliance_preferred_withdrawal_account_number}
-                  </p>
-                </div>
-                <div>
-                  <Input
-                    type="radio"
-                    name="preferredEarnings"
-                    value={item.alliance_preferred_withdrawal_id}
-                    checked={
-                      selectedOption === item.alliance_preferred_withdrawal_id
-                    }
-                    onChange={(e) => setSelectedOption(e.target.value)}
-                    className="w-4 h-4"
-                  />
-                </div>
-              </Card>
-            ))}
+            {isFetching ? (
+              <Skeleton className="h-12 w-full rounded-lg" />
+            ) : (
+              preferredWithdrawalList?.map((item) => (
+                <Card
+                  key={item.alliance_preferred_withdrawal_id}
+                  className="flex items-center justify-between bg-sky-300 px-4 py-1"
+                >
+                  <div className="flex flex-col gap-1">
+                    <p className="text-sm font-extrabold">
+                      {item.alliance_preferred_withdrawal_bank_name}
+                    </p>
+                    <p className="text-sm">
+                      ACCOUNT NAME:{" "}
+                      {item.alliance_preferred_withdrawal_account_name}
+                    </p>
+                    <p className="text-sm">
+                      ACCOUNT NUMBER:{" "}
+                      {item.alliance_preferred_withdrawal_account_number}
+                    </p>
+                  </div>
+                  <div>
+                    <Input
+                      type="radio"
+                      name="preferredEarnings"
+                      value={item.alliance_preferred_withdrawal_id}
+                      checked={
+                        selectedOption === item.alliance_preferred_withdrawal_id
+                      }
+                      onChange={(e) => setSelectedOption(e.target.value)}
+                      className="w-4 h-4"
+                    />
+                  </div>
+                </Card>
+              ))
+            )}
+            {preferredWithdrawalList?.length === 0 && (
+              <p className="text-sm">No favorite accounts found</p>
+            )}
           </div>
         </ScrollArea>
 

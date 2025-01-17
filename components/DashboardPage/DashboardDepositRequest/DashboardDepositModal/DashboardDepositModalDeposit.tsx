@@ -35,6 +35,7 @@ import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
+
 type Props = {
   teamMemberProfile: alliance_member_table;
   className: string;
@@ -213,10 +214,10 @@ const DashboardDepositModalDeposit = ({
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[440px]">
         <ScrollArea className="h-[500px] sm:h-full">
           <DialogHeader className="flex flex-col items-center text-2xl font-bold">
-            <DialogTitle className="text-2xl sm:text-3xl font-bold mb-4">
+            <DialogTitle className="text-2xl sm:text-3xl font-bold">
               Deposit
             </DialogTitle>
             <Separator className="w-full" />
@@ -225,13 +226,13 @@ const DashboardDepositModalDeposit = ({
 
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="space-y-6 w-full max-w-xs sm:max-w-max "
+            className="space-y-6 w-full max-w-xs sm:max-w-sm "
           >
             {/* Amount Field */}
 
             {/* Top-Up Mode */}
             <div>
-              <Label htmlFor="topUpMode">Account Number</Label>
+              <Label htmlFor="topUpMode">Select Bank</Label>
               <Controller
                 name="topUpMode"
                 control={control}
@@ -293,7 +294,7 @@ const DashboardDepositModalDeposit = ({
                 )}
               </div>
               <div className="flex-1">
-                <Label htmlFor="accountNumber">E-wallet/Bank</Label>
+                <Label htmlFor="accountNumber">Account Number</Label>
                 <div className="flex gap-2">
                   <Controller
                     name="accountNumber"

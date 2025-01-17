@@ -26,6 +26,8 @@ export async function POST(req: NextRequest) {
       to,
       subject,
       accountHolderName,
+      accountBank,
+      accountType,
       accountNumber,
       transactionDetails,
       message,
@@ -35,6 +37,8 @@ export async function POST(req: NextRequest) {
     } = await req.json();
 
     const emailProps: BankingEmailNotificationTemplateProps = {
+      accountBank,
+      accountType,
       accountHolderName,
       accountNumber,
       transactionDetails,
@@ -50,14 +54,13 @@ export async function POST(req: NextRequest) {
         : "<help@portfolio-glorioso.site>";
 
     const { data, error } = await resend.emails.send({
-      from: `Formsly Team ${domain}`,
+      from: `Elevate Team ${domain}`,
       to: to,
       subject: subject,
       react: BankingEmailNotificationTemplate(emailProps),
     });
 
     if (error) {
-      console.error(error);
       return NextResponse.json(error);
     }
 

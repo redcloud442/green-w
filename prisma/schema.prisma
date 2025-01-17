@@ -88,6 +88,7 @@ model alliance_member_table {
   alliance_transaction_table alliance_transaction_table[]
   alliance_notification_table alliance_notification_table[]
   alliance_preferred_withdrawal_table alliance_preferred_withdrawal_table[]
+  alliance_ranking_table alliance_ranking_table[]
   
   package_ally_bounty_log_from package_ally_bounty_log[] @relation("FromMember")
   @@schema("alliance_schema")
@@ -129,6 +130,7 @@ model dashboard_earnings_summary {
   indirect_referral_amount Float  @default(0.0) @map("indirect_referral_amount")
   direct_referral_count  Int      @default(0) @map("direct_referral_count")
   indirect_referral_count Int     @default(0) @map("indirect_referral_count")
+  package_income         Float    @default(0.0) @map("package_income")
 
   @@map("dashboard_earnings_summary")
   @@schema("alliance_schema")
@@ -145,6 +147,15 @@ model alliance_preferred_withdrawal_table {
   @@schema("alliance_schema")
 }
 
+model alliance_ranking_table {
+  alliance_ranking_id String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  alliance_rank String
+  alliance_total_income_tag String
+  alliance_ranking_member_id String @db.Uuid
+
+  alliance_member_table alliance_member_table @relation(fields: [alliance_ranking_member_id], references: [alliance_member_id], onDelete: Cascade, onUpdate: Cascade)
+  @@schema("alliance_schema")
+}
 
 model alliance_earnings_table {
   alliance_earnings_id         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
@@ -199,7 +210,9 @@ model alliance_withdrawal_request_table {
   alliance_withdrawal_request_referral_amount     Float     @default(0.0)
   alliance_withdrawal_request_earnings_amount     Float     @default(0.0)
   alliance_withdrawal_request_bank_name           String?
-
+  alliance_withdrawal_request_email               String?
+  alliance_withdrawal_request_cellphone_number    String?
+  
   alliance_withdrawal_request_date      DateTime  @default(now())
   alliance_withdrawal_request_status    String    @default("APPROVED")
   alliance_withdrawal_request_account   String    @default("APPROVED")

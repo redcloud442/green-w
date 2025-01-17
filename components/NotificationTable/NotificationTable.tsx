@@ -7,7 +7,6 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useUserNotificationStore } from "@/store/userNotificationStore";
 import { alliance_member_table } from "@prisma/client";
-import { BellIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { Card, CardHeader, CardTitle } from "../ui/card";
@@ -171,7 +170,6 @@ const NotificationTable = ({ teamMemberProfile }: DataTableProps) => {
                             ).toLocaleString()}
                           </p>
                         </div>
-                        <BellIcon className="w-4 h-4" />
                       </li>
                     ))}
                   </ul>
@@ -209,7 +207,6 @@ const NotificationTable = ({ teamMemberProfile }: DataTableProps) => {
                             notification.alliance_notification_date_created
                           ).toLocaleString()}
                         </p>
-                        <BellIcon className="w-4 h-4" />
                       </li>
                     ))}
                   </ul>

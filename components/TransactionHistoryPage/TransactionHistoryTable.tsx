@@ -100,7 +100,7 @@ const TransactionHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
           </CardTitle>
           <Separator className="my-2 bg-zinc-800" />
         </CardHeader>
-        <ScrollArea className="w-full h-[600px] ">
+        <ScrollArea className="w-full min-h-auto max-h-[600px] ">
           {transactionHistory?.map((data, index) => (
             <CardContent
               key={data.transaction_id || `transaction-${index}`}
@@ -109,7 +109,9 @@ const TransactionHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
               {/* History Item */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  {data.transaction_description.includes("Success") ? (
+                  {data.transaction_description.includes("Success") ||
+                  data.transaction_description.includes("Deposit") ||
+                  data.transaction_description.includes("Claimed") ? (
                     <Image
                       src="/assets/plus.png"
                       alt="success"
@@ -140,7 +142,8 @@ const TransactionHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
                 </div>
                 <div
                   className={`flex items-center justify-center text-black font-bold text-lg sm:text-3xl ${
-                    data.transaction_description.includes("Success")
+                    data.transaction_description.includes("Success") ||
+                    data.transaction_description.includes("Claimed")
                       ? "text-green-500"
                       : "text-black"
                   }`}
@@ -157,6 +160,13 @@ const TransactionHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
               <Separator className="bg-zinc-200" />
             </CardContent>
           ))}
+          {transactionHistory?.length === 0 && (
+            <div className="flex items-center justify-center h-full pb-10">
+              <p className="text-gray-500 text-lg">
+                No transaction history found
+              </p>
+            </div>
+          )}
         </ScrollArea>
       </Card>
 

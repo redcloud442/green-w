@@ -3,7 +3,6 @@
 import { getUserEarnings } from "@/app/actions/user/userAction";
 import { getDashboard, getDashboardEarnings } from "@/services/Dasboard/Member";
 import { logError } from "@/services/Error/ErrorLogs";
-import { rankMapping } from "@/utils/constant";
 import { useRole } from "@/utils/context/roleContext";
 import { createClientSide } from "@/utils/supabase/client";
 import { ChartDataMember, DashboardEarnings } from "@/utils/types";
@@ -11,10 +10,16 @@ import {
   alliance_earnings_table,
   alliance_member_table,
   alliance_referral_link_table,
-  alliance_transaction_table,
   package_table,
   user_table,
 } from "@prisma/client";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@radix-ui/react-tooltip";
+import { InfoIcon } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -23,10 +28,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Badge } from "../ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import CardAmount from "../ui/cardAmount";
+import NavigationLoader from "../ui/NavigationLoader";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { Separator } from "../ui/separator";
 import { Skeleton } from "../ui/skeleton";
-import TableLoading from "../ui/tableLoading";
 import DashboardDepositModalDeposit from "./DashboardDepositRequest/DashboardDepositModal/DashboardDepositModalDeposit";
 import DashboardDepositModalPackages from "./DashboardDepositRequest/DashboardDepositModal/DashboardDepositPackagesModal";
 import DashboardGenerateQrCode from "./DashboardDepositRequest/DashboardDepositModal/DashboardGenerateQrCode";
@@ -63,9 +68,6 @@ const DashboardPage = ({
   const [totalEarnings, setTotalEarnings] = useState<DashboardEarnings | null>(
     null
   );
-  const [transactionHistory, setTransactionHistory] = useState<
-    alliance_transaction_table[]
-  >([]);
 
   const { role } = useRole();
 
@@ -119,17 +121,13 @@ const DashboardPage = ({
     getPackagesData();
   }, [role]);
 
-  const rank = (Number(totalEarnings?.directReferralCount || 0) +
-    Number(
-      totalEarnings?.indirectReferralCount || 0
-    )) as keyof typeof rankMapping;
-
   const handleRefresh = async () => {
     try {
       setRefresh(true);
-      const { totalEarnings, userEarningsData } = await getUserEarnings({
-        memberId: teamMemberProfile.alliance_member_id,
-      });
+      const { totalEarnings, userEarningsData, userRanking } =
+        await getUserEarnings({
+          memberId: teamMemberProfile.alliance_member_id,
+        });
 
       if (!totalEarnings || !userEarningsData) return;
 
@@ -140,6 +138,9 @@ const DashboardPage = ({
         withdrawalAmount: totalEarnings.withdrawalAmount ?? 0,
         directReferralCount: totalEarnings.directReferralCount ?? 0,
         indirectReferralCount: totalEarnings.indirectReferralCount ?? 0,
+        package_income: totalEarnings.package_income ?? 0,
+        rank: userRanking?.alliance_rank ?? "",
+        tags: userRanking?.alliance_total_income_tag?.split(",") ?? [],
       });
 
       setEarnings((prev) => {
@@ -170,11 +171,12 @@ const DashboardPage = ({
       setRefresh(false);
     }
   };
+
   return (
     <div className="relative min-h-screen mx-auto space-y-4 py-2 px-2 sm:px-0 mt-0 sm:mt-20 sm:mb-20 overflow-x-hidden">
-      {isLoading && <TableLoading />}
+      {isLoading && <NavigationLoader visible={true} />}
 
-      <div className="flex flex-row sm:fixed w-full sm:w-fit justify-between px-4 py-4 sm:px-2 items-center top-2 bg-transparent sm:bg-cardColor sm:rounded-tr-lg sm:rounded-br-lg z-50 ">
+      <div className="flex flex-row sm:fixed w-full sm:min-w-fit sm:max-w-lg justify-between px-4 py-4 sm:px-2 items-center top-2 bg-transparent sm:bg-cardColor sm:rounded-tr-lg sm:rounded-br-lg z-50 ">
         {/* Profile Section */}
         <div className="flex gap-2 justify-center items-center">
           {/* Avatar */}
@@ -196,20 +198,27 @@ const DashboardPage = ({
                 <p className="text-[12px] sm:text-sm font-semibold">
                   {profile.user_first_name} {profile.user_last_name}
                 </p>
-                <Badge className="h-4 sm:h-5 text-[9px] sm:text-xs bg-green-500 text-white cursor-pointer rounded-sm px-2">
-                  BILLIONAIRE
-                </Badge>
+                {totalEarnings?.tags &&
+                  totalEarnings.tags.length > 0 &&
+                  totalEarnings.tags.map((tag, index) => (
+                    <Badge
+                      key={index}
+                      className="h-4 sm:h-5 text-[9px] sm:text-xs bg-green-500 text-white cursor-pointer rounded-sm px-2"
+                    >
+                      {tag}
+                    </Badge>
+                  ))}
               </div>
             </div>
 
             {isActive && (
               <div className="flex items-center gap-1 text-white sm:text-black">
-                <p className="text-[9px] sm:text-xs italic">Referral: </p>
-                <p className="text-[9px] sm:text-xs bg-indigo-400 truncate text-white rounded-xl px-1">
-                  https://elevateglobal.app/ref/9900924
+                <p className="text-[10px] sm:text-xs italic">Referral: </p>
+                <p className="text-[10px] sm:text-xs bg-indigo-400 truncate text-white rounded-xl px-1">
+                  {referal.alliance_referral_link}
                 </p>
 
-                <Badge className="h-3 sm:h-5 bg-sky-400 text-[9px] sm:text-xs text-white cursor-pointer rounded-sm px-2">
+                <Badge className="h-4 sm:h-5 bg-sky-400 text-[9px] sm:text-xs text-white cursor-pointer rounded-sm px-2">
                   Copy
                 </Badge>
               </div>
@@ -218,9 +227,9 @@ const DashboardPage = ({
         </div>
 
         {/* Image */}
-        {rank > 3 && (
+        {totalEarnings?.rank && (
           <Image
-            src={`/ranking/${rankMapping[rank]}.png`}
+            src={`/ranking/${totalEarnings?.rank}.png`}
             alt="ranking"
             width={800}
             height={800}
@@ -233,7 +242,7 @@ const DashboardPage = ({
       <div className="w-full space-y-4 md:px-10">
         <div className="flex flex-col gap-4 justify-center items-center ">
           <CardAmount
-            title="Total Earnings"
+            title="Wallet Balance"
             handleClick={handleRefresh}
             refresh={refresh}
             value={
@@ -254,7 +263,21 @@ const DashboardPage = ({
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex justify-between sm:justify-between px-0 sm:px-32">
-                <div className="flex flex-col justify-start  items-start">
+                <div className="relative flex flex-col justify-start items-start">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger className="absolute -right-5 sm:-right-8 top-4 transform -translate-y-1/2">
+                        <InfoIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </TooltipTrigger>
+                      <TooltipContent className="bg-white text-black p-2 rounded-md shadow-lg">
+                        <p>
+                          Ito ang kabuuang kita sa package income, referral
+                          income at network income mula ng magsimula ka dito sa
+                          ELEVATE.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                   <p className="text-xl sm:text-2xl font-thin">Total Income</p>
                   <p className="text-xl sm:text-2xl font-extrabold">
                     {refresh ? (
@@ -262,22 +285,43 @@ const DashboardPage = ({
                         <Skeleton className="h-7 sm:h-8 w-[100px] sm:w-[250px]" />
                       </div>
                     ) : (
-                      "₱ " + (totalEarnings?.totalEarnings ?? 0)
+                      "₱ " +
+                      (totalEarnings?.totalEarnings.toLocaleString("en-US", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      }) ?? 0)
                     )}
                   </p>
                 </div>
 
-                <div className="flex flex-col justify-start  items-start">
+                <div className="relative flex flex-col justify-start  items-start">
                   <p className="text-xl sm:text-2xl font-thin">
                     Total Withdrawal
                   </p>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger className="absolute -right-5 -sm:right-8 top-4 transform -translate-y-1/2">
+                        <InfoIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </TooltipTrigger>
+                      <TooltipContent className="bg-white text-black p-2 rounded-md shadow-lg">
+                        <p>
+                          Ito ang kabuuang kita na na naiwithdraw at nareceive
+                          mo na dito sa ELEVATE.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                   <p className="text-xl sm:text-2xl font-extrabold">
                     {refresh ? (
                       <div className="flex items-center gap-2">
                         <Skeleton className="h-7 sm:h-8 w-[100px] sm:w-[250px]" />
                       </div>
                     ) : (
-                      "₱ " + (totalEarnings?.withdrawalAmount ?? 0)
+                      "₱ " +
+                      (totalEarnings?.withdrawalAmount.toLocaleString("en-US", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      }) ?? 0)
                     )}
                   </p>
                 </div>
@@ -285,8 +329,21 @@ const DashboardPage = ({
 
               <Separator className="text-white" />
 
-              <div className="flex justify-evenly gap-2">
-                <div className="flex flex-col justify-start  items-start">
+              <div className="flex flex-col  sm:flex-row  justify-evenly gap-2">
+                <div className="relative flex flex-col justify-start  items-start">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger className="absolute -right-4 sm:-right-8  top-2 sm:top-4 transform -translate-y-1/2">
+                        <InfoIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </TooltipTrigger>
+                      <TooltipContent className="bg-white text-black p-2 rounded-md shadow-lg">
+                        <p>
+                          Ito ang kabuuang kita mula sa sa packages na nagmature
+                          at naiwithdraw na dito sa ELEVATE.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                   <p className="text-sm sm:text-lg font-thin">Package Income</p>
                   <p className="text-sm sm:text-lg font-bold">
                     {refresh ? (
@@ -294,12 +351,30 @@ const DashboardPage = ({
                         <Skeleton className="h-5 sm:h-8 w-[100px] sm:w-[250px]" />
                       </div>
                     ) : (
-                      "₱ " + (totalEarnings?.totalEarnings ?? 0)
+                      "₱ " +
+                      (totalEarnings?.package_income.toLocaleString("en-US", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      }) ?? 0)
                     )}
                   </p>
                 </div>
 
-                <div className="flex flex-col justify-start  items-start">
+                <div className="relative flex flex-col justify-start  items-start">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger className="absolute -right-4 sm:-right-8  top-2 sm:top-4 transform -translate-y-1/2">
+                        <InfoIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </TooltipTrigger>
+                      <TooltipContent className="bg-white text-black p-2 rounded-md shadow-lg">
+                        <p>
+                          Ito ang kabuuang kita mula sa 10% na REFERRAL INCOME
+                          kapag ikaw ay nakapagpasok ng bagong mag aavail ng
+                          package dito sa ELEVATE.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                   <p className="text-sm sm:text-lg font-light">
                     Referral Income
                   </p>
@@ -314,7 +389,20 @@ const DashboardPage = ({
                   </p>
                 </div>
 
-                <div className="flex flex-col justify-start  items-start">
+                <div className="relative flex flex-col justify-start  items-start">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger className="absolute -right-4 sm:-right-8  top-2 sm:top-4 transform -translate-y-1/2">
+                        <InfoIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </TooltipTrigger>
+                      <TooltipContent className="bg-white text-black p-2 rounded-md shadow-lg">
+                        <p>
+                          Ito ang kabuuang kita mula sa grupo na mabubuo mo dito
+                          sa elevate mula 2nd level hanggang 10th level.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                   <p className="text-sm sm:text-lg font-light">
                     Network Income
                   </p>

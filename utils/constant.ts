@@ -25,7 +25,7 @@ export const ROLE = {
   ADMIN: "ADMIN",
 };
 
-export const BASE_URL = "https://pr1meph.vercel.app";
+export const BASE_URL = "https://elevate-sigma.vercel.app";
 
 export const MAX_FILE_SIZE_MB = 12;
 export const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;

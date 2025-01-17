@@ -192,7 +192,7 @@ const AvailPackagePage = ({
             {/* amount to avail */}
             <div className="flex items-end gap-2 w-full">
               <div className="w-full">
-                <Label className="font-bold block mb-2">
+                <Label className="font-bold block mb-2 text-green-700">
                   Balance: {formattedMaxAmount}
                 </Label>
                 <Controller
@@ -281,12 +281,12 @@ const AvailPackagePage = ({
               />
             </div>
 
-            <div className="flex flex-col gap-2 w-full justify-center items-center text-center pt-6">
+            <div className="flex flex-col gap-2 w-full  text-center pt-4 px-4">
               <Button
                 disabled={isSubmitting || maxAmount === 0}
                 type="submit"
                 variant="card"
-                className="  text-black w-96 rounded-lg "
+                className="  text-black  rounded-lg "
               >
                 {isSubmitting && <Loader2 className="animate-spin mr-2" />}
                 Submit
@@ -297,7 +297,7 @@ const AvailPackagePage = ({
       </div>
 
       <Button
-        variant="card"
+        variant="secondary"
         className="w-full rounded-md text-black"
         onClick={() => setSelectedPackage(null)}
       >

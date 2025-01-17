@@ -112,8 +112,16 @@ export async function POST(request: Request) {
       request.headers.get("cf-connecting-ip") ||
       "unknown";
 
-    const { earnings, accountNumber, accountName, amount, bank, teamMemberId } =
-      await request.json();
+    const {
+      earnings,
+      accountNumber,
+      accountName,
+      amount,
+      bank,
+      teamMemberId,
+      email,
+      cellphoneNumber,
+    } = await request.json();
 
     const withdrawalData = withdrawalFormSchema.safeParse({
       earnings,
@@ -218,6 +226,10 @@ export async function POST(request: Request) {
             Number(amount),
             earnings
           ),
+          alliance_withdrawal_request_email: email ? email : null,
+          alliance_withdrawal_request_cellphone_number: cellphoneNumber
+            ? cellphoneNumber
+            : null,
           alliance_withdrawal_request_withdraw_amount: calculateFinalAmount(
             Number(amount),
             earnings

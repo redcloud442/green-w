@@ -3,9 +3,73 @@ DELETE FROM storage.buckets;
 CREATE POLICY buckets_policy ON storage.buckets FOR ALL TO PUBLIC USING (true) WITH CHECK (true);
 
 INSERT INTO storage.buckets (id, name) VALUES ('REQUEST_ATTACHMENTS', 'REQUEST_ATTACHMENTS');
-
+INSERT INTO storage.buckets (id, name) VALUES ('USER_PROFILE', 'USER_PROFILE');
+INSERT INTO storage.buckets (id, name) VALUES ('PACKAGE_IMAGES', 'PACKAGE_IMAGES');
 UPDATE storage.buckets SET public = true;
+
 CREATE EXTENSION IF NOT EXISTS plv8;
+
+
+CREATE OR REPLACE VIEW alliance_schema.dashboard_earnings_summary AS
+WITH 
+        earnings AS (
+        SELECT 
+        package_member_member_id AS member_id,
+        COALESCE(SUM(package_member_amount), 0.00)::numeric AS total_amount,
+        COALESCE(SUM(package_member_amount_earnings), 0.00)::numeric AS total_earnings,
+        COALESCE(SUM(package_member_amount + package_member_amount_earnings), 0.00)::numeric AS total_combined
+    FROM packages_schema.package_earnings_log
+    WHERE package_member_status = 'ENDED'
+    GROUP BY package_member_member_id
+    ),
+    withdrawals AS (
+        SELECT 
+            alliance_withdrawal_request_member_id AS member_id,
+            COALESCE(SUM(alliance_withdrawal_request_amount), 0.00)::numeric AS total_withdrawals
+        FROM alliance_schema.alliance_withdrawal_request_table
+        WHERE alliance_withdrawal_request_status = 'APPROVED'
+        GROUP BY alliance_withdrawal_request_member_id
+    ),
+    direct_referrals AS (
+        SELECT 
+            package_ally_bounty_member_id AS member_id,
+            COALESCE(SUM(package_ally_bounty_earnings), 0.00)::numeric AS direct_referral_amount,
+            COUNT(DISTINCT package_ally_bounty_from) AS direct_referral_count
+        FROM packages_schema.package_ally_bounty_log
+        WHERE package_ally_bounty_type = 'DIRECT'
+        GROUP BY package_ally_bounty_member_id
+    ),
+    indirect_referrals AS (
+        SELECT 
+            package_ally_bounty_member_id AS member_id,
+            COALESCE(SUM(package_ally_bounty_earnings), 0.00)::numeric AS indirect_referral_amount,
+            COUNT(DISTINCT package_ally_bounty_from) AS indirect_referral_count
+        FROM packages_schema.package_ally_bounty_log
+        WHERE package_ally_bounty_type = 'INDIRECT'
+        GROUP BY package_ally_bounty_member_id
+    )
+        indirect_referrals AS (
+        SELECT 
+            package_ally_bounty_member_id AS member_id,
+            COALESCE(SUM(package_ally_bounty_earnings), 0.00)::numeric AS indirect_referral_amount,
+            COUNT(DISTINCT package_ally_bounty_from) AS indirect_referral_count
+        FROM packages_schema.package_ally_bounty_log
+        WHERE package_ally_bounty_type = 'INDIRECT'
+        GROUP BY package_ally_bounty_member_id
+    )
+SELECT 
+    m.alliance_member_id AS member_id,
+    COALESCE(e.total_combined, 0.00) AS total_earnings,
+    COALESCE(w.total_withdrawals, 0.00) AS total_withdrawals,
+    COALESCE(d.direct_referral_amount, 0.00) AS direct_referral_amount,
+    COALESCE(d.direct_referral_count, 0) AS direct_referral_count,
+    COALESCE(i.indirect_referral_amount, 0.00) AS indirect_referral_amount,
+    COALESCE(i.indirect_referral_count, 0) AS indirect_referral_count
+FROM alliance_schema.alliance_member_table m
+LEFT JOIN earnings e ON m.alliance_member_id = e.member_id
+LEFT JOIN withdrawals w ON m.alliance_member_id = w.member_id
+LEFT JOIN direct_referrals d ON m.alliance_member_id = d.member_id
+LEFT JOIN indirect_referrals i ON m.alliance_member_id = i.member_id;
 
 
 CREATE OR REPLACE FUNCTION get_current_date()
@@ -1298,101 +1362,121 @@ return returnData;
 $$ LANGUAGE plv8;
 
 
-CREATE OR REPLACE FUNCTION get_dashboard_data(
+CREATE OR REPLACE FUNCTION get_dashboard_earnings(
     input_data JSON
 )
 RETURNS JSON
 SET search_path TO ''
 AS $$
-let returnData = [];
-let totalCompletedAmount = 0;
+let returnData = {};
 plv8.subtransaction(function() {
   const { teamMemberId } = input_data;
 
-  if (!teamMemberId) {
-    returnData = { success: false, message: 'teamMemberId is required' };
-    return;
-  }
+  const member = plv8.execute(`
+    SELECT alliance_member_role
+    FROM alliance_schema.alliance_member_table
+    WHERE alliance_member_id = $1
+  `, [teamMemberId]);
 
-  const currentTimestamp = new Date(
-    plv8.execute(`SELECT public.get_current_date()`)[0].get_current_date
-  );
-
-  const member = plv8.execute(
-    `SELECT alliance_member_role 
-     FROM alliance_schema.alliance_member_table 
-     WHERE alliance_member_id = $1`,
-    [teamMemberId]
-  );
-
-  if (!member.length || (!["MEMBER", "MERCHANT", "ACCOUNTING"].includes(member[0].alliance_member_role))) {
+  if (!member.length || !["MEMBER", "MERCHANT", "ACCOUNTING"].includes(member[0].alliance_member_role)) {
     returnData = { success: false, message: 'Unauthorized access' };
     return;
   }
-  
-  const chartData = plv8.execute(
-    `SELECT
-      p.package_name AS package,
-      p.packages_days::INTEGER AS packages_days,
-      pmc.package_member_status,
-      pmc.package_member_connection_created::TEXT AS package_member_connection_created,
-      (pmc.package_member_connection_created + (p.packages_days || ' days')::INTERVAL)::TEXT AS completion_date,
-      (pmc.package_member_amount + pmc.package_amount_earnings) AS amount,
-      pmc.package_member_connection_id,
-      pmc.package_member_package_id,
-      pmc.package_member_member_id,
-      pmc.package_member_amount,
-      pmc.package_amount_earnings
-    FROM packages_schema.package_member_connection_table pmc
-    JOIN packages_schema.package_table p
-      ON pmc.package_member_package_id = p.package_id
-    WHERE pmc.package_member_status = $1 AND pmc.package_member_member_id = $2
-    ORDER BY pmc.package_member_connection_created DESC`,
-    ['ACTIVE', teamMemberId]
-  );
-  
-  returnData = chartData.reduce((acc, row) => {
-    const startDate = new Date(row.package_member_connection_created);
-    const completionDate = new Date(row.completion_date);
 
-    const elapsedTimeMs = Math.max(currentTimestamp - startDate, 0);
-    const totalTimeMs = Math.max(completionDate - startDate, 0);
+  // Query earnings data
+  const earningsData = plv8.execute(`
+    SELECT 
+        total_earnings,
+        total_withdrawals,
+        direct_referral_amount,
+        indirect_referral_amount,
+        direct_referral_count,
+        indirect_referral_count
+    FROM alliance_schema.dashboard_earnings_summary
+    WHERE member_id = $1
+  `, [teamMemberId]);
 
-    let percentage = totalTimeMs > 0
-      ? parseFloat(((elapsedTimeMs / totalTimeMs) * 100).toFixed(2))
-      : 100.0;
+  if (!earningsData.length) {
+    returnData = {
+      success: true,
+      totalEarnings: 0,
+      withdrawalAmount: 0,
+      directReferralAmount: 0,
+      indirectReferralAmount: 0,
+      tags: [],
+    };
+    return;
+  }
 
-    // Cap percentage at 100%
-    percentage = Math.min(percentage, 100);
+  const data = earningsData[0];
+  const totalEarnings = Number(data.total_earnings) || 0;
+  const directReferralCount = Number(data.direct_referral_count) || 0;
+  const indirectReferralCount = Number(data.indirect_referral_count) || 0;
+  const totalReferrals = directReferralCount + indirectReferralCount;
 
-    // Check if the package is ready to claim
-    const isReadyToClaim = percentage === 100;
+  // Rank mapping
+  const rankMapping = [
+    { threshold: 500, rank: "diamond" },
+    { threshold: 200, rank: "sapphire" },
+    { threshold: 150, rank: "ruby" },
+    { threshold: 100, rank: "diamond" },
+    { threshold: 50, rank: "emeralds" },
+    { threshold: 20, rank: "platinum" },
+    { threshold: 10, rank: "gold" },
+    { threshold: 6, rank: "silver" },
+    { threshold: 3, rank: "bronze" },
+  ];
 
-    if (isReadyToClaim) {
-      return acc; 
-    }
+  const incomeTags = [
+    { threshold: 2000000, tag: "Multi Millionaire" },
+    { threshold: 1000000, tag: "Millionaire" },
+    { threshold: 500000, tag: "500k earner" },
+    { threshold: 100000, tag: "100k earner" },
+    { threshold: 50000, tag: "50k earner" },
+  ];
 
-    acc.push({
-      package: row.package,
-      packageId:row.package_id,
-      package_connection_id:row.package_member_connection_id,
-      completion_date: completionDate.toISOString(),
-      amount: parseFloat(row.amount),
-      completion: percentage,
-      is_ready_to_claim: isReadyToClaim,
-    });
+  const applicableRank = rankMapping.find(rank => totalReferrals >= rank.threshold)?.rank || null;
+  const applicableIncomeTag = incomeTags.find(tag => totalEarnings >= tag.threshold)?.tag || null;
 
-    return acc;
-  }, []);
+  const currentData = plv8.execute(`
+    SELECT alliance_rank, alliance_total_income_tag
+    FROM alliance_schema.alliance_ranking_table
+    WHERE alliance_ranking_member_id = $1
+  `, [teamMemberId]);
 
+  const currentRank = currentData.length ? currentData[0].alliance_rank : null;
+  const currentIncomeTag = currentData.length ? currentData[0].alliance_total_income_tag : null;
+
+  // Update only if rank or income tag has changed
+  if (currentRank !== applicableRank || currentIncomeTag !== applicableIncomeTag) {
+    plv8.execute(`
+      INSERT INTO alliance_schema.alliance_ranking_table (alliance_ranking_member_id, alliance_rank, alliance_total_income_tag)
+      VALUES ($1, $2, $3)
+      ON CONFLICT (alliance_ranking_member_id)
+      DO UPDATE SET alliance_rank = $2, alliance_total_income_tag = $3;
+    `, [teamMemberId, applicableRank, applicableIncomeTag]);
+  }
+
+  // Create the tags array
+  const tags = [];
+  if (applicableIncomeTag) tags.push(applicableIncomeTag);
+
+  // Prepare the return data
   returnData = {
     success: true,
-    data: returnData,
-    totalCompletedAmount: totalCompletedAmount,
+    totalEarnings,
+    withdrawalAmount: data.total_withdrawals || 0,
+    directReferralAmount: data.direct_referral_amount || 0,
+    indirectReferralAmount: data.indirect_referral_amount || 0,
+    directReferralCount,
+    indirectReferralCount,
+    rank: applicableRank,
+    tags,
   };
 });
 return returnData;
 $$ LANGUAGE plv8;
+
 
 
 
@@ -1404,78 +1488,107 @@ SET search_path TO ''
 AS $$
 let returnData = {};
 plv8.subtransaction(function() {
-  const {
-    page = 1,
-    limit = 10,
-    teamMemberId
-  } = input_data;
+  const { teamMemberId } = input_data;
 
-  const member = plv8.execute(
-    `
+
+  const member = plv8.execute(`
     SELECT alliance_member_role
     FROM alliance_schema.alliance_member_table
     WHERE alliance_member_id = $1
-    `,
-    [teamMemberId]
-  );
+  `, [teamMemberId]);
 
-  if (!member.length) {
+  if (!member.length || !["MEMBER", "MERCHANT", "ACCOUNTING"].includes(member[0].alliance_member_role)) {
     returnData = { success: false, message: 'Unauthorized access' };
     return;
   }
 
+  // Query earnings data
+  const earningsData = plv8.execute(`
+    SELECT 
+        total_earnings,
+        total_withdrawals,
+        direct_referral_amount,
+        indirect_referral_amount,
+        direct_referral_count,
+        indirect_referral_count
+    FROM alliance_schema.dashboard_earnings_summary
+    WHERE member_id = $1
+  `, [teamMemberId]);
 
-    const totalEarnings = plv8.execute(
-    `
-    SELECT
-        COALESCE(SUM(package_member_amount), 0) AS total_earnings
-    FROM packages_schema.package_earnings_log
-    WHERE package_member_member_id = $1
-        AND package_member_status = 'ENDED'
-    `,
-    [teamMemberId]
-    );
+  if (!earningsData.length) {
+    returnData = {
+      success: true,
+      totalEarnings: 0,
+      withdrawalAmount: 0,
+      directReferralAmount: 0,
+      indirectReferralAmount: 0,
+    };
+    return;
+  }
 
+  const data = earningsData[0];
+  const totalEarnings = Number(data.total_earnings) || 0;
+  const directReferralCount = Number(data.direct_referral_count) || 0;
+  const indirectReferralCount = Number(data.indirect_referral_count) || 0;
+  const totalReferrals = directReferralCount + indirectReferralCount;
 
-    const totalWithdrawals = plv8.execute(
-    `
-    SELECT
-        COALESCE(SUM(alliance_withdrawal_request_amount), 0) AS total_withdrawal
-    FROM alliance_schema.alliance_withdrawal_request_table
-    WHERE alliance_withdrawal_request_member_id = $1
-        AND alliance_withdrawal_request_status = 'APPROVED'
-    `,
-    [teamMemberId]
-    );
-  
-  const directReferralAmount = plv8.execute(
-    `
-    SELECT COALESCE(SUM(package_ally_bounty_earnings), 0) AS total_bounty
-    FROM packages_schema.package_ally_bounty_log
-    WHERE package_ally_bounty_member_id = $1 AND package_ally_bounty_type = 'DIRECT'
-    `,
-    [teamMemberId]
-  );
+  // Rank mapping
+  const rankMapping = [
+    { threshold: 500, rank: "diamond" },
+    { threshold: 200, rank: "sapphire" },
+    { threshold: 150, rank: "ruby" },
+    { threshold: 100, rank: "diamond" },
+    { threshold: 50, rank: "emeralds" },
+    { threshold: 20, rank: "platinum" },
+    { threshold: 10, rank: "gold" },
+    { threshold: 6, rank: "silver" },
+    { threshold: 3, rank: "bronze" },
+  ];
 
+  const incomeTags = [
+    { threshold: 2000000, tag: "Multi Millionaire" },
+    { threshold: 1000000, tag: "Millionaire" },
+    { threshold: 500000, tag: "500k earner" },
+    { threshold: 100000, tag: "100k earner" },
+    { threshold: 50000, tag: "50k earner" },
+  ];
 
-    const indirectReferralAmount = plv8.execute(
-    `
-    SELECT COALESCE(SUM(package_ally_bounty_earnings), 0) AS total_bounty 
-    FROM packages_schema.package_ally_bounty_log
-    WHERE package_ally_bounty_member_id = $1 AND package_ally_bounty_type = 'INDIRECT'
-    `,
-    [teamMemberId]
-  );
+  const applicableRank = rankMapping.find(rank => totalReferrals >= rank.threshold)?.rank || null;
+  const applicableIncomeTag = incomeTags.find(tag => totalEarnings >= tag.threshold)?.tag || null;
 
+  const currentData = plv8.execute(`
+    SELECT alliance_rank, alliance_total_income_tag
+    FROM alliance_schema.alliance_ranking_table
+    WHERE alliance_ranking_member_id = $1
+  `, [teamMemberId]);
+
+  const currentRank = currentData.length ? currentData[0].rank : null;
+  const currentIncomeTag = currentData.length ? currentData[0].income_tag : null;
+
+  if (currentRank !== applicableRank || currentIncomeTag !== applicableIncomeTag) {
+    plv8.execute(`
+      INSERT INTO alliance_schema.alliance_ranking_table (alliance_ranking_member_id, alliance_rank, alliance_total_income_tag)
+      VALUES ($1, $2, $3)
+      ON CONFLICT (alliance_ranking_member_id)
+      DO UPDATE SET rank = $2, income_tag = $3;
+    `, [teamMemberId, applicableRank, applicableIncomeTag]);
+  }
+  const tags = [incomeTag];
   returnData = {
-    totalEarnings: totalEarnings[0]?.total_earnings || 0,
-    withdrawalAmount: totalWithdrawals[0]?.total_withdrawal || 0,
-    directReferralAmount: directReferralAmount[0]?.total_bounty || 0,
-    indirectReferralAmount: indirectReferralAmount[0]?.total_bounty || 0
+    success: true,
+    totalEarnings,
+    withdrawalAmount: data.total_withdrawals || 0,
+    directReferralAmount: data.direct_referral_amount || 0,
+    indirectReferralAmount: data.indirect_referral_amount || 0,
+    directReferralCount,
+    indirectReferralCount,
+    rank: applicableRank,
+    tags: tags,
   };
 });
 return returnData;
 $$ LANGUAGE plv8;
+
 
 
 CREATE OR REPLACE FUNCTION get_direct_sponsor(

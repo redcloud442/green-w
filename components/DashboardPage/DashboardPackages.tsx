@@ -177,7 +177,7 @@ const DashboardPackages = ({
                 </span>
                 <span className="text-sm font-extrabold text-white">
                   Amount to Claim: ₱{" "}
-                  {data.profit_amount.toLocaleString("en-US", {
+                  {(data.profit_amount + data.amount).toLocaleString("en-US", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
                   })}
@@ -189,7 +189,7 @@ const DashboardPackages = ({
                   Total Generated Income
                 </span>
                 ₱{" "}
-                {data.amount.toLocaleString("en-US", {
+                {data.profit_amount.toLocaleString("en-US", {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                 })}

@@ -28,10 +28,10 @@ const DashboardGenerateQrCode = ({ url }: Props) => {
     >
       <DialogTrigger asChild>
         <Button
-          className="dark:bg-pageColor  dark:text-white h-12 p-4 absolute top-10 left-1/4"
+          className="dark:bg-pageColor z-50  dark:text-white h-8 p-2 fixed bottom-20 left-2"
           onClick={() => setOpen(true)}
         >
-          QR <QrCodeIcon className="w-4 h-4" />
+          <QrCodeIcon className="w-4 h-4" />
         </Button>
       </DialogTrigger>
 
@@ -40,9 +40,7 @@ const DashboardGenerateQrCode = ({ url }: Props) => {
         className="w-auto dark:bg-cardColor border-none shadow-none overflow-auto"
       >
         <ScrollArea className=" sm:h-full space-y-4 text-center">
-          <DialogTitle className=" text-2xl font-bold">
-            Referral QR Code
-          </DialogTitle>
+          <DialogTitle className=" text-2xl font-bold"></DialogTitle>
           {url && (
             <div className="bg-white p-4 rounded shadow-md">
               <QRCode value={url} size={200} />

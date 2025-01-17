@@ -17,7 +17,11 @@ import {
 import { useUserNotificationStore } from "@/store/userNotificationStore";
 import { useUserTransactionHistoryStore } from "@/store/userTransactionHistoryStore";
 import { BANKS, E_WALLETS, FINANCIAL_SERVICES } from "@/utils/constant";
-import { calculateFinalAmount, escapeFormData } from "@/utils/function";
+import {
+  calculateFinalAmount,
+  escapeFormData,
+  formatMonthDateYear,
+} from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -39,7 +43,7 @@ const withdrawalFormSchema = z.object({
   amount: z
     .string()
     .min(3, "Minimum amount is required atleast 200 pesos")
-    .refine((amount) => parseInt(amount, 10) > 200, {
+    .refine((amount) => parseInt(amount, 10) >= 200, {
       message: "Amount must be at least 200 pesos",
     }),
   bank: z.string().min(1, "Please select a bank"),
@@ -138,6 +142,7 @@ const DashboardWithdrawalModalForm = ({
       }
 
       if (cellphoneNumber) {
+        // await sendTextMessage();
       }
 
       await createWithdrawalRequest({
@@ -247,22 +252,38 @@ const DashboardWithdrawalModalForm = ({
   const handleSendEmailRequest = async (email: string) => {
     try {
       await sendWithdrawalEmail({
-        email,
+        to: email,
+        from: "Elevate Team",
+        subject: "Withdrawal Request Ongoing !",
         accountHolderName: profile.user_username ?? "",
+        accountType:
+          preferredEarnings?.alliance_preferred_withdrawal_account_name ?? "",
+        accountBank:
+          preferredEarnings?.alliance_preferred_withdrawal_bank_name ?? "",
         accountNumber:
           preferredEarnings?.alliance_preferred_withdrawal_account_number ?? "",
         transactionDetails: {
-          date: new Date().toISOString(),
+          date: formatMonthDateYear(new Date().toISOString()),
           description: "Withdrawal Request Ongoing !",
-          amount: calculateFinalAmount(
-            Number(amount || 0),
-            selectedEarnings
-          ).toString(),
-          balance: totalEarnings.toString(),
+          amount:
+            "₱" +
+            calculateFinalAmount(
+              Number(amount || 0),
+              selectedEarnings
+            ).toLocaleString("en-US", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            }),
+          balance:
+            "₱" +
+            totalEarnings.toLocaleString("en-US", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            }),
         },
         message: "We noticed a new transaction on your account.",
         greetingPhrase: "Hello!",
-        closingPhrase: "Thank you for continue Elevating with us.",
+        closingPhrase: "Thank you for continuously Elevating with us.",
         signature: "The Elevate Team",
       });
     } catch (e) {
@@ -299,7 +320,6 @@ const DashboardWithdrawalModalForm = ({
             : preferredType === "ewallet"
               ? "Select E-Wallet"
               : "Select Payment Method"}{" "}
-          {/* Fallback for undefined */}
         </Label>
         <Controller
           name="bank"
@@ -329,14 +349,13 @@ const DashboardWithdrawalModalForm = ({
                       {ewallet}
                     </SelectItem>
                   ))}
-                {preferredType === null ||
-                  (preferredType === undefined &&
-                    FINANCIAL_SERVICES.length > 0 &&
-                    FINANCIAL_SERVICES.map((service, index) => (
-                      <SelectItem key={index} value={service}>
-                        {service}
-                      </SelectItem>
-                    )))}
+                {preferredType === null &&
+                  FINANCIAL_SERVICES.length > 0 &&
+                  FINANCIAL_SERVICES.map((service, index) => (
+                    <SelectItem key={index} value={service}>
+                      {service}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           )}
@@ -433,7 +452,7 @@ const DashboardWithdrawalModalForm = ({
         )}
       </div>
 
-      <div className="flex flex-col w-full space-y-2 ">
+      <div className="flex flex-col w-full space-y-2">
         <Label htmlFor="amount">Amount</Label>
         <div className="flex relative items-center justify-between w-full gap-2">
           <Controller
@@ -483,7 +502,7 @@ const DashboardWithdrawalModalForm = ({
           />
           <Button
             type="button"
-            className="h-6 rounded-md px-2 text-sm bg-sky-200 text-black rouneded-md border-2 border-black fixed right-8"
+            className="h-6 rounded-md px-2 text-sm bg-sky-200 text-black rounded-md border-2 border-black absolute right-2"
             onClick={() => {
               if (!selectedEarnings) {
                 toast({

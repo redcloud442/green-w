@@ -42,6 +42,7 @@ export const getLegionBounty = async (params: {
   teamMemberId: string;
   columnAccessor: string;
   isAscendingSort: boolean;
+  userId: string;
 }) => {
   const urlParams = {
     page: params.page.toString(),
@@ -49,6 +50,7 @@ export const getLegionBounty = async (params: {
     search: params.search || "",
     columnAccessor: params.columnAccessor,
     isAscendingSort: params.isAscendingSort.toString(),
+    userId: params.userId,
   };
 
   const response = await fetch(

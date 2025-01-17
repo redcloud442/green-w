@@ -3,6 +3,8 @@ import React from "react";
 export interface BankingEmailNotificationTemplateProps {
   accountHolderName: string;
   accountNumber: string;
+  accountBank: string;
+  accountType: string;
   transactionDetails?: {
     date: string;
     description: string;
@@ -20,6 +22,8 @@ const BankingEmailNotificationTemplate: React.FC<
 > = ({
   accountHolderName,
   accountNumber,
+  accountBank,
+  accountType,
   transactionDetails,
   message,
   greetingPhrase,
@@ -55,7 +59,13 @@ const BankingEmailNotificationTemplate: React.FC<
             Transaction Details
           </h2>
           <p>
-            <strong>Account Username:</strong> {accountNumber}
+            <strong>Account Bank:</strong> {accountBank}
+          </p>
+          <p>
+            <strong>Account Number:</strong> {accountNumber}
+          </p>
+          <p>
+            <strong>Account Holder Name:</strong> {accountType}
           </p>
           <p>
             <strong>Date:</strong> {transactionDetails.date}
@@ -66,9 +76,11 @@ const BankingEmailNotificationTemplate: React.FC<
           <p>
             <strong>Amount:</strong> {transactionDetails.amount}
           </p>
-          <p>
-            <strong>Balance:</strong> {transactionDetails.balance}
-          </p>
+          {transactionDetails.balance && (
+            <p>
+              <strong>Balance:</strong> {transactionDetails.balance}
+            </p>
+          )}
         </div>
       )}
       <p style={{ marginTop: "20px" }}>{closingPhrase}</p>
@@ -82,8 +94,8 @@ const BankingEmailNotificationTemplate: React.FC<
           paddingTop: "10px",
         }}
       >
-        This is an automated message from your banking institution. Please do
-        not reply to this email.
+        This is an automated message from your Elevate Team. Please do not not
+        reply to this email.
       </footer>
     </div>
   );

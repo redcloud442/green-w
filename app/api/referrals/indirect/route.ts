@@ -5,11 +5,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 const getIndirectReferralsSchema = z.object({
-  page: z.number().min(1),
-  limit: z.number().min(1),
-  search: z.string().min(3),
+  page: z.string().min(1),
+  limit: z.string().min(1),
+  search: z.string().optional(),
   columnAccessor: z.string().min(3),
-  isAscendingSort: z.boolean(),
+  isAscendingSort: z.string(),
 });
 
 export const GET = async (request: NextRequest) => {
@@ -30,6 +30,7 @@ export const GET = async (request: NextRequest) => {
     const search = url.searchParams.get("search");
     const columnAccessor = url.searchParams.get("columnAccessor");
     const isAscendingSort = url.searchParams.get("isAscendingSort");
+    const userId = url.searchParams.get("userId");
 
     const validate = getIndirectReferralsSchema.safeParse({
       page,
@@ -37,6 +38,7 @@ export const GET = async (request: NextRequest) => {
       search,
       columnAccessor,
       isAscendingSort,
+      userId,
     });
 
     if (!validate.success) {
@@ -54,7 +56,6 @@ export const GET = async (request: NextRequest) => {
       search: search || "",
       columnAccessor: columnAccessor || "",
       isAscendingSort: isAscendingSort === "true",
-      teamMemberId: teamMemberProfile?.alliance_member_id || "",
       teamId: teamMemberProfile?.alliance_member_alliance_id || "",
     };
 
