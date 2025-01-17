@@ -25,7 +25,10 @@ const statusColorMap: Record<string, string> = {
   REJECTED: "bg-red-600 dark:bg-red-700 dark:text-white ",
 };
 
-export const WithdrawalColumn = (handleFetch: () => void) => {
+export const WithdrawalColumn = (
+  handleFetch: () => void,
+  reset: () => void
+) => {
   const { toast } = useToast();
   const supabaseClient = createClientSide();
   const [isLoading, setIsLoading] = useState(false);
@@ -41,6 +44,7 @@ export const WithdrawalColumn = (handleFetch: () => void) => {
         setIsLoading(true);
         await updateWithdrawalStatus({ status, requestId, note });
         handleFetch();
+        reset();
         toast({
           title: `Status Update`,
           description: `${status} Request Successfully`,

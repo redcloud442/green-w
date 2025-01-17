@@ -249,14 +249,6 @@ const TopUpTable = ({ teamMemberProfile }: DataTableProps) => {
     }
   };
 
-  const {
-    columns,
-    isOpenModal,
-    isLoading,
-    setIsOpenModal,
-    handleUpdateStatus,
-  } = TopUpColumn(handleRefresh, setRequestData);
-
   const { register, handleSubmit, watch, getValues, control, reset, setValue } =
     useForm<FilterFormValues>({
       defaultValues: {
@@ -271,6 +263,13 @@ const TopUpTable = ({ teamMemberProfile }: DataTableProps) => {
       },
     });
 
+  const {
+    columns,
+    isOpenModal,
+    isLoading,
+    setIsOpenModal,
+    handleUpdateStatus,
+  } = TopUpColumn(handleRefresh, setRequestData, reset);
   const status = watch("statusFilter") as "PENDING" | "APPROVED" | "REJECTED";
 
   const table = useReactTable({
@@ -443,11 +442,18 @@ const TopUpTable = ({ teamMemberProfile }: DataTableProps) => {
               type="submit"
               disabled={isFetchingList}
               size="sm"
-              variant="outline"
+              variant="card"
+              className="w-full rounded-md"
             >
               <Search />
             </Button>
-            <Button onClick={handleRefresh} disabled={isFetchingList} size="sm">
+            <Button
+              variant="card"
+              className="w-full rounded-md"
+              onClick={handleRefresh}
+              disabled={isFetchingList}
+              size="sm"
+            >
               <RefreshCw />
               Refresh
             </Button>
@@ -624,7 +630,7 @@ const TopUpTable = ({ teamMemberProfile }: DataTableProps) => {
               typeof page === "number" ? (
                 <Button
                   key={page}
-                  variant={activePage === page ? "default" : "outline"}
+                  variant={activePage === page ? "card" : "outline"}
                   size="sm"
                   onClick={() => setActivePage(page)}
                 >
@@ -640,7 +646,8 @@ const TopUpTable = ({ teamMemberProfile }: DataTableProps) => {
         </div>
         {activePage < pageCount && (
           <Button
-            variant="outline"
+            variant="card"
+            className="w-full rounded-md"
             size="sm"
             onClick={() =>
               setActivePage((prev) => Math.min(prev + 1, pageCount))

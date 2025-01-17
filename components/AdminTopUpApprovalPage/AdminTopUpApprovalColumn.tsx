@@ -28,7 +28,10 @@ const statusColorMap: Record<string, string> = {
   REJECTED: "bg-red-600 dark:bg-red-700 dark:text-white",
 };
 
-export const useAdminTopUpApprovalColumns = (handleFetch: () => void) => {
+export const useAdminTopUpApprovalColumns = (
+  handleFetch: () => void,
+  reset: () => void
+) => {
   const { toast } = useToast();
   const router = useRouter();
   const supabaseClient = createClientSide();
@@ -45,6 +48,7 @@ export const useAdminTopUpApprovalColumns = (handleFetch: () => void) => {
         setIsLoading(true);
         await updateTopUpStatus({ status, requestId, note });
         handleFetch();
+        reset();
         toast({
           title: `Status Update`,
           description: `${status} Request Successfully`,

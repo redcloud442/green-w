@@ -27,7 +27,8 @@ const statusColorMap: Record<string, string> = {
 
 export const TopUpColumn = (
   handleFetch: () => void,
-  setRequestData: Dispatch<SetStateAction<MerchantTopUpRequestData | null>>
+  setRequestData: Dispatch<SetStateAction<MerchantTopUpRequestData | null>>,
+  reset: () => void
 ) => {
   const { toast } = useToast();
   const supabaseClient = createClientSide();
@@ -65,6 +66,7 @@ export const TopUpColumn = (
           variant: "success",
         });
         setIsOpenModal({ open: false, requestId: "", status: "", amount: 0 });
+        reset();
       } catch (e) {
         if (e instanceof Error) {
           await logError(supabaseClient, {

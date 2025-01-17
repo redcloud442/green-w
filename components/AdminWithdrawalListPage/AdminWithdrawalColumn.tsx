@@ -24,7 +24,10 @@ const statusColorMap: Record<string, string> = {
   REJECTED: "bg-red-600 dark:bg-red-700 dark:text-white",
 };
 
-export const AdminWithdrawalHistoryColumn = (handleFetch: () => void) => {
+export const AdminWithdrawalHistoryColumn = (
+  handleFetch: () => void,
+  reset: () => void
+) => {
   const { toast } = useToast();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -46,6 +49,7 @@ export const AdminWithdrawalHistoryColumn = (handleFetch: () => void) => {
         setIsLoading(true);
         await updateWithdrawalStatus({ status, requestId, note });
         handleFetch();
+        reset();
         toast({
           title: `Status Update`,
           description: `${status} Request Successfully`,

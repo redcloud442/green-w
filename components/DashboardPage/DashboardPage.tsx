@@ -1,6 +1,7 @@
 "use client";
 
 import { getUserEarnings } from "@/app/actions/user/userAction";
+import { toast } from "@/hooks/use-toast";
 import { getDashboard, getDashboardEarnings } from "@/services/Dasboard/Member";
 import { logError } from "@/services/Error/ErrorLogs";
 import { useRole } from "@/utils/context/roleContext";
@@ -172,6 +173,15 @@ const DashboardPage = ({
     }
   };
 
+  const handleCopy = (url: string) => {
+    navigator.clipboard.writeText(url);
+    toast({
+      title: "Copied",
+      description: "Referral link copied to clipboard",
+      variant: "success",
+    });
+  };
+
   return (
     <div className="relative min-h-screen mx-auto space-y-4 py-2 px-2 sm:px-0 mt-0 sm:mt-20 sm:mb-20 overflow-x-hidden">
       {isLoading && <TableLoading />}
@@ -184,8 +194,8 @@ const DashboardPage = ({
             <Avatar className="w-8 h-8 sm:w-12 sm:h-12">
               <AvatarImage src={profile.user_profile_picture ?? ""} />
               <AvatarFallback>
-                {profile.user_first_name?.charAt(0)}
-                {profile.user_last_name?.charAt(0)}
+                {profile.user_first_name?.charAt(0).toUpperCase()}
+                {profile.user_last_name?.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
           </div>
@@ -218,7 +228,10 @@ const DashboardPage = ({
                   {referal.alliance_referral_link}
                 </p>
 
-                <Badge className="h-4 sm:h-5 bg-sky-400 text-[9px] sm:text-xs text-white cursor-pointer rounded-sm px-2">
+                <Badge
+                  onClick={() => handleCopy(referal.alliance_referral_link)}
+                  className="h-4 sm:h-5 bg-sky-400 text-[9px] sm:text-xs text-white cursor-pointer rounded-sm px-2"
+                >
                   Copy
                 </Badge>
               </div>

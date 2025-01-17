@@ -218,10 +218,7 @@ const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
               src={avatarUrl || ""}
               alt={`${userProfile.user_first_name} ${userProfile.user_last_name}`}
             />
-            <AvatarFallback
-              onClick={() => inputRef.current?.click()}
-              className="text-white bg-cardColor border-2 border-zinc-400 rounded-full mb-4 cursor-pointer"
-            >
+            <AvatarFallback className="text-white bg-cardColor border-2 border-zinc-400 rounded-full mb-4 cursor-pointer">
               {userProfile.user_first_name?.slice(0, 1).toUpperCase()}
               {userProfile.user_last_name?.slice(0, 1).toUpperCase()}
             </AvatarFallback>

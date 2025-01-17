@@ -92,7 +92,7 @@ const RegisterPage = ({ referralLink }: Props) => {
 
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const url = `${BASE_URL}`;
+  const url = `${BASE_URL}/register`;
 
   const { field: userNameField } = useController({
     name: "userName",

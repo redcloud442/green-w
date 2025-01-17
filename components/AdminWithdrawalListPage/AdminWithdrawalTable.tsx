@@ -246,14 +246,6 @@ const AdminWithdrawalHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
     }
   };
 
-  const {
-    columns,
-    isOpenModal,
-    isLoading,
-    setIsOpenModal,
-    handleUpdateStatus,
-  } = AdminWithdrawalHistoryColumn(fetchRequest);
-
   const { register, handleSubmit, watch, getValues, control, reset, setValue } =
     useForm<FilterFormValues>({
       defaultValues: {
@@ -267,6 +259,14 @@ const AdminWithdrawalHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
         rejectNote: "",
       },
     });
+
+  const {
+    columns,
+    isOpenModal,
+    isLoading,
+    setIsOpenModal,
+    handleUpdateStatus,
+  } = AdminWithdrawalHistoryColumn(fetchRequest, reset);
 
   const status = watch("statusFilter") as "PENDING" | "APPROVED" | "REJECTED";
 
