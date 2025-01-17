@@ -148,11 +148,18 @@ const WithdrawalHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
               type="submit"
               disabled={isFetchingList}
               size="sm"
-              variant="outline"
+              variant="card"
+              className="w-full md:w-auto rounded-md"
             >
               <Search />
             </Button>
-            <Button onClick={fetchRequest} disabled={isFetchingList} size="sm">
+            <Button
+              variant="card"
+              className="w-full md:w-auto rounded-md"
+              onClick={fetchRequest}
+              disabled={isFetchingList}
+              size="sm"
+            >
               <RefreshCw />
               Refresh
             </Button>
@@ -271,7 +278,7 @@ const WithdrawalHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
                 typeof page === "number" ? (
                   <Button
                     key={page}
-                    variant={activePage === page ? "default" : "outline"}
+                    variant={activePage === page ? "card" : "outline"}
                     size="sm"
                     onClick={() => setActivePage(page)}
                   >
@@ -287,7 +294,8 @@ const WithdrawalHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
           </div>
           {activePage < pageCount && (
             <Button
-              variant="outline"
+              variant="card"
+              className="w-full md:w-auto rounded-md"
               size="sm"
               onClick={() =>
                 setActivePage((prev) => Math.min(prev + 1, pageCount))

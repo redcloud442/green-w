@@ -16,7 +16,7 @@ const UserAdminProfile = ({ userProfile: initialData }: Props) => {
   const [userProfileData, setUserProfileData] =
     useState<UserRequestdata>(initialData);
   return (
-    <div className="mx-auto ">
+    <div className="mx-auto p-6 ">
       <div className="w-full flex flex-col gap-6">
         {/* Page Title */}
         <header>

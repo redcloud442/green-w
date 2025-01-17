@@ -223,7 +223,8 @@ const AdminDashboardPage = ({ teamMemberProfile, referral }: Props) => {
             )}
           />
           <Button
-            className="w-full md:w-auto"
+            variant="card"
+            className="w-full md:w-auto rounded-md"
             disabled={!startDate || !endDate}
             type="submit"
           >
@@ -262,11 +263,25 @@ const AdminDashboardPage = ({ teamMemberProfile, referral }: Props) => {
                 readOnly
                 className="flex-0 md:flex-2 lg:flex-1"
               />
-              <Button onClick={handleCopyLink}>Copy Link</Button>
-              <Button onClick={() => router.push("/direct-referral")}>
+              <Button
+                variant="card"
+                className="w-full md:w-auto rounded-md"
+                onClick={handleCopyLink}
+              >
+                Copy Link
+              </Button>
+              <Button
+                variant="card"
+                className="w-full md:w-auto rounded-md"
+                onClick={() => router.push("/direct-referral")}
+              >
                 Direct Referral
               </Button>
-              <Button onClick={() => router.push("/indirect-referral")}>
+              <Button
+                variant="card"
+                className="w-full md:w-auto rounded-md"
+                onClick={() => router.push("/indirect-referral")}
+              >
                 Indirect Referral
               </Button>
             </div>

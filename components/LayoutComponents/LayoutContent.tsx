@@ -37,7 +37,13 @@ export default function LayoutContent({
             <SidebarTrigger />
           </div>
         )}
-        <div className="relative z-50 flex-grow pb-20 sm:pb-0">{children}</div>
+        <div
+          className={`relative z-50 flex-grow pb-20 ${
+            role === ROLE.ADMIN ? "p-4" : "p-0"
+          } sm:pb-0`}
+        >
+          {children}
+        </div>
 
         {role !== ROLE.ADMIN && <MobileNavBar />}
       </div>

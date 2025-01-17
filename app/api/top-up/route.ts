@@ -6,12 +6,12 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 const getTopUpHistorySchema = z.object({
-  page: z.number().min(1),
-  limit: z.number().min(1),
-  search: z.string().min(3),
-  columnAccessor: z.string().min(3),
-  isAscendingSort: z.boolean(),
-  teamMemberId: z.string().uuid(),
+  page: z.string().min(1),
+  limit: z.string().min(1),
+  search: z.string().optional(),
+  columnAccessor: z.string(),
+  isAscendingSort: z.string().optional(),
+  userId: z.string().uuid(),
 });
 
 export async function GET(request: Request) {
@@ -34,7 +34,7 @@ export async function GET(request: Request) {
     const sortBy = url.searchParams.get("sortBy") || true;
     const columnAccessor = url.searchParams.get("columnAccessor") || "";
     const isAscendingSort = url.searchParams.get("isAscendingSort") || true;
-    const teamMemberId = url.searchParams.get("teamMemberId") || "";
+    const userId = url.searchParams.get("userId") || "";
 
     const validate = getTopUpHistorySchema.safeParse({
       page,
@@ -42,7 +42,7 @@ export async function GET(request: Request) {
       search,
       columnAccessor,
       isAscendingSort,
-      teamMemberId,
+      userId,
     });
 
     if (!validate.success) {
@@ -60,9 +60,7 @@ export async function GET(request: Request) {
       columnAccessor,
       isAscendingSort: isAscendingSort,
       teamId: teamMemberProfile?.alliance_member_alliance_id || "",
-      teamMemberId: teamMemberId
-        ? teamMemberId
-        : teamMemberProfile?.alliance_member_id,
+      userId: userId ? userId : teamMemberProfile?.alliance_member_id,
     };
 
     const escapedParams = escapeFormData(params);
@@ -82,6 +80,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ success: true, data: data });
   } catch (error) {
+    console.log(error);
     return NextResponse.json(
       { error: "internal server error" },
       { status: 500 }

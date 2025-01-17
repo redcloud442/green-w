@@ -476,11 +476,18 @@ const AdminTopUpApprovalTable = ({ teamMemberProfile }: DataTableProps) => {
               type="submit"
               disabled={isFetchingList}
               size="sm"
-              variant="outline"
+              variant="card"
+              className="w-full md:w-auto rounded-md"
             >
               <Search />
             </Button>
-            <Button onClick={handleRefresh} disabled={isFetchingList} size="sm">
+            <Button
+              variant="card"
+              className="w-full md:w-auto rounded-md"
+              onClick={handleRefresh}
+              disabled={isFetchingList}
+              size="sm"
+            >
               <RefreshCw />
               Refresh
             </Button>
@@ -576,7 +583,12 @@ const AdminTopUpApprovalTable = ({ teamMemberProfile }: DataTableProps) => {
                 )}
               />
 
-              <Button type="submit" onClick={fetchRequest}>
+              <Button
+                variant="card"
+                className="w-full md:w-auto rounded-md"
+                type="submit"
+                onClick={fetchRequest}
+              >
                 Submit
               </Button>
             </div>
@@ -675,7 +687,7 @@ const AdminTopUpApprovalTable = ({ teamMemberProfile }: DataTableProps) => {
               typeof page === "number" ? (
                 <Button
                   key={page}
-                  variant={activePage === page ? "default" : "outline"}
+                  variant={activePage === page ? "card" : "outline"}
                   size="sm"
                   onClick={() => setActivePage(page)}
                 >
@@ -691,7 +703,8 @@ const AdminTopUpApprovalTable = ({ teamMemberProfile }: DataTableProps) => {
         </div>
         {activePage < pageCount && (
           <Button
-            variant="outline"
+            variant="card"
+            className="w-full md:w-auto rounded-md"
             size="sm"
             onClick={() =>
               setActivePage((prev) => Math.min(prev + 1, pageCount))
