@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
 
     const domain =
       process.env.NODE_ENV === "production"
-        ? "<help@elevevateglobal.app>"
+        ? "<help@portfolio-glorioso.site>"
         : "<help@portfolio-glorioso.site>";
 
     const { data, error } = await resend.emails.send({
