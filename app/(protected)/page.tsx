@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Dashboard",
-  description: "Pr1me Dashboard",
+  description: "Elevate Dashboard",
   openGraph: {
     url: "/",
   },
