@@ -83,7 +83,7 @@ export const loginValidation = async (
   if (role === "ADMIN") {
     const decryptedPassword = await decryptData(password, iv ?? "");
 
-    await handleSignInUser(supabaseClient, {
+    await handleSignInUser({
       formattedUserName,
       password: decryptedPassword,
     });

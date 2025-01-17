@@ -48,7 +48,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { Separator } from "../ui/separator";
 import { Switch } from "../ui/switch";
 import TableLoading from "../ui/tableLoading";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
@@ -432,11 +431,18 @@ const AdminWithdrawalHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
               type="submit"
               disabled={isFetchingList}
               size="sm"
-              variant="outline"
+              variant="card"
+              className="w-full md:w-auto rounded-md"
             >
               <Search />
             </Button>
-            <Button onClick={handleRefresh} disabled={isFetchingList} size="sm">
+            <Button
+              variant="card"
+              className="w-full md:w-auto rounded-md"
+              onClick={handleRefresh}
+              disabled={isFetchingList}
+              size="sm"
+            >
               <RefreshCw />
               Refresh
             </Button>
@@ -532,14 +538,21 @@ const AdminWithdrawalHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
 
               {/* End Date Picker */}
 
-              <Button onClick={fetchRequest}>Submit</Button>
+              <Button
+                variant="card"
+                className="w-full md:w-auto rounded-md"
+                onClick={fetchRequest}
+              >
+                Submit
+              </Button>
             </div>
           )}
         </form>
       </div>
+
       <ScrollArea className="w-full overflow-x-auto ">
         {isFetchingList && <TableLoading />}
-        <Separator />
+
         <Tabs defaultValue="PENDING" onValueChange={handleTabChange}>
           <TabsList className="mb-4">
             <TabsTrigger value="PENDING">
@@ -580,6 +593,7 @@ const AdminWithdrawalHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
             />
           </TabsContent>
         </Tabs>
+
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
 
@@ -632,7 +646,7 @@ const AdminWithdrawalHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
               typeof page === "number" ? (
                 <Button
                   key={page}
-                  variant={activePage === page ? "default" : "outline"}
+                  variant={activePage === page ? "card" : "outline"}
                   size="sm"
                   onClick={() => setActivePage(page)}
                 >
@@ -648,7 +662,8 @@ const AdminWithdrawalHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
         </div>
         {activePage < pageCount && (
           <Button
-            variant="outline"
+            variant="card"
+            className="w-full md:w-auto rounded-md"
             size="sm"
             onClick={() =>
               setActivePage((prev) => Math.min(prev + 1, pageCount))

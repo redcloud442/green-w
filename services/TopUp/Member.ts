@@ -16,7 +16,6 @@ export const getMemberTopUpRequest = async (params: {
     limit: params.limit.toString(),
     columnAccessor: params.columnAccessor,
     isAscendingSort: params.isAscendingSort.toString(),
-    teamMemberId: params.teamMemberId || "",
     userId: params.userId || "",
   };
 

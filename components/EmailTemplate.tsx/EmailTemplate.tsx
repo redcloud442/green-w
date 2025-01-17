@@ -1,3 +1,4 @@
+import Image from "next/image";
 import React from "react";
 
 export interface BankingEmailNotificationTemplateProps {
@@ -41,11 +42,39 @@ const BankingEmailNotificationTemplate: React.FC<
         padding: "20px",
         border: "1px solid #ddd",
         borderRadius: "8px",
+        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
       }}
     >
+      {/* Logo Section */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          marginBottom: "20px",
+          padding: "10px",
+          borderRadius: "8px",
+          backgroundColor: "#f3f4f6",
+          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+        }}
+      >
+        <Image
+          src="/logo.png"
+          alt="Elevate Logo"
+          width={100}
+          height={100}
+          style={{
+            borderRadius: "50%",
+            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
+          }}
+        />
+      </div>
+
       <h1 style={{ fontSize: "20px", color: "#0056b3" }}>{greetingPhrase}</h1>
       <p>Dear {accountHolderName},</p>
       <p>{message}</p>
+
+      {/* Transaction Details */}
       {transactionDetails && (
         <div
           style={{
@@ -83,8 +112,12 @@ const BankingEmailNotificationTemplate: React.FC<
           )}
         </div>
       )}
+
+      {/* Closing */}
       <p style={{ marginTop: "20px" }}>{closingPhrase}</p>
       <p style={{ marginTop: "10px", fontWeight: "bold" }}>{signature}</p>
+
+      {/* Footer */}
       <footer
         style={{
           marginTop: "30px",
@@ -94,8 +127,8 @@ const BankingEmailNotificationTemplate: React.FC<
           paddingTop: "10px",
         }}
       >
-        This is an automated message from your Elevate Team. Please do not not
-        reply to this email.
+        This is an automated message from Elevate Team. Please do not reply to
+        this email.
       </footer>
     </div>
   );

@@ -148,8 +148,8 @@ const AdminUserMonitoringTable = ({ teamMemberProfile }: DataTableProps) => {
               type="submit"
               disabled={isFetchingList}
               size="sm"
-              variant="outline"
-              className="w-full sm:w-auto"
+              variant="card"
+              className="w-full md:w-auto rounded-md"
             >
               <Search />
             </Button>
@@ -157,7 +157,8 @@ const AdminUserMonitoringTable = ({ teamMemberProfile }: DataTableProps) => {
               onClick={fetchAdminRequest}
               disabled={isFetchingList}
               size="sm"
-              className="w-full sm:w-auto"
+              variant="card"
+              className="w-full md:w-auto rounded-md"
             >
               <RefreshCw className="mr-2" />
               Refresh
@@ -281,7 +282,7 @@ const AdminUserMonitoringTable = ({ teamMemberProfile }: DataTableProps) => {
               typeof page === "number" ? (
                 <Button
                   key={page}
-                  variant={activePage === page ? "default" : "outline"}
+                  variant={activePage === page ? "card" : "outline"}
                   size="sm"
                   onClick={() => setActivePage(page)}
                 >
@@ -297,7 +298,8 @@ const AdminUserMonitoringTable = ({ teamMemberProfile }: DataTableProps) => {
         </div>
         {activePage < pageCount && (
           <Button
-            variant="outline"
+            variant="card"
+            className="w-full md:w-auto rounded-md"
             size="sm"
             onClick={() =>
               setActivePage((prev) => Math.min(prev + 1, pageCount))

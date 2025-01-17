@@ -297,8 +297,8 @@ const AdminUsersTable = ({ teamMemberProfile }: DataTableProps) => {
               type="submit"
               disabled={isFetchingList}
               size="sm"
-              variant="outline"
-              className="w-full sm:w-auto"
+              variant="card"
+              className="w-full md:w-auto rounded-md"
             >
               <Search />
             </Button>
@@ -306,7 +306,8 @@ const AdminUsersTable = ({ teamMemberProfile }: DataTableProps) => {
               onClick={fetchAdminRequest}
               disabled={isFetchingList}
               size="sm"
-              className="w-full sm:w-auto"
+              variant="card"
+              className="w-full md:w-auto rounded-md"
             >
               <RefreshCw className="mr-2" />
               Refresh
@@ -390,7 +391,11 @@ const AdminUsersTable = ({ teamMemberProfile }: DataTableProps) => {
                   </>
                 )}
               />
-              <Button onClick={fetchAdminRequest} className="w-full sm:w-auto">
+              <Button
+                variant="card"
+                className="w-full md:w-auto rounded-md"
+                onClick={fetchAdminRequest}
+              >
                 Submit
               </Button>
             </div>
@@ -467,7 +472,6 @@ const AdminUsersTable = ({ teamMemberProfile }: DataTableProps) => {
       <div className="flex items-center justify-end gap-x-4 py-4">
         {activePage > 1 && (
           <Button
-            variant="outline"
             size="sm"
             onClick={() => setActivePage((prev) => Math.max(prev - 1, 1))}
             disabled={activePage <= 1}
@@ -513,7 +517,7 @@ const AdminUsersTable = ({ teamMemberProfile }: DataTableProps) => {
               typeof page === "number" ? (
                 <Button
                   key={page}
-                  variant={activePage === page ? "default" : "outline"}
+                  variant={activePage === page ? "card" : "outline"}
                   size="sm"
                   onClick={() => setActivePage(page)}
                 >
@@ -529,7 +533,8 @@ const AdminUsersTable = ({ teamMemberProfile }: DataTableProps) => {
         </div>
         {activePage < pageCount && (
           <Button
-            variant="outline"
+            variant="card"
+            className="w-full md:w-auto rounded-md"
             size="sm"
             onClick={() =>
               setActivePage((prev) => Math.min(prev + 1, pageCount))

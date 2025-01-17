@@ -309,8 +309,8 @@ const CreatePackageModal = ({ fetchPackages }: Props) => {
           <div className="flex justify-center items-center">
             <Button
               type="submit"
-              className="w-full"
               variant="card"
+              className="w-full md:w-auto rounded-md"
               disabled={isSubmitting}
             >
               {isSubmitting && <Loader2 className="animate-spin mr-2" />} Submit
