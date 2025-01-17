@@ -25,7 +25,7 @@ import {
   VisibilityState,
 } from "@tanstack/react-table";
 import { ChevronLeft, ChevronRight, RefreshCw, Search } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "../ui/button";
@@ -54,11 +54,10 @@ const TopUpHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
   const [requestCount, setRequestCount] = useState(0);
   const [activePage, setActivePage] = useState(1);
   const [isFetchingList, setIsFetchingList] = useState(false);
-  const searchParams = useSearchParams();
   const columnAccessor = sorting?.[0]?.id || "alliance_top_up_request_date";
   const isAscendingSort =
     sorting?.[0]?.desc === undefined ? true : !sorting[0].desc;
-
+  const searchParams = useParams();
   const fetchRequest = async () => {
     try {
       if (!teamMemberProfile) return;
@@ -74,7 +73,7 @@ const TopUpHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
         columnAccessor: columnAccessor,
         isAscendingSort: isAscendingSort,
         search: referenceId,
-        userId: searchParams.get("userId") || "",
+        userId: searchParams?.userId?.toString() || "",
         teamMemberId: teamMemberProfile.alliance_member_id,
       });
 
@@ -146,11 +145,18 @@ const TopUpHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
               type="submit"
               disabled={isFetchingList}
               size="sm"
-              variant="outline"
+              variant="card"
+              className="w-full md:w-auto rounded-md"
             >
               <Search />
             </Button>
-            <Button onClick={fetchRequest} disabled={isFetchingList} size="sm">
+            <Button
+              variant="card"
+              className="w-full md:w-auto rounded-md"
+              onClick={fetchRequest}
+              disabled={isFetchingList}
+              size="sm"
+            >
               <RefreshCw />
               Refresh
             </Button>
@@ -269,7 +275,7 @@ const TopUpHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
                 typeof page === "number" ? (
                   <Button
                     key={page}
-                    variant={activePage === page ? "default" : "outline"}
+                    variant={activePage === page ? "card" : "outline"}
                     size="sm"
                     onClick={() => setActivePage(page)}
                   >
@@ -285,7 +291,8 @@ const TopUpHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
           </div>
           {activePage < pageCount && (
             <Button
-              variant="outline"
+              variant="card"
+              className="w-full md:w-auto rounded-md"
               size="sm"
               onClick={() =>
                 setActivePage((prev) => Math.min(prev + 1, pageCount))

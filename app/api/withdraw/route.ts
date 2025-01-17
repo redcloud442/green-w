@@ -12,12 +12,12 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 const getWithdrawalHistorySchema = z.object({
-  page: z.number().min(1),
-  limit: z.number().min(1),
-  search: z.string().min(3),
+  page: z.string().min(1),
+  limit: z.string().min(1),
+  search: z.string().optional(),
   columnAccessor: z.string().min(3),
-  isAscendingSort: z.boolean(),
-  teamMemberId: z.string().uuid(),
+  isAscendingSort: z.string().optional(),
+  userId: z.string().uuid(),
 });
 
 export async function GET(request: Request) {
@@ -80,6 +80,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ success: true, data: withdrawals, totalCount });
   } catch (error) {
+    console.log(error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

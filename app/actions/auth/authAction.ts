@@ -10,7 +10,6 @@ import {
   createClientServerSide,
   createServiceRoleClientServerSide,
 } from "@/utils/supabase/server";
-import { SupabaseClient } from "@supabase/supabase-js";
 import crypto from "crypto";
 import { z } from "zod";
 
@@ -203,14 +202,12 @@ const signInUserSchema = z.object({
   password: z.string().min(6),
 });
 
-export const handleSignInUser = async (
-  supabaseClient: SupabaseClient,
-  params: {
-    formattedUserName: string;
-    password: string;
-  }
-) => {
+export const handleSignInUser = async (params: {
+  formattedUserName: string;
+  password: string;
+}) => {
   try {
+    const supabaseClient = await createClientServerSide();
     const validate = signInUserSchema.safeParse(params);
 
     if (!validate.success) {
