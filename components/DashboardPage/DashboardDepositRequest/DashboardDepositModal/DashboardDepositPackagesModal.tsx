@@ -61,7 +61,6 @@ const DashboardDepositModalPackages = ({
 
         setPackages(data);
         if (!teamMemberProfile.alliance_member_is_active) {
-          setIsActive(true);
         }
       } catch (e) {
         if (e instanceof Error) {
