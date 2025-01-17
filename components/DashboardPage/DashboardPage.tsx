@@ -224,7 +224,7 @@ const DashboardPage = ({
             {isActive && (
               <div className="flex items-center gap-1 text-white sm:text-black">
                 <p className="text-[10px] sm:text-xs italic">Referral: </p>
-                <p className="text-[10px] sm:text-xs truncate bg-indigo-400 text-white rounded-xl px-1">
+                <p className="text-[10px] sm:text-xs truncate bg-indigo-400 text-white rounded-xl px-1 max-w-[150px] sm:max-w-[250px]">
                   {referal.alliance_referral_link}
                 </p>
 
@@ -277,11 +277,12 @@ const DashboardPage = ({
               <CardTitle></CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex justify-between sm:justify-between px-0 sm:px-32">
-                <div className="relative flex flex-col justify-start items-start">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-4 sm:px-32 gap-4">
+                {/* Total Income Section */}
+                <div className="relative flex flex-col justify-start items-start w-full sm:w-auto">
                   <TooltipProvider>
                     <Tooltip>
-                      <TooltipTrigger className="absolute -right-5 sm:-right-8 top-4 transform -translate-y-1/2">
+                      <TooltipTrigger className="absolute -right-4 sm:-right-8 top-2 sm:top-1 ">
                         <InfoIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                       </TooltipTrigger>
                       <TooltipContent className="bg-white text-black p-2 rounded-md shadow-lg">
@@ -293,7 +294,7 @@ const DashboardPage = ({
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
-                  <p className="text-xl sm:text-2xl font-thin">Total Income</p>
+                  <p className="text-lg sm:text-xl font-thin">Total Income</p>
                   <p className="text-xl sm:text-2xl font-extrabold">
                     {refresh ? (
                       <div className="flex items-center gap-2">
@@ -309,13 +310,11 @@ const DashboardPage = ({
                   </p>
                 </div>
 
-                <div className="relative flex flex-col justify-start  items-start">
-                  <p className="text-xl sm:text-2xl font-thin">
-                    Total Withdrawal
-                  </p>
+                {/* Total Withdrawal Section */}
+                <div className="relative flex flex-col justify-start items-start w-full sm:w-auto">
                   <TooltipProvider>
                     <Tooltip>
-                      <TooltipTrigger className="absolute -right-5 -sm:right-8 top-4 transform -translate-y-1/2">
+                      <TooltipTrigger className="absolute -right-4 sm:-right-8 top-2 sm:top-1 ">
                         <InfoIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                       </TooltipTrigger>
                       <TooltipContent className="bg-white text-black p-2 rounded-md shadow-lg">
@@ -326,6 +325,9 @@ const DashboardPage = ({
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
+                  <p className="text-lg sm:text-xl font-thin">
+                    Total Withdrawal
+                  </p>
                   <p className="text-xl sm:text-2xl font-extrabold">
                     {refresh ? (
                       <div className="flex items-center gap-2">
@@ -344,27 +346,28 @@ const DashboardPage = ({
 
               <Separator className="text-white" />
 
-              <div className="flex flex-col  sm:flex-row  justify-evenly gap-2">
-                <div className="relative flex flex-col justify-start  items-start">
+              <div className="flex flex-col sm:flex-row justify-evenly gap-4 sm:gap-8 px-2 sm:px-6">
+                {/* Package Income */}
+                <div className="relative flex flex-col justify-start items-start">
                   <TooltipProvider>
                     <Tooltip>
-                      <TooltipTrigger className="absolute -right-4 sm:-right-8  top-2 sm:top-4 transform -translate-y-1/2">
+                      <TooltipTrigger className="absolute -right-4 sm:-right-8 top-3 sm:top-4 transform -translate-y-1/2">
                         <InfoIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                       </TooltipTrigger>
-                      <TooltipContent className="bg-white text-black p-2 rounded-md shadow-lg">
+                      <TooltipContent className="bg-white text-black p-2 rounded-md shadow-lg max-w-xs">
                         <p>
-                          Ito ang kabuuang kita mula sa sa packages na nagmature
-                          at naiwithdraw na dito sa ELEVATE.
+                          Ito ang kabuuang kita mula sa packages na nagmature at
+                          naiwithdraw na dito sa ELEVATE.
                         </p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
-                  <p className="text-sm sm:text-lg font-thin">Package Income</p>
+                  <p className="text-sm sm:text-lg font-light">
+                    Package Income
+                  </p>
                   <p className="text-sm sm:text-lg font-bold">
                     {refresh ? (
-                      <div className="flex items-center gap-2">
-                        <Skeleton className="h-5 sm:h-8 w-[100px] sm:w-[250px]" />
-                      </div>
+                      <Skeleton className="h-5 sm:h-8 w-[120px] sm:w-[200px]" />
                     ) : (
                       "₱ " +
                       (totalEarnings?.package_income.toLocaleString("en-US", {
@@ -375,13 +378,14 @@ const DashboardPage = ({
                   </p>
                 </div>
 
-                <div className="relative flex flex-col justify-start  items-start">
+                {/* Referral Income */}
+                <div className="relative flex flex-col justify-start items-start">
                   <TooltipProvider>
                     <Tooltip>
-                      <TooltipTrigger className="absolute -right-4 sm:-right-8  top-2 sm:top-4 transform -translate-y-1/2">
+                      <TooltipTrigger className="absolute -right-4 sm:-right-8 top-3 sm:top-4 transform -translate-y-1/2">
                         <InfoIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                       </TooltipTrigger>
-                      <TooltipContent className="bg-white text-black p-2 rounded-md shadow-lg">
+                      <TooltipContent className="bg-white text-black p-2 rounded-md shadow-lg max-w-xs">
                         <p>
                           Ito ang kabuuang kita mula sa 10% na REFERRAL INCOME
                           kapag ikaw ay nakapagpasok ng bagong mag aavail ng
@@ -395,22 +399,28 @@ const DashboardPage = ({
                   </p>
                   <p className="text-sm sm:text-lg font-bold">
                     {refresh ? (
-                      <div className="flex items-center gap-2">
-                        <Skeleton className="h-5 sm:h-8 w-[100px] sm:w-[250px]" />
-                      </div>
+                      <Skeleton className="h-5 sm:h-8 w-[120px] sm:w-[200px]" />
                     ) : (
-                      "₱ " + (totalEarnings?.directReferralAmount ?? 0)
+                      "₱ " +
+                      (totalEarnings?.directReferralAmount.toLocaleString(
+                        "en-US",
+                        {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        }
+                      ) ?? 0)
                     )}
                   </p>
                 </div>
 
-                <div className="relative flex flex-col justify-start  items-start">
+                {/* Network Income */}
+                <div className="relative flex flex-col justify-start items-start">
                   <TooltipProvider>
                     <Tooltip>
-                      <TooltipTrigger className="absolute -right-4 sm:-right-8  top-2 sm:top-4 transform -translate-y-1/2">
+                      <TooltipTrigger className="absolute -right-4 sm:-right-8 top-3 sm:top-4 transform -translate-y-1/2">
                         <InfoIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                       </TooltipTrigger>
-                      <TooltipContent className="bg-white text-black p-2 rounded-md shadow-lg">
+                      <TooltipContent className="bg-white text-black p-2 rounded-md shadow-lg max-w-xs">
                         <p>
                           Ito ang kabuuang kita mula sa grupo na mabubuo mo dito
                           sa elevate mula 2nd level hanggang 10th level.
@@ -423,11 +433,16 @@ const DashboardPage = ({
                   </p>
                   <p className="text-sm sm:text-lg font-bold">
                     {refresh ? (
-                      <div className="flex items-center gap-2">
-                        <Skeleton className="h-5 sm:h-8 w-[100px] sm:w-[250px]" />
-                      </div>
+                      <Skeleton className="h-5 sm:h-8 w-[120px] sm:w-[200px]" />
                     ) : (
-                      "₱ " + (totalEarnings?.indirectReferralAmount ?? 0)
+                      "₱ " +
+                      (totalEarnings?.indirectReferralAmount.toLocaleString(
+                        "en-US",
+                        {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        }
+                      ) ?? 0)
                     )}
                   </p>
                 </div>

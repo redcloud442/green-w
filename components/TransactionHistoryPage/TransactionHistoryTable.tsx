@@ -82,8 +82,8 @@ const TransactionHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
                   <ChevronLeft />
                 </Button>
               )}
-
-              {activePage >= pageCount && (
+              {activePage}
+              {activePage < pageCount && (
                 <Button
                   variant="outline"
                   className="shadow-none"
@@ -100,7 +100,7 @@ const TransactionHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
           </CardTitle>
           <Separator className="my-2 bg-zinc-800" />
         </CardHeader>
-        <ScrollArea className="w-full min-h-auto max-h-[400px] ">
+        <ScrollArea className="w-full h-[500px] ">
           {transactionHistory?.map((data, index) => (
             <CardContent
               key={data.transaction_id || `transaction-${index}`}

@@ -216,7 +216,7 @@ export async function POST(request: Request) {
         data: {
           transaction_member_id: teamMemberId,
           transaction_amount: amount,
-          transaction_description: `Package ${packageData.package_name} Registration`,
+          transaction_description: `${packageData.package_name} Registration`,
         },
       });
       return connectionData;

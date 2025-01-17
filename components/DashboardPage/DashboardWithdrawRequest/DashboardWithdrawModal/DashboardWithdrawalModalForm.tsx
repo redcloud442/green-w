@@ -587,12 +587,12 @@ const DashboardWithdrawalModalForm = ({
       <div className="bg-white h-28 px-10 p-2">
         <p className="text-md text-center font-semibold">COMPUTATION</p>
         <div className="flex flex-col items-start w-full">
-          <p className="text-xs text-center ">5% TAX</p>
-          <p className="text-xs text-center ">1% ADMIN FEE</p>
-          <p className="text-xs text-center ">
+          <p className="text-xs text-start  sm:text-center">5% TAX</p>
+          <p className="text-xs text-start  sm:text-center">1% ADMIN FEE</p>
+          <p className="text-xs text-start  sm:text-center ">
             2% FOR COMPANY DEVELOPMENT AND INNOVATION
           </p>
-          <p className="text-xs text-center ">
+          <p className="text-xs text-start  sm:text-center">
             2% CHARITY AND MEDICAL ASSISTANCE
           </p>
         </div>

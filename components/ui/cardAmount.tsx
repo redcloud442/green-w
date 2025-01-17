@@ -66,11 +66,11 @@ const CardAmount = ({
           </CardDescription>
         )}
       </CardHeader>
-      <CardContent className="flex relative justify-center items-center text-3xl font-extrabold text-gray-900 dark:text-gray-100 mt-2 p-0 pr-4">
+      <CardContent className="flex relative justify-center text-3xl font-extrabold text-gray-900 dark:text-gray-100 mt-2 p-0">
         {handleClick && (
           <Button
             variant="ghost"
-            className="absolute left-10 px-2 mr-2 bg-white rounded-full"
+            className=" px-2 mr-4 bg-white rounded-full"
             onClick={handleClick}
           >
             <RefreshCcw />
