@@ -36,7 +36,7 @@ const NavigationLoader = ({ visible }: Props) => {
             fill="none"
             id="outline"
             stroke="#0ea5e9"
-            className="animate-[stroke-anim_1.6s_linear_infinite]"
+            className="animate-stroke-anim"
           ></path>
 
           {/* Background Path (Faint Static) */}

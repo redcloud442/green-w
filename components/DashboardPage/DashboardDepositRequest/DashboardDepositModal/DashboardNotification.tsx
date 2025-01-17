@@ -32,12 +32,12 @@ const DashboardNotification = ({ teamMemberProfile }: Props) => {
     >
       <DialogTrigger asChild>
         <Button
-          className="flex relative flex-col bg-transparent p-2 shadow-none text-sm text-black font-normal bg-white rounded-full"
+          className="flex relative flex-col bg-transparent p-2 text-xs shadow-none sm:text-sm text-gray-600 font-normal bg-white rounded-full"
           onClick={() => setOpen(true)}
         >
           <BellIcon
             size={48}
-            className="text-black rounded-full text-2xl h-full w-full"
+            className="text-zinc-500 rounded-full text-2xl h-full w-full"
           />
           {userNotification.count > 0 && (
             <span className="absolute border-2 border-white -top-4 right-4 bg-red-500 text-white text-xs font-bold w-auto p-1 h-5 flex items-center justify-center rounded-full">

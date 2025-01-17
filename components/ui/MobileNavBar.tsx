@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { useUserNotificationStore } from "@/store/userNotificationStore";
 import { createClientSide } from "@/utils/supabase/client";
 import { alliance_member_table } from "@prisma/client";
-import { BookOpenIcon, HomeIcon, LogOut, UserIcon } from "lucide-react";
+import { BookOpenIcon, DoorOpen, HomeIcon, UserIcon } from "lucide-react";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -109,7 +109,7 @@ const MobileNavBar = () => {
   return (
     <>
       <nav
-        className="fixed bottom-0 left-0 right-0 z-50 bg-white h-16 shadow-md"
+        className="fixed bottom-0 left-0 right-0 z-50 border-2 border-zinc-400 bg-white h-16 shadow-md"
         aria-label="Mobile Navigation"
       >
         <ul className="flex justify-around items-center h-full w-full">
@@ -164,28 +164,30 @@ const MobileNavBar = () => {
       </nav>
 
       <Button
-        className="fixed bottom-20 right-6 h-12 w-12 rounded-full p-4 z-50 bg-gray-100 border border-gray-300 shadow-lg hover:shadow-xl transition-transform transform hover:scale-105 dark:bg-gray-700 dark:border-gray-500"
-        variant="ghost"
+        className="fixed bottom-20 right-6 h-14 w-14 rounded-md  p-4 z-50  border-none shadow-lg hover:shadow-xl transition-transform transform hover:scale-110 dark:from-gray-800 dark:to-gray-700"
+        variant="card"
         onClick={() => setIsModalOpen(true)}
         aria-label="Log Out"
       >
-        <LogOut className="w-6 h-6 text-gray-700 dark:text-white" />
+        <DoorOpen className="w-7 h-7 text-black" />
       </Button>
 
       {/* Logout Confirmation Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="z-50">
           <DialogHeader>
-            <DialogTitle>Log Out</DialogTitle>
+            <DialogTitle> Are you sure you want to log out?</DialogTitle>
           </DialogHeader>
-          <DialogDescription>
-            Are you sure you want to log out?
-          </DialogDescription>
+          <DialogDescription></DialogDescription>
           <DialogFooter>
             <Button variant="secondary" onClick={() => setIsModalOpen(false)}>
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleSignOut}>
+            <Button
+              variant="card"
+              className="rounded-md"
+              onClick={handleSignOut}
+            >
               Log Out
             </Button>
           </DialogFooter>

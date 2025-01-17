@@ -2,12 +2,10 @@
 
 import { logError } from "@/services/Error/ErrorLogs";
 import { getTransactionHistory } from "@/services/Transaction/Transaction";
+import { useUserTransactionHistoryStore } from "@/store/userTransactionHistoryStore";
 import { formatMonthDateYear, formatTime } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
-import {
-  alliance_member_table,
-  alliance_transaction_table,
-} from "@prisma/client";
+import { alliance_member_table } from "@prisma/client";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -23,10 +21,8 @@ type DataTableProps = {
 
 const TransactionHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
   const supabaseClient = createClientSide();
-
-  const [requestData, setRequestData] = useState<alliance_transaction_table[]>(
-    []
-  );
+  const { transactionHistory, setTransactionHistory } =
+    useUserTransactionHistoryStore();
   const [requestCount, setRequestCount] = useState(0);
   const [activePage, setActivePage] = useState(1);
   const [isFetchingList, setIsFetchingList] = useState(false);
@@ -42,7 +38,7 @@ const TransactionHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
           limit: 10,
         });
 
-      setRequestData(transactionHistory || []);
+      setTransactionHistory(transactionHistory || []);
       setRequestCount(totalTransactions || 0);
     } catch (e) {
       if (e instanceof Error) {
@@ -64,9 +60,9 @@ const TransactionHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
   const pageCount = Math.ceil(requestCount / 10);
 
   return isFetchingList ? (
-    <Skeleton className="h-[400px] bg-zinc-300 w-full" />
+    <Skeleton className="h-[400px] bg-white/50 w-full" />
   ) : (
-    <ScrollArea className="w-full overflow-x-auto ">
+    <ScrollArea className="w-full overflow-x-auto pt-2">
       <Card className="w-full shadow-2xl rounded-2xl bg-white">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
@@ -104,63 +100,74 @@ const TransactionHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
           </CardTitle>
           <Separator className="my-2 bg-zinc-800" />
         </CardHeader>
+        <ScrollArea className="w-full min-h-auto max-h-[600px] ">
+          {transactionHistory?.map((data, index) => (
+            <CardContent
+              key={data.transaction_id || `transaction-${index}`}
+              className="space-y-4 px-10"
+            >
+              {/* History Item */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  {data.transaction_description.includes("Success") ||
+                  data.transaction_description.includes("Deposit") ||
+                  data.transaction_description.includes("Claimed") ? (
+                    <Image
+                      src="/assets/plus.png"
+                      alt="success"
+                      width={40}
+                      height={40}
+                    />
+                  ) : (
+                    <Image
+                      src="/assets/minus.png"
+                      alt="failed"
+                      width={40}
+                      height={40}
+                    />
+                  )}
 
-        {requestData.map((data, index) => (
-          <CardContent
-            key={data.transaction_id || `transaction-${index}`}
-            className="space-y-4 px-10"
-          >
-            {/* History Item */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                {data.transaction_description.includes("Success") ? (
-                  <Image
-                    src="/assets/plus.png"
-                    alt="success"
-                    width={40}
-                    height={40}
-                  />
-                ) : (
-                  <Image
-                    src="/assets/plus.png"
-                    alt="failed"
-                    width={40}
-                    height={40}
-                  />
-                )}
-
-                <div>
-                  <p className="text-sm sm:text-xl font-medium">
-                    {data.transaction_description}
-                  </p>
-                  <p className="text-[10px] sm:text-[12px] text-gray-500">
-                    {data.transaction_description}
-                  </p>
-                  <p className="text-[10px] sm:text-[12px] text-gray-500">
-                    {formatMonthDateYear(data.transaction_date)}{" "}
-                    {formatTime(data.transaction_date)}
-                  </p>
+                  <div>
+                    <p className="text-sm sm:text-xl font-medium">
+                      {data.transaction_description}
+                    </p>
+                    <p className="text-[10px] sm:text-[12px] text-gray-500">
+                      {data.transaction_description}
+                    </p>
+                    <p className="text-[10px] sm:text-[12px] text-gray-500">
+                      {formatMonthDateYear(data.transaction_date)}{" "}
+                      {formatTime(data.transaction_date)}
+                    </p>
+                  </div>
+                </div>
+                <div
+                  className={`flex items-center justify-center text-black font-bold text-lg sm:text-3xl ${
+                    data.transaction_description.includes("Success") ||
+                    data.transaction_description.includes("Claimed")
+                      ? "text-green-500"
+                      : "text-black"
+                  }`}
+                >
+                  ₱{" "}
+                  {data.transaction_amount
+                    ? data.transaction_amount.toLocaleString("en-US", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })
+                    : "0.00"}
                 </div>
               </div>
-              <div
-                className={`flex items-center justify-center text-black font-bold text-lg sm:text-3xl ${
-                  data.transaction_description.includes("Success")
-                    ? "text-green-500"
-                    : "text-black"
-                }`}
-              >
-                ₱{" "}
-                {data.transaction_amount
-                  ? data.transaction_amount.toLocaleString("en-US", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })
-                  : "0.00"}
-              </div>
+              <Separator className="bg-zinc-200" />
+            </CardContent>
+          ))}
+          {transactionHistory?.length === 0 && (
+            <div className="flex items-center justify-center h-full pb-10">
+              <p className="text-gray-500 text-lg">
+                No transaction history found
+              </p>
             </div>
-            <Separator className="bg-zinc-200" />
-          </CardContent>
-        ))}
+          )}
+        </ScrollArea>
       </Card>
 
       <ScrollBar orientation="horizontal" />

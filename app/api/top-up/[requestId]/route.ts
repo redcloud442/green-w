@@ -3,11 +3,17 @@ import { applyRateLimit } from "@/utils/function";
 import prisma from "@/utils/prisma";
 import { protectionMerchantUser } from "@/utils/serversideProtection";
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 
 // Helper function for returning error responses
 function sendErrorResponse(message: string, status: number = 400) {
   return NextResponse.json({ error: message }, { status });
 }
+
+const updateTopUpRequestSchema = z.object({
+  status: z.string().min(3),
+  note: z.string().optional(),
+});
 
 export async function PUT(
   request: NextRequest,
@@ -25,6 +31,18 @@ export async function PUT(
 
     const { status, note }: { status: string; note?: string | null } =
       await request.json();
+
+    const validate = updateTopUpRequestSchema.safeParse({
+      status,
+      note,
+    });
+
+    if (!validate.success) {
+      return NextResponse.json(
+        { error: validate.error.message },
+        { status: 400 }
+      );
+    }
 
     if (!status || !Object.values(TOP_UP_STATUS).includes(status)) {
       return sendErrorResponse("Invalid request.");

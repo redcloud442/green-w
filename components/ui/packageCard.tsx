@@ -32,7 +32,7 @@ const PackageCard = ({
   return (
     <Card
       onClick={onClick}
-      className={`w-full rounded-lg cursor-pointer shadow-lg flex flex-col items-center px-4 py-12 justify-center space-y-4 relative overflow-hidden ${
+      className={`w-full rounded-lg cursor-pointer shadow-lg flex flex-col items-center px-4 py-8 justify-center space-y-4 relative overflow-hidden ${
         selectedPackage?.package_id === packageId
           ? " dark:border-pageColor border-none shadow-none "
           : "border-none"

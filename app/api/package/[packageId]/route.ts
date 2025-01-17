@@ -2,6 +2,7 @@ import { applyRateLimit } from "@/utils/function";
 import prisma from "@/utils/prisma";
 import { protectionAdminUser } from "@/utils/serversideProtection";
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 
 // Helper functions for responses
 const errorResponse = (message: string, status: number) =>
@@ -9,6 +10,16 @@ const errorResponse = (message: string, status: number) =>
 
 const successResponse = (data: object = {}) =>
   NextResponse.json({ success: true, ...data });
+
+const updatePackageSchema = z.object({
+  packageName: z.string().min(3),
+  packageDescription: z.string().min(3),
+  packagePercentage: z.number().min(1),
+  packageDays: z.number().min(1),
+  packageIsDisabled: z.boolean(),
+  packageColor: z.string().min(3),
+  package_image: z.string().min(3),
+});
 
 export async function PUT(
   request: NextRequest,
@@ -24,6 +35,13 @@ export async function PUT(
     if (!packageId) return errorResponse("Package ID is required.", 400);
 
     const { packageData, teamMemberId } = await request.json();
+
+    const validate = updatePackageSchema.safeParse(packageData);
+
+    if (!validate.success) {
+      throw new Error(validate.error.message);
+    }
+
     const {
       packageName,
       packageDescription,

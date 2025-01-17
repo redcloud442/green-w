@@ -2,6 +2,15 @@ import { applyRateLimit, escapeFormData } from "@/utils/function";
 import { protectionMemberUser } from "@/utils/serversideProtection";
 import { createClientServerSide } from "@/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+
+const getIndirectReferralsSchema = z.object({
+  page: z.string().min(1),
+  limit: z.string().min(1),
+  search: z.string().optional(),
+  columnAccessor: z.string().min(3),
+  isAscendingSort: z.string(),
+});
 
 export const GET = async (request: NextRequest) => {
   try {
@@ -21,6 +30,20 @@ export const GET = async (request: NextRequest) => {
     const search = url.searchParams.get("search");
     const columnAccessor = url.searchParams.get("columnAccessor");
     const isAscendingSort = url.searchParams.get("isAscendingSort");
+    const userId = url.searchParams.get("userId");
+
+    const validate = getIndirectReferralsSchema.safeParse({
+      page,
+      limit,
+      search,
+      columnAccessor,
+      isAscendingSort,
+      userId,
+    });
+
+    if (!validate.success) {
+      throw new Error(validate.error.message);
+    }
 
     const supabaseClient = await createClientServerSide();
     if (limit !== "10") {
@@ -33,7 +56,6 @@ export const GET = async (request: NextRequest) => {
       search: search || "",
       columnAccessor: columnAccessor || "",
       isAscendingSort: isAscendingSort === "true",
-      teamMemberId: teamMemberProfile?.alliance_member_id || "",
       teamId: teamMemberProfile?.alliance_member_alliance_id || "",
     };
 

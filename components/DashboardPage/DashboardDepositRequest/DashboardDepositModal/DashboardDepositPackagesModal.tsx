@@ -110,10 +110,10 @@ const DashboardDepositModalPackages = ({
       >
         <ScrollArea className="h-[650px] sm:h-full">
           <DialogHeader className="text-start text-2xl font-bold">
-            <DialogTitle className="text-2xl font-bold mb-4"></DialogTitle>
+            <DialogTitle className="text-2xl font-bold"></DialogTitle>
             <DialogDescription></DialogDescription>
           </DialogHeader>
-          <div className="flex flex-col justify-between gap-6">
+          <div className="flex flex-col justify-between gap-4">
             {!selectedPackage &&
               packages.map((pkg) => (
                 <PackageCard

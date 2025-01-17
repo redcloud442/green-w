@@ -12,13 +12,26 @@ import {
 } from "@/utils/supabase/server";
 import { SupabaseClient } from "@supabase/supabase-js";
 import crypto from "crypto";
+import { z } from "zod";
+
+const changeUserPasswordSchema = z.object({
+  email: z.string().email(),
+  userId: z.string().uuid(),
+  password: z.string().min(6),
+});
 
 export const changeUserPassword = async (params: {
   email: string;
   userId: string;
   password: string;
 }) => {
-  const { email, password, userId } = params;
+  const validate = changeUserPasswordSchema.safeParse(params);
+
+  if (!validate.success) {
+    throw new Error(validate.error.message);
+  }
+
+  const { email, password, userId } = validate.data;
 
   const { teamMemberProfile: role } = await protectionMemberUser();
 
@@ -112,6 +125,16 @@ export const changeUserPassword = async (params: {
   return { success: true, iv: iv.toString("hex"), creds: encrypted };
 };
 
+const registerUserSchema = z.object({
+  userName: z.string().min(6),
+  password: z.string().min(6),
+  firstName: z.string().min(2),
+  lastName: z.string().min(2),
+  activeMobile: z.string().min(10),
+  referalLink: z.string().min(2),
+  url: z.string().min(2),
+});
+
 export const registerUser = async (params: {
   userName: string;
   password: string;
@@ -123,6 +146,11 @@ export const registerUser = async (params: {
 }) => {
   try {
     const supabaseClient = await createClientServerSide();
+    const validate = registerUserSchema.safeParse(params);
+
+    if (!validate.success) {
+      throw new Error(validate.error.message);
+    }
 
     const {
       userName,
@@ -170,6 +198,11 @@ export const registerUser = async (params: {
   }
 };
 
+const signInUserSchema = z.object({
+  formattedUserName: z.string().email(),
+  password: z.string().min(6),
+});
+
 export const handleSignInUser = async (
   supabaseClient: SupabaseClient,
   params: {
@@ -178,6 +211,12 @@ export const handleSignInUser = async (
   }
 ) => {
   try {
+    const validate = signInUserSchema.safeParse(params);
+
+    if (!validate.success) {
+      throw new Error(validate.error.message);
+    }
+
     const { formattedUserName, password } = params;
     await protectionAdminUser();
 

@@ -23,6 +23,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { logError } from "@/services/Error/ErrorLogs";
 import { getMerchantOptions } from "@/services/Options/Options";
+import { useUserTransactionHistoryStore } from "@/store/userTransactionHistoryStore";
 import { escapeFormData } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,6 +33,7 @@ import Image from "next/image";
 import { NextResponse } from "next/server";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 
 type Props = {
@@ -64,11 +66,15 @@ const topUpFormSchema = z.object({
 
 export type TopUpFormValues = z.infer<typeof topUpFormSchema>;
 
-const DashboardDepositModalDeposit = ({ className }: Props) => {
+const DashboardDepositModalDeposit = ({
+  className,
+  teamMemberProfile,
+}: Props) => {
   const supabaseClient = createClientSide();
   const [topUpOptions, setTopUpOptions] = useState<merchant_table[]>([]);
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
+  const { setAddTransactionHistory } = useUserTransactionHistoryStore();
   const {
     control,
     handleSubmit,
@@ -137,6 +143,15 @@ const DashboardDepositModalDeposit = ({ className }: Props) => {
         publicUrl,
       });
 
+      const transactionHistory = {
+        transaction_id: uuidv4(),
+        transaction_date: new Date(),
+        transaction_description: "Deposit Ongoing",
+        transaction_amount: Number(sanitizedData.amount),
+        transaction_member_id: teamMemberProfile?.alliance_member_id,
+      };
+      setAddTransactionHistory([transactionHistory]);
+
       toast({
         title: "Deposit Request Successfully",
         description: "Please wait for your request to be approved.",
@@ -199,22 +214,25 @@ const DashboardDepositModalDeposit = ({ className }: Props) => {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[440px]">
         <ScrollArea className="h-[500px] sm:h-full">
           <DialogHeader className="flex flex-col items-center text-2xl font-bold">
-            <DialogTitle className="text-2xl sm:text-3xl font-bold mb-4">
+            <DialogTitle className="text-2xl sm:text-3xl font-bold">
               Deposit
             </DialogTitle>
             <Separator className="w-full" />
             <DialogDescription></DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="space-y-6 w-full max-w-xs sm:max-w-sm "
+          >
             {/* Amount Field */}
 
             {/* Top-Up Mode */}
             <div>
-              <Label htmlFor="topUpMode">Account Number</Label>
+              <Label htmlFor="topUpMode">Select Bank</Label>
               <Controller
                 name="topUpMode"
                 control={control}
@@ -276,7 +294,7 @@ const DashboardDepositModalDeposit = ({ className }: Props) => {
                 )}
               </div>
               <div className="flex-1">
-                <Label htmlFor="accountNumber">E-wallet/Bank</Label>
+                <Label htmlFor="accountNumber">Account Number</Label>
                 <div className="flex gap-2">
                   <Controller
                     name="accountNumber"
@@ -355,7 +373,7 @@ const DashboardDepositModalDeposit = ({ className }: Props) => {
               )}
             </div>
 
-            <div>
+            <div className="">
               <Controller
                 name="file"
                 control={control}

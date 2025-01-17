@@ -13,7 +13,7 @@ import { createClientSide } from "@/utils/supabase/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckIcon } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useController, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -88,12 +88,11 @@ const RegisterPage = ({ referralLink }: Props) => {
 
   const supabase = createClientSide();
   const router = useRouter();
-  const pathName = usePathname();
   const { toast } = useToast();
 
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const url = `${BASE_URL}${pathName}`;
+  const url = `${BASE_URL}`;
 
   const { field: userNameField } = useController({
     name: "userName",

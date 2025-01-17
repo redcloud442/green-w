@@ -3,6 +3,17 @@ import prisma from "@/utils/prisma";
 import { protectionMemberUser } from "@/utils/serversideProtection";
 import { createClientServerSide } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
+import { z } from "zod";
+
+const getTopUpHistorySchema = z.object({
+  page: z.number().min(1),
+  limit: z.number().min(1),
+  search: z.string().min(3),
+  columnAccessor: z.string().min(3),
+  isAscendingSort: z.boolean(),
+  teamMemberId: z.string().uuid(),
+});
+
 export async function GET(request: Request) {
   try {
     const ip =
@@ -24,6 +35,22 @@ export async function GET(request: Request) {
     const columnAccessor = url.searchParams.get("columnAccessor") || "";
     const isAscendingSort = url.searchParams.get("isAscendingSort") || true;
     const teamMemberId = url.searchParams.get("teamMemberId") || "";
+
+    const validate = getTopUpHistorySchema.safeParse({
+      page,
+      limit,
+      search,
+      columnAccessor,
+      isAscendingSort,
+      teamMemberId,
+    });
+
+    if (!validate.success) {
+      return NextResponse.json(
+        { error: validate.error.message },
+        { status: 400 }
+      );
+    }
 
     const params = {
       search,

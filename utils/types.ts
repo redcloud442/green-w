@@ -75,6 +75,9 @@ export type DashboardEarnings = {
   withdrawalAmount: number;
   directReferralCount: number;
   indirectReferralCount: number;
+  package_income: number;
+  rank: string;
+  tags: string[];
 };
 
 export type AdminDashboardDataByDate = {

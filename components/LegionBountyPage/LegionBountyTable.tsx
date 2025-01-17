@@ -73,6 +73,7 @@ const LegionBountyTable = ({ teamMemberProfile }: DataTableProps) => {
         columnAccessor: columnAccessor,
         isAscendingSort: isAscendingSort,
         search: emailFilter,
+        userId: teamMemberProfile.alliance_member_user_id,
       });
 
       setRequestData(data || []);
@@ -130,7 +131,7 @@ const LegionBountyTable = ({ teamMemberProfile }: DataTableProps) => {
         </CardHeader>
         <Separator />
         <form
-          className="flex justify-end flex-wrap gap-2 pt-4 pb-4"
+          className="flex gap-2 pt-4 pb-4"
           onSubmit={handleSubmit(handleFilter)}
         >
           <Input

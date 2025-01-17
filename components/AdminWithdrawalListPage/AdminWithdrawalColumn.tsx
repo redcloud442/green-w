@@ -35,7 +35,13 @@ export const AdminWithdrawalHistoryColumn = (handleFetch: () => void) => {
   });
 
   const handleUpdateStatus = useCallback(
-    async (status: string, requestId: string, note?: string) => {
+    async (
+      status: string,
+      requestId: string,
+      note?: string,
+      email?: string,
+      cellphoneNumber?: string
+    ) => {
       try {
         setIsLoading(true);
         await updateWithdrawalStatus({ status, requestId, note });

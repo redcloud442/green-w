@@ -140,10 +140,6 @@ const EditPackagesModal = ({
         })
       );
 
-      uploadResults.forEach(({ path, publicUrl }) => {
-        console.log(`File uploaded: ${path}, Public URL: ${publicUrl}`);
-      });
-
       const packageBanner = uploadResults[0].publicUrl;
       const packageColor = uploadResults[1].publicUrl;
 

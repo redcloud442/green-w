@@ -13,11 +13,11 @@ export const metadata: Metadata = {
 };
 
 const Page = async ({
-  searchParams,
+  params,
 }: {
-  searchParams: Promise<{ registerName: string }>;
+  params: Promise<{ registerName: string }>;
 }) => {
-  const { registerName } = await searchParams;
+  const { registerName } = await params;
   const result = await protectionRegisteredUser();
 
   if (result?.redirect || !registerName) {

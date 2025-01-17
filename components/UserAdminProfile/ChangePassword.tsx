@@ -143,7 +143,7 @@ const ChangePassword = ({ userProfile, setUserProfile }: Props) => {
             variant="card"
             disabled={isSubmitting}
             type="submit"
-            className="w-full"
+            className="w-full rounded-md"
           >
             {isSubmitting && <Loader2 className="animate-spin" />}
             Save Changes
