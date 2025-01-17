@@ -238,7 +238,9 @@ const DashboardPage = ({
           />
         )}
       </div>
-      <DashboardGenerateQrCode url={referal.alliance_referral_link} />
+      {isActive && (
+        <DashboardGenerateQrCode url={referal.alliance_referral_link} />
+      )}
       <div className="w-full space-y-4 md:px-10">
         <div className="flex flex-col gap-4 justify-center items-center ">
           <CardAmount
