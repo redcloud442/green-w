@@ -138,7 +138,7 @@ const DashboardWithdrawalModalForm = ({
       const cellphoneNumber = sanitizedData.cellphoneNumber;
 
       if (email) {
-        await handleSendEmailRequest(email);
+        await handleSendEmailRequest(sanitizedData);
       }
 
       if (cellphoneNumber) {
@@ -196,9 +196,14 @@ const DashboardWithdrawalModalForm = ({
       const transactionHistory: alliance_transaction_table = {
         transaction_member_id: teamMemberProfile.alliance_member_id,
         transaction_description: "Withdrawal Ongoing",
-        transaction_amount: calculateFinalAmount(
-          Number(amount || 0),
-          selectedEarnings
+        transaction_amount: Number(
+          calculateFinalAmount(Number(amount || 0), "TOTAL").toLocaleString(
+            "en-US",
+            {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            }
+          )
         ),
         transaction_date: new Date(),
         transaction_id: uuidv4(),
@@ -207,8 +212,14 @@ const DashboardWithdrawalModalForm = ({
       const notification: alliance_notification_table = {
         alliance_notification_user_id: teamMemberProfile.alliance_member_id,
         alliance_notification_message:
-          "Withdrawal request is Ongoing amounting to " +
-          calculateFinalAmount(Number(amount || 0), selectedEarnings) +
+          "Withdrawal request is Ongoing amounting to ₱ " +
+          calculateFinalAmount(Number(amount || 0), "TOTAL").toLocaleString(
+            "en-US",
+            {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            }
+          ) +
           " Please wait for approval.",
         alliance_notification_date_created: new Date(),
         alliance_notification_is_read: false,
@@ -249,19 +260,24 @@ const DashboardWithdrawalModalForm = ({
     }
   };
 
-  const handleSendEmailRequest = async (email: string) => {
+  const handleSendEmailRequest = async (
+    sanitizedData: WithdrawalFormValues
+  ) => {
     try {
       await sendWithdrawalEmail({
-        to: email,
+        to: sanitizedData.email ?? "",
         from: "Elevate Team",
         subject: "Withdrawal Request Ongoing !",
-        accountHolderName: profile.user_username ?? "",
+        accountHolderName: profile.user_username ?? sanitizedData.accountName,
         accountType:
-          preferredEarnings?.alliance_preferred_withdrawal_account_name ?? "",
+          preferredEarnings?.alliance_preferred_withdrawal_account_name ??
+          sanitizedData.bank,
         accountBank:
-          preferredEarnings?.alliance_preferred_withdrawal_bank_name ?? "",
+          preferredEarnings?.alliance_preferred_withdrawal_bank_name ??
+          sanitizedData.bank,
         accountNumber:
-          preferredEarnings?.alliance_preferred_withdrawal_account_number ?? "",
+          preferredEarnings?.alliance_preferred_withdrawal_account_number ??
+          sanitizedData.accountNumber,
         transactionDetails: {
           date: formatMonthDateYear(new Date().toISOString()),
           description: "Withdrawal Request Ongoing !",
