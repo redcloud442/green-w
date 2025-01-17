@@ -502,7 +502,7 @@ const DashboardWithdrawalModalForm = ({
           />
           <Button
             type="button"
-            className="h-6 rounded-md px-2 text-sm bg-sky-200 text-black rounded-md border-2 border-black absolute right-2"
+            className="h-6 rounded-md px-2 text-sm bg-sky-200 text-black  border-2 border-black absolute right-2"
             onClick={() => {
               if (!selectedEarnings) {
                 toast({
