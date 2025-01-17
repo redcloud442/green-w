@@ -186,7 +186,7 @@ const DashboardPage = ({
     <div className="relative min-h-screen mx-auto space-y-4 py-2 px-2 sm:px-0 mt-0 sm:mt-20 sm:mb-20 overflow-x-hidden">
       {isLoading && <TableLoading />}
 
-      <div className="flex flex-row sm:fixed w-full sm:min-w-fit sm:max-w-lg justify-between px-4 py-4 sm:px-2 items-center top-2 bg-transparent sm:bg-cardColor sm:rounded-tr-lg sm:rounded-br-lg z-50 ">
+      <div className="flex flex-row sm:fixed w-full sm:min-w-fit sm:max-w-lg justify-between px-0 py-4 sm:px-2 sm:py-0 items-center top-2 bg-transparent sm:bg-cardColor sm:rounded-tr-lg sm:rounded-br-lg z-50 ">
         {/* Profile Section */}
         <div className="flex gap-2 justify-center items-center">
           {/* Avatar */}
@@ -224,7 +224,7 @@ const DashboardPage = ({
             {isActive && (
               <div className="flex items-center gap-1 text-white sm:text-black">
                 <p className="text-[10px] sm:text-xs italic">Referral: </p>
-                <p className="text-[10px] sm:text-xs bg-indigo-400 truncate text-white rounded-xl px-1">
+                <p className="text-[10px] sm:text-xs truncate bg-indigo-400 text-white rounded-xl px-1">
                   {referal.alliance_referral_link}
                 </p>
 

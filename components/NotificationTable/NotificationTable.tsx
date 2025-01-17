@@ -96,23 +96,45 @@ const NotificationTable = ({ teamMemberProfile }: DataTableProps) => {
   };
 
   const handleConvertUnreadToRead = async (notificationId: string) => {
+    // Find the notification to move
+    const notificationToMove = userNotification.unread.find(
+      (notif) => notif.alliance_notification_id === notificationId
+    );
+
+    if (!notificationToMove) return;
+
+    // Optimistically update the UI
+    const updatedUnread = userNotification.unread.filter(
+      (notif) => notif.alliance_notification_id !== notificationId
+    );
+
+    setUserNotification({
+      ...userNotification,
+      unread: updatedUnread,
+      read: [...userNotification.read, notificationToMove],
+      count: userNotification.count - 1, // Decrement the count
+    });
+
     try {
-      const notification = await convertUnreadToRead({
+      // Mark as read in the backend
+      await convertUnreadToRead({
         notificationId,
         teamMemberId: teamMemberProfile?.alliance_member_id || "",
-      });
-
-      setUserNotification({
-        unread: userNotification.unread.filter(
-          (notif) => notif.alliance_notification_id !== notificationId
-        ),
-        read: [...userNotification.read, notification],
-        count: userNotification.count - 1,
       });
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to mark notification as read.",
+      });
+
+      // Revert the UI update in case of an error
+      setUserNotification({
+        ...userNotification,
+        unread: [...updatedUnread, notificationToMove],
+        read: userNotification.read.filter(
+          (notif) => notif.alliance_notification_id !== notificationId
+        ),
+        count: userNotification.count, // Restore the original count
       });
     }
   };

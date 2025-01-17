@@ -56,6 +56,7 @@ export const GET = async (request: NextRequest) => {
       search: search || "",
       columnAccessor: columnAccessor || "",
       isAscendingSort: isAscendingSort === "true",
+      userId: userId || "",
       teamId: teamMemberProfile?.alliance_member_alliance_id || "",
     };
 
@@ -69,6 +70,8 @@ export const GET = async (request: NextRequest) => {
 
     return NextResponse.json({ success: true, data: data });
   } catch (e) {
+    console.log(e);
+
     return NextResponse.json({ error: "An error occurred" }, { status: 500 });
   }
 };

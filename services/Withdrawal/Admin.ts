@@ -63,16 +63,16 @@ export const updateWithdrawalStatus = async (params: {
       from: "Elevate Team",
       subject: `Withdrawal Request ${data.alliance_withdrawal_request_status.slice(0, 1).toUpperCase() + data.alliance_withdrawal_request_status.slice(1)} !`,
       accountHolderName: data.user_username ?? "",
-      accountType: data.alliance_preferred_withdrawal_account_name ?? "",
-      accountBank: data.alliance_preferred_withdrawal_bank_name ?? "",
-      accountNumber: data.alliance_preferred_withdrawal_account_number ?? "",
+      accountType: data.alliance_withdrawal_request_account_type ?? "",
+      accountBank: data.alliance_withdrawal_request_bank_name ?? "",
+      accountNumber: data.alliance_withdrawal_request_account_number ?? "",
       transactionDetails: {
         balance: "",
         date:
           formatMonthDateYear(data.alliance_withdrawal_request_date) +
           ", " +
           formatTime(data.alliance_withdrawal_request_date),
-        description: "Withdrawal Request Ongoing !",
+        description: `Withdrawal ${data.alliance_withdrawal_request_status.slice(0, 1).toUpperCase() + data.alliance_withdrawal_request_status.slice(1)} ${data.alliance_withdrawal_request_reject_note ? `(${data.alliance_withdrawal_request_reject_note})` : ""} !`,
         amount:
           "₱" +
           Number(

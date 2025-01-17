@@ -167,6 +167,7 @@ export const protectionMemberUser = async (ip?: string) => {
           alliance_member_role: true,
           alliance_member_alliance_id: true,
           alliance_member_restricted: true,
+          alliance_member_user_id: true,
         },
       }),
     ]);
@@ -452,6 +453,7 @@ export const protectionAllUser = async (ip?: string) => {
           alliance_member_role: true,
           alliance_member_alliance_id: true,
           alliance_member_restricted: true,
+          alliance_member_user_id: true,
         },
       }),
     ]);

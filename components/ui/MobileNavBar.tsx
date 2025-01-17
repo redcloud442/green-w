@@ -180,9 +180,6 @@ const MobileNavBar = () => {
           </DialogHeader>
           <DialogDescription></DialogDescription>
           <DialogFooter>
-            <Button variant="secondary" onClick={() => setIsModalOpen(false)}>
-              Cancel
-            </Button>
             <Button
               variant="card"
               className="rounded-md"
