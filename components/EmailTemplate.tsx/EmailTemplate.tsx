@@ -1,4 +1,3 @@
-import Image from "next/image";
 import React from "react";
 
 export interface BankingEmailNotificationTemplateProps {
@@ -16,6 +15,13 @@ export interface BankingEmailNotificationTemplateProps {
   greetingPhrase: string;
   closingPhrase: string;
   signature: string;
+  attachments?: [
+    {
+      filename: string;
+      path: string;
+      content_id: string;
+    },
+  ];
 }
 
 const BankingEmailNotificationTemplate: React.FC<
@@ -46,29 +52,6 @@ const BankingEmailNotificationTemplate: React.FC<
       }}
     >
       {/* Logo Section */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          marginBottom: "20px",
-          padding: "10px",
-          borderRadius: "8px",
-          backgroundColor: "#f3f4f6",
-          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-        }}
-      >
-        <Image
-          src="/logo.png"
-          alt="Elevate Logo"
-          width={100}
-          height={100}
-          style={{
-            borderRadius: "50%",
-            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-          }}
-        />
-      </div>
 
       <h1 style={{ fontSize: "20px", color: "#0056b3" }}>{greetingPhrase}</h1>
       <p>Dear {accountHolderName},</p>

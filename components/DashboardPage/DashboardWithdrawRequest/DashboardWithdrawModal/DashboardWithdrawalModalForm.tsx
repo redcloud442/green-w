@@ -13,6 +13,7 @@ import { logError } from "@/services/Error/ErrorLogs";
 import {
   createWithdrawalRequest,
   sendWithdrawalEmail,
+  sendWithdrawalSMS,
 } from "@/services/Withdrawal/Member";
 import { useUserNotificationStore } from "@/store/userNotificationStore";
 import { useUserTransactionHistoryStore } from "@/store/userTransactionHistoryStore";
@@ -84,7 +85,8 @@ const DashboardWithdrawalModalForm = ({
   profile,
 }: Props) => {
   const { toast } = useToast();
-  const { setAddUserNotification } = useUserNotificationStore();
+  const { userNotification, setAddUserNotification } =
+    useUserNotificationStore();
   const { setAddTransactionHistory } = useUserTransactionHistoryStore();
   const {
     control,
@@ -142,7 +144,7 @@ const DashboardWithdrawalModalForm = ({
       }
 
       if (cellphoneNumber) {
-        // await sendTextMessage();
+        await handleSendSMSRequest(sanitizedData);
       }
 
       await createWithdrawalRequest({
@@ -231,7 +233,7 @@ const DashboardWithdrawalModalForm = ({
       setAddUserNotification({
         unread: [notification],
         read: [],
-        count: +1,
+        count: userNotification.count + 1,
       });
 
       toast({
@@ -258,6 +260,23 @@ const DashboardWithdrawalModalForm = ({
         variant: "destructive",
       });
     }
+  };
+
+  const handleSendSMSRequest = async (sanitizedData: WithdrawalFormValues) => {
+    try {
+      await sendWithdrawalSMS({
+        number: sanitizedData.cellphoneNumber ?? "",
+        message:
+          "Withdrawal request is Ongoing amounting to ₱ " +
+          calculateFinalAmount(Number(amount || 0), "TOTAL").toLocaleString(
+            "en-US",
+            {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            }
+          ),
+      });
+    } catch (e) {}
   };
 
   const handleSendEmailRequest = async (
@@ -292,7 +311,9 @@ const DashboardWithdrawalModalForm = ({
             }),
           balance:
             "₱" +
-            totalEarnings.toLocaleString("en-US", {
+            (
+              totalEarnings - calculateFinalAmount(Number(amount || 0), "TOTAL")
+            ).toLocaleString("en-US", {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
             }),
