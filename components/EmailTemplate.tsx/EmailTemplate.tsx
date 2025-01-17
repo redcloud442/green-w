@@ -61,8 +61,8 @@ const BankingEmailNotificationTemplate: React.FC<
         <Image
           src="/logo.png"
           alt="Elevate Logo"
-          width={80}
-          height={80}
+          width={100}
+          height={100}
           style={{
             borderRadius: "50%",
             boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
