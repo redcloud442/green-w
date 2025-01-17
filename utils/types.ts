@@ -66,6 +66,7 @@ export type ChartDataMember = {
   package_connection_id: string;
   profit_amount: number;
   package_color: string;
+  package_date_created: string;
 };
 
 export type DashboardEarnings = {

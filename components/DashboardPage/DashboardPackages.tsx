@@ -106,6 +106,7 @@ const DashboardPackages = ({
           return {
             ...prev,
             totalEarnings: prev.totalEarnings + newEarnings,
+            package_income: prev.package_income + newEarnings,
           };
         });
       }
@@ -147,10 +148,11 @@ const DashboardPackages = ({
               <CardDescription className="space-y-2 pb-2">
                 <div className="flex flex-col items-start">
                   <span className="text-md font-extrabold text-white">
-                    Date Availed: {formatMonthDateYear(data.completion_date)}
+                    Date Availed:{" "}
+                    {formatMonthDateYear(data.package_date_created)}
                   </span>
                   <span className="text-sm font-extrabold text-white">
-                    Time Availed: {formatTime(data.completion_date)}
+                    Time Availed: {formatTime(data.package_date_created)}
                   </span>
                 </div>
               </CardDescription>
