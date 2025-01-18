@@ -334,7 +334,7 @@ const AdminWithdrawalHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
     setShowFilters(checked);
     if (!checked) {
       reset();
-      handleSubmit(handleFilter)();
+      handleRefresh();
     }
   };
 
@@ -483,28 +483,6 @@ const AdminWithdrawalHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
               />
 
               <Controller
-                name="statusFilter"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    onValueChange={(value) =>
-                      field.onChange(value === field.value ? "" : value)
-                    }
-                    value={field.value || ""}
-                  >
-                    <SelectTrigger className="w-full sm:w-auto">
-                      <SelectValue placeholder="Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="PENDING">Pending</SelectItem>
-                      <SelectItem value="APPROVED">Approved</SelectItem>
-                      <SelectItem value="REJECTED">Rejected</SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-
-              <Controller
                 name="dateFilter.start"
                 control={control}
                 render={({ field }) => (
@@ -541,7 +519,7 @@ const AdminWithdrawalHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
               <Button
                 variant="card"
                 className="w-full md:w-auto rounded-md"
-                onClick={fetchRequest}
+                onClick={handleRefresh}
               >
                 Submit
               </Button>
@@ -663,7 +641,7 @@ const AdminWithdrawalHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
         {activePage < pageCount && (
           <Button
             variant="card"
-            className="w-full md:w-auto rounded-md"
+            className="md:w-auto rounded-md"
             size="sm"
             onClick={() =>
               setActivePage((prev) => Math.min(prev + 1, pageCount))

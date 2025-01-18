@@ -195,7 +195,8 @@ const TopUpTable = ({ teamMemberProfile }: DataTableProps) => {
           REJECTED: { data: [], count: 0 },
           PENDING: { data: [], count: 0 },
         },
-        merchantBalance: requestData?.merchantBalance || 0,
+        merchantBalance:
+          (requestData?.merchantBalance || 0) - (isOpenModal.amount || 0),
       };
 
       const sanitizedData = escapeFormData(getValues());
@@ -344,7 +345,7 @@ const TopUpTable = ({ teamMemberProfile }: DataTableProps) => {
     setShowFilters(checked);
     if (!checked) {
       reset();
-      handleSubmit(handleFilter)();
+      handleRefresh();
     }
   };
 
@@ -443,13 +444,13 @@ const TopUpTable = ({ teamMemberProfile }: DataTableProps) => {
               disabled={isFetchingList}
               size="sm"
               variant="card"
-              className="w-full rounded-md"
+              className=" rounded-md"
             >
               <Search />
             </Button>
             <Button
               variant="card"
-              className="w-full rounded-md"
+              className=" rounded-md"
               onClick={handleRefresh}
               disabled={isFetchingList}
               size="sm"
@@ -525,7 +526,7 @@ const TopUpTable = ({ teamMemberProfile }: DataTableProps) => {
                 )}
               />
 
-              <Button type="submit" onClick={fetchRequest}>
+              <Button type="submit" onClick={handleRefresh}>
                 Submit
               </Button>
             </div>
@@ -647,7 +648,7 @@ const TopUpTable = ({ teamMemberProfile }: DataTableProps) => {
         {activePage < pageCount && (
           <Button
             variant="card"
-            className="w-full rounded-md"
+            className="md:w-auto rounded-md"
             size="sm"
             onClick={() =>
               setActivePage((prev) => Math.min(prev + 1, pageCount))

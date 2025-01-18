@@ -251,7 +251,7 @@ const DashboardDepositModalDeposit = ({
                       {topUpOptions.map((option) => (
                         <SelectItem
                           key={option.merchant_id}
-                          value={option.merchant_id}
+                          value={option.merchant_account_type}
                         >
                           {option.merchant_account_type} -{" "}
                           {option.merchant_account_name}

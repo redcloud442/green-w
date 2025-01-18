@@ -137,7 +137,9 @@ const MerchantBalance = ({ userProfile }: Props) => {
               {errors.balance.message?.toString()}
             </span>
           )}
-          <Button type="submit">Update Balance</Button>
+          <Button variant="card" className="rounded-md" type="submit">
+            Update Balance
+          </Button>
         </form>
       </CardContent>
     </Card>

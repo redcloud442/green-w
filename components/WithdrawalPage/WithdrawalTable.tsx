@@ -333,13 +333,16 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
     fetchRequest();
   }, [supabaseClient, teamMemberProfile, activePage, sorting]);
 
-  const pageCount = Math.ceil(requestCount / 10);
+  const pageCount = Math.ceil(
+    (requestData?.data?.[status as "PENDING" | "APPROVED" | "REJECTED"]
+      ?.count ?? 0) / 10
+  );
 
   const handleSwitchChange = (checked: boolean) => {
     setShowFilters(checked);
     if (!checked) {
       reset();
-      handleSubmit(handleFilter)();
+      handleRefresh();
     }
   };
 
@@ -429,13 +432,13 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
               disabled={isFetchingList}
               size="sm"
               variant="card"
-              className="w-full rounded-md"
+              className=" rounded-md"
             >
               <Search />
             </Button>
             <Button
               variant="card"
-              className="w-full rounded-md"
+              className="rounded-md"
               onClick={handleRefresh}
               disabled={isFetchingList}
               size="sm"
@@ -511,7 +514,13 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
                 )}
               />
 
-              <Button onClick={fetchRequest}>Submit</Button>
+              <Button
+                variant="card"
+                className=" md:w-auto rounded-md"
+                onClick={handleRefresh}
+              >
+                Submit
+              </Button>
             </div>
           )}
         </form>
@@ -562,7 +571,7 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
 
-      <div className="flex items-center justify-end gap-x-4 py-4">
+      <div className="flex items-center justify-end gap-x-4 py-4 ">
         {activePage > 1 && (
           <Button
             variant="outline"
@@ -611,7 +620,7 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
               typeof page === "number" ? (
                 <Button
                   key={page}
-                  variant={activePage === page ? "default" : "outline"}
+                  variant={activePage === page ? "card" : "outline"}
                   size="sm"
                   onClick={() => setActivePage(page)}
                 >
@@ -628,7 +637,7 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
         {activePage < pageCount && (
           <Button
             variant="card"
-            className="w-full rounded-md"
+            className="rounded-md"
             size="sm"
             onClick={() =>
               setActivePage((prev) => Math.min(prev + 1, pageCount))

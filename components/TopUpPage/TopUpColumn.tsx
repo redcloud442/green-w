@@ -50,21 +50,13 @@ export const TopUpColumn = (
           note,
         });
 
-        handleFetch();
-        setRequestData((prev) => {
-          if (prev) {
-            return {
-              ...prev,
-              merchantBalance: prev.merchantBalance - isOpenModal.amount,
-            };
-          }
-          return prev;
-        });
         toast({
           title: `Status Update`,
           description: `${status} Request Successfully`,
           variant: "success",
         });
+        handleFetch();
+
         setIsOpenModal({ open: false, requestId: "", status: "", amount: 0 });
         reset();
       } catch (e) {

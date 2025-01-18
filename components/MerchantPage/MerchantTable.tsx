@@ -228,7 +228,7 @@ const MerchantTable = ({ teamMemberProfile }: DataTableProps) => {
             }}
           >
             <DialogTrigger asChild>
-              <Button className="w-full sm:w-auto" variant="outline">
+              <Button variant="card" className="w-full sm:w-auto rounded-md">
                 Create New Merchant
               </Button>
             </DialogTrigger>
@@ -298,7 +298,7 @@ const MerchantTable = ({ teamMemberProfile }: DataTableProps) => {
                   rules={{ required: "Account type is required" }}
                   render={({ field, fieldState }) => (
                     <div className="flex flex-col gap-2">
-                      <Label>Account Type</Label>
+                      <Label>Account Name</Label>
                       <Input
                         placeholder="Enter the account type..."
                         {...field}
@@ -315,7 +315,12 @@ const MerchantTable = ({ teamMemberProfile }: DataTableProps) => {
                   <DialogClose asChild>
                     <Button variant="secondary">Cancel</Button>
                   </DialogClose>
-                  <Button disabled={formState.isSubmitting} type="submit">
+                  <Button
+                    variant="card"
+                    className="rounded-md"
+                    disabled={formState.isSubmitting}
+                    type="submit"
+                  >
                     {formState.isSubmitting ? (
                       <div className="flex items-center gap-2">
                         <Loader2 className="animate-spin" /> Creating ...
@@ -332,7 +337,8 @@ const MerchantTable = ({ teamMemberProfile }: DataTableProps) => {
             onClick={fetchMerchant}
             disabled={isFetchingList}
             size="sm"
-            className="w-full sm:w-auto"
+            variant="card"
+            className="w-full sm:w-auto rounded-md"
           >
             <RefreshCw className="mr-2" />
             Refresh

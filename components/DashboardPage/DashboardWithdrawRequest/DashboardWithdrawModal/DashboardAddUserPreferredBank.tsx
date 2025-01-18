@@ -103,7 +103,7 @@ const DashboardAddUserPreferredBank = ({
       </div>
 
       {open && (
-        <Card className="p-4 bg-sky-300">
+        <Card className="p-4 bg-sky-300 w-full max-w-[310px] sm:max-w-md">
           <form
             action={(formData) => handleSubmit(formData)}
             className="space-y-4"
@@ -140,20 +140,20 @@ const DashboardAddUserPreferredBank = ({
             <Button
               disabled={isLoading}
               variant="card"
-              className="rounded-md"
+              className="w-full rounded-md"
               type="submit"
             >
-              {isLoading ? "Adding..." : "SET ACCOUNT TO FAVORITES"}
+              {isLoading ? "Adding..." : "SET TO FAVORITES"}
             </Button>
             <Button
-              className="w-full rounded-md"
+              className=" w-full rounded-md"
               variant="outline"
               onClick={() => {
                 setOpen(false);
                 setSelectedOption("");
               }}
             >
-              Exit
+              close
             </Button>
           </form>
         </Card>

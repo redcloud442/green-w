@@ -378,7 +378,7 @@ const AdminTopUpApprovalTable = ({ teamMemberProfile }: DataTableProps) => {
     setShowFilters(checked);
     if (!checked) {
       reset();
-      handleSubmit(handleFilter)();
+      handleRefresh();
     }
   };
 
@@ -587,7 +587,7 @@ const AdminTopUpApprovalTable = ({ teamMemberProfile }: DataTableProps) => {
                 variant="card"
                 className="w-full md:w-auto rounded-md"
                 type="submit"
-                onClick={fetchRequest}
+                onClick={handleRefresh}
               >
                 Submit
               </Button>
@@ -704,7 +704,7 @@ const AdminTopUpApprovalTable = ({ teamMemberProfile }: DataTableProps) => {
         {activePage < pageCount && (
           <Button
             variant="card"
-            className="w-full md:w-auto rounded-md"
+            className="md:w-auto rounded-md"
             size="sm"
             onClick={() =>
               setActivePage((prev) => Math.min(prev + 1, pageCount))
