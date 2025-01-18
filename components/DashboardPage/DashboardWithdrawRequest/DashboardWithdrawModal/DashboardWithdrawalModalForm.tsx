@@ -43,9 +43,9 @@ const withdrawalFormSchema = z.object({
   earnings: z.string(),
   amount: z
     .string()
-    .min(3, "Minimum amount is required atleast 200 pesos")
-    .refine((amount) => parseInt(amount, 10) >= 200, {
-      message: "Amount must be at least 200 pesos",
+    .min(3, "Minimum amount is required atleast 30 pesos")
+    .refine((amount) => parseInt(amount, 10) >= 30, {
+      message: "Amount must be at least 30 pesos",
     }),
   bank: z.string().min(1, "Please select a bank"),
   email: z.string().email("Invalid email address").optional(),
@@ -511,11 +511,12 @@ const DashboardWithdrawalModalForm = ({
                     return;
                   }
 
+                  // Remove invalid characters (allow only digits and a single dot)
                   value = value.replace(/[^0-9.]/g, "");
 
                   const parts = value.split(".");
                   if (parts.length > 2) {
-                    value = `${parts[0]}.${parts[1]}`;
+                    value = `${parts[0]}.${parts[1]}`; // Prevent multiple dots
                   }
 
                   // Limit to 2 decimal places
@@ -523,13 +524,22 @@ const DashboardWithdrawalModalForm = ({
                     value = `${parts[0]}.${parts[1].substring(0, 2)}`;
                   }
 
-                  if (value.startsWith("0")) {
+                  // Remove leading zeros
+                  if (value.startsWith("0") && !value.startsWith("0.")) {
                     value = value.replace(/^0+/, "");
                   }
 
-                  // Limit total length to 10 characters
-                  if (Math.floor(Number(value)).toString().length > 7) {
-                    value = value.substring(0, 7);
+                  // Parse the value as a number and enforce the maximum amount
+                  const numericValue = parseFloat(value || "0");
+                  const maxAmount = getMaxAmount();
+
+                  if (numericValue > maxAmount) {
+                    value = maxAmount.toFixed(2).toString();
+                  }
+
+                  // Limit total length to the max amount's length (including decimals)
+                  if (value.length > maxAmount.toString().length) {
+                    value = value.substring(0, maxAmount.toString().length);
                   }
 
                   field.onChange(value);
