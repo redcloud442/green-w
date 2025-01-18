@@ -122,7 +122,7 @@ const DashboardPackages = ({
   };
 
   return (
-    <ScrollArea className="w-full pb-10">
+    <ScrollArea className="w-full pb-0">
       <div className="flex grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {chartData.map((data) => (
           <Card

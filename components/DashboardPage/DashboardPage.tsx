@@ -181,6 +181,7 @@ const DashboardPage = ({
       variant: "success",
     });
   };
+  console.log(totalEarnings?.rank);
 
   return (
     <div className="relative min-h-screen mx-auto space-y-4 py-2 px-2 sm:px-0 mt-0 sm:mt-20 sm:mb-20 overflow-x-hidden">
@@ -188,7 +189,7 @@ const DashboardPage = ({
 
       <div
         className={`flex flex-row  sm:fixed w-full sm:min-w-fit sm:max-w-lg justify-between px-0 py-4 sm:px-2 sm:py-4 items-center top-2 bg-transparent sm:bg-cardColor sm:rounded-tr-lg sm:rounded-br-lg z-50 ${
-          totalEarnings?.rank && Number(totalEarnings?.rank) > 3
+          totalEarnings?.rank
             ? "sm:py-0 sm:rounded-tr-lg sm:rounded-br-lg"
             : "sm:py-4 sm:rounded-tr-lg sm:rounded-br-lg"
         }`}
@@ -542,7 +543,7 @@ const DashboardPage = ({
         </ScrollArea>
 
         {chartData.length > 0 && (
-          <div className=" gap-6">
+          <div className=" gap-4">
             <p className="text-xl text-white sm:text-2xl font-thin">
               My Current Package
             </p>
