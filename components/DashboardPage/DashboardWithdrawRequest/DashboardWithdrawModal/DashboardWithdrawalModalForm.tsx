@@ -524,22 +524,26 @@ const DashboardWithdrawalModalForm = ({
                     value = `${parts[0]}.${parts[1].substring(0, 2)}`;
                   }
 
-                  // Remove leading zeros
+                  // Remove leading zeros unless it starts with "0."
                   if (value.startsWith("0") && !value.startsWith("0.")) {
                     value = value.replace(/^0+/, "");
                   }
 
-                  // Parse the value as a number and enforce the maximum amount
-                  const numericValue = parseFloat(value || "0");
-                  const maxAmount = getMaxAmount();
+                  // Enforce maximum length based on maxAmount excluding decimals
+                  const maxAmount = getMaxAmount(); // Replace with your actual maxAmount logic
+                  const maxLength = Math.floor(maxAmount).toString().length;
 
-                  if (numericValue > maxAmount) {
-                    value = maxAmount.toFixed(2).toString();
+                  // Truncate the integer part if it exceeds maxLength
+                  if (parts[0].length > maxLength) {
+                    value = `${parts[0].substring(0, maxLength)}${
+                      parts[1] ? `.${parts[1]}` : ""
+                    }`;
                   }
 
-                  // Limit total length to the max amount's length (including decimals)
-                  if (value.length > maxAmount.toString().length) {
-                    value = value.substring(0, maxAmount.toString().length);
+                  // Enforce the maximum amount value
+                  const numericValue = parseFloat(value || "0");
+                  if (numericValue > maxAmount) {
+                    value = maxAmount.toFixed(2);
                   }
 
                   field.onChange(value);
