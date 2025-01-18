@@ -21,7 +21,7 @@ export const getDashboard = async (
     throw new Error("Invalid ChartData format");
   }
 
-  const currentDate = new Date("2025-02-01T00:00:00Z");
+  const currentDate = new Date();
 
   const tomorrow = new Date(currentDate);
   tomorrow.setDate(currentDate.getDate() + 1);

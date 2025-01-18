@@ -86,6 +86,7 @@ export async function GET(request: Request) {
     );
   }
 }
+
 const withdrawalFormSchema = z.object({
   earnings: z.string(),
   amount: z
@@ -252,12 +253,7 @@ export async function POST(request: Request) {
       }),
       prisma.alliance_transaction_table.create({
         data: {
-          transaction_amount: Number(
-            calculateFee(Number(amount), earnings)
-          ).toLocaleString("en-US", {
-            maximumFractionDigits: 2,
-            minimumFractionDigits: 2,
-          }) as unknown as number,
+          transaction_amount: calculateFinalAmount(Number(amount), "TOTAL"),
           transaction_description: "Withdrawal Ongoing",
           transaction_member_id: teamMemberId,
         },
