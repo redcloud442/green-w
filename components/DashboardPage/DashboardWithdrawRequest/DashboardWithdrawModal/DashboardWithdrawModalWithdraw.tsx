@@ -98,8 +98,8 @@ const DashboardWithdrawModalWithdraw = ({
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="w-full max-w-xl">
-        <ScrollArea className="w-full relative sm:max-w-[400px] h-[600px] sm:h-full">
+      <DialogContent className="">
+        <ScrollArea className=" w-full  sm:max-w-full h-[600px] sm:h-full">
           <DialogHeader className="text-start text-2xl font-bold">
             <DialogTitle className="text-3xl font-bold text-center">
               Withdraw

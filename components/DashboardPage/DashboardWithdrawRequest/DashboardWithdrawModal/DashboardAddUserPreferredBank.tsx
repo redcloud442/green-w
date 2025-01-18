@@ -90,126 +90,122 @@ const DashboardAddUserPreferredBank = ({
   };
 
   return (
-    <div className="flex flex-col justify-start gap-2">
+    <div className="flex flex-col gap-2">
       <p className="text-2xl font-extrabold">FAVORITES</p>
 
-      <div className="space-y-4">
-        {/* Add Account Button */}
-        <div
-          onClick={() => setOpen(true)}
-          className="flex items-center justify-center gap-2 border-2 border-white p-2 cursor-pointer"
-        >
-          <p className="text-sm">ADD BYBIT ACCOUNT, EWALLET OR BANK DETAILS</p>
-          <PlusIcon />
-        </div>
+      {/* Add Account Button */}
+      <div
+        onClick={() => setOpen(true)}
+        className="flex items-center justify-center gap-2 border-2 border-white p-2 cursor-pointer"
+      >
+        <p className="text-sm">ADD BYBIT ACCOUNT, EWALLET OR BANK DETAILS</p>
+        <PlusIcon />
+      </div>
 
-        {open && (
-          <Card className="p-4 bg-sky-300">
-            <form
-              action={(formData) => handleSubmit(formData)}
-              className="space-y-4"
+      {open && (
+        <Card className="p-4 bg-sky-300">
+          <form
+            action={(formData) => handleSubmit(formData)}
+            className="space-y-4"
+          >
+            <Input type="text" name="accountName" placeholder="Account Name" />
+            <Input
+              type="text"
+              name="accountNumber"
+              placeholder="Account Number"
+            />
+            <Select
+              onValueChange={(value) => {
+                const bankNameInput = document.getElementById(
+                  "bankName"
+                ) as HTMLInputElement;
+                bankNameInput.value = value;
+              }}
             >
-              <Input
-                type="text"
-                name="accountName"
-                placeholder="Account Name"
-              />
-              <Input
-                type="text"
-                name="accountNumber"
-                placeholder="Account Number"
-              />
-              <Select
-                onValueChange={(value) => {
-                  const bankNameInput = document.getElementById(
-                    "bankName"
-                  ) as HTMLInputElement;
-                  bankNameInput.value = value;
-                }}
+              <SelectTrigger>
+                <SelectValue placeholder="Select Bank" />
+              </SelectTrigger>
+              <SelectContent>
+                {FINANCIAL_SERVICES.map((bank, index) => (
+                  <SelectItem key={index} value={bank}>
+                    {bank}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Hidden input to store selected bankName */}
+            <Input type="hidden" id="bankName" name="bankName" />
+
+            <Button
+              disabled={isLoading}
+              variant="card"
+              className="rounded-md"
+              type="submit"
+            >
+              {isLoading ? "Adding..." : "SET ACCOUNT TO FAVORITES"}
+            </Button>
+            <Button
+              className="w-full rounded-md"
+              variant="outline"
+              onClick={() => {
+                setOpen(false);
+                setSelectedOption("");
+              }}
+            >
+              Exit
+            </Button>
+          </form>
+        </Card>
+      )}
+
+      {/* Favorite Card with Radio Button */}
+      <ScrollArea className="min-h-auto max-h-[200px]">
+        <div className="flex flex-col gap-2 border-2 border-white p-2">
+          {isFetching ? (
+            <Skeleton className="h-12 w-full rounded-lg" />
+          ) : (
+            preferredWithdrawalList?.map((item) => (
+              <Card
+                key={item.alliance_preferred_withdrawal_id}
+                className="flex items-center justify-between bg-sky-300 px-4 py-1"
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Bank" />
-                </SelectTrigger>
-                <SelectContent>
-                  {FINANCIAL_SERVICES.map((bank, index) => (
-                    <SelectItem key={index} value={bank}>
-                      {bank}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                <div className="flex flex-col gap-1">
+                  <p className="text-sm font-extrabold">
+                    {item.alliance_preferred_withdrawal_bank_name}
+                  </p>
+                  <p className="text-sm">
+                    ACCOUNT NAME:{" "}
+                    {item.alliance_preferred_withdrawal_account_name}
+                  </p>
+                  <p className="text-sm">
+                    ACCOUNT NUMBER:{" "}
+                    {item.alliance_preferred_withdrawal_account_number}
+                  </p>
+                </div>
+                <div>
+                  <Input
+                    type="radio"
+                    name="preferredEarnings"
+                    value={item.alliance_preferred_withdrawal_id}
+                    checked={
+                      selectedOption === item.alliance_preferred_withdrawal_id
+                    }
+                    onChange={(e) => setSelectedOption(e.target.value)}
+                    className="w-4 h-4"
+                  />
+                </div>
+              </Card>
+            ))
+          )}
+          {preferredWithdrawalList?.length === 0 && (
+            <p className="text-sm">No favorite accounts found</p>
+          )}
+        </div>
+      </ScrollArea>
 
-              {/* Hidden input to store selected bankName */}
-              <Input type="hidden" id="bankName" name="bankName" />
-
-              <Button
-                disabled={isLoading}
-                variant="card"
-                className="rounded-md"
-                type="submit"
-              >
-                {isLoading ? "Adding..." : "SET ACCOUNT TO FAVORITES"}
-              </Button>
-              <Button
-                className="w-full rounded-md"
-                variant="outline"
-                onClick={() => {
-                  setOpen(false);
-                  setSelectedOption("");
-                }}
-              >
-                Exit
-              </Button>
-            </form>
-          </Card>
-        )}
-
-        {/* Favorite Card with Radio Button */}
-        <ScrollArea className="min-h-auto max-h-[200px]">
-          <div className="flex flex-col gap-2 border-2 border-white p-2">
-            {isFetching ? (
-              <Skeleton className="h-12 w-full rounded-lg" />
-            ) : (
-              preferredWithdrawalList?.map((item) => (
-                <Card
-                  key={item.alliance_preferred_withdrawal_id}
-                  className="flex items-center justify-between bg-sky-300 px-4 py-1"
-                >
-                  <div className="flex flex-col gap-1">
-                    <p className="text-sm font-extrabold">
-                      {item.alliance_preferred_withdrawal_bank_name}
-                    </p>
-                    <p className="text-sm">
-                      ACCOUNT NAME:{" "}
-                      {item.alliance_preferred_withdrawal_account_name}
-                    </p>
-                    <p className="text-sm">
-                      ACCOUNT NUMBER:{" "}
-                      {item.alliance_preferred_withdrawal_account_number}
-                    </p>
-                  </div>
-                  <div>
-                    <Input
-                      type="radio"
-                      name="preferredEarnings"
-                      value={item.alliance_preferred_withdrawal_id}
-                      checked={
-                        selectedOption === item.alliance_preferred_withdrawal_id
-                      }
-                      onChange={(e) => setSelectedOption(e.target.value)}
-                      className="w-4 h-4"
-                    />
-                  </div>
-                </Card>
-              ))
-            )}
-            {preferredWithdrawalList?.length === 0 && (
-              <p className="text-sm">No favorite accounts found</p>
-            )}
-          </div>
-        </ScrollArea>
-
-        {/* Submit Button */}
+      {/* Submit Button */}
+      <div className="flex justify-center items-center">
         <Button
           type="button"
           onClick={() => {
@@ -232,7 +228,7 @@ const DashboardAddUserPreferredBank = ({
             setOpen(false);
           }}
           variant="card"
-          className="w-full rounded-md"
+          className="w-72 sm:w-full rounded-md"
         >
           SUBMIT FOR WITHDRAWAL
         </Button>

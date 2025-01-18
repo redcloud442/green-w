@@ -156,7 +156,7 @@ const AllyBountyTable = ({ teamMemberProfile }: DataTableProps) => {
                 >
                   {headerGroup.headers.map((header) => (
                     <TableHead
-                      className="border-r border-black px-4 py-2 text-blue-500 hover:bg-transparent font-bold"
+                      className="border-r border-white px-4 py-2 text-blue-500 hover:bg-transparent font-bold"
                       key={header.id}
                     >
                       {header.isPlaceholder
@@ -181,7 +181,7 @@ const AllyBountyTable = ({ teamMemberProfile }: DataTableProps) => {
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell
-                        className="border-r border-black px-4 py-2"
+                        className="border-r border-white px-4 py-2"
                         key={cell.id}
                       >
                         {flexRender(
@@ -196,7 +196,7 @@ const AllyBountyTable = ({ teamMemberProfile }: DataTableProps) => {
                 <TableRow className="border-b border-black">
                   <TableCell
                     colSpan={columns.length}
-                    className="h-24 text-center border-r border-black"
+                    className="h-24 text-center border-r border-white"
                   >
                     No results.
                   </TableCell>

@@ -63,9 +63,11 @@ export type ChartDataMember = {
   completion_date: string;
   amount: number;
   is_ready_to_claim: boolean;
+  is_notified: boolean;
   package_connection_id: string;
   profit_amount: number;
   package_color: string;
+  package_member_id: string;
   package_date_created: string;
 };
 

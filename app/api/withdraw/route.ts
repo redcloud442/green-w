@@ -80,7 +80,6 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ success: true, data: withdrawals, totalCount });
   } catch (error) {
-    console.log(error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -253,7 +252,12 @@ export async function POST(request: Request) {
       }),
       prisma.alliance_transaction_table.create({
         data: {
-          transaction_amount: Number(calculateFee(Number(amount), earnings)),
+          transaction_amount: Number(
+            calculateFee(Number(amount), earnings)
+          ).toLocaleString("en-US", {
+            maximumFractionDigits: 2,
+            minimumFractionDigits: 2,
+          }) as unknown as number,
           transaction_description: "Withdrawal Ongoing",
           transaction_member_id: teamMemberId,
         },
@@ -262,7 +266,13 @@ export async function POST(request: Request) {
       prisma.alliance_notification_table.create({
         data: {
           alliance_notification_user_id: teamMemberId,
-          alliance_notification_message: `Withdrawal request is Ongoing amounting to ${amount}, Please wait for approval.`,
+          alliance_notification_message: `Withdrawal request is Ongoing amounting to ₱ ${calculateFinalAmount(
+            Number(amount),
+            earnings
+          ).toLocaleString("en-US", {
+            maximumFractionDigits: 2,
+            minimumFractionDigits: 2,
+          })} Please wait for approval.`,
         },
       }),
     ]);

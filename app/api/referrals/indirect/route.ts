@@ -70,8 +70,6 @@ export const GET = async (request: NextRequest) => {
 
     return NextResponse.json({ success: true, data: data });
   } catch (e) {
-    console.log(e);
-
     return NextResponse.json({ error: "An error occurred" }, { status: 500 });
   }
 };

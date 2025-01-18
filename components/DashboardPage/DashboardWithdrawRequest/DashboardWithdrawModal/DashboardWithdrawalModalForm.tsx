@@ -549,7 +549,7 @@ const DashboardWithdrawalModalForm = ({
                 });
                 return;
               }
-              setValue("amount", getMaxAmount().toString());
+              setValue("amount", getMaxAmount().toFixed(2).toString());
             }}
           >
             MAX

@@ -104,7 +104,7 @@ const TransactionHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
           {transactionHistory?.map((data, index) => (
             <CardContent
               key={data.transaction_id || `transaction-${index}`}
-              className="space-y-4 px-10"
+              className="space-y-4 px-4 sm:px-10"
             >
               {/* History Item */}
               <div className="flex items-center justify-between">
@@ -141,7 +141,7 @@ const TransactionHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
                   </div>
                 </div>
                 <div
-                  className={`flex items-center justify-center text-black font-bold text-lg sm:text-3xl ${
+                  className={`flex items-center justify-center text-black font-bold text-sm sm:text-3xl ${
                     data.transaction_description.includes("Success") ||
                     data.transaction_description.includes("Claimed")
                       ? "text-green-500"

@@ -162,6 +162,8 @@ const AvailPackagePage = ({
           profit_amount: computation,
           package_color: selectedPackage?.package_color || "",
           package_date_created: new Date().toISOString(),
+          is_notified: false,
+          package_member_id: teamMemberProfile?.alliance_member_id,
         },
         ...prev,
       ]);

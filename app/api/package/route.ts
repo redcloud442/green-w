@@ -257,7 +257,8 @@ export async function POST(request: Request) {
             .mul(ref.percentage)
             .div(100)
             .toNumber(),
-          transaction_description: "Refer & Earn",
+          transaction_description:
+            ref.level === 1 ? "Referral Income" : "Network Income",
         }));
 
         await Promise.all(

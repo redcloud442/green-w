@@ -56,7 +56,7 @@ const NotificationTable = ({ teamMemberProfile }: DataTableProps) => {
       setUserNotification({
         unread: isUnread ? data : [],
         read: !isUnread ? data : userNotification.read,
-        count,
+        count: userNotification.count,
       });
 
       setCount(count);
@@ -239,7 +239,7 @@ const NotificationTable = ({ teamMemberProfile }: DataTableProps) => {
                 )}
 
                 {userNotification.read.length > 0 &&
-                  userNotification.read.length < count && (
+                  userNotification.read.length < userNotification.count && (
                     <Button
                       className="mt-2 w-full"
                       variant="card"

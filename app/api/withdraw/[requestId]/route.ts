@@ -60,6 +60,23 @@ export async function PUT(
           where: { alliance_withdrawal_request_id: requestId },
         });
 
+      const requestor = await tx.alliance_member_table.findUnique({
+        where: {
+          alliance_member_id:
+            existingRequest?.alliance_withdrawal_request_member_id,
+        },
+        select: {
+          user_table: {
+            select: {
+              user_username: true,
+            },
+          },
+        },
+      });
+
+      // Access the username
+      const username = requestor?.user_table?.user_username;
+
       if (existingRequest?.alliance_withdrawal_request_status !== "PENDING") {
         throw new Error("Request has already been processed.");
       }
@@ -109,14 +126,17 @@ export async function PUT(
         data: {
           alliance_notification_user_id:
             updatedRequest.alliance_withdrawal_request_member_id,
-          alliance_notification_message: `Withdrawal is ${status.slice(0, 1).toUpperCase() + status.slice(1).toLowerCase()} amounting to ${updatedRequest.alliance_withdrawal_request_amount}, ${status === WITHDRAWAL_STATUS.REJECTED ? `( due to ${note})` : "Please check your account for the transaction."}`,
+          alliance_notification_message: `Withdrawal is ${status.slice(0, 1).toUpperCase() + status.slice(1).toLowerCase()} amounting to ₱ ${updatedRequest.alliance_withdrawal_request_amount - updatedRequest.alliance_withdrawal_request_fee}, ${status === WITHDRAWAL_STATUS.REJECTED ? `( due to ${note})` : "Please check your account for the transaction."}`,
         },
       });
 
-      return updatedRequest;
+      return { updatedRequest, username };
     });
 
-    return NextResponse.json({ success: true, data: result });
+    return NextResponse.json({
+      success: true,
+      data: result,
+    });
   } catch (error) {
     return NextResponse.json(
       {

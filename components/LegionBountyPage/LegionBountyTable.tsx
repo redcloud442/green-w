@@ -59,7 +59,7 @@ const LegionBountyTable = ({ teamMemberProfile }: DataTableProps) => {
 
   const fetchAdminRequest = async () => {
     try {
-      if (!teamMemberProfile || requestData.length > 0) return;
+      if (!teamMemberProfile) return;
       setIsFetchingList(true);
 
       const sanitizedData = escapeFormData(getValues());
@@ -159,7 +159,7 @@ const LegionBountyTable = ({ teamMemberProfile }: DataTableProps) => {
                 >
                   {headerGroup.headers.map((header) => (
                     <TableHead
-                      className="border-r border-black px-4 py-2 text-blue-500 hover:bg-transparent font-bold"
+                      className="border-r border-white px-4 py-2 text-blue-500 hover:bg-transparent font-bold"
                       key={header.id}
                     >
                       {header.isPlaceholder
@@ -184,7 +184,7 @@ const LegionBountyTable = ({ teamMemberProfile }: DataTableProps) => {
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell
-                        className="border-r border-black px-4 py-2"
+                        className="border-r border-white px-4 py-2"
                         key={cell.id}
                       >
                         {flexRender(

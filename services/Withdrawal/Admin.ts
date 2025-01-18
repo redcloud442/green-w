@@ -57,35 +57,39 @@ export const updateWithdrawalStatus = async (params: {
   }
   const { data } = result;
 
-  if (data.alliance_withdrawal_request_email) {
+  if (data) {
     await sendWithdrawalEmail({
-      to: data.alliance_withdrawal_request_email,
+      to: data.updatedRequest.alliance_withdrawal_request_email,
       from: "Elevate Team",
-      subject: `Withdrawal Request ${data.alliance_withdrawal_request_status.slice(0, 1).toUpperCase() + data.alliance_withdrawal_request_status.slice(1)} !`,
-      accountHolderName: data.user_username ?? "",
-      accountType: data.alliance_withdrawal_request_account_type ?? "",
-      accountBank: data.alliance_withdrawal_request_bank_name ?? "",
-      accountNumber: data.alliance_withdrawal_request_account_number ?? "",
+      subject: `Withdrawal Request ${data.updatedRequest.alliance_withdrawal_request_status.slice(0, 1) + data.updatedRequest.alliance_withdrawal_request_status.slice(1).toLowerCase()}.`,
+      accountHolderName: data.username ?? "",
+      accountType: data.alliance_withdrawal_request_bank_name ?? "",
+      accountBank:
+        data.updatedRequest.alliance_withdrawal_request_bank_name ?? "",
+      accountNumber:
+        data.updatedRequest.alliance_withdrawal_request_account ?? "",
       transactionDetails: {
         balance: "",
         date:
-          formatMonthDateYear(data.alliance_withdrawal_request_date) +
+          formatMonthDateYear(
+            data.updatedRequest.alliance_withdrawal_request_date
+          ) +
           ", " +
-          formatTime(data.alliance_withdrawal_request_date),
-        description: `Withdrawal ${data.alliance_withdrawal_request_status.slice(0, 1).toUpperCase() + data.alliance_withdrawal_request_status.slice(1)} ${data.alliance_withdrawal_request_reject_note ? `(${data.alliance_withdrawal_request_reject_note})` : ""} !`,
+          formatTime(data.updatedRequest.alliance_withdrawal_request_date),
+        description: `Withdrawal ${data.updatedRequest.alliance_withdrawal_request_status.slice(0, 1) + data.updatedRequest.alliance_withdrawal_request_status.slice(1).toLowerCase()} ${data.updatedRequest.alliance_withdrawal_request_reject_note ? `(${data.updatedRequest.alliance_withdrawal_request_reject_note})` : ""} !`,
         amount:
           "₱" +
           Number(
-            data.alliance_withdrawal_request_amount -
-              data.alliance_withdrawal_request_fee || 0
+            data.updatedRequest.alliance_withdrawal_request_amount -
+              data.updatedRequest.alliance_withdrawal_request_fee || 0
           ).toLocaleString("en-US", {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           }),
       },
-      message: `Your withdrawal request has been ${data.alliance_withdrawal_request_status.slice(0, 1).toUpperCase() + data.alliance_withdrawal_request_status.slice(1)} !`,
+      message: `Your withdrawal request has been ${data.updatedRequest.alliance_withdrawal_request_status.slice(0, 1) + data.updatedRequest.alliance_withdrawal_request_status.slice(1).toLowerCase()} !`,
       greetingPhrase: "Hello!",
-      closingPhrase: "Thank you for continuous Elevating with us.",
+      closingPhrase: "Thank you for continuously Elevating with us.",
       signature: "The Elevate Team",
     });
   }
