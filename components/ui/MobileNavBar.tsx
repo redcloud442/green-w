@@ -88,15 +88,10 @@ const MobileNavBar = () => {
   useEffect(() => {
     const handleFetchUserInformation = async () => {
       try {
-        const {
-          unreadNotification,
-          readNotification,
-          count,
-          teamMemberProfile,
-        } = await getUserNotification();
+        const { count, teamMemberProfile } = await getUserNotification();
         setUserNotification({
-          unread: unreadNotification,
-          read: readNotification,
+          unread: [],
+          read: [],
           count,
         });
         setTeamMemberProfile(teamMemberProfile);

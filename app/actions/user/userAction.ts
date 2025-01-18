@@ -37,29 +37,6 @@ export const getUserNotification = async () => {
       redirect("/");
     }
 
-    const unreadNotification =
-      await prisma.alliance_notification_table.findMany({
-        where: {
-          alliance_notification_user_id: teamMemberProfile?.alliance_member_id,
-          alliance_notification_is_read: false,
-        },
-        take: 10,
-        orderBy: {
-          alliance_notification_date_created: "desc",
-        },
-      });
-
-    const userNotification = await prisma.alliance_notification_table.findMany({
-      where: {
-        alliance_notification_user_id: teamMemberProfile?.alliance_member_id,
-        alliance_notification_is_read: true,
-      },
-      take: 10,
-      orderBy: {
-        alliance_notification_date_created: "desc",
-      },
-    });
-
     const count = await prisma.alliance_notification_table.count({
       where: {
         alliance_notification_user_id: teamMemberProfile?.alliance_member_id,
@@ -69,8 +46,7 @@ export const getUserNotification = async () => {
 
     return {
       teamMemberProfile,
-      unreadNotification: unreadNotification as alliance_notification_table[],
-      readNotification: userNotification as alliance_notification_table[],
+
       count: count,
     };
   } catch (error) {

@@ -195,18 +195,14 @@ const DashboardWithdrawalModalForm = ({
           break;
       }
 
+      const transactionAmount = calculateFinalAmount(
+        Number(amount || 0),
+        "TOTAL"
+      );
       const transactionHistory: alliance_transaction_table = {
         transaction_member_id: teamMemberProfile.alliance_member_id,
         transaction_description: "Withdrawal Ongoing",
-        transaction_amount: Number(
-          calculateFinalAmount(Number(amount || 0), "TOTAL").toLocaleString(
-            "en-US",
-            {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            }
-          )
-        ),
+        transaction_amount: transactionAmount,
         transaction_date: new Date(),
         transaction_id: uuidv4(),
       };
@@ -311,9 +307,7 @@ const DashboardWithdrawalModalForm = ({
             }),
           balance:
             "₱" +
-            (
-              totalEarnings - calculateFinalAmount(Number(amount || 0), "TOTAL")
-            ).toLocaleString("en-US", {
+            (totalEarnings - Number(amount || 0)).toLocaleString("en-US", {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
             }),
