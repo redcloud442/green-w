@@ -270,8 +270,8 @@ const DashboardPage = ({
               Number(earnings?.alliance_combined_earnings ?? 0).toLocaleString(
                 "en-US",
                 {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
                 }
               ) as unknown as number
             }
@@ -309,8 +309,8 @@ const DashboardPage = ({
                     ) : (
                       "₱ " +
                       (totalEarnings?.totalEarnings.toLocaleString("en-US", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0,
                       }) ?? 0)
                     )}
                   </p>

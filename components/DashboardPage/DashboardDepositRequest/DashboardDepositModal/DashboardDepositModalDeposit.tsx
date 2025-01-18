@@ -180,6 +180,7 @@ const DashboardDepositModalDeposit = ({
     const selectedOption = topUpOptions.find(
       (option) => option.merchant_id === value
     );
+
     if (selectedOption) {
       setValue("accountName", selectedOption.merchant_account_name || "");
       setValue("accountNumber", selectedOption.merchant_account_number || "");
@@ -239,6 +240,7 @@ const DashboardDepositModalDeposit = ({
                 render={({ field }) => (
                   <Select
                     onValueChange={(value) => {
+                      console.log(value);
                       field.onChange(value);
                       onTopUpModeChange(value);
                     }}
@@ -251,7 +253,7 @@ const DashboardDepositModalDeposit = ({
                       {topUpOptions.map((option) => (
                         <SelectItem
                           key={option.merchant_id}
-                          value={option.merchant_account_type}
+                          value={option.merchant_id}
                         >
                           {option.merchant_account_type} -{" "}
                           {option.merchant_account_name}
