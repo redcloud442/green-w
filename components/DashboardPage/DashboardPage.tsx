@@ -181,7 +181,6 @@ const DashboardPage = ({
       variant: "success",
     });
   };
-  console.log(totalEarnings?.rank);
 
   return (
     <div className="relative min-h-screen mx-auto space-y-4 py-2 px-2 sm:px-0 mt-0 sm:mt-20 sm:mb-20 overflow-x-hidden">
