@@ -146,10 +146,9 @@ export const registerUser = async (params: {
   url: string;
 }) => {
   try {
-    console.log(params);
     const supabaseClient = await createClientServerSide();
     const validate = registerUserSchema.safeParse(params);
-    console.log(validate);
+
     if (!validate.success) {
       throw new Error(validate.error.message);
     }
@@ -195,7 +194,6 @@ export const registerUser = async (params: {
 
     return { success: true };
   } catch (error) {
-    console.log(error);
     throw new Error(
       error instanceof Error ? error.message : "An unknown error occurred."
     );
