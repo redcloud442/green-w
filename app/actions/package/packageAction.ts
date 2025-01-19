@@ -9,7 +9,7 @@ const availPackageSchema = z.object({
   amount: z.number().min(1),
   earnings: z.number().min(1),
   packageConnectionId: z.string().uuid(),
-  package: z.string(),
+  packageName: z.string(),
 });
 
 export const claimPackage = async (params: {
@@ -106,6 +106,7 @@ export const claimPackage = async (params: {
 
     return { success: true, totalClaimedAmount };
   } catch (error) {
+    console.log(error);
     throw new Error("Internal server error");
   }
 };
