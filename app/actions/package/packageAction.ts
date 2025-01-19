@@ -9,20 +9,23 @@ const availPackageSchema = z.object({
   amount: z.number().min(1),
   earnings: z.number().min(1),
   packageConnectionId: z.string().uuid(),
+  package: z.string(),
 });
 
 export const claimPackage = async (params: {
   packageConnectionId: string;
   amount: number;
   earnings: number;
+  packageName: string;
 }) => {
   try {
-    const { packageConnectionId, amount, earnings } = params;
+    const { packageConnectionId, amount, earnings, packageName } = params;
 
     const parsedData = availPackageSchema.safeParse({
       amount,
       packageConnectionId,
       earnings,
+      packageName,
     });
 
     if (!parsedData.success) {
@@ -56,7 +59,7 @@ export const claimPackage = async (params: {
     const totalClaimedAmount =
       packageConnection.package_member_amount +
       packageConnection.package_amount_earnings;
-    const totalAmountToBeClaimed = amount + earnings;
+    const totalAmountToBeClaimed = BigInt(amount) + BigInt(earnings);
 
     if (totalClaimedAmount !== totalAmountToBeClaimed) {
       throw new Error("Invalid request");
@@ -82,7 +85,7 @@ export const claimPackage = async (params: {
         data: {
           transaction_member_id: teamMemberProfile.alliance_member_id,
           transaction_amount: totalClaimedAmount,
-          transaction_description: "Package Claimed",
+          transaction_description: `Package Claimed ${packageName}`,
         },
       });
 

@@ -57,7 +57,8 @@ const MerchantBalance = ({ userProfile }: Props) => {
       setMerchantData((prev) => ({
         ...prev,
         merchant_member_balance:
-          Number(sanitizedData.balance) + merchantData.merchant_member_balance,
+          BigInt(Number(sanitizedData.balance)) +
+          BigInt(merchantData.merchant_member_balance),
       }));
       toast({
         title: "Merchant Balance Updated Successfully",

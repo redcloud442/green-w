@@ -1,3 +1,4 @@
+import { formateMonthDateYear, formatTime } from "@/utils/function";
 import { user_table } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 
@@ -12,6 +13,18 @@ export const AllyBountyColumn = (): ColumnDef<
       cell: ({ row }) => <div className="text-center">{row.index + 1}.</div>,
     },
     {
+      accessorKey: "package_ally_bounty_log_date_created",
+      header: () => <div className="text-center text-lg font-bold">Date</div>,
+      cell: ({ row }) => (
+        <div className="text-wrap">
+          {formateMonthDateYear(
+            row.getValue("package_ally_bounty_log_date_created")
+          )}
+          , {formatTime(row.getValue("package_ally_bounty_log_date_created"))}
+        </div>
+      ),
+    },
+    {
       accessorKey: "user_username",
       header: () => (
         <div className="text-center text-lg font-bold">Username</div>
@@ -20,6 +33,7 @@ export const AllyBountyColumn = (): ColumnDef<
         <div className="text-wrap">{row.getValue("user_username")}</div>
       ),
     },
+
     {
       accessorKey: "total_bounty_earnings",
       header: () => <div className="text-center text-lg font-bold">Amount</div>,

@@ -147,7 +147,7 @@ const DashboardDepositModalDeposit = ({
         transaction_id: uuidv4(),
         transaction_date: new Date(),
         transaction_description: "Deposit Ongoing",
-        transaction_amount: Number(sanitizedData.amount),
+        transaction_amount: BigInt(Number(sanitizedData.amount)),
         transaction_member_id: teamMemberProfile?.alliance_member_id,
       };
       setAddTransactionHistory([transactionHistory]);
@@ -233,21 +233,20 @@ const DashboardDepositModalDeposit = ({
 
             {/* Top-Up Mode */}
             <div>
-              <Label htmlFor="topUpMode">Select Bank</Label>
+              <Label htmlFor="topUpMode">Select Bank Or E-Wallet</Label>
               <Controller
                 name="topUpMode"
                 control={control}
                 render={({ field }) => (
                   <Select
                     onValueChange={(value) => {
-                      console.log(value);
                       field.onChange(value);
                       onTopUpModeChange(value);
                     }}
                     value={field.value}
                   >
                     <SelectTrigger className="text-center">
-                      <SelectValue placeholder="Select Cashier Bank" />
+                      <SelectValue placeholder="Select Bank Or E-Wallet" />
                     </SelectTrigger>
                     <SelectContent>
                       {topUpOptions.map((option) => (

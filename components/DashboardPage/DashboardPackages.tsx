@@ -60,14 +60,15 @@ const DashboardPackages = ({
         packageConnectionId: package_connection_id,
         amount,
         earnings: profit_amount,
+        packageName: packageData.package,
       });
 
       if (response.success) {
         const transactionHistory = {
           transaction_id: uuidv4(),
           transaction_date: new Date(),
-          transaction_description: "Package Claimed",
-          transaction_amount: Number(profit_amount + amount),
+          transaction_description: `Package Claimed ${packageData.package}`,
+          transaction_amount: BigInt(profit_amount + amount),
           transaction_member_id: teamMemberProfile?.alliance_member_id,
         };
 
@@ -93,9 +94,9 @@ const DashboardPackages = ({
           return {
             ...prev,
             alliance_olympus_earnings:
-              prev.alliance_olympus_earnings + newEarnings,
+              BigInt(prev.alliance_olympus_earnings) + BigInt(newEarnings),
             alliance_combined_earnings:
-              prev.alliance_combined_earnings + newEarnings,
+              BigInt(prev.alliance_combined_earnings) + BigInt(newEarnings),
           };
         });
 
@@ -173,17 +174,31 @@ const DashboardPackages = ({
                 <span className="text-sm font-extrabold text-white">
                   Amount Deposited: ₱{" "}
                   {data.amount.toLocaleString("en-US", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
                   })}
                 </span>
                 <span className="text-sm font-extrabold text-white">
                   Amount to Claim: ₱{" "}
                   {(data.profit_amount + data.amount).toLocaleString("en-US", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
                   })}
                 </span>
+              </div>
+
+              <div className="flex flex-col items-center bg-white rounded-xl p-2">
+                <span className="text-sm font-extrabold text-black">
+                  Daily Income
+                </span>
+                ₱{" "}
+                {(data.profit_amount / (data.package_days || 1)).toLocaleString(
+                  "en-US",
+                  {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                  }
+                )}
               </div>
 
               <div className="flex flex-col items-center bg-white rounded-xl p-2">
@@ -192,8 +207,8 @@ const DashboardPackages = ({
                 </span>
                 ₱{" "}
                 {data.profit_amount.toLocaleString("en-US", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
                 })}
               </div>
             </CardContent>

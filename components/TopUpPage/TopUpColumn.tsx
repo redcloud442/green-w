@@ -282,7 +282,7 @@ export const TopUpColumn = (
                       open: true,
                       requestId: data.alliance_top_up_request_id,
                       status: "APPROVED",
-                      amount: data.alliance_top_up_request_amount || 0,
+                      amount: Number(data.alliance_top_up_request_amount) || 0,
                     })
                   }
                 >

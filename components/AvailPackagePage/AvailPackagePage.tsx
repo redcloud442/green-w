@@ -57,10 +57,10 @@ const AvailPackagePage = ({
     amount: z
       .string()
       .min(1, "Minimum amount is 1 pesos")
-      .refine((val) => !isNaN(parseFloat(val)), {
+      .refine((val) => !isNaN(Number(val)), {
         message: "Amount must be a number",
       })
-      .refine((val) => parseFloat(val) <= parseFloat(maxAmount.toFixed(2)), {
+      .refine((val) => Number(val) <= Number(maxAmount), {
         message: `Amount cannot exceed ${formattedMaxAmount}`,
       }),
     packageId: z.string(),
@@ -85,7 +85,7 @@ const AvailPackagePage = ({
 
   const amount = watch("amount");
   const computation = amount
-    ? (Number(amount) * (selectedPackage?.package_percentage ?? 0)) / 100
+    ? (Number(amount) * Number(selectedPackage?.package_percentage ?? 0)) / 100
     : 0;
   const sumOfTotal = Number(amount) + computation;
 
@@ -95,7 +95,7 @@ const AvailPackagePage = ({
       const now = new Date();
       const completionDate = new Date(
         now.getTime() +
-          (selectedPackage?.packages_days ?? 0) * 24 * 60 * 60 * 1000
+          Number(selectedPackage?.packages_days ?? 0) * 24 * 60 * 60 * 1000
       );
 
       await createPackageConnection({
@@ -110,7 +110,7 @@ const AvailPackagePage = ({
         transaction_id: uuidv4(),
         transaction_date: new Date(),
         transaction_description: "Package Enrolled",
-        transaction_amount: Number(result.amount),
+        transaction_amount: BigInt(Number(result.amount)),
         transaction_member_id: teamMemberProfile?.alliance_member_id,
       };
 
@@ -128,28 +128,31 @@ const AvailPackagePage = ({
 
         const olympusDeduction = Math.min(
           remainingAmount,
-          earnings.alliance_olympus_earnings
+          Number(earnings.alliance_olympus_earnings)
         );
         remainingAmount -= olympusDeduction;
 
         const referralDeduction = Math.min(
           remainingAmount,
-          earnings.alliance_referral_bounty
+          Number(earnings.alliance_referral_bounty)
         );
         remainingAmount -= referralDeduction;
 
         setEarnings({
           ...earnings,
           alliance_combined_earnings:
-            earnings.alliance_combined_earnings - Number(result.amount),
+            BigInt(earnings.alliance_combined_earnings) -
+            BigInt(Number(result.amount)),
           alliance_olympus_earnings:
-            earnings.alliance_olympus_earnings - olympusDeduction,
+            BigInt(earnings.alliance_olympus_earnings) -
+            BigInt(olympusDeduction),
           alliance_referral_bounty:
-            earnings.alliance_referral_bounty - referralDeduction,
+            BigInt(earnings.alliance_referral_bounty) -
+            BigInt(referralDeduction),
         });
       }
 
-      setMaxAmount((prev) => prev - result.amount);
+      setMaxAmount((prev) => Number(prev) - Number(result.amount));
 
       setChartData((prev) => [
         {
@@ -159,11 +162,12 @@ const AvailPackagePage = ({
           amount: Number(amount),
           is_ready_to_claim: false,
           package_connection_id: selectedPackage?.package_id || "",
-          profit_amount: computation,
+          profit_amount: Number(computation),
           package_color: selectedPackage?.package_color || "",
           package_date_created: new Date().toISOString(),
           is_notified: false,
           package_member_id: teamMemberProfile?.alliance_member_id,
+          package_days: Number(selectedPackage?.packages_days || 0),
         },
         ...prev,
       ]);
@@ -212,33 +216,37 @@ const AvailPackagePage = ({
                       onChange={(e) => {
                         let value = e.target.value;
 
-                        // Allow deleting the value
                         if (value === "") {
                           field.onChange("");
                           return;
                         }
 
                         // Allow only numbers and a single decimal point
-                        value = value.replace(/[^0-9.]/g, "");
+                        value = value.replace(/[^0-9]/g, "");
 
-                        // Split the value to check for decimal places
+                        // Prevent multiple decimal points
                         const parts = value.split(".");
                         if (parts.length > 2) {
-                          value = parts[0] + "." + parts[1]; // Keep only the first decimal
+                          value = parts[0] + "." + parts[1]; // Keep only the first decimal part
                         }
 
-                        // Limit to 2 decimal places
-                        if (parts[1]?.length > 2) {
-                          value = `${parts[0]}.${parts[1].substring(0, 2)}`;
-                        }
-
-                        // Remove leading zeros unless it's "0."
+                        // Ensure it doesn't start with multiple zeros (e.g., "00")
                         if (value.startsWith("0") && !value.startsWith("0.")) {
-                          value = value.replace(/^0+/, "");
+                          value = value.replace(/^0+/, "0");
                         }
 
-                        if (Math.floor(Number(value)).toString().length > 7) {
-                          value = value.substring(0, 7);
+                        // Limit decimal places to 2 (adjust as needed)
+                        if (value.includes(".")) {
+                          const [integerPart, decimalPart] = value.split(".");
+                          value = `${integerPart}.${decimalPart.slice(0, 2)}`;
+                        }
+
+                        const amount = maxAmount;
+
+                        // Enforce the maximum amount value
+                        const numericValue = parseFloat(value || "0");
+                        if (!isNaN(numericValue) && numericValue > amount) {
+                          value = amount.toString(); // Adjust precision to match allowed decimals
                         }
 
                         field.onChange(value);
@@ -251,7 +259,7 @@ const AvailPackagePage = ({
                 variant="card"
                 type="button"
                 onClick={() => {
-                  setValue("amount", maxAmount.toFixed(2));
+                  setValue("amount", maxAmount.toString());
                 }}
                 className="h-8 text-sm text-black"
               >

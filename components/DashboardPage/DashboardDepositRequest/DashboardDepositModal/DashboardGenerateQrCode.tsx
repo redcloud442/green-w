@@ -28,7 +28,8 @@ const DashboardGenerateQrCode = ({ url }: Props) => {
     >
       <DialogTrigger asChild>
         <Button
-          className="dark:bg-pageColor z-50  dark:text-white h-8 p-2 fixed bottom-20 left-2"
+          variant="card"
+          className=" p-1 h-6 rounded-sm"
           onClick={() => setOpen(true)}
         >
           <QrCodeIcon className="w-4 h-4" />

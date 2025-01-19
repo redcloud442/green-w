@@ -114,8 +114,8 @@ const DashboardWithdrawalModalForm = ({
   const amount = watch("amount");
 
   const totalEarnings =
-    (earnings?.alliance_olympus_earnings ?? 0) +
-    (earnings?.alliance_referral_bounty ?? 0);
+    Number(earnings?.alliance_olympus_earnings ?? 0) +
+    Number(earnings?.alliance_referral_bounty ?? 0);
 
   const getMaxAmount = () => {
     switch (selectedEarnings) {
@@ -161,14 +161,14 @@ const DashboardWithdrawalModalForm = ({
             // Calculate Olympus Earnings deduction
             const olympusDeduction = Math.min(
               remainingAmount,
-              earnings.alliance_olympus_earnings
+              Number(earnings.alliance_olympus_earnings)
             );
             remainingAmount -= olympusDeduction;
 
             // Calculate Referral Bounty deduction
             const referralDeduction = Math.min(
               remainingAmount,
-              earnings.alliance_referral_bounty
+              Number(earnings.alliance_referral_bounty)
             );
             remainingAmount -= referralDeduction;
 
@@ -182,12 +182,14 @@ const DashboardWithdrawalModalForm = ({
             setEarnings({
               ...earnings,
               alliance_combined_earnings:
-                earnings.alliance_combined_earnings -
-                Number(sanitizedData.amount),
+                BigInt(earnings.alliance_combined_earnings) -
+                BigInt(Number(sanitizedData.amount)),
               alliance_olympus_earnings:
-                earnings.alliance_olympus_earnings - olympusDeduction,
+                BigInt(earnings.alliance_olympus_earnings) -
+                BigInt(olympusDeduction),
               alliance_referral_bounty:
-                earnings.alliance_referral_bounty - referralDeduction,
+                BigInt(earnings.alliance_referral_bounty) -
+                BigInt(referralDeduction),
             });
           }
           break;
@@ -202,7 +204,7 @@ const DashboardWithdrawalModalForm = ({
       const transactionHistory: alliance_transaction_table = {
         transaction_member_id: teamMemberProfile.alliance_member_id,
         transaction_description: "Withdrawal Ongoing",
-        transaction_amount: transactionAmount,
+        transaction_amount: BigInt(transactionAmount),
         transaction_date: new Date(),
         transaction_id: uuidv4(),
       };
@@ -214,8 +216,8 @@ const DashboardWithdrawalModalForm = ({
           calculateFinalAmount(Number(amount || 0), "TOTAL").toLocaleString(
             "en-US",
             {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 0,
             }
           ) +
           " Please wait for approval.",
@@ -267,8 +269,8 @@ const DashboardWithdrawalModalForm = ({
           calculateFinalAmount(Number(amount || 0), "TOTAL").toLocaleString(
             "en-US",
             {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 0,
             }
           ),
       });
@@ -282,7 +284,7 @@ const DashboardWithdrawalModalForm = ({
       await sendWithdrawalEmail({
         to: sanitizedData.email ?? "",
         from: "Elevate Team",
-        subject: "Withdrawal Request Ongoing !",
+        subject: "Withdrawal Request Ongoing.",
         accountHolderName: profile.user_username ?? sanitizedData.accountName,
         accountType:
           preferredEarnings?.alliance_preferred_withdrawal_account_name ??
@@ -295,21 +297,21 @@ const DashboardWithdrawalModalForm = ({
           sanitizedData.accountNumber,
         transactionDetails: {
           date: formatMonthDateYear(new Date().toISOString()),
-          description: "Withdrawal Request Ongoing !",
+          description: "Withdrawal Request Ongoing.",
           amount:
             "₱" +
             calculateFinalAmount(
               Number(amount || 0),
               selectedEarnings
             ).toLocaleString("en-US", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 0,
             }),
           balance:
             "₱" +
             (totalEarnings - Number(amount || 0)).toLocaleString("en-US", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 0,
             }),
         },
         message: "We noticed a new transaction on your account.",
@@ -337,8 +339,8 @@ const DashboardWithdrawalModalForm = ({
         <Label className="text-green-700" htmlFor="earnings">
           Your Available Balance: ₱
           {totalEarnings.toLocaleString("en-US", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
           })}
         </Label>
       </div>
@@ -505,39 +507,32 @@ const DashboardWithdrawalModalForm = ({
                     return;
                   }
 
-                  // Remove invalid characters (allow only digits and a single dot)
-                  value = value.replace(/[^0-9.]/g, "");
+                  // Allow only numbers and a single decimal point
+                  value = value.replace(/[^0-9]/g, "");
 
+                  // Prevent multiple decimal points
                   const parts = value.split(".");
                   if (parts.length > 2) {
-                    value = `${parts[0]}.${parts[1]}`; // Prevent multiple dots
+                    value = parts[0] + "." + parts[1]; // Keep only the first decimal part
                   }
 
-                  // Limit to 2 decimal places
-                  if (parts[1]?.length > 2) {
-                    value = `${parts[0]}.${parts[1].substring(0, 2)}`;
-                  }
-
-                  // Remove leading zeros unless it starts with "0."
+                  // Ensure it doesn't start with multiple zeros (e.g., "00")
                   if (value.startsWith("0") && !value.startsWith("0.")) {
-                    value = value.replace(/^0+/, "");
+                    value = value.replace(/^0+/, "0");
                   }
 
-                  // Enforce maximum length based on maxAmount excluding decimals
-                  const maxAmount = getMaxAmount(); // Replace with your actual maxAmount logic
-                  const maxLength = Math.floor(maxAmount).toString().length;
-
-                  // Truncate the integer part if it exceeds maxLength
-                  if (parts[0].length > maxLength) {
-                    value = `${parts[0].substring(0, maxLength)}${
-                      parts[1] ? `.${parts[1]}` : ""
-                    }`;
+                  // Limit decimal places to 2 (adjust as needed)
+                  if (value.includes(".")) {
+                    const [integerPart, decimalPart] = value.split(".");
+                    value = `${integerPart}.${decimalPart.slice(0, 2)}`;
                   }
+
+                  const maxAmount = getMaxAmount();
 
                   // Enforce the maximum amount value
                   const numericValue = parseFloat(value || "0");
-                  if (numericValue > maxAmount) {
-                    value = maxAmount.toFixed(2);
+                  if (!isNaN(numericValue) && numericValue > maxAmount) {
+                    value = maxAmount.toFixed(0); // Adjust precision to match allowed decimals
                   }
 
                   field.onChange(value);
@@ -557,7 +552,7 @@ const DashboardWithdrawalModalForm = ({
                 });
                 return;
               }
-              setValue("amount", getMaxAmount().toFixed(2).toString());
+              setValue("amount", getMaxAmount().toFixed(0).toString());
             }}
           >
             MAX
@@ -582,8 +577,8 @@ const DashboardWithdrawalModalForm = ({
               Number(amount || 0),
               selectedEarnings
             ).toLocaleString("en-US", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 0,
             })}
           />
         </div>

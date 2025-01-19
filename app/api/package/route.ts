@@ -153,8 +153,8 @@ export async function POST(request: Request) {
       alliance_combined_earnings,
     } = earningsData;
 
-    const combinedEarnings = Math.round(alliance_combined_earnings * 100) / 100; // Normalize to 2 decimal places
-    const requestedAmount = Math.round(amount * 100) / 100; // Normalize to 2 decimal places
+    const combinedEarnings = Number(alliance_combined_earnings) / 100; // Normalize to 2 decimal places
+    const requestedAmount = Number(amount) / 100; // Normalize to 2 decimal places
 
     if (combinedEarnings < requestedAmount) {
       return NextResponse.json(
@@ -172,13 +172,13 @@ export async function POST(request: Request) {
     } = deductFromWallets(
       amount,
       combinedEarnings,
-      alliance_olympus_wallet,
-      alliance_olympus_earnings,
-      alliance_referral_bounty
+      Number(alliance_olympus_wallet),
+      Number(alliance_olympus_earnings),
+      Number(alliance_referral_bounty)
     );
     // Calculate earnings
     const packagePercentage = new Prisma.Decimal(
-      packageData.package_percentage
+      Number(packageData.package_percentage)
     ).div(100);
     const packageAmountEarnings = decimalAmount
       .mul(packagePercentage)
@@ -225,6 +225,8 @@ export async function POST(request: Request) {
     let bountyLogs: Prisma.package_ally_bounty_logCreateManyInput[] = [];
     let transactionLogs: Prisma.alliance_transaction_tableCreateManyInput[] =
       [];
+    let notificationLogs: Prisma.alliance_notification_tableCreateManyInput[] =
+      [];
 
     if (referralChain.length > 0) {
       const batchSize = 100;
@@ -258,7 +260,17 @@ export async function POST(request: Request) {
             .div(100)
             .toNumber(),
           transaction_description:
-            ref.level === 1 ? "Referral Income" : "Network Income",
+            ref.level === 1
+              ? "Referral Income"
+              : `Network Income Level ${ref.level}`,
+        }));
+
+        notificationLogs = batch.map((ref) => ({
+          alliance_notification_user_id: ref.referrerId,
+          alliance_notification_message:
+            ref.level === 1
+              ? "Referral Income"
+              : `Network Income Level ${ref.level}`,
         }));
 
         await Promise.all(
@@ -289,6 +301,9 @@ export async function POST(request: Request) {
       prisma.package_ally_bounty_log.createMany({ data: bountyLogs }),
       prisma.alliance_transaction_table.createMany({
         data: transactionLogs,
+      }),
+      prisma.alliance_notification_table.createMany({
+        data: notificationLogs,
       }),
     ]);
 

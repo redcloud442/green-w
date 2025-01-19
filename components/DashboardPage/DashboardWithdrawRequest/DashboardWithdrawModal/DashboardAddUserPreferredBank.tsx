@@ -123,7 +123,7 @@ const DashboardAddUserPreferredBank = ({
               }}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select Bank" />
+                <SelectValue placeholder="Select Bank Or E-Wallets" />
               </SelectTrigger>
               <SelectContent>
                 {FINANCIAL_SERVICES.map((bank, index) => (

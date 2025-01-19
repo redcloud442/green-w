@@ -37,6 +37,7 @@ export async function POST(request: NextRequest) {
     if (limit !== 10) {
       return NextResponse.json({ error: "Invalid limit" }, { status: 400 });
     }
+
     // Fetch total count of transactions for the user
     const totalTransactions = await prisma.alliance_transaction_table.count({
       where: {
@@ -59,7 +60,7 @@ export async function POST(request: NextRequest) {
         },
         select: {
           transaction_description: true,
-          transaction_amount: true,
+          transaction_amount: true, // BigInt column
           transaction_date: true,
         },
         skip: offset,
@@ -70,9 +71,17 @@ export async function POST(request: NextRequest) {
       }
     );
 
+    // Convert BigInt to string for JSON serialization
+    const serializedTransactionHistory = transactionHistory.map(
+      (transaction) => ({
+        ...transaction,
+        transaction_amount: transaction.transaction_amount?.toString() || "0",
+      })
+    );
+
     // Return the paginated data and total count
     return NextResponse.json({
-      transactionHistory,
+      transactionHistory: serializedTransactionHistory,
       totalTransactions,
     });
   } catch (e) {

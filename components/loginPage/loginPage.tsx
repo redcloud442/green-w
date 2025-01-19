@@ -60,7 +60,7 @@ const LoginPage = () => {
       });
 
       toast({
-        title: "Infinity Login Successfully",
+        title: "Logging in to Elevate",
       });
 
       setIsSuccess(true);

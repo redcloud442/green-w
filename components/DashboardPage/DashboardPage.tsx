@@ -14,13 +14,7 @@ import {
   package_table,
   user_table,
 } from "@prisma/client";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@radix-ui/react-tooltip";
-import { InfoIcon } from "lucide-react";
+import { Info } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -29,6 +23,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Badge } from "../ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import CardAmount from "../ui/cardAmount";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { Separator } from "../ui/separator";
 import { Skeleton } from "../ui/skeleton";
@@ -133,13 +128,15 @@ const DashboardPage = ({
       if (!totalEarnings || !userEarningsData) return;
 
       setTotalEarnings({
-        directReferralAmount: totalEarnings.directReferralAmount ?? 0,
-        indirectReferralAmount: totalEarnings.indirectReferralAmount ?? 0,
-        totalEarnings: totalEarnings.totalEarnings ?? 0,
-        withdrawalAmount: totalEarnings.withdrawalAmount ?? 0,
-        directReferralCount: totalEarnings.directReferralCount ?? 0,
-        indirectReferralCount: totalEarnings.indirectReferralCount ?? 0,
-        package_income: totalEarnings.package_income ?? 0,
+        directReferralAmount: Number(totalEarnings.directReferralAmount ?? 0),
+        indirectReferralAmount: Number(
+          totalEarnings.indirectReferralAmount ?? 0
+        ),
+        totalEarnings: Number(totalEarnings.totalEarnings ?? 0),
+        withdrawalAmount: Number(totalEarnings.withdrawalAmount ?? 0),
+        directReferralCount: Number(totalEarnings.directReferralCount ?? 0),
+        indirectReferralCount: Number(totalEarnings.indirectReferralCount ?? 0),
+        package_income: Number(totalEarnings.package_income ?? 0),
         rank: userRanking?.alliance_rank ?? "",
         tags: userRanking?.alliance_total_income_tag?.split(",") ?? [],
       });
@@ -183,14 +180,14 @@ const DashboardPage = ({
   };
 
   return (
-    <div className="relative min-h-screen mx-auto space-y-4 py-2 px-2 sm:px-0 mt-0 sm:mt-20 sm:mb-20 overflow-x-hidden">
+    <div className="relative min-h-screen mx-auto space-y-4 py-2 px-2 sm:px-0 mt-20 sm:mt-20 sm:mb-20 overflow-x-hidden">
       {isLoading && <TableLoading />}
 
       <div
-        className={`flex flex-row  sm:fixed w-full sm:min-w-fit sm:max-w-lg justify-between px-0 py-4 sm:px-2 sm:py-4 items-center top-2 bg-transparent sm:bg-cardColor sm:rounded-tr-lg sm:rounded-br-lg z-50 ${
+        className={`flex flex-row fixed  sm:fixed w-full sm:min-w-fit sm:max-w-lg justify-between px-0 bg-inherit py-4 sm:px-2 items-center top-2 sm:bg-cardColor sm:rounded-tr-lg sm:rounded-br-lg z-50 ${
           totalEarnings?.rank
             ? "sm:py-0 sm:rounded-tr-lg sm:rounded-br-lg"
-            : "sm:py-4 sm:rounded-tr-lg sm:rounded-br-lg"
+            : "sm:py-0 sm:rounded-tr-lg sm:rounded-br-lg"
         }`}
       >
         {/* Profile Section */}
@@ -229,7 +226,9 @@ const DashboardPage = ({
 
             {isActive && (
               <div className="flex items-center gap-1 text-white sm:text-black">
-                <p className="text-[10px] sm:text-xs italic">Referral: </p>
+                <p className="text-[10px] sm:text-xs italic text-black">
+                  Referral:{" "}
+                </p>
                 <p className="text-[10px] sm:text-xs truncate bg-indigo-400 text-white rounded-xl px-1 max-w-[150px] sm:max-w-[250px]">
                   {referal.alliance_referral_link}
                 </p>
@@ -240,26 +239,59 @@ const DashboardPage = ({
                 >
                   Copy
                 </Badge>
+                <DashboardGenerateQrCode url={referal.alliance_referral_link} />
               </div>
             )}
           </div>
         </div>
 
         {/* Image */}
-        {totalEarnings?.rank && (
+        {/* {totalEarnings?.rank && ( */}
+        <div className="relative">
+          {/* Background Image */}
           <Image
-            src={`/ranking/${totalEarnings?.rank}.png`}
+            src={`/ranking/bronze.png`}
             alt="ranking"
             width={800}
             height={800}
             quality={100}
-            className="w-20 h-20 object-contain "
+            className="w-20 h-20 object-contain"
           />
-        )}
+
+          {/* Overlay Content */}
+          <div className="absolute left-10 sm:left-14 bottom-10 inset-0 flex items-center justify-center">
+            <Popover>
+              <PopoverTrigger>
+                <Info className="w-3 h-3 sm:w-5 sm:h-5 text-white bg-violet-600 rounded-full cursor-pointer" />
+              </PopoverTrigger>
+              <PopoverContent>
+                By Referrals
+                <br />
+                Iron- 3 referrals
+                <br />
+                Bronze- 6 referrals
+                <br />
+                Silver - 10 referrals
+                <br />
+                Gold- 20 referrals
+                <br />
+                Platinum- 50 referrals
+                <br />
+                Emerald- 100 referrals
+                <br />
+                Ruby- 150 referrals
+                <br />
+                Sapphire-200 referrals
+                <br />
+                Diamond-500 referrals
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
+
+        {/* )} */}
       </div>
-      {isActive && (
-        <DashboardGenerateQrCode url={referal.alliance_referral_link} />
-      )}
+
       <div className="w-full space-y-4 md:px-10">
         <div className="flex flex-col gap-4 justify-center items-center ">
           <CardAmount
@@ -278,29 +310,36 @@ const DashboardPage = ({
             description=""
           />
 
-          <Card className="w-full bg-opacity-70 shadow-2xl rounded-2xl mx-auto m-2">
+          <Card className="relative w-full bg-opacity-70 shadow-2xl rounded-2xl mx-auto m-2 ">
+            <Image
+              src="/logo.png"
+              alt="dashboard"
+              layout="fill"
+              quality={100}
+              style={{
+                objectFit: "cover",
+              }}
+              className="absolute top-0 left-0 -z-10 w-40 h-40"
+            />
             <CardHeader>
               <CardTitle></CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-4 sm:px-32 gap-4">
+            <CardContent className="space-y-4 p-1">
+              <div className="flex flex-row justify-between items-start sm:items-center md:px-10 sm:px-32  gap-4 ">
                 {/* Total Income Section */}
-                <div className="relative flex flex-col justify-start items-start w-full sm:w-auto">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger className="absolute -right-4 sm:-right-8 top-2 sm:top-1 ">
-                        <InfoIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                      </TooltipTrigger>
-                      <TooltipContent className="bg-white text-black p-2 rounded-md shadow-lg">
-                        <p>
-                          Ito ang kabuuang kita sa package income, referral
-                          income at network income mula ng magsimula ka dito sa
-                          ELEVATE.
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <p className="text-lg sm:text-xl font-thin">Total Income</p>
+                <div className="relative flex flex-col bg-gray-200/50 p-2 rounded-xl justify-start items-start w-full sm:w-auto">
+                  <div className="flex flex-row justify-between items-center gap-1">
+                    <p className="text-sm sm:text-xl font-thin">Total Income</p>
+                    <Popover>
+                      <PopoverTrigger>
+                        <Info className="w-3 h-3 sm:w-5 sm:h-5 text-white bg-violet-600 rounded-full " />
+                      </PopoverTrigger>
+                      <PopoverContent>
+                        Ito ang kabuuang kita sa package income, referral income
+                        at network income mula ng magsimula ka dito sa ELEVATE.
+                      </PopoverContent>
+                    </Popover>
+                  </div>
                   <p className="text-xl sm:text-2xl font-extrabold">
                     {refresh ? (
                       <div className="flex items-center gap-2">
@@ -317,23 +356,21 @@ const DashboardPage = ({
                 </div>
 
                 {/* Total Withdrawal Section */}
-                <div className="relative flex flex-col justify-start items-start w-full sm:w-auto">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger className="absolute -right-4 sm:-right-8 top-2 sm:top-1 ">
-                        <InfoIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                      </TooltipTrigger>
-                      <TooltipContent className="bg-white text-black p-2 rounded-md shadow-lg">
-                        <p>
-                          Ito ang kabuuang kita na na naiwithdraw at nareceive
-                          mo na dito sa ELEVATE.
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <p className="text-lg sm:text-xl font-thin">
-                    Total Withdrawal
-                  </p>
+                <div className="relative flex flex-col bg-gray-200/50 p-2 rounded-xl justify-start items-start w-full sm:w-auto">
+                  <div className="flex flex-row justify-between items-center gap-1">
+                    <p className="text-sm sm:text-xl font-thin">
+                      Total Withdrawal
+                    </p>
+                    <Popover>
+                      <PopoverTrigger>
+                        <Info className="w-3 h-3 sm:w-5 sm:h-5 text-white bg-violet-600 rounded-full " />
+                      </PopoverTrigger>
+                      <PopoverContent>
+                        Ito ang kabuuang kita na na naiwithdraw at nareceive mo
+                        na dito sa ELEVATE.
+                      </PopoverContent>
+                    </Popover>
+                  </div>
                   <p className="text-xl sm:text-2xl font-extrabold">
                     {refresh ? (
                       <div className="flex items-center gap-2">
@@ -342,8 +379,8 @@ const DashboardPage = ({
                     ) : (
                       "₱ " +
                       (totalEarnings?.withdrawalAmount.toLocaleString("en-US", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0,
                       }) ?? 0)
                     )}
                   </p>
@@ -352,57 +389,54 @@ const DashboardPage = ({
 
               <Separator className="text-white" />
 
-              <div className="flex flex-col sm:flex-row justify-evenly gap-4 sm:gap-8 px-2 sm:px-6">
+              <div className="flex flex-row  sm:flex-row justify-evenly gap-4 sm:gap-8  sm:px-6">
                 {/* Package Income */}
-                <div className="relative flex flex-col justify-start items-start">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger className="absolute -right-4 sm:-right-8 top-3 sm:top-4 transform -translate-y-1/2">
-                        <InfoIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                      </TooltipTrigger>
-                      <TooltipContent className="bg-white text-black p-2 rounded-md shadow-lg max-w-xs">
-                        <p>
-                          Ito ang kabuuang kita mula sa packages na nagmature at
-                          naiwithdraw na dito sa ELEVATE.
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <p className="text-sm sm:text-lg font-light">
-                    Package Income
-                  </p>
+                <div className="relative bg-gray-200/50 p-2 rounded-xl flex flex-col justify-start items-start">
+                  <div className="flex flex-row justify-between items-center gap-1">
+                    <p className="text-[10px] w-full sm:text-lg font-light">
+                      Package Income
+                    </p>
+                    <Popover>
+                      <PopoverTrigger>
+                        <Info className="w-3 h-3 sm:w-5 sm:h-5 text-white bg-violet-600 rounded-full " />
+                      </PopoverTrigger>
+                      <PopoverContent>
+                        Ito ang kabuuang kita mula sa packages na nagmature at
+                        naiwithdraw na dito sa ELEVATE.
+                      </PopoverContent>
+                    </Popover>
+                  </div>
                   <p className="text-sm sm:text-lg font-bold">
                     {refresh ? (
                       <Skeleton className="h-5 sm:h-8 w-[120px] sm:w-[200px]" />
                     ) : (
                       "₱ " +
                       (totalEarnings?.package_income.toLocaleString("en-US", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0,
                       }) ?? 0)
                     )}
                   </p>
                 </div>
 
                 {/* Referral Income */}
-                <div className="relative flex flex-col justify-start items-start">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger className="absolute -right-4 sm:-right-8 top-3 sm:top-4 transform -translate-y-1/2">
-                        <InfoIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                      </TooltipTrigger>
-                      <TooltipContent className="bg-white text-black p-2 rounded-md shadow-lg max-w-xs">
-                        <p>
-                          Ito ang kabuuang kita mula sa 10% na REFERRAL INCOME
-                          kapag ikaw ay nakapagpasok ng bagong mag aavail ng
-                          package dito sa ELEVATE.
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <p className="text-sm sm:text-lg font-light">
-                    Referral Income
-                  </p>
+                <div className="relative bg-gray-200/50 p-2 rounded-xl flex flex-col justify-start items-start">
+                  <div className="flex flex-row justify-between items-center gap-1">
+                    <p className="text-[10px] w-full sm:text-lg font-light">
+                      Referral Income
+                    </p>
+
+                    <Popover>
+                      <PopoverTrigger>
+                        <Info className="w-3 h-3 sm:w-5 sm:h-5 text-white bg-violet-600 rounded-full " />
+                      </PopoverTrigger>
+                      <PopoverContent>
+                        Ito ang kabuuang kita mula sa 10% na REFERRAL INCOME
+                        kapag ikaw ay nakapagpasok ng bagong mag aavail ng
+                        package dito sa ELEVATE.
+                      </PopoverContent>
+                    </Popover>
+                  </div>
                   <p className="text-sm sm:text-lg font-bold">
                     {refresh ? (
                       <Skeleton className="h-5 sm:h-8 w-[120px] sm:w-[200px]" />
@@ -411,8 +445,8 @@ const DashboardPage = ({
                       (totalEarnings?.directReferralAmount.toLocaleString(
                         "en-US",
                         {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
+                          minimumFractionDigits: 0,
+                          maximumFractionDigits: 0,
                         }
                       ) ?? 0)
                     )}
@@ -420,23 +454,22 @@ const DashboardPage = ({
                 </div>
 
                 {/* Network Income */}
-                <div className="relative flex flex-col justify-start items-start">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger className="absolute -right-4 sm:-right-8 top-3 sm:top-4 transform -translate-y-1/2">
-                        <InfoIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                      </TooltipTrigger>
-                      <TooltipContent className="bg-white text-black p-2 rounded-md shadow-lg max-w-xs">
-                        <p>
-                          Ito ang kabuuang kita mula sa grupo na mabubuo mo dito
-                          sa elevate mula 2nd level hanggang 10th level.
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <p className="text-sm sm:text-lg font-light">
-                    Network Income
-                  </p>
+                <div className="relative bg-gray-200/50 p-2 rounded-xl flex flex-col justify-start items-start">
+                  <div className="flex flex-row justify-between items-center gap-1">
+                    <p className="text-[10px]  w-full sm:text-lg font-light">
+                      Network Income
+                    </p>
+
+                    <Popover>
+                      <PopoverTrigger>
+                        <Info className="w-3 h-3 sm:w-5 sm:h-5 text-white bg-violet-600 rounded-full " />
+                      </PopoverTrigger>
+                      <PopoverContent>
+                        Ito ang kabuuang kita mula sa grupo na mabubuo mo dito
+                        sa elevate mula 2nd level hanggang 10th level.
+                      </PopoverContent>
+                    </Popover>
+                  </div>
                   <p className="text-sm sm:text-lg font-bold">
                     {refresh ? (
                       <Skeleton className="h-5 sm:h-8 w-[120px] sm:w-[200px]" />
@@ -445,8 +478,8 @@ const DashboardPage = ({
                       (totalEarnings?.indirectReferralAmount.toLocaleString(
                         "en-US",
                         {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
+                          minimumFractionDigits: 0,
+                          maximumFractionDigits: 0,
                         }
                       ) ?? 0)
                     )}

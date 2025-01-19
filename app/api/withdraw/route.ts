@@ -203,13 +203,13 @@ export async function POST(request: Request) {
     let remainingAmount = Number(amount);
     const olympusDeduction = Math.min(
       remainingAmount,
-      alliance_olympus_earnings
+      Number(alliance_olympus_earnings)
     );
     remainingAmount -= olympusDeduction;
 
     const referralDeduction = Math.min(
       remainingAmount,
-      alliance_referral_bounty
+      Number(alliance_referral_bounty)
     );
     remainingAmount -= referralDeduction;
 

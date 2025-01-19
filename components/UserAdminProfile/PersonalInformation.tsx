@@ -188,19 +188,33 @@ const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
               variant="card"
               className="lg:ml-auto"
               onClick={async () => {
-                await handleSignIn();
-                if (userProfile.alliance_member_restricted) {
-                  return toast({
-                    title: "User is banned.",
-                    description: "Cannot sign in as banned user.",
-                    variant: "destructive",
+                // Open a new tab with a placeholder URL
+                const newTab = window.open("/loading", "_blank");
+                try {
+                  await handleSignIn();
+
+                  if (userProfile.alliance_member_restricted) {
+                    newTab?.close(); // Close the new tab if user is banned
+                    return toast({
+                      title: "User is banned.",
+                      description: "Cannot sign in as banned user.",
+                      variant: "destructive",
+                    });
+                  }
+
+                  setRole({
+                    role: userProfile.alliance_member_role,
+                    userName: userProfile.user_username ?? "",
                   });
+
+                  // Redirect the new tab to the desired URL
+                  if (newTab) {
+                    newTab.location.href = "/";
+                  }
+                } catch (error) {
+                  newTab?.close(); // Close the new tab on error
+                  console.error("Sign-in failed:", error);
                 }
-                setRole({
-                  role: userProfile.alliance_member_role,
-                  userName: userProfile.user_username ?? "",
-                });
-                await router.push("/");
               }}
             >
               Sign In as {userProfile.user_username}

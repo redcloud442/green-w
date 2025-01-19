@@ -112,7 +112,8 @@ const TransactionHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
                   {data.transaction_description.includes("Success") ||
                   data.transaction_description.includes("Deposit") ||
                   data.transaction_description.includes("Claimed") ||
-                  data.transaction_description.includes("Withdrawal Failed") ? (
+                  data.transaction_description.includes("Withdrawal Failed") ||
+                  data.transaction_description.includes("Income") ? (
                     <Image
                       src="/assets/plus.png"
                       alt="success"
@@ -144,16 +145,17 @@ const TransactionHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
                 <div
                   className={`flex items-center justify-center text-black font-bold text-sm sm:text-3xl ${
                     data.transaction_description.includes("Success") ||
-                    data.transaction_description.includes("Claimed")
+                    data.transaction_description.includes("Claimed") ||
+                    data.transaction_description.includes("Income")
                       ? "text-green-500"
-                      : "text-black"
+                      : "text-red-500"
                   }`}
                 >
                   ₱{" "}
                   {data.transaction_amount
                     ? data.transaction_amount.toLocaleString("en-US", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0,
                       })
                     : "0.00"}
                 </div>

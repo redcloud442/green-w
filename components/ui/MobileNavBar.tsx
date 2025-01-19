@@ -63,7 +63,7 @@ const MobileNavBar = () => {
     },
     {
       href: "/tools-and-guides",
-      label: "Guides",
+      label: "Tools & Guides",
       icon: <BookOpenIcon />,
     },
 
