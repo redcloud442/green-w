@@ -144,6 +144,36 @@ export async function POST(request: Request) {
 
     const { teamMemberProfile } = await protectionMemberUser(ip);
 
+    const today = new Date().toISOString().split("T")[0];
+    const existingWithdrawal =
+      await prisma.alliance_withdrawal_request_table.findFirst({
+        where: {
+          alliance_withdrawal_request_member_id: teamMemberId,
+          AND: [
+            {
+              alliance_withdrawal_request_date: {
+                gte: new Date(`${today}T00:00:00Z`), // Start of the day
+              },
+            },
+            {
+              alliance_withdrawal_request_date: {
+                lte: new Date(`${today}T23:59:59Z`), // End of the day
+              },
+            },
+          ],
+        },
+      });
+
+    if (existingWithdrawal) {
+      return NextResponse.json(
+        {
+          error:
+            "You have already made a withdrawal today. Please try again tomorrow.",
+        },
+        { status: 400 }
+      );
+    }
+
     const isAllowed = await rateLimit(
       `rate-limit:${teamMemberProfile?.alliance_member_id}`,
       10,
