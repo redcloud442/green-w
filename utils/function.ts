@@ -288,3 +288,27 @@ export const calculateFee = (
 export const userNameToEmail = (userName: string) => {
   return `${userName}@gmail.com`;
 };
+
+export const serializeBigIntRecursive = (data: any): any => {
+  if (data === null || data === undefined) return data;
+
+  if (typeof data === "bigint") {
+    return data.toString();
+  }
+
+  if (Array.isArray(data)) {
+    return data.map(serializeBigIntRecursive);
+  }
+
+  if (typeof data === "object") {
+    return Object.entries(data).reduce(
+      (acc, [key, value]) => {
+        acc[key] = serializeBigIntRecursive(value);
+        return acc;
+      },
+      {} as Record<string, any>
+    );
+  }
+
+  return data;
+};

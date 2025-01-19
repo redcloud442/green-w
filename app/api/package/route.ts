@@ -197,8 +197,8 @@ export async function POST(request: Request) {
         data: {
           package_member_member_id: teamMemberId,
           package_member_package_id: packageId,
-          package_member_amount: Number(amount),
-          package_amount_earnings: Number(packageAmountEarnings),
+          package_member_amount: BigInt(amount),
+          package_amount_earnings: BigInt(packageAmountEarnings),
           package_member_status: "ACTIVE",
         },
       });

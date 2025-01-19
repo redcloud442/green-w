@@ -1,7 +1,6 @@
-import { applyRateLimit } from "@/utils/function";
+import { applyRateLimit, serializeBigIntRecursive } from "@/utils/function";
 import prisma from "@/utils/prisma";
 import { protectionMemberUser } from "@/utils/serversideProtection";
-import { createClientServerSide } from "@/utils/supabase/server";
 import { alliance_preferred_withdrawal_table } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -100,62 +99,51 @@ export async function PUT(request: Request) {
 }
 
 export async function GET(request: Request) {
-  try {
-    const ip =
-      request.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
-      request.headers.get("cf-connecting-ip") ||
-      "unknown";
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
+    request.headers.get("cf-connecting-ip") ||
+    "unknown";
 
-    if (ip === "unknown") {
-      return NextResponse.json(
-        { error: "Unable to determine IP address for rate limiting." },
-        { status: 400 }
-      );
-    }
-
-    const { teamMemberProfile } = await protectionMemberUser();
-
-    const supabase = await createClientServerSide();
-
-    applyRateLimit(teamMemberProfile?.alliance_member_id || "", ip);
-
-    const { data, error } = await supabase.rpc("get_earnings_modal_data", {
-      input_data: {
-        teamMemberId: teamMemberProfile?.alliance_member_id || "",
-      },
-    });
-    if (error) throw error;
-
-    const preferredWithdrawal =
-      await prisma.alliance_preferred_withdrawal_table.findMany({
-        where: {
-          alliance_preferred_withdrawal_member_id:
-            teamMemberProfile?.alliance_member_id,
-        },
-      });
-
-    const serializeBigInt = (data: any) =>
-      JSON.parse(
-        JSON.stringify(data, (key, value) =>
-          typeof value === "bigint" ? value.toString() : value
-        )
-      );
-
-    const serializedData = serializeBigInt(data);
-
-    const serializedPreferredWithdrawal = serializeBigInt(
-      preferredWithdrawal as alliance_preferred_withdrawal_table[]
-    );
-
-    return NextResponse.json({
-      success: true,
-      data: serializedData,
-      preferredWithdrawal: serializedPreferredWithdrawal,
-    });
-  } catch (error) {
+  if (ip === "unknown") {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error." },
-      { status: 500 }
+      { error: "Unable to determine IP address for rate limiting." },
+      { status: 400 }
     );
   }
+
+  const { teamMemberProfile } = await protectionMemberUser();
+
+  applyRateLimit(teamMemberProfile?.alliance_member_id || "", ip);
+
+  const primaryData = await prisma.alliance_earnings_table.findUnique({
+    where: {
+      alliance_earnings_member_id: teamMemberProfile?.alliance_member_id || "",
+    },
+    select: {
+      alliance_referral_bounty: true,
+      alliance_combined_earnings: true,
+      alliance_olympus_earnings: true,
+      alliance_olympus_wallet: true,
+    },
+  });
+
+  const preferredWithdrawal =
+    await prisma.alliance_preferred_withdrawal_table.findMany({
+      where: {
+        alliance_preferred_withdrawal_member_id:
+          teamMemberProfile?.alliance_member_id,
+      },
+    });
+
+  // Serialize all BigInt values recursively
+  const serializedData = serializeBigIntRecursive(primaryData);
+  const serializedPreferredWithdrawal = serializeBigIntRecursive(
+    preferredWithdrawal as alliance_preferred_withdrawal_table[]
+  );
+
+  return NextResponse.json({
+    success: true,
+    data: serializedData,
+    preferredWithdrawal: serializedPreferredWithdrawal,
+  });
 }
