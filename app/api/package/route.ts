@@ -197,8 +197,8 @@ export async function POST(request: Request) {
         data: {
           package_member_member_id: teamMemberId,
           package_member_package_id: packageId,
-          package_member_amount: amount,
-          package_amount_earnings: packageAmountEarnings,
+          package_member_amount: Number(amount),
+          package_amount_earnings: Number(packageAmountEarnings),
           package_member_status: "ACTIVE",
         },
       });
@@ -216,7 +216,7 @@ export async function POST(request: Request) {
       await tx.alliance_transaction_table.create({
         data: {
           transaction_member_id: teamMemberId,
-          transaction_amount: amount,
+          transaction_amount: Number(amount),
           transaction_description: `${packageData.package_name} Registration`,
         },
       });

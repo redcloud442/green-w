@@ -134,11 +134,23 @@ export async function GET(request: Request) {
         },
       });
 
+    const serializeBigInt = (data: any) =>
+      JSON.parse(
+        JSON.stringify(data, (key, value) =>
+          typeof value === "bigint" ? value.toString() : value
+        )
+      );
+
+    const serializedData = serializeBigInt(data);
+
+    const serializedPreferredWithdrawal = serializeBigInt(
+      preferredWithdrawal as alliance_preferred_withdrawal_table[]
+    );
+
     return NextResponse.json({
       success: true,
-      data: data,
-      preferredWithdrawal:
-        preferredWithdrawal as alliance_preferred_withdrawal_table[],
+      data: serializedData,
+      preferredWithdrawal: serializedPreferredWithdrawal,
     });
   } catch (error) {
     return NextResponse.json(
