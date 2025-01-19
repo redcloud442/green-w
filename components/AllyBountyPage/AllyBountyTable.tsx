@@ -60,7 +60,7 @@ const AllyBountyTable = ({ teamMemberProfile }: DataTableProps) => {
 
   const fetchAdminRequest = async () => {
     try {
-      if (!teamMemberProfile || requestData.length > 0) return;
+      if (!teamMemberProfile) return;
       setIsFetchingList(true);
 
       const sanitizedData = escapeFormData(getValues());

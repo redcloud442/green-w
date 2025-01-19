@@ -246,50 +246,49 @@ const DashboardPage = ({
         </div>
 
         {/* Image */}
-        {/* {totalEarnings?.rank && ( */}
-        <div className="relative">
-          {/* Background Image */}
-          <Image
-            src={`/ranking/bronze.png`}
-            alt="ranking"
-            width={800}
-            height={800}
-            quality={100}
-            className="w-20 h-20 object-contain"
-          />
+        {totalEarnings?.rank && (
+          <div className="relative">
+            {/* Background Image */}
+            <Image
+              src={`/ranking/${totalEarnings?.rank}.png`}
+              alt="ranking"
+              width={800}
+              height={800}
+              quality={100}
+              className="w-20 h-20 object-contain"
+            />
 
-          {/* Overlay Content */}
-          <div className="absolute left-10 sm:left-14 bottom-10 inset-0 flex items-center justify-center">
-            <Popover>
-              <PopoverTrigger>
-                <Info className="w-3 h-3 sm:w-5 sm:h-5 text-white bg-violet-600 rounded-full cursor-pointer" />
-              </PopoverTrigger>
-              <PopoverContent>
-                By Referrals
-                <br />
-                Iron - 3 referrals
-                <br />
-                Bronze - 6 referrals
-                <br />
-                Silver - 10 referrals
-                <br />
-                Gold - 20 referrals
-                <br />
-                Platinum - 50 referrals
-                <br />
-                Emerald - 100 referrals
-                <br />
-                Ruby - 150 referrals
-                <br />
-                Sapphire - 200 referrals
-                <br />
-                Diamond -500 referrals
-              </PopoverContent>
-            </Popover>
+            {/* Overlay Content */}
+            <div className="absolute left-10 sm:left-14 bottom-10 inset-0 flex items-center justify-center">
+              <Popover>
+                <PopoverTrigger>
+                  <Info className="w-3 h-3 sm:w-5 sm:h-5 text-white bg-violet-600 rounded-full cursor-pointer" />
+                </PopoverTrigger>
+                <PopoverContent>
+                  By Referrals
+                  <br />
+                  Iron - 3 referrals
+                  <br />
+                  Bronze - 6 referrals
+                  <br />
+                  Silver - 10 referrals
+                  <br />
+                  Gold - 20 referrals
+                  <br />
+                  Platinum - 50 referrals
+                  <br />
+                  Emerald - 100 referrals
+                  <br />
+                  Ruby - 150 referrals
+                  <br />
+                  Sapphire - 200 referrals
+                  <br />
+                  Diamond -500 referrals
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
-        </div>
-
-        {/* )} */}
+        )}
       </div>
 
       <div className="w-full space-y-4 md:px-10">
