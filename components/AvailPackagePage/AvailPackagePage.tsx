@@ -48,10 +48,10 @@ const AvailPackagePage = ({
 
   const { setAddTransactionHistory } = useUserTransactionHistoryStore();
 
-  const formattedMaxAmount = new Intl.NumberFormat("en-PH", {
-    style: "currency",
-    currency: "PHP",
-  }).format(maxAmount);
+  const formattedMaxAmount = maxAmount.toLocaleString("en-US", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
 
   const formSchema = z.object({
     amount: z
@@ -285,8 +285,8 @@ const AvailPackagePage = ({
                 placeholder="Gross Income"
                 value={
                   sumOfTotal.toLocaleString("en-US", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
                   }) || ""
                 }
               />
