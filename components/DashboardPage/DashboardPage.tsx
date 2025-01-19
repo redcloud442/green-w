@@ -89,19 +89,12 @@ const DashboardPage = ({
       setIsLoading(true);
       const { data } = await getDashboard(supabaseClient, {
         activePhoneNumber: profile.user_active_mobile ?? "",
+        activeEmail: profile.user_email ?? "",
         teamMemberId: teamMemberProfile.alliance_member_id,
       });
       setChartData(data);
 
       await getDasboardEarningsData();
-
-      // if (totalCompletedAmount !== 0) {
-      //   setTotalEarnings((prev) => ({
-      //     ...prev,
-      //     totalEarnings:
-      //       Number(prev?.totalEarnings) + Number(totalCompletedAmount),
-      //   }));
-      // }
     } catch (e) {
       if (e instanceof Error) {
         await logError(supabaseClient, {
@@ -543,7 +536,7 @@ const DashboardPage = ({
           {/* Direct Referrals */}
           <div
             onClick={() => router.push("/referral")}
-            className="flex-shrink-0 relative  flex flex-col items-center cursor-pointer"
+            className="flex-shrink-0 relative gap-2 flex flex-col items-center cursor-pointer"
           >
             <Image
               src="/assets/referral.ico"
@@ -557,7 +550,7 @@ const DashboardPage = ({
           {/* Indirect Referrals */}
           <div
             onClick={() => router.push("/network")}
-            className="flex-shrink-0 relative  flex flex-col items-center cursor-pointer"
+            className="flex-shrink-0 relative gap-2  flex flex-col items-center cursor-pointer"
           >
             <Image
               src="/assets/network.ico"

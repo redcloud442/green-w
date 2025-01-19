@@ -55,7 +55,7 @@ export async function GET(request: Request) {
 const topupSchema = z.object({
   amount: z
     .number()
-    .min(100, "Minimum amount is 100 pesos")
+    .min(2, "Minimum amount is 50 pesos")
     .refine((val) => !isNaN(Number(val)), {
       message: "Amount must be a number",
     }),
@@ -197,7 +197,7 @@ export async function POST(request: Request) {
     let notificationLogs: Prisma.alliance_notification_tableCreateManyInput[] =
       [];
 
-    await prisma.$transaction(async (tx) => {
+    const connectionData = await prisma.$transaction(async (tx) => {
       const connectionData = await tx.package_member_connection_table.create({
         data: {
           package_member_member_id: teamMemberId,
@@ -286,25 +286,27 @@ export async function POST(request: Request) {
             )
           );
         }
-
-        await Promise.all([
-          tx.package_ally_bounty_log.createMany({ data: bountyLogs }),
-          tx.alliance_transaction_table.createMany({
-            data: transactionLogs,
-          }),
-          tx.alliance_notification_table.createMany({
-            data: notificationLogs,
-          }),
-        ]);
       }
 
       return connectionData;
     });
 
+    if (connectionData) {
+      await Promise.all([
+        prisma.package_ally_bounty_log.createMany({ data: bountyLogs }),
+        prisma.alliance_transaction_table.createMany({
+          data: transactionLogs,
+        }),
+        prisma.alliance_notification_table.createMany({
+          data: notificationLogs,
+        }),
+      ]);
+    }
+
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch (e) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error." },
+      { error: e instanceof Error ? e.message : "Unknown error." },
       { status: 500 }
     );
   }

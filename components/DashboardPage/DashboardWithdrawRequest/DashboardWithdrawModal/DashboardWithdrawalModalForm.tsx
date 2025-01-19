@@ -229,11 +229,11 @@ const DashboardWithdrawalModalForm = ({
         count: userNotification.count + 1,
       });
 
-      if (email && result.ok) {
+      if (email && result) {
         await handleSendEmailRequest(sanitizedData);
       }
 
-      if (cellphoneNumber && result.ok) {
+      if (cellphoneNumber && result) {
         await handleSendSMSRequest(sanitizedData);
       }
 
