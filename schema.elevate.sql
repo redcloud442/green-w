@@ -252,7 +252,6 @@ function handleReferral(referalLink, allianceMemberId) {
 return returnData;
 $$ LANGUAGE plv8;
 
-
 CREATE OR REPLACE FUNCTION get_accountant_withdrawal_history(
     input_data JSON
 )
@@ -347,17 +346,15 @@ plv8.subtransaction(function() {
     WHERE m.alliance_member_alliance_id = $1
     ${searchCondition}
     ${userCondition}
-    ${statusCondition}
     ${dateFilterCondition}
     GROUP BY t.alliance_withdrawal_request_status
-    ORDER BY COUNT(*) ${sortBy} -- Sorting by status count dynamically
   `, [teamId]);
 
-  statusCount.forEach(item => {
-    if (returnData.data[item.status]) {
-      returnData.data[item.status].count = Number(item.count);
-    }
-  });
+['APPROVED', 'REJECTED', 'PENDING'].forEach((status) => {
+  const match = statusCount.find(item => item.status.trim().toUpperCase() === status);
+  returnData.data[status].count = match ? BigInt(match.count) : BigInt(0);
+});
+
 
   withdrawRequest.forEach(request => {
     if (returnData.data[request.alliance_withdrawal_request_status]) {
@@ -365,9 +362,16 @@ plv8.subtransaction(function() {
     }
   });
 });
-return returnData;
-$$ LANGUAGE plv8;
+const stringifyWithBigInt = (key, value) => {
+  if (typeof value === "bigint") {
+    return value.toString(); // Convert BigInt to string
+  }
+  return value;
+};
 
+// Return serialized result
+return JSON.parse(JSON.stringify(returnData, stringifyWithBigInt));
+$$ LANGUAGE plv8;
 
 
 CREATE OR REPLACE FUNCTION get_admin_dashboard_data_by_date(
@@ -535,7 +539,6 @@ let returnData = {
   },
   merchantBalance: 0
 };
-
 plv8.subtransaction(function() {
   const {
     page = 1,
@@ -631,7 +634,6 @@ plv8.subtransaction(function() {
     ${dateFilterCondition}
     ${merchantCondition}
     GROUP BY t.alliance_top_up_request_status
-    ORDER BY COUNT(*)
   `, [teamId]);
 
   // Fetch merchant balance
@@ -656,7 +658,6 @@ plv8.subtransaction(function() {
 
   returnData.merchantBalance = Number(merchantBalance);
 });
-
 return returnData;
 $$ LANGUAGE plv8;
 
@@ -782,11 +783,11 @@ SET search_path TO ''
 AS $$
 let returnData = {
   data: {
-    APPROVED: { data: [], count: 0 },
-    REJECTED: { data: [], count: 0 },
-    PENDING: { data: [], count: 0 }
+    APPROVED: { data: [], count: BigInt(0) },
+    REJECTED: { data: [], count: BigInt(0) },
+    PENDING: { data: [], count: BigInt(0) },
   },
-  totalCount: 0
+  totalCount: BigInt(0),
 };
 
 plv8.subtransaction(function() {
@@ -804,6 +805,7 @@ plv8.subtransaction(function() {
     dateFilter = null
   } = input_data;
 
+  // Validate admin role
   const member = plv8.execute(`
     SELECT alliance_member_role
     FROM alliance_schema.alliance_member_table
@@ -815,6 +817,7 @@ plv8.subtransaction(function() {
     return;
   }
 
+  // Query conditions
   const offset = (page - 1) * limit;
   const sortBy = isAscendingSort ? "ASC" : "DESC";
   const sortCondition = columnAccessor
@@ -846,7 +849,7 @@ plv8.subtransaction(function() {
 
   const params = [teamId, limit, offset];
 
-  // Fetch top-up requests
+  // Fetch paginated top-up requests
   const topUpRequests = plv8.execute(`
     SELECT
       u.user_id,
@@ -876,7 +879,7 @@ plv8.subtransaction(function() {
     LIMIT $2 OFFSET $3
   `, params);
 
-  // Fetch status counts with dynamic sorting
+  // Fetch status counts
   const statusCount = plv8.execute(`
     SELECT
       t.alliance_top_up_request_status AS status,
@@ -891,20 +894,17 @@ plv8.subtransaction(function() {
     LEFT JOIN user_schema.user_table approver
       ON approver.user_id = mt.alliance_member_user_id
     WHERE m.alliance_member_alliance_id = $1
+    ${dateFilterCondition}
     ${searchCondition}
     ${userCondition}
-    ${statusCondition}
-    ${dateFilterCondition}
     ${merchantCondition}
     GROUP BY t.alliance_top_up_request_status
-    ORDER BY COUNT(*)
   `, [teamId]);
 
-  // Update status count and organize data
-  statusCount.forEach(item => {
-    if (returnData.data[item.status]) {
-      returnData.data[item.status].count = Number(item.count);
-    }
+  // Initialize counts for all statuses
+  ['APPROVED', 'REJECTED', 'PENDING'].forEach((status) => {
+    const match = statusCount.find(item => item.status === status);
+    returnData.data[status].count = match ? BigInt(match.count) : BigInt(0);
   });
 
   // Group requests by status
@@ -914,12 +914,26 @@ plv8.subtransaction(function() {
     }
   });
 
-  returnData.totalCount = statusCount.reduce((sum, item) => sum + Number(item.count), 0);
+  // Calculate total count
+  returnData.totalCount = statusCount.reduce(
+    (sum, item) => sum + BigInt(item.count),
+    BigInt(0)
+  );
 });
 
-return returnData;
+// Custom serialization for BigInt
+const stringifyWithBigInt = (key, value) => {
+  if (typeof value === "bigint") {
+    return value.toString(); // Convert BigInt to string
+  }
+  return value;
+};
 
+// Return serialized result
+return JSON.parse(JSON.stringify(returnData, stringifyWithBigInt));
 $$ LANGUAGE plv8;
+
+
 
 
 CREATE OR REPLACE FUNCTION get_admin_user_data(
@@ -1013,9 +1027,9 @@ SET search_path TO ''
 AS $$
 let returnData = {
   data: {
-    APPROVED: { data: [], count: 0 },
-    REJECTED: { data: [], count: 0 },
-    PENDING: { data: [], count: 0 }
+    APPROVED: { data: [], count: BigInt(0) }, // Initialize counts as BigInt
+    REJECTED: { data: [], count: BigInt(0) },
+    PENDING: { data: [], count: BigInt(0) },
   },
 };
 
@@ -1048,9 +1062,19 @@ plv8.subtransaction(function() {
 
   const params = [teamId, limit, offset];
   const userCondition = userFilter ? `AND u.user_id = '${userFilter}'` : "";
-  const statusCondition = statusFilter ? `AND t.alliance_withdrawal_request_status = '${statusFilter}'`: "";
-  const dateFilterCondition = dateFilter.start && dateFilter.end ? `AND t.alliance_withdrawal_request_date BETWEEN '${dateFilter.start}' AND '${dateFilter.end}'` : "";
-  const searchCondition = search ? `AND t.alliance_withdrawal_request_id::TEXT ILIKE '%${search}%' OR u.user_id::TEXT ILIKE '%${search}%' OR u.user_username ILIKE '%${search}%' OR u.user_first_name ILIKE '%${search}%' OR u.user_last_name ILIKE '%${search}%'`: "";
+  const statusCondition = statusFilter ? `AND t.alliance_withdrawal_request_status = '${statusFilter}'` : "";
+  const dateFilterCondition = dateFilter?.start && dateFilter?.end
+    ? `AND t.alliance_withdrawal_request_date BETWEEN '${dateFilter.start}' AND '${dateFilter.end}'`
+    : "";
+  const searchCondition = search
+    ? `AND (
+         t.alliance_withdrawal_request_id::TEXT ILIKE '%${search}%' OR
+         u.user_id::TEXT ILIKE '%${search}%' OR
+         u.user_username ILIKE '%${search}%' OR
+         u.user_first_name ILIKE '%${search}%' OR
+         u.user_last_name ILIKE '%${search}%'
+       )`
+    : "";
   const sortBy = isAscendingSort ? "desc" : "asc";
   const sortCondition = columnAccessor
     ? `ORDER BY "${columnAccessor}" ${sortBy}`
@@ -1084,60 +1108,51 @@ plv8.subtransaction(function() {
     LIMIT $2 OFFSET $3
   `, params);
 
-    const totalCount = plv8.execute(`
-        SELECT
-            COUNT(*)
-        FROM alliance_schema.alliance_withdrawal_request_table t
-        JOIN alliance_schema.alliance_member_table m
-        ON t.alliance_withdrawal_request_member_id = m.alliance_member_id
-        JOIN user_schema.user_table u
-        ON u.user_id = m.alliance_member_user_id
-        LEFT JOIN alliance_schema.alliance_member_table mt
-        ON mt.alliance_member_id = t.alliance_withdrawal_request_approved_by
-    LEFT JOIN user_schema.user_table approver
-      ON approver.user_id = mt.alliance_member_user_id
-        WHERE m.alliance_member_alliance_id = $1
-        ${searchCondition}
-        ${searchCondition}
-        ${userCondition}
-        ${statusCondition}
-        ${dateFilterCondition}
-  `,[teamId])[0].count;
-
-
-  const statusCount = plv8.execute(
-    `
+  const statusCount = plv8.execute(`
     SELECT
       t.alliance_withdrawal_request_status AS status,
       COUNT(*) AS count
     FROM alliance_schema.alliance_withdrawal_request_table t
-    JOIN alliance_schema.alliance_member_table m ON t.alliance_withdrawal_request_member_id = m.alliance_member_id
-    JOIN user_schema.user_table u ON u.user_id = m.alliance_member_user_id
-    LEFT JOIN alliance_schema.alliance_member_table mt ON mt.alliance_member_id = t.alliance_withdrawal_request_approved_by
-    LEFT JOIN
-      user_schema.user_table approver ON approver.user_id = mt.alliance_member_user_id
+    JOIN alliance_schema.alliance_member_table m
+      ON t.alliance_withdrawal_request_member_id = m.alliance_member_id
+    JOIN user_schema.user_table u
+      ON u.user_id = m.alliance_member_user_id
+    LEFT JOIN alliance_schema.alliance_member_table mt
+      ON mt.alliance_member_id = t.alliance_withdrawal_request_approved_by
+    LEFT JOIN user_schema.user_table approver
+      ON approver.user_id = mt.alliance_member_user_id
     WHERE m.alliance_member_alliance_id = $1
+    ${searchCondition}
+    ${userCondition}
+    ${dateFilterCondition}
     GROUP BY t.alliance_withdrawal_request_status
-    ORDER BY t.alliance_withdrawal_request_status DESC 
-    `,
-    [teamId]
-  );
+  `, [teamId]);
+
+['APPROVED', 'REJECTED', 'PENDING'].forEach((status) => {
+  const match = statusCount.find(item => item.status.trim().toUpperCase() === status);
+  returnData.data[status].count = match ? BigInt(match.count) : BigInt(0);
+});
 
 
-  statusCount.forEach(item => {
-    if (returnData.data[item.status]) {
-      returnData.data[item.status].count = Number(item.count);
-    }
-  });
-
+  // Append withdrawal requests to the corresponding statuses
   withdrawRequest.forEach(request => {
     if (returnData.data[request.alliance_withdrawal_request_status]) {
       returnData.data[request.alliance_withdrawal_request_status].data.push(request);
     }
   });
 });
-return returnData;
+
+// Custom JSON.stringify replacer to handle BigInt
+const stringifyWithBigInt = (key, value) => {
+  if (typeof value === "bigint") {
+    return value.toString(); // Convert BigInt to string
+  }
+  return value;
+};
+
+return JSON.parse(JSON.stringify(returnData, stringifyWithBigInt)); // Serialize with custom replacer
 $$ LANGUAGE plv8;
+
 
 CREATE OR REPLACE FUNCTION get_user_with_active_balance(
     input_data JSON
@@ -1407,6 +1422,12 @@ plv8.subtransaction(function() {
     WHERE member_id = $1
   `, [teamMemberId]);
 
+  const totalCount = plv8.execute(`
+    SELECT COUNT(*)
+    FROM alliance_schema.alliance_referral_table
+    WHERE alliance_referral_from_member_id = $1
+  `, [teamMemberId])[0].count;
+
   if (!earningsData.length) {
     returnData = {
       success: true,
@@ -1444,7 +1465,7 @@ plv8.subtransaction(function() {
   ];
 
   const incomeTags = [
-    {threshold:2000000, tag:"Multi Millionaire"}
+    {threshold:2000000, tag:"Multi Millionaire"},
     { threshold: 1000000, tag: "Millionaire" },
     { threshold: 500000, tag: "500k earner" },
     { threshold: 100000, tag: "100k earner" },
@@ -1477,7 +1498,7 @@ plv8.subtransaction(function() {
       plv8.execute(`
         INSERT INTO alliance_schema.alliance_notification_table (alliance_notification_user_id, alliance_notification_message)
         VALUES ($1, $2)
-      `, [teamMemberId, `Congratulations! You've achieved the ${applicableIncomeTag} milestone!`]);
+      `, [teamMemberId, `Congratulations! You have achieved the ${applicableIncomeTag} milestone!`]);
     }
 
     plv8.execute(`
@@ -1488,11 +1509,11 @@ plv8.subtransaction(function() {
     `, [teamMemberId, applicableRank, applicableIncomeTag]);
   }
 
-  // Create the tags array
+
   const tags = [];
   if (applicableIncomeTag) tags.push(applicableIncomeTag);
 
-  // Prepare the return data
+
   returnData = {
     success: true,
     totalEarnings,

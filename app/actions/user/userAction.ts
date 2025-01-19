@@ -1,6 +1,5 @@
 "use server";
 
-import { applyRateLimitMember } from "@/utils/function";
 import prisma from "@/utils/prisma";
 import { rateLimit } from "@/utils/redis/redis";
 import { protectionMemberUser } from "@/utils/serversideProtection";
@@ -77,14 +76,17 @@ export const getUnserNotificationWithLimit = async (params: {
 
     const { page, limit, teamMemberId, isRead } = params;
 
-    // Apply rate limiting if necessary
-    applyRateLimitMember(teamMemberId);
+    const isAllowed = await rateLimit(`rate-limit:${teamMemberId}`, 10, 60);
+
+    if (!isAllowed) {
+      throw new Error("Too many requests. Please try again later.");
+    }
 
     // Calculate total count
     const count = await prisma.alliance_notification_table.count({
       where: {
         alliance_notification_user_id: teamMemberId,
-        alliance_notification_is_read: true,
+        alliance_notification_is_read: isRead,
       },
     });
 
@@ -133,7 +135,11 @@ export const convertUnreadToRead = async (params: {
 
     const { notificationId, teamMemberId } = params;
 
-    applyRateLimitMember(teamMemberId);
+    const isAllowed = await rateLimit(`rate-limit:${teamMemberId}`, 10, 60);
+
+    if (!isAllowed) {
+      throw new Error("Too many requests. Please try again later.");
+    }
 
     const userNotification = await prisma.alliance_notification_table.update({
       where: {
