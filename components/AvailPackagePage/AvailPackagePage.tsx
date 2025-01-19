@@ -109,7 +109,7 @@ const AvailPackagePage = ({
       const transactionHistory = {
         transaction_id: uuidv4(),
         transaction_date: new Date(),
-        transaction_description: "Package Enrolled",
+        transaction_description: `Package Enrolled ${selectedPackage?.package_name}`,
         transaction_amount: BigInt(Number(result.amount)),
         transaction_member_id: teamMemberProfile?.alliance_member_id,
       };
@@ -117,7 +117,7 @@ const AvailPackagePage = ({
       setAddTransactionHistory([transactionHistory]);
 
       toast({
-        title: "Package Enrolled",
+        title: `Package Enrolled ${selectedPackage?.package_name}`,
         description: "You have successfully enrolled in a package",
       });
 
@@ -200,7 +200,7 @@ const AvailPackagePage = ({
             <div className="flex items-end gap-2 w-full">
               <div className="w-full">
                 <Label className="font-bold block mb-2 text-green-700">
-                  Balance: {formattedMaxAmount}
+                  Balance: ₱ {formattedMaxAmount}
                 </Label>
                 <Controller
                   name="amount"
