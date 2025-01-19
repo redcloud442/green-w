@@ -153,8 +153,8 @@ export async function POST(request: Request) {
       alliance_combined_earnings,
     } = earningsData;
 
-    const combinedEarnings = Number(alliance_combined_earnings) / 100; // Normalize to 2 decimal places
-    const requestedAmount = Number(amount) / 100; // Normalize to 2 decimal places
+    const combinedEarnings = Number(alliance_combined_earnings);
+    const requestedAmount = Number(amount);
 
     if (combinedEarnings < requestedAmount) {
       return NextResponse.json(
@@ -180,6 +180,7 @@ export async function POST(request: Request) {
     const packagePercentage = new Prisma.Decimal(
       Number(packageData.package_percentage)
     ).div(100);
+
     const packageAmountEarnings = decimalAmount
       .mul(packagePercentage)
       .toNumber();
@@ -317,7 +318,7 @@ export async function POST(request: Request) {
       });
     }
 
-    return NextResponse.json({ success: true, transaction: connectionData });
+    return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unknown error." },

@@ -171,6 +171,13 @@ export const getUserEarnings = async (params: { memberId: string }) => {
       where: {
         member_id: memberId,
       },
+      select: {
+        direct_referral_amount: true,
+        indirect_referral_amount: true,
+        total_earnings: true,
+        total_withdrawals: true,
+        package_income: true,
+      },
     });
 
     const userEarnings = await prisma.alliance_earnings_table.findUnique({
@@ -200,8 +207,6 @@ export const getUserEarnings = async (params: { memberId: string }) => {
       indirectReferralAmount: user?.indirect_referral_amount,
       totalEarnings: user?.total_earnings,
       withdrawalAmount: user?.total_withdrawals,
-      directReferralCount: user?.direct_referral_count,
-      indirectReferralCount: user?.indirect_referral_count,
       package_income: user?.package_income,
     };
 

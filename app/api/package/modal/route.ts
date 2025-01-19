@@ -1,6 +1,7 @@
 import { applyRateLimit } from "@/utils/function";
 import prisma from "@/utils/prisma";
 import { protectionMemberUser } from "@/utils/serversideProtection";
+import { package_table } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
@@ -29,7 +30,16 @@ export async function GET(request: Request) {
       return data;
     });
 
-    return NextResponse.json({ success: true, data: result });
+    const serializeBigInt = (data: package_table[]) =>
+      JSON.parse(
+        JSON.stringify(data, (key, value) =>
+          typeof value === "bigint" ? value.toString() : value
+        )
+      );
+
+    const serializedResult = serializeBigInt(result as package_table[]); // Type assertion to bypass type check temporarily
+
+    return NextResponse.json({ success: true, data: serializedResult });
   } catch (error) {
     return NextResponse.json(
       { error: "internal server error" },
