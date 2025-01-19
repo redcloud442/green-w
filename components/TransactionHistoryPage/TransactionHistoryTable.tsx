@@ -154,7 +154,7 @@ const TransactionHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
                 >
                   ₱{" "}
                   {data.transaction_amount
-                    ? data.transaction_amount.toLocaleString("en-US", {
+                    ? Number(data.transaction_amount).toLocaleString("en-US", {
                         minimumFractionDigits: 0,
                         maximumFractionDigits: 0,
                       })

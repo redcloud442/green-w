@@ -210,6 +210,13 @@ export async function POST(request: Request) {
         },
       });
 
+      await tx.alliance_transaction_table.create({
+        data: {
+          transaction_member_id: teamMemberId,
+          transaction_amount: BigInt(packageAmountEarnings),
+          transaction_description: `Package Enrolled: ${packageData.package_name}`,
+        },
+      });
       await tx.alliance_earnings_table.update({
         where: { alliance_earnings_member_id: teamMemberId },
         data: {
