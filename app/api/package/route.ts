@@ -192,7 +192,14 @@ export async function POST(request: Request) {
       100 // Cap the depth to 100 levels
     );
 
-    const connectionData = await prisma.$transaction(async (tx) => {
+    let bountyLogs: Prisma.package_ally_bounty_logCreateManyInput[] = [];
+
+    let transactionLogs: Prisma.alliance_transaction_tableCreateManyInput[] =
+      [];
+    let notificationLogs: Prisma.alliance_notification_tableCreateManyInput[] =
+      [];
+
+    await prisma.$transaction(async (tx) => {
       const connectionData = await tx.package_member_connection_table.create({
         data: {
           package_member_member_id: teamMemberId,
@@ -213,49 +220,86 @@ export async function POST(request: Request) {
         },
       });
 
+      if (referralChain.length > 0) {
+        const batchSize = 100;
+        const limitedReferralChain = [];
+        for (let i = 0; i < referralChain.length; i++) {
+          if (referralChain[i].level > 10) break;
+          limitedReferralChain.push(referralChain[i]);
+        }
+
+        for (let i = 0; i < limitedReferralChain.length; i += batchSize) {
+          const batch = limitedReferralChain.slice(i, i + batchSize);
+
+          bountyLogs = batch.map((ref) => {
+            // Calculate earnings based on ref.percentage and round to the nearest integer
+            const calculatedEarnings = Math.round(
+              (Number(amount) * Number(ref.percentage)) / 100
+            );
+
+            return {
+              package_ally_bounty_member_id: ref.referrerId,
+              package_ally_bounty_percentage: ref.percentage,
+              package_ally_bounty_earnings: BigInt(calculatedEarnings), // Use the rounded value
+              package_ally_bounty_type: ref.level === 1 ? "DIRECT" : "INDIRECT",
+              package_ally_bounty_connection_id:
+                connectionData.package_member_connection_id,
+              package_ally_bounty_from: teamMemberId,
+            };
+          });
+
+          transactionLogs = batch.map((ref) => {
+            const calculatedEarnings = Math.round(
+              (Number(amount) * Number(ref.percentage)) / 100
+            );
+
+            return {
+              transaction_member_id: ref.referrerId,
+              transaction_amount: BigInt(calculatedEarnings),
+              transaction_description:
+                ref.level === 1
+                  ? "Referral Income"
+                  : `Network Income Level ${ref.level}`,
+            };
+          });
+
+          notificationLogs = batch.map((ref) => ({
+            alliance_notification_user_id: ref.referrerId,
+            alliance_notification_message:
+              ref.level === 1
+                ? "Referral Income"
+                : `Network Income Level ${ref.level}`,
+          }));
+
+          await Promise.all(
+            batch.map((ref) =>
+              tx.alliance_earnings_table.update({
+                where: { alliance_earnings_member_id: ref.referrerId },
+                data: {
+                  alliance_referral_bounty: BigInt(packageAmountEarnings),
+                  alliance_combined_earnings: BigInt(packageAmountEarnings),
+                },
+              })
+            )
+          );
+        }
+
+        await Promise.all([
+          tx.package_ally_bounty_log.createMany({ data: bountyLogs }),
+          tx.alliance_transaction_table.createMany({
+            data: transactionLogs,
+          }),
+          tx.alliance_notification_table.createMany({
+            data: notificationLogs,
+          }),
+        ]);
+      }
+
       return connectionData;
     });
 
-    // Process referral chain and logs
-    if (referralChain.length > 0) {
-      await Promise.all(
-        referralChain.map((ref) =>
-          prisma.alliance_earnings_table.update({
-            where: { alliance_earnings_member_id: ref.referrerId },
-            data: {
-              alliance_referral_bounty: {
-                increment: BigInt(
-                  Math.round(
-                    Number(
-                      new Prisma.Decimal(roundedAmount)
-                        .mul(ref.percentage)
-                        .div(100)
-                        .toNumber()
-                    )
-                  )
-                ),
-              },
-              alliance_combined_earnings: {
-                increment: BigInt(
-                  Math.round(
-                    Number(
-                      new Prisma.Decimal(roundedAmount)
-                        .mul(ref.percentage)
-                        .div(100)
-                        .toNumber()
-                    )
-                  )
-                ),
-              },
-            },
-          })
-        )
-      );
-    }
-
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error in POST handler:", error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unknown error." },
       { status: 500 }

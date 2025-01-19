@@ -7,12 +7,6 @@ export const AllyBountyColumn = (): ColumnDef<
 >[] => {
   return [
     {
-      // Index column
-      id: "index",
-      header: () => <div className="text-center text-lg font-bold"></div>,
-      cell: ({ row }) => <div className="text-center">{row.index + 1}.</div>,
-    },
-    {
       accessorKey: "package_ally_bounty_log_date_created",
       header: () => <div className="text-center text-lg font-bold">Date</div>,
       cell: ({ row }) => (
