@@ -198,7 +198,7 @@ export async function POST(request: Request) {
           package_member_member_id: teamMemberId,
           package_member_package_id: packageId,
           package_member_amount: BigInt(amount),
-          package_amount_earnings: BigInt(packageAmountEarnings),
+          package_amount_earnings: BigInt(Number(packageAmountEarnings)),
           package_member_status: "ACTIVE",
         },
       });
@@ -243,10 +243,9 @@ export async function POST(request: Request) {
         bountyLogs = batch.map((ref) => ({
           package_ally_bounty_member_id: ref.referrerId,
           package_ally_bounty_percentage: ref.percentage,
-          package_ally_bounty_earnings: decimalAmount
-            .mul(ref.percentage)
-            .div(100)
-            .toNumber(),
+          package_ally_bounty_earnings: BigInt(
+            Number(decimalAmount.mul(ref.percentage).div(100).toNumber())
+          ),
           package_ally_bounty_type:
             ref.level === 1 ? DIRECTYPE.DIRECT : DIRECTYPE.INDIRECT,
           package_ally_bounty_connection_id:
@@ -256,10 +255,9 @@ export async function POST(request: Request) {
 
         transactionLogs = batch.map((ref) => ({
           transaction_member_id: ref.referrerId,
-          transaction_amount: decimalAmount
-            .mul(ref.percentage)
-            .div(100)
-            .toNumber(),
+          transaction_amount: BigInt(
+            Number(decimalAmount.mul(ref.percentage).div(100).toNumber())
+          ),
           transaction_description:
             ref.level === 1
               ? "Referral Income"
@@ -279,18 +277,12 @@ export async function POST(request: Request) {
             prisma.alliance_earnings_table.update({
               where: { alliance_earnings_member_id: ref.referrerId },
               data: {
-                alliance_referral_bounty: {
-                  increment: decimalAmount
-                    .mul(ref.percentage)
-                    .div(100)
-                    .toNumber(),
-                },
-                alliance_combined_earnings: {
-                  increment: decimalAmount
-                    .mul(ref.percentage)
-                    .div(100)
-                    .toNumber(),
-                },
+                alliance_referral_bounty: BigInt(
+                  Number(decimalAmount.mul(ref.percentage).div(100).toNumber())
+                ),
+                alliance_combined_earnings: BigInt(
+                  Number(decimalAmount.mul(ref.percentage).div(100).toNumber())
+                ),
               },
             })
           )
