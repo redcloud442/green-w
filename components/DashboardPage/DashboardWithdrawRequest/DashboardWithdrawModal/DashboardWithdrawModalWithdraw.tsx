@@ -87,14 +87,12 @@ const DashboardWithdrawModalWithdraw = ({
           onClick={() => setOpen(true)}
         >
           <Image
-            src="/assets/withdraw.png"
-            alt="withdraw"
-            width={240}
-            height={240}
+            src="/assets/withdraw.ico"
+            alt="plans"
+            width={40}
+            height={40}
           />
-          <p className="text-sm sm:text-lg font-thin absolute bottom-1/4">
-            WITHDRAW
-          </p>
+          <p className="text-sm sm:text-lg font-thin ">WITHDRAW</p>
         </Button>
       </DialogTrigger>
 

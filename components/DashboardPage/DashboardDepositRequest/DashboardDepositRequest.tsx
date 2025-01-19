@@ -15,7 +15,6 @@ import { Dispatch, SetStateAction } from "react";
 
 import DashboardDepositModalHistory from "./DashboardDepositModal/DashboardDepositHistory";
 import DashboardDepositModalDeposit from "./DashboardDepositModal/DashboardDepositModalDeposit";
-import DashboardDepositModalPackages from "./DashboardDepositModal/DashboardDepositPackagesModal";
 
 type Props = {
   teamMemberProfile: alliance_member_table;
@@ -77,16 +76,6 @@ const DashboardDepositRequest = ({
               <DashboardDepositModalDeposit
                 teamMemberProfile={teamMemberProfile}
                 className="deposit-button"
-              />
-
-              <DashboardDepositModalPackages
-                className="package-selection"
-                packages={packages}
-                earnings={earnings}
-                teamMemberProfile={teamMemberProfile}
-                setEarnings={setEarnings}
-                setChartData={setChartData}
-                setIsActive={setIsActive}
               />
 
               <DashboardDepositModalHistory

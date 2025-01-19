@@ -31,6 +31,8 @@ type Props = {
   setEarnings: Dispatch<SetStateAction<alliance_earnings_table | null>>;
   setChartData: Dispatch<SetStateAction<ChartDataMember[]>>;
   setIsActive: Dispatch<SetStateAction<boolean>>;
+  open: boolean;
+  setOpen: Dispatch<SetStateAction<boolean>>;
 };
 
 const DashboardDepositModalPackages = ({
@@ -41,9 +43,10 @@ const DashboardDepositModalPackages = ({
   setEarnings,
   setChartData,
   setIsActive,
+  open,
+  setOpen,
 }: Props) => {
   const supabaseClient = createClientSide();
-  const [open, setOpen] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState<package_table | null>(
     null
   );
@@ -93,14 +96,12 @@ const DashboardDepositModalPackages = ({
           onClick={() => setOpen(true)}
         >
           <Image
-            src="/assets/packages.png"
+            src="/assets/packages.ico"
             alt="plans"
-            width={300}
-            height={300}
+            width={40}
+            height={40}
           />
-          <p className="text-sm sm:text-lg font-thin absolute bottom-1/4">
-            PACKAGES
-          </p>
+          <p className="text-sm sm:text-lg font-thin">PACKAGES</p>
         </Button>
       </DialogTrigger>
 

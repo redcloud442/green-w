@@ -1,7 +1,5 @@
-import { formatMonthDateYear, formatTime } from "@/utils/function";
 import { AdminTopUpRequestData } from "@/utils/types";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { sendWithdrawalEmail } from "../Withdrawal/Member";
 
 export const getAdminTopUpRequest = async (
   supabaseClient: SupabaseClient,
@@ -52,45 +50,6 @@ export const updateTopUpStatus = async (params: {
     throw new Error(
       result.error || "An error occurred while creating the top-up request."
     );
-  }
-
-  const { data } = result;
-
-  if (data) {
-    await sendWithdrawalEmail({
-      to: data.updatedRequest.alliance_withdrawal_request_email,
-      from: "Elevate Team",
-      subject: `Withdrawal Request ${data.updatedRequest.alliance_withdrawal_request_status.slice(0, 1) + data.updatedRequest.alliance_withdrawal_request_status.slice(1).toLowerCase()}.`,
-      accountHolderName: data.username ?? "",
-      accountType: data.alliance_withdrawal_request_bank_name ?? "",
-      accountBank:
-        data.updatedRequest.alliance_withdrawal_request_bank_name ?? "",
-      accountNumber:
-        data.updatedRequest.alliance_withdrawal_request_account ?? "",
-      transactionDetails: {
-        balance: "",
-        date:
-          formatMonthDateYear(
-            data.updatedRequest.alliance_withdrawal_request_date
-          ) +
-          ", " +
-          formatTime(data.updatedRequest.alliance_withdrawal_request_date),
-        description: `Withdrawal ${data.updatedRequest.alliance_withdrawal_request_status.slice(0, 1) + data.updatedRequest.alliance_withdrawal_request_status.slice(1).toLowerCase()} ${data.updatedRequest.alliance_withdrawal_request_reject_note ? `(${data.updatedRequest.alliance_withdrawal_request_reject_note})` : ""} !`,
-        amount:
-          "₱" +
-          Number(
-            data.updatedRequest.alliance_withdrawal_request_amount -
-              data.updatedRequest.alliance_withdrawal_request_fee || 0
-          ).toLocaleString("en-US", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          }),
-      },
-      message: `Your withdrawal request has been ${data.updatedRequest.alliance_withdrawal_request_status.slice(0, 1) + data.updatedRequest.alliance_withdrawal_request_status.slice(1).toLowerCase()} !`,
-      greetingPhrase: "Hello!",
-      closingPhrase: "Thank you for continuously Elevating with us.",
-      signature: "The Elevate Team",
-    });
   }
 
   return response as unknown as { success: boolean; balance: number };

@@ -9,6 +9,7 @@ export const createTriggerUser = async (params: {
   lastName: string;
   password: string;
   activeMobile: string;
+  activeEmail: string;
   referalLink?: string;
   url: string;
 }) => {
@@ -20,6 +21,7 @@ export const createTriggerUser = async (params: {
     firstName,
     lastName,
     activeMobile,
+    activeEmail,
   } = params;
 
   const checkUserNameResult = await checkUserName({ userName });
@@ -32,6 +34,7 @@ export const createTriggerUser = async (params: {
     userName,
     password,
     activeMobile,
+    activeEmail,
     firstName,
     lastName,
     referalLink: referalLink ?? "",

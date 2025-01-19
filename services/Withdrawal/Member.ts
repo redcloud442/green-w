@@ -153,7 +153,13 @@ export const sendWithdrawalSMS = async (params: {
     `${process.env.NEXT_PUBLIC_BASE_URL}/api/message`,
     {
       method: "POST",
-      body: JSON.stringify(params),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        number: params.number,
+        message: params.message,
+      }),
     }
   );
 
@@ -162,6 +168,4 @@ export const sendWithdrawalSMS = async (params: {
   if (!response.ok) {
     throw new Error(result.error || "An error occurred while sending the SMS.");
   }
-
-  return result;
 };

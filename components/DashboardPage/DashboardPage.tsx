@@ -24,7 +24,6 @@ import { Badge } from "../ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import CardAmount from "../ui/cardAmount";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { Separator } from "../ui/separator";
 import { Skeleton } from "../ui/skeleton";
 import TableLoading from "../ui/tableLoading";
@@ -33,6 +32,7 @@ import DashboardDepositModalPackages from "./DashboardDepositRequest/DashboardDe
 import DashboardGenerateQrCode from "./DashboardDepositRequest/DashboardDepositModal/DashboardGenerateQrCode";
 import DashboardPackages from "./DashboardPackages";
 import DashboardWithdrawModalWithdraw from "./DashboardWithdrawRequest/DashboardWithdrawModal/DashboardWithdrawModalWithdraw";
+import NewlyRegisteredModal from "./NewlyRegisteredModal/NewlyRegisteredModal";
 
 type Props = {
   earnings: alliance_earnings_table;
@@ -53,6 +53,7 @@ const DashboardPage = ({
   const supabaseClient = createClientSide();
   const router = useRouter();
   const [chartData, setChartData] = useState<ChartDataMember[]>([]);
+  const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [earnings, setEarnings] = useState<alliance_earnings_table | null>(
     initialEarnings
@@ -87,6 +88,7 @@ const DashboardPage = ({
     try {
       setIsLoading(true);
       const { data } = await getDashboard(supabaseClient, {
+        activePhoneNumber: profile.user_active_mobile ?? "",
         teamMemberId: teamMemberProfile.alliance_member_id,
       });
       setChartData(data);
@@ -182,9 +184,9 @@ const DashboardPage = ({
   return (
     <div className="relative min-h-screen mx-auto space-y-4 py-2 px-2 sm:px-0 mt-20 sm:mt-20 sm:mb-20 overflow-x-hidden">
       {isLoading && <TableLoading />}
-
+      <NewlyRegisteredModal isActive={isActive} setOpen={setOpen} />
       <div
-        className={`flex flex-row fixed  sm:fixed w-full sm:min-w-fit sm:max-w-lg justify-between px-0 bg-inherit py-4 sm:px-2 items-center top-2 sm:bg-cardColor sm:rounded-tr-lg sm:rounded-br-lg z-50 ${
+        className={`flex flex-row fixed sm:fixed w-full sm:min-w-fit sm:max-w-lg justify-between px-0 bg-inherit py-4 sm:px-2 items-center top-2 sm:bg-cardColor sm:rounded-tr-lg sm:rounded-br-lg z-50 ${
           totalEarnings?.rank
             ? "sm:py-0 sm:rounded-tr-lg sm:rounded-br-lg"
             : "sm:py-2 sm:rounded-tr-lg sm:rounded-br-lg"
@@ -324,11 +326,13 @@ const DashboardPage = ({
               <CardTitle></CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 p-1">
-              <div className="flex flex-row justify-between items-start sm:items-center sm:px-32  gap-4 ">
+              <div className="flex flex-row justify-between md:justify-between items-start md:items-center md:px-32  gap-2">
                 {/* Total Income Section */}
                 <div className="relative flex flex-col bg-gray-200/50 p-2 rounded-xl justify-start items-start w-full sm:w-auto">
                   <div className="flex flex-row justify-between items-center gap-1">
-                    <p className="text-sm sm:text-xl font-thin">Total Income</p>
+                    <p className="text-sm sm:text-2xl font-thin">
+                      Total Income
+                    </p>
                     <Popover>
                       <PopoverTrigger>
                         <Info className="w-3 h-3 sm:w-5 sm:h-5 text-white bg-violet-600 rounded-full " />
@@ -339,7 +343,7 @@ const DashboardPage = ({
                       </PopoverContent>
                     </Popover>
                   </div>
-                  <p className="text-xl sm:text-2xl font-extrabold">
+                  <p className="text-xl sm:text-3xl font-extrabold">
                     {refresh ? (
                       <div className="flex items-center gap-2">
                         <Skeleton className="h-7 sm:h-8 w-[100px] sm:w-[250px]" />
@@ -370,7 +374,7 @@ const DashboardPage = ({
                       </PopoverContent>
                     </Popover>
                   </div>
-                  <p className="text-xl sm:text-2xl font-extrabold">
+                  <p className="text-xl sm:text-3xl font-extrabold">
                     {refresh ? (
                       <div className="flex items-center gap-2">
                         <Skeleton className="h-7 sm:h-8 w-[100px] sm:w-[250px]" />
@@ -388,7 +392,7 @@ const DashboardPage = ({
 
               <Separator className="text-white" />
 
-              <div className="flex flex-row  sm:flex-row justify-evenly gap-4 sm:gap-8  sm:px-6">
+              <div className="flex flex-row  sm:flex-row justify-evenly gap-1 sm:gap-8  sm:px-6">
                 {/* Package Income */}
                 <div className="relative bg-gray-200/50 p-2 rounded-xl flex flex-col justify-start items-start">
                   <div className="flex flex-row justify-between items-center gap-1">
@@ -502,76 +506,68 @@ const DashboardPage = ({
           </Card>
         </div>
 
-        <ScrollArea className="w-full h-32 overflow-y-hidden">
-          <div className="flex justify-around items-center bg-white rounded-2xl shadow-2xl gap-4 border-2 h-32 overflow-y-hidden">
-            {/* Deposit Modal */}
-            <div className="flex-shrink-0 relative w-[200px]">
-              <DashboardDepositModalDeposit
-                teamMemberProfile={teamMemberProfile}
-                className="w-full"
-              />
-            </div>
-
-            {/* Withdraw Modal */}
-            <div className="flex-shrink-0 relative w-[200px]">
-              <DashboardWithdrawModalWithdraw
-                teamMemberProfile={teamMemberProfile}
-                earnings={earnings}
-                setEarnings={setEarnings}
-                profile={profile}
-              />
-            </div>
-
-            {/* Packages */}
-            <div className="flex-shrink-0 relative w-[200px]">
-              <DashboardDepositModalPackages
-                packages={packages}
-                earnings={earnings}
-                setEarnings={setEarnings}
-                setChartData={setChartData}
-                setIsActive={setIsActive}
-                teamMemberProfile={teamMemberProfile}
-                className="w-full"
-              />
-            </div>
-
-            {/* Direct Referrals */}
-            <div
-              onClick={() => router.push("/referral")}
-              className="flex-shrink-0 relative w-[200px] flex flex-col items-center cursor-pointer"
-            >
-              <Image
-                src="/assets/referral.png"
-                alt="referrals"
-                width={200}
-                height={200}
-              />
-              <p className="text-sm sm:text-lg font-thin absolute  bottom-1/4">
-                REFERRAL
-              </p>
-            </div>
-
-            {/* Indirect Referrals */}
-            <div
-              onClick={() => router.push("/network")}
-              className="flex-shrink-0 relative w-[200px] flex flex-col items-center cursor-pointer"
-            >
-              <Image
-                src="/assets/network.png"
-                alt="network"
-                width={200}
-                height={200}
-                style={{
-                  objectFit: "cover",
-                }}
-              />
-              <p className="text-sm sm:text-lg font-thin absolute bottom-1/4">
-                NETWORK
-              </p>
-            </div>
+        <div className="flex justify-around items-center bg-white rounded-2xl shadow-2xl gap-4 border-2 h-auto pt-2 overflow-y-hidden">
+          {/* Deposit Modal */}
+          <div className="flex-shrink-0 relative ">
+            <DashboardDepositModalDeposit
+              teamMemberProfile={teamMemberProfile}
+              className="w-full"
+            />
           </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
+
+          {/* Withdraw Modal */}
+          <div className="flex-shrink-0 relative ">
+            <DashboardWithdrawModalWithdraw
+              teamMemberProfile={teamMemberProfile}
+              earnings={earnings}
+              setEarnings={setEarnings}
+              profile={profile}
+            />
+          </div>
+
+          {/* Packages */}
+          <div className="flex-shrink-0 relative ">
+            <DashboardDepositModalPackages
+              packages={packages}
+              earnings={earnings}
+              setEarnings={setEarnings}
+              setChartData={setChartData}
+              setIsActive={setIsActive}
+              teamMemberProfile={teamMemberProfile}
+              className="w-full"
+              open={open}
+              setOpen={setOpen}
+            />
+          </div>
+
+          {/* Direct Referrals */}
+          <div
+            onClick={() => router.push("/referral")}
+            className="flex-shrink-0 relative  flex flex-col items-center cursor-pointer"
+          >
+            <Image
+              src="/assets/referral.ico"
+              alt="plans"
+              width={40}
+              height={40}
+            />
+            <p className="text-sm sm:text-lg font-thin">REFERRAL</p>
+          </div>
+
+          {/* Indirect Referrals */}
+          <div
+            onClick={() => router.push("/network")}
+            className="flex-shrink-0 relative  flex flex-col items-center cursor-pointer"
+          >
+            <Image
+              src="/assets/network.ico"
+              alt="plans"
+              width={40}
+              height={40}
+            />
+            <p className="text-sm sm:text-lg font-thin ">NETWORK</p>
+          </div>
+        </div>
 
         {chartData.length > 0 && (
           <div className=" gap-4">

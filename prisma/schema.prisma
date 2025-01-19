@@ -30,7 +30,7 @@ model user_table {
   user_username         String?
   user_first_name       String?
   user_last_name        String?
-  user_email            String          @unique
+  user_email            String          
   user_password         String
   user_iv               String?
   user_active_mobile    String?

@@ -47,7 +47,7 @@ const RegisterSchema = z
         /^0\d{10}$/,
         "Active Mobile must start with '0' and contain exactly 11 digits."
       ),
-
+    activeEmail: z.string().email("Invalid email address"),
     password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z
       .string()
@@ -84,7 +84,13 @@ const RegisterPage = ({ referralLink }: Props) => {
   });
 
   const lastNameSchema = z.string().min(4).max(50);
-  const activeMobileSchema = z.number().min(10);
+  const activeMobileSchema = z
+    .string()
+    .regex(
+      /^0\d{10}$/,
+      "Active Mobile must start with '0' and contain exactly 11 digits."
+    );
+  const activeEmailSchema = z.string().email("Invalid email address");
 
   const supabase = createClientSide();
   const router = useRouter();
@@ -123,14 +129,20 @@ const RegisterPage = ({ referralLink }: Props) => {
     if (isUsernameLoading || !isUsernameValidated) {
       return toast({
         title: "Please wait",
-        description: "Username validation is still in progress.",
+        description: "Please Check Your Username First Before Proceeding",
         variant: "destructive",
       });
     }
     const sanitizedData = escapeFormData(data);
 
-    const { userName, password, firstName, lastName, activeMobile } =
-      sanitizedData;
+    const {
+      userName,
+      password,
+      firstName,
+      lastName,
+      activeMobile,
+      activeEmail,
+    } = sanitizedData;
 
     try {
       await createTriggerUser({
@@ -141,12 +153,13 @@ const RegisterPage = ({ referralLink }: Props) => {
         lastName,
         referalLink: referralLink,
         url,
+        activeEmail,
       });
       setIsSuccess(true);
 
       toast({
-        title: "Welcome to Elevate and Congratulations on your free account !",
-        description: "Mag avail na ng package para makapagsimula ng kumita !",
+        title: "Welcome to Elevate and Congratulations on your free account!",
+        description: "Mag avail na ng package para makapagsimula ng kumita!",
       });
       router.push("/");
     } catch (e) {
@@ -167,7 +180,7 @@ const RegisterPage = ({ referralLink }: Props) => {
   };
 
   return (
-    <ScrollArea className="h-[670px] rounded-md sm:h-auto w-full max-w-lg mx-auto">
+    <ScrollArea className="h-[700px] rounded-md sm:h-auto w-full max-w-lg mx-auto">
       <Card className="w-full mx-auto ">
         <NavigationLoader visible={isSubmitting || isSuccess} />
         <CardTitle className="font-extrabold text-4xl text-center">
@@ -282,6 +295,31 @@ const RegisterPage = ({ referralLink }: Props) => {
               {errors.activeMobile && (
                 <p className="text-sm text-primaryRed">
                   {errors.activeMobile.message}
+                </p>
+              )}
+            </div>
+
+            <div className="relative">
+              <Label htmlFor="activeEmail">Active Email</Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  id="activeEmail"
+                  placeholder="Active Email"
+                  className="pr-10"
+                  {...register("activeEmail")}
+                />
+
+                {touchedFields.activeEmail &&
+                  !errors.activeEmail &&
+                  activeEmailSchema.safeParse(watch("activeEmail")).success && (
+                    <CheckIcon className="w-5 h-5 text-green-500 absolute right-3" />
+                  )}
+
+                {/* Show error icon if validation failed */}
+              </div>
+              {errors.activeEmail && (
+                <p className="text-sm text-primaryRed">
+                  {errors.activeEmail.message}
                 </p>
               )}
             </div>

@@ -1,7 +1,6 @@
 import { ROLE } from "@/utils/constant";
 import { decryptData, loginRateLimit } from "@/utils/function";
 import prisma from "@/utils/prisma";
-import { user_table } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -178,22 +177,6 @@ export async function GET(request: Request) {
 
     if (!userName) {
       return sendErrorResponse("Username is required.", 400);
-    }
-
-    const existingUser: user_table | null = await prisma.user_table.findFirst({
-      where: {
-        user_username: {
-          equals: userName,
-          mode: "insensitive",
-        },
-      },
-    });
-
-    if (existingUser) {
-      return NextResponse.json(
-        { error: "Username already taken." },
-        { status: 409 }
-      );
     }
 
     return NextResponse.json({ success: true, userName });

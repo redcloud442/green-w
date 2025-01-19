@@ -15,6 +15,7 @@ export const metadata: Metadata = {
 
 const Page = async () => {
   const supabaseClient = await createClientServerSide();
+
   const {
     redirect: redirectTo,
     earnings,

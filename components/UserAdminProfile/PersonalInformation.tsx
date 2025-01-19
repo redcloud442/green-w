@@ -296,6 +296,16 @@ const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
             className="mt-1 border-gray-300"
           />
         </div>
+        <div>
+          <Label className="text-sm font-medium ">Email</Label>
+          <Input
+            id="email"
+            type="text"
+            value={userProfile.user_email || ""}
+            readOnly
+            className="mt-1 border-gray-300"
+          />
+        </div>
         {type === ROLE.ADMIN && (
           <div>
             <Label className="text-sm font-medium ">Role</Label>

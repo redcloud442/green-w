@@ -56,7 +56,7 @@ const NotificationTable = ({ teamMemberProfile }: DataTableProps) => {
       setUserNotification({
         unread: isUnread ? data : [],
         read: !isUnread ? data : userNotification.read,
-        count: userNotification.count,
+        count: userNotification.unread.length,
       });
 
       setCount(count);

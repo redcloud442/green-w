@@ -61,7 +61,7 @@ export const notifyAction = async (params: {
       }),
     ]);
 
-    return;
+    return true;
   } catch (err) {
     throw new Error("Error in notifyAction");
   }

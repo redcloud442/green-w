@@ -130,6 +130,7 @@ const registerUserSchema = z.object({
   firstName: z.string().min(2),
   lastName: z.string().min(2),
   activeMobile: z.string().min(10),
+  activeEmail: z.string().email(),
   referalLink: z.string().min(2),
   url: z.string().min(2),
 });
@@ -140,13 +141,15 @@ export const registerUser = async (params: {
   firstName: string;
   lastName: string;
   activeMobile: string;
+  activeEmail: string;
   referalLink: string;
   url: string;
 }) => {
   try {
+    console.log(params);
     const supabaseClient = await createClientServerSide();
     const validate = registerUserSchema.safeParse(params);
-
+    console.log(validate);
     if (!validate.success) {
       throw new Error(validate.error.message);
     }
@@ -157,6 +160,7 @@ export const registerUser = async (params: {
       firstName,
       lastName,
       activeMobile,
+      activeEmail,
       referalLink,
       url,
     } = params;
@@ -173,7 +177,7 @@ export const registerUser = async (params: {
     const userParams = {
       userName,
       activeMobile,
-      email: formatUsername,
+      email: activeEmail,
       password: encryptedData,
       userId: userData.user?.id,
       firstName,
@@ -191,6 +195,7 @@ export const registerUser = async (params: {
 
     return { success: true };
   } catch (error) {
+    console.log(error);
     throw new Error(
       error instanceof Error ? error.message : "An unknown error occurred."
     );

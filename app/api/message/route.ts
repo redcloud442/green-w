@@ -1,50 +1,58 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
-  if (req.method !== "POST") {
-    return NextResponse.json({ error: "Method not allowed" });
-  }
-
-  const { number, message, sendername } = await req.json();
-
-  if (!number || !message) {
-    return NextResponse.json({
-      error: "Missing required parameters: number or message",
-    });
-  }
-
   try {
-    const response = await fetch("https://api.semaphore.co/api/v4/messages", {
+    // Parse the request body
+    const { number, message } = await req.json();
+
+    // Validate input
+    if (!number || !message) {
+      return NextResponse.json(
+        { error: "Number and message are required" },
+        { status: 400 }
+      );
+    }
+    const apiKey = process.env.MOVIDER_API_KEY!;
+    const apiSecret = process.env.MOVIDER_API_SECRET!;
+
+    const bodyParams = new URLSearchParams();
+    bodyParams.append(
+      "to",
+      number.startsWith("09")
+        ? `63${number.slice(1)}`
+        : number.startsWith("63")
+          ? number
+          : `63${number}`
+    );
+
+    bodyParams.append("text", message);
+    bodyParams.append("api_key", apiKey);
+    bodyParams.append("api_secret", apiSecret);
+
+    const response = await fetch("https://api.movider.co/v1/sms", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
+        accept: "application/json",
+        "content-type": "application/x-www-form-urlencoded",
+        Authorization: `Basic ${Buffer.from(`${apiKey}:${apiSecret}`).toString("base64")}`,
       },
-      body: JSON.stringify({
-        apikey: process.env.SEMAPHORE_API_KEY, // Add your Semaphore API key to .env.local
-        number,
-        message,
-        sendername: sendername || "Elevate Team", // Defaults to "SEMAPHORE" if not provided
-      }),
+      body: bodyParams.toString(),
     });
 
-    // Read response body as text
-    const rawBody = await response.text();
-
-    // Try to parse as JSON
-    let parsedBody;
-    try {
-      parsedBody = JSON.parse(rawBody);
-    } catch {
-      parsedBody = rawBody; // If not JSON, fallback to plain text
-    }
+    const result = await response.json();
 
     if (!response.ok) {
-      return NextResponse.json({ error: parsedBody });
+      return NextResponse.json(
+        { error: result.message || "Failed to send SMS" },
+        { status: response.status }
+      );
     }
 
-    return NextResponse.json({ success: true, data: parsedBody });
+    return NextResponse.json(result);
   } catch (error) {
-    console.error("Error sending SMS:", error);
-    return NextResponse.json({ error: "Internal Server Error" });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }

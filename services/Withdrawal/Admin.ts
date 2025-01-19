@@ -1,7 +1,7 @@
 import { formatMonthDateYear, formatTime } from "@/utils/function";
 import { AdminWithdrawaldata } from "@/utils/types";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { sendWithdrawalEmail } from "./Member";
+import { sendWithdrawalEmail, sendWithdrawalSMS } from "./Member";
 
 export const getAdminWithdrawalRequest = async (
   supabaseClient: SupabaseClient,
@@ -57,11 +57,11 @@ export const updateWithdrawalStatus = async (params: {
   }
   const { data } = result;
 
-  if (data) {
+  if (data.updatedRequest.alliance_withdrawal_request_email) {
     await sendWithdrawalEmail({
       to: data.updatedRequest.alliance_withdrawal_request_email,
       from: "Elevate Team",
-      subject: `${data.updatedRequest.alliance_withdrawal_request_status === "APPROVED" ? "Congratulations! Withdrawal Request Sent" : `Withdrawal Request Failed, ${data.updatedRequest.alliance_withdrawal_request_reject_note}`}`,
+      subject: `Withdrawal Request ${data.updatedRequest.alliance_withdrawal_request_status.slice(0, 1) + data.updatedRequest.alliance_withdrawal_request_status.slice(1).toLowerCase()}.`,
       accountHolderName: data.username ?? "",
       accountType: data.alliance_withdrawal_request_bank_name ?? "",
       accountBank:
@@ -91,6 +91,13 @@ export const updateWithdrawalStatus = async (params: {
       greetingPhrase: "Hello!",
       closingPhrase: "Thank you for continuously Elevating with us.",
       signature: "The Elevate Team",
+    });
+  }
+
+  if (data.updatedRequest.alliance_withdrawal_request_cellphone_number) {
+    await sendWithdrawalSMS({
+      number: data.updatedRequest.alliance_withdrawal_request_cellphone_number,
+      message: `${data.updatedRequest.alliance_withdrawal_request_status === "APPROVED" ? "Congratulations! Withdrawal sent" : `We're sorry, your withdrawal request has been rejected, ${data.updatedRequest.alliance_withdrawal_request_reject_note}`} `,
     });
   }
 

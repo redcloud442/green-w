@@ -2,10 +2,12 @@
 import { notifyAction } from "@/app/actions/notify/notifyAction";
 import { ChartDataMember, DashboardEarnings } from "@/utils/types";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { sendWithdrawalSMS } from "../Withdrawal/Member";
 
 export const getDashboard = async (
   supabaseClient: SupabaseClient,
   params: {
+    activePhoneNumber: string;
     teamMemberId: string;
   }
 ) => {
@@ -37,10 +39,18 @@ export const getDashboard = async (
     );
   });
   if (unnotifiedData.length > 0) {
-    await notifyAction({
+    const result = await notifyAction({
       chartData: unnotifiedData,
       memberId: params.teamMemberId,
     });
+
+    if (result) {
+      await sendWithdrawalSMS({
+        number: params.activePhoneNumber,
+        message:
+          "Your Package is Ready to Claim Tomorrow, Do not forget to claim it!",
+      });
+    }
   }
 
   return data as {

@@ -157,6 +157,8 @@ export const protectionMemberUser = async (ip?: string) => {
           user_last_name: true,
           user_profile_picture: true,
           user_username: true,
+          user_active_mobile: true,
+          user_email: true,
         },
       }),
       prisma.alliance_member_table.findFirst({
