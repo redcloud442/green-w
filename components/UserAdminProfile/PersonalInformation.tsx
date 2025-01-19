@@ -188,7 +188,7 @@ const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
               className="lg:ml-auto"
               onClick={async () => {
                 // Open a new tab with a placeholder URL
-                const newTab = window.open("/loading", "_blank");
+                const newTab = window.open("/", "_blank");
                 try {
                   await handleSignIn();
 

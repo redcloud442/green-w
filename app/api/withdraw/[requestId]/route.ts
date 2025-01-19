@@ -99,15 +99,19 @@ export async function PUT(
           },
           data: {
             alliance_olympus_wallet: {
-              increment:
-                updatedRequest.alliance_withdrawal_request_earnings_amount,
+              increment: BigInt(
+                updatedRequest.alliance_withdrawal_request_earnings_amount
+              ),
             },
             alliance_olympus_earnings: {
-              increment:
-                updatedRequest.alliance_withdrawal_request_earnings_amount,
+              increment: BigInt(
+                updatedRequest.alliance_withdrawal_request_earnings_amount
+              ),
             },
             alliance_combined_earnings: {
-              increment: updatedRequest.alliance_withdrawal_request_amount,
+              increment: BigInt(
+                updatedRequest.alliance_withdrawal_request_amount
+              ),
             },
           },
         });
@@ -115,8 +119,14 @@ export async function PUT(
 
       await tx.alliance_transaction_table.create({
         data: {
-          transaction_description: `Withdrawal ${status === WITHDRAWAL_STATUS.APPROVED ? "Success" : "Failed"} ${note ? `(${note})` : ""}`,
-          transaction_amount: updatedRequest.alliance_withdrawal_request_amount,
+          transaction_description: `${
+            status === WITHDRAWAL_STATUS.APPROVED
+              ? "Congratulations! Withdrawal Request Sent"
+              : `Withdrawal Request Failed, ${note}`
+          }`,
+          transaction_amount: BigInt(
+            updatedRequest.alliance_withdrawal_request_amount
+          ),
           transaction_member_id:
             updatedRequest.alliance_withdrawal_request_member_id,
         },
@@ -126,17 +136,33 @@ export async function PUT(
         data: {
           alliance_notification_user_id:
             updatedRequest.alliance_withdrawal_request_member_id,
-          alliance_notification_message: `${status === WITHDRAWAL_STATUS.APPROVED ? "Congratulations! Withdrawal Request Sent" : `Withdrawal Request Failed, ${note}`}`,
+          alliance_notification_message: `${
+            status === WITHDRAWAL_STATUS.APPROVED
+              ? "Congratulations! Withdrawal Request Sent"
+              : `Withdrawal Request Failed, ${note}`
+          }`,
         },
       });
 
       return { updatedRequest, username };
     });
 
-    return NextResponse.json({
-      success: true,
-      data: result,
-    });
+    // Custom serialization to handle BigInt values
+    const stringifyWithBigInt = (
+      key: string,
+      value: string | number | bigint
+    ) => {
+      if (typeof value === "bigint") {
+        return value.toString(); // Convert BigInt to string
+      }
+      return value;
+    };
+
+    return NextResponse.json(
+      JSON.parse(
+        JSON.stringify({ success: true, data: result }, stringifyWithBigInt)
+      )
+    );
   } catch (error) {
     return NextResponse.json(
       {

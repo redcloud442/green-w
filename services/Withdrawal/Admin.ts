@@ -61,7 +61,7 @@ export const updateWithdrawalStatus = async (params: {
     await sendWithdrawalEmail({
       to: data.updatedRequest.alliance_withdrawal_request_email,
       from: "Elevate Team",
-      subject: `${data.updatedRequest.alliance_withdrawal_request_status ? "Congratulations! Withdrawal Request Sent" : `Withdrawal Request Failed, ${data.updatedRequest.alliance_withdrawal_request_reject_note}`}`,
+      subject: `${data.updatedRequest.alliance_withdrawal_request_status === "APPROVED" ? "Congratulations! Withdrawal Request Sent" : `Withdrawal Request Failed, ${data.updatedRequest.alliance_withdrawal_request_reject_note}`}`,
       accountHolderName: data.username ?? "",
       accountType: data.alliance_withdrawal_request_bank_name ?? "",
       accountBank:

@@ -187,7 +187,7 @@ const DashboardPage = ({
         className={`flex flex-row fixed  sm:fixed w-full sm:min-w-fit sm:max-w-lg justify-between px-0 bg-inherit py-4 sm:px-2 items-center top-2 sm:bg-cardColor sm:rounded-tr-lg sm:rounded-br-lg z-50 ${
           totalEarnings?.rank
             ? "sm:py-0 sm:rounded-tr-lg sm:rounded-br-lg"
-            : "sm:py-0 sm:rounded-tr-lg sm:rounded-br-lg"
+            : "sm:py-2 sm:rounded-tr-lg sm:rounded-br-lg"
         }`}
       >
         {/* Profile Section */}

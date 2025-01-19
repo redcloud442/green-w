@@ -99,7 +99,9 @@ export async function PUT(
 
       await tx.alliance_transaction_table.create({
         data: {
-          transaction_description: `Deposit ${status === TOP_UP_STATUS.APPROVED ? "Success" : "Failed"} ${note ? `(${note})` : ""}`,
+          transaction_description: `Deposit ${
+            status === TOP_UP_STATUS.APPROVED ? "Success" : "Failed"
+          } ${note ? `(${note})` : ""}`,
           transaction_amount: updatedRequest.alliance_top_up_request_amount,
           transaction_member_id:
             updatedRequest.alliance_top_up_request_member_id,
@@ -145,7 +147,20 @@ export async function PUT(
       return { updatedRequest };
     });
 
-    return NextResponse.json({ success: true, result });
+    // Serialize BigInt values into strings for the response
+    const stringifyWithBigInt = (
+      key: string,
+      value: string | number | bigint
+    ) => {
+      if (typeof value === "bigint") {
+        return value.toString(); // Convert BigInt to string
+      }
+      return value;
+    };
+
+    return NextResponse.json(
+      JSON.parse(JSON.stringify({ success: true, result }, stringifyWithBigInt))
+    );
   } catch (error) {
     return NextResponse.json(
       {

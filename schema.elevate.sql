@@ -184,6 +184,11 @@ plv8.subtransaction(function() {
     VALUES ($1, $2)
   `, [referralLinkURL, allianceMemberId]);
 
+  plv8.execute(`
+    INSERT INTO alliance_schema.alliance_notification_table (alliance_notification_user_id, alliance_notification_message)
+    VALUES ($1, $2)
+  `, [allianceMemberId, "Welcome to Elevate and Congratulations on your free account! Mag avail na ng Package para makapagsimula ka ng kumita!"]);
+
 
     handleReferral(referalLink, allianceMemberId);
 
@@ -1328,7 +1333,8 @@ plv8.subtransaction(function() {
        u.user_username,
        m.alliance_member_id,
        u.user_date_created,
-       COALESCE(SUM(pa.package_ally_bounty_earnings)::TEXT, '0') AS total_bounty_earnings -- Cast BIGINT to TEXT
+       pa.package_ally_bounty_log_date_created,
+       COALESCE(SUM(pa.package_ally_bounty_earnings)::TEXT, '0') AS total_bounty_earnings
      FROM alliance_schema.alliance_member_table m
      JOIN user_schema.user_table u
        ON u.user_id = m.alliance_member_user_id
@@ -1336,7 +1342,7 @@ plv8.subtransaction(function() {
        ON pa.package_ally_bounty_from = m.alliance_member_id
      WHERE pa.package_ally_bounty_from = ANY($1) AND pa.package_ally_bounty_member_id = $2
      ${searchCondition}
-     GROUP BY u.user_first_name, u.user_last_name, u.user_username, m.alliance_member_id, u.user_date_created
+     GROUP BY u.user_first_name, u.user_last_name, u.user_username, m.alliance_member_id, u.user_date_created,pa.package_ally_bounty_log_date_created
      ${sortCondition}
      LIMIT $3 OFFSET $4`,
     params
@@ -1371,12 +1377,13 @@ CREATE OR REPLACE FUNCTION get_dashboard_earnings(
     input_data JSON
 )
 RETURNS JSON
-SET search_path TO ''
 AS $$
 let returnData = {};
+
 plv8.subtransaction(function() {
   const { teamMemberId } = input_data;
 
+  // Validate role
   const member = plv8.execute(`
     SELECT alliance_member_role
     FROM alliance_schema.alliance_member_table
@@ -1388,15 +1395,13 @@ plv8.subtransaction(function() {
     return;
   }
 
-  // Query earnings data
+  // Fetch earnings data
   const earningsData = plv8.execute(`
     SELECT 
         total_earnings,
         total_withdrawals,
         direct_referral_amount,
         indirect_referral_amount,
-        direct_referral_count,
-        indirect_referral_count,
         package_income
     FROM alliance_schema.dashboard_earnings_summary
     WHERE member_id = $1
@@ -1409,6 +1414,8 @@ plv8.subtransaction(function() {
       withdrawalAmount: 0,
       directReferralAmount: 0,
       indirectReferralAmount: 0,
+      package_income: 0,
+      rank: null,
       tags: [],
     };
     return;
@@ -1422,9 +1429,8 @@ plv8.subtransaction(function() {
 
   const data = earningsData[0];
   const totalEarnings = Number(data.total_earnings) || 0;
-  const totalReferrals = referralCount;
 
-  // Rank mapping
+  // Rank and income tag mapping
   const rankMapping = [
     { threshold: 500, rank: "diamond" },
     { threshold: 200, rank: "sapphire" },
@@ -1438,15 +1444,17 @@ plv8.subtransaction(function() {
   ];
 
   const incomeTags = [
+    {threshold:2000000, tag:"Multi Millionaire"}
     { threshold: 1000000, tag: "Millionaire" },
     { threshold: 500000, tag: "500k earner" },
     { threshold: 100000, tag: "100k earner" },
     { threshold: 50000, tag: "50k earner" },
   ];
 
-  const applicableRank = rankMapping.find(rank => totalReferrals >= rank.threshold)?.rank || null;
+  const applicableRank = rankMapping.find(rank => referralCount >= rank.threshold)?.rank || null;
   const applicableIncomeTag = incomeTags.find(tag => totalEarnings >= tag.threshold)?.tag || null;
 
+  // Fetch current rank and tag
   const currentData = plv8.execute(`
     SELECT alliance_rank, alliance_total_income_tag
     FROM alliance_schema.alliance_ranking_table
@@ -1456,12 +1464,21 @@ plv8.subtransaction(function() {
   const currentRank = currentData.length ? currentData[0].alliance_rank : null;
   const currentIncomeTag = currentData.length ? currentData[0].alliance_total_income_tag : null;
 
+  // Update rank and tag if changes are detected
   if (currentRank !== applicableRank || currentIncomeTag !== applicableIncomeTag) {
+    if (currentRank !== applicableRank) {
+      plv8.execute(`
+        INSERT INTO alliance_schema.alliance_notification_table (alliance_notification_user_id, alliance_notification_message)
+        VALUES ($1, $2)
+      `, [teamMemberId, `You have been promoted to ${applicableRank}!`]);
+    }
 
-    plv8.execute(`
-      INSERT INTO alliance_schema.alliance_notification_table (alliance_notification_user_id, alliance_notification_message)
-      VALUES ($1, $2)
-    `, [teamMemberId, `You have been promoted to ${applicableRank}!`]);
+    if (currentIncomeTag !== applicableIncomeTag && applicableIncomeTag) {
+      plv8.execute(`
+        INSERT INTO alliance_schema.alliance_notification_table (alliance_notification_user_id, alliance_notification_message)
+        VALUES ($1, $2)
+      `, [teamMemberId, `Congratulations! You've achieved the ${applicableIncomeTag} milestone!`]);
+    }
 
     plv8.execute(`
       INSERT INTO alliance_schema.alliance_ranking_table (alliance_ranking_member_id, alliance_rank, alliance_total_income_tag)
@@ -1482,13 +1499,12 @@ plv8.subtransaction(function() {
     withdrawalAmount: data.total_withdrawals || 0,
     directReferralAmount: data.direct_referral_amount || 0,
     indirectReferralAmount: data.indirect_referral_amount || 0,
-    directReferralCount,
-    indirectReferralCount,
     package_income: data.package_income || 0,
     rank: applicableRank,
     tags,
   };
 });
+
 return returnData;
 $$ LANGUAGE plv8;
 
@@ -1883,6 +1899,7 @@ let returnData = {
   success: true,
   message: 'Data fetched successfully',
 };
+
 plv8.subtransaction(function() {
   const {
     page = 1,
@@ -1890,8 +1907,8 @@ plv8.subtransaction(function() {
     search = '',
     teamMemberId,
     userId,
-    columnAccessor = 'user_first_name',
-    isAscendingSort = true,
+    columnAccessor = 'pa.package_ally_bounty_log_date_created',
+    isAscendingSort = false,
   } = input_data;
 
   if (!userId) {
@@ -1902,7 +1919,7 @@ plv8.subtransaction(function() {
   // Check if the team member has the correct role
   const member = plv8.execute(
     `
-    SELECT alliance_member_role,alliance_member_id
+    SELECT alliance_member_role, alliance_member_id
     FROM alliance_schema.alliance_member_table
     WHERE alliance_member_user_id = $1
     `,
@@ -1957,7 +1974,6 @@ plv8.subtransaction(function() {
     currentLevel++;
   }
 
-
   indirectReferrals = Array.from(indirectReferrals).filter(
     (id) => !directReferrals.includes(id)
   );
@@ -1983,13 +1999,14 @@ plv8.subtransaction(function() {
       ut.user_username, 
       ut.user_date_created,
       am.alliance_member_id,
+      pa.package_ally_bounty_log_date_created,
       COALESCE(SUM(pa.package_ally_bounty_earnings), 0) AS total_bounty_earnings
     FROM alliance_schema.alliance_member_table am
     JOIN user_schema.user_table ut
       ON ut.user_id = am.alliance_member_user_id
     JOIN packages_schema.package_ally_bounty_log pa
       ON am.alliance_member_id = pa.package_ally_bounty_from
-    WHERE pa.package_ally_bounty_from  = ANY($1)
+    WHERE pa.package_ally_bounty_from = ANY($1)
       AND pa.package_ally_bounty_member_id = $2
       ${searchCondition}
     GROUP BY 
@@ -1997,8 +2014,9 @@ plv8.subtransaction(function() {
       ut.user_last_name, 
       ut.user_username, 
       ut.user_date_created,
-      am.alliance_member_id
-    ORDER BY ${columnAccessor} ${isAscendingSort ? 'ASC' : 'DESC'}
+      am.alliance_member_id,
+      pa.package_ally_bounty_log_date_created
+    ORDER BY  pa.package_ally_bounty_log_date_created DESC
     LIMIT $3 OFFSET $4
     `,
     params
@@ -2007,24 +2025,40 @@ plv8.subtransaction(function() {
 const totalCountResult = plv8.execute(
   `
   SELECT 
-   COUNT(DISTINCT package_ally_bounty_from) AS count
-  FROM alliance_schema.alliance_member_table am
+    COUNT(*) AS count
+  FROM (
+    SELECT 
+      pa.package_ally_bounty_from
+    FROM alliance_schema.alliance_member_table am
     JOIN user_schema.user_table ut
       ON ut.user_id = am.alliance_member_user_id
     JOIN packages_schema.package_ally_bounty_log pa
       ON am.alliance_member_id = pa.package_ally_bounty_from
-    WHERE pa.package_ally_bounty_from  = ANY($1)
+    WHERE pa.package_ally_bounty_from = ANY($1)
       AND pa.package_ally_bounty_member_id = $2
       ${searchCondition}
+    GROUP BY 
+      pa.package_ally_bounty_from,
+      ut.user_first_name,
+      ut.user_last_name,
+      ut.user_username,
+      ut.user_date_created,
+      am.alliance_member_id,
+      pa.package_ally_bounty_log_date_created
+  ) AS subquery
   `,
   [indirectReferrals, member[0].alliance_member_id]
 );
+
+
   returnData.data = indirectReferralDetails;
   returnData.totalCount = Number(totalCountResult[0].count);
 });
+
 return returnData;
 
 $$ LANGUAGE plv8;
+
 
 CREATE OR REPLACE FUNCTION get_member_withdrawal_history(
   input_data JSON

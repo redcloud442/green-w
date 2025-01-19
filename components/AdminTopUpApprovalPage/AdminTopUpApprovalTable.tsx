@@ -204,6 +204,7 @@ const AdminTopUpApprovalTable = ({ teamMemberProfile }: DataTableProps) => {
         rejectNote: "",
       },
     });
+
   const handleRefresh = async () => {
     try {
       setIsFetchingList(true);
