@@ -267,23 +267,23 @@ const DashboardPage = ({
               <PopoverContent>
                 By Referrals
                 <br />
-                Iron- 3 referrals
+                Iron - 3 referrals
                 <br />
-                Bronze- 6 referrals
+                Bronze - 6 referrals
                 <br />
                 Silver - 10 referrals
                 <br />
-                Gold- 20 referrals
+                Gold - 20 referrals
                 <br />
-                Platinum- 50 referrals
+                Platinum - 50 referrals
                 <br />
-                Emerald- 100 referrals
+                Emerald - 100 referrals
                 <br />
-                Ruby- 150 referrals
+                Ruby - 150 referrals
                 <br />
-                Sapphire-200 referrals
+                Sapphire - 200 referrals
                 <br />
-                Diamond-500 referrals
+                Diamond -500 referrals
               </PopoverContent>
             </Popover>
           </div>
@@ -321,11 +321,11 @@ const DashboardPage = ({
               }}
               className="absolute top-0 left-0 -z-10 w-40 h-40"
             />
-            <CardHeader>
+            <CardHeader className="p-1">
               <CardTitle></CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 p-1">
-              <div className="flex flex-row justify-between items-start sm:items-center md:px-10 sm:px-32  gap-4 ">
+              <div className="flex flex-row justify-between items-start sm:items-center sm:px-32  gap-4 ">
                 {/* Total Income Section */}
                 <div className="relative flex flex-col bg-gray-200/50 p-2 rounded-xl justify-start items-start w-full sm:w-auto">
                   <div className="flex flex-row justify-between items-center gap-1">

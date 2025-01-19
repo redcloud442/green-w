@@ -38,6 +38,7 @@ const Page = async () => {
         user_email: true,
         user_iv: true,
         user_profile_picture: true,
+        user_active_mobile: true,
       },
     }),
     prisma.alliance_member_table.findFirst({

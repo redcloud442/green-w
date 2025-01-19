@@ -5,15 +5,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@radix-ui/react-tooltip";
-import { InfoIcon, RefreshCcw } from "lucide-react";
+import { Info, RefreshCcw } from "lucide-react";
 import { ReactNode } from "react";
 import { Button } from "./button";
+import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import { Skeleton } from "./skeleton";
 
 type Props = {
@@ -39,20 +34,21 @@ const CardAmount = ({
       <CardHeader className="p-0">
         {/* Title */}
         <CardTitle className="relative text-gray-700 dark:text-gray-300 text-center text-sm font-medium">
-          {title}
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger className="absolute right-4 top-1/2 transform -translate-y-1/2">
-                <InfoIcon />
-              </TooltipTrigger>
-              <TooltipContent className="bg-white text-black p-2 rounded-md">
+          <div className="flex flex-row justify-center items-center gap-1">
+            {title}
+
+            <Popover>
+              <PopoverTrigger>
+                <Info className="w-3 h-3 sm:w-5 sm:h-5 text-white bg-violet-600 rounded-full " />
+              </PopoverTrigger>
+              <PopoverContent>
                 <p>
                   Ito ay ang iyong balance kasama ang wallet, package income at
                   referral income.
                 </p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+              </PopoverContent>
+            </Popover>
+          </div>
         </CardTitle>
 
         {/* Value */}

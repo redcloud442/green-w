@@ -111,6 +111,7 @@ const TransactionHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
                 <div className="flex items-center gap-2">
                   {data.transaction_description.includes("Success") ||
                   data.transaction_description.includes("Deposit") ||
+                  data.transaction_description.includes("Deposit Pending") ||
                   data.transaction_description.includes("Claimed") ||
                   data.transaction_description.includes("Withdrawal Failed") ||
                   data.transaction_description.includes("Income") ? (

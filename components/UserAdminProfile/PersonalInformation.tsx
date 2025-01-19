@@ -7,7 +7,6 @@ import { useRole } from "@/utils/context/roleContext";
 import { createClientSide } from "@/utils/supabase/client";
 import { UserRequestdata } from "@/utils/types";
 import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
@@ -39,7 +38,7 @@ const schema = z.object({
 export type PersonalInformationSchema = z.infer<typeof schema>;
 const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
   const supabaseClient = createClientSide();
-  const router = useRouter();
+
   const [isLoading, setIsLoading] = useState(false);
   const [userSponsor, setUserSponsor] = useState<{
     user_username: string;
@@ -283,6 +282,16 @@ const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
             id="userName"
             type="text"
             value={userProfile.user_username || ""}
+            readOnly
+            className="mt-1 border-gray-300"
+          />
+        </div>
+        <div>
+          <Label className="text-sm font-medium ">Active Mobile Number</Label>
+          <Input
+            id="activeMobile"
+            type="text"
+            value={userProfile.user_active_mobile || ""}
             readOnly
             className="mt-1 border-gray-300"
           />
