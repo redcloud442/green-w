@@ -83,7 +83,7 @@ export const getUnserNotificationWithLimit = async (params: {
     const count = await prisma.alliance_notification_table.count({
       where: {
         alliance_notification_user_id: teamMemberId,
-        alliance_notification_is_read: isRead,
+        alliance_notification_is_read: true,
       },
     });
 

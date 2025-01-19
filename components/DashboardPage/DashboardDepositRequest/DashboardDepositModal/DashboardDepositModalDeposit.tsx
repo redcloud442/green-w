@@ -45,7 +45,7 @@ const topUpFormSchema = z.object({
   amount: z
     .string()
     .min(3, "Amount is required and must be at least 300 pesos")
-    .max(6, "Amount must be less than 6 digits")
+    .max(8, "Amount must be less than 8 digits")
     .regex(/^\d+$/, "Amount must be a number")
     .refine((amount) => parseInt(amount, 10) >= 300, {
       message: "Amount must be at least 300 pesos",
@@ -147,7 +147,7 @@ const DashboardDepositModalDeposit = ({
         transaction_id: uuidv4(),
         transaction_date: new Date(),
         transaction_description: "Deposit Ongoing",
-        transaction_amount: BigInt(Number(sanitizedData.amount)),
+        transaction_amount: Number(sanitizedData.amount),
         transaction_member_id: teamMemberProfile?.alliance_member_id,
       };
       setAddTransactionHistory([transactionHistory]);
@@ -222,8 +222,6 @@ const DashboardDepositModalDeposit = ({
             onSubmit={handleSubmit(onSubmit)}
             className="space-y-6 w-full max-w-xs sm:max-w-sm "
           >
-            {/* Amount Field */}
-
             {/* Top-Up Mode */}
             <div>
               <Label htmlFor="topUpMode">Select Bank Or E-Wallet</Label>
@@ -347,6 +345,10 @@ const DashboardDepositModalDeposit = ({
                       // Limit to two decimal places
                       if (parts[1]?.length > 2) {
                         inputValue = `${parts[0]}.${parts[1].substring(0, 2)}`;
+                      }
+
+                      if (inputValue.length > 8) {
+                        inputValue = inputValue.substring(0, 8);
                       }
 
                       // Update the field value

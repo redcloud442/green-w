@@ -124,6 +124,7 @@ export async function POST(request: Request) {
       cellphoneNumber,
     } = await request.json();
 
+    // Validate input
     const withdrawalData = withdrawalFormSchema.safeParse({
       earnings,
       accountNumber,
@@ -140,41 +141,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid request." }, { status: 400 });
     }
 
-    if (Number(amount) <= 0 || Number(amount) < 30) {
-      return NextResponse.json({ error: "Invalid request." }, { status: 400 });
-    }
-
     const { teamMemberProfile } = await protectionMemberUser(ip);
-    // const today = new Date().toISOString().slice(0, 10); // Get the current date in YYYY-MM-DD format
-
-    // const existingWithdrawal =
-    //   await prisma.alliance_withdrawal_request_table.findFirst({
-    //     where: {
-    //       alliance_withdrawal_request_member_id: teamMemberId,
-    //       AND: [
-    //         {
-    //           alliance_withdrawal_request_date: {
-    //             gte: new Date(`${today}T00:00:00Z`), // Start of the day
-    //           },
-    //         },
-    //         {
-    //           alliance_withdrawal_request_date: {
-    //             lte: new Date(`${today}T23:59:59Z`), // End of the day
-    //           },
-    //         },
-    //       ],
-    //     },
-    //   });
-
-    // if (existingWithdrawal) {
-    //   return NextResponse.json(
-    //     {
-    //       error:
-    //         "You have already made a withdrawal today. Please try again tomorrow.",
-    //     },
-    //     { status: 400 }
-    //   );
-    // }
 
     await applyRateLimit(teamMemberId, ip);
 
@@ -196,7 +163,8 @@ export async function POST(request: Request) {
       alliance_referral_bounty,
       alliance_combined_earnings,
     } = amountMatch;
-    if (Number(amount) > alliance_combined_earnings) {
+
+    if (Number(amount) > Number(alliance_combined_earnings)) {
       return NextResponse.json({ error: "Invalid request." }, { status: 400 });
     }
 
@@ -217,6 +185,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid request." }, { status: 400 });
     }
 
+    // Perform database transactions
     const [allianceData] = await prisma.$transaction([
       prisma.alliance_withdrawal_request_table.create({
         data: {
@@ -246,9 +215,15 @@ export async function POST(request: Request) {
       prisma.alliance_earnings_table.update({
         where: { alliance_earnings_member_id: teamMemberId },
         data: {
-          alliance_olympus_earnings: { decrement: olympusDeduction },
-          alliance_referral_bounty: { decrement: referralDeduction },
-          alliance_combined_earnings: { decrement: Number(amount) },
+          alliance_olympus_earnings: {
+            decrement: olympusDeduction,
+          },
+          alliance_referral_bounty: {
+            decrement: referralDeduction,
+          },
+          alliance_combined_earnings: {
+            decrement: Number(amount),
+          },
         },
       }),
       prisma.alliance_transaction_table.create({
@@ -258,17 +233,15 @@ export async function POST(request: Request) {
           transaction_member_id: teamMemberId,
         },
       }),
-
       prisma.alliance_notification_table.create({
         data: {
           alliance_notification_user_id: teamMemberId,
-          alliance_notification_message: `Withdrawal request is Ongoing amounting to ₱ ${calculateFinalAmount(
-            Number(amount),
-            earnings
+          alliance_notification_message: `Withdrawal request is Ongoing amounting to ₱ ${Math.floor(
+            calculateFinalAmount(Number(amount), earnings)
           ).toLocaleString("en-US", {
             maximumFractionDigits: 2,
             minimumFractionDigits: 2,
-          })} Please wait for approval.`,
+          })}. Please wait for approval.`,
         },
       }),
     ]);

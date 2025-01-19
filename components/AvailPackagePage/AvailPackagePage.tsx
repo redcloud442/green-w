@@ -49,14 +49,14 @@ const AvailPackagePage = ({
   const { setAddTransactionHistory } = useUserTransactionHistoryStore();
 
   const formattedMaxAmount = maxAmount.toLocaleString("en-US", {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   });
 
   const formSchema = z.object({
     amount: z
       .string()
-      .min(1, "Minimum amount is 1 pesos")
+      .min(2, "Minimum amount is 50 pesos")
       .refine((val) => !isNaN(Number(val)), {
         message: "Amount must be a number",
       })
@@ -110,11 +110,16 @@ const AvailPackagePage = ({
         transaction_id: uuidv4(),
         transaction_date: new Date(),
         transaction_description: `Package Enrolled ${selectedPackage?.package_name}`,
-        transaction_amount: BigInt(Number(result.amount)),
+        transaction_amount: Number(result.amount),
         transaction_member_id: teamMemberProfile?.alliance_member_id,
       };
 
-      setAddTransactionHistory([transactionHistory]);
+      setAddTransactionHistory([
+        {
+          ...transactionHistory,
+          transaction_amount: Number(result.amount),
+        },
+      ]);
 
       toast({
         title: `Package Enrolled ${selectedPackage?.package_name}`,
@@ -141,14 +146,13 @@ const AvailPackagePage = ({
         setEarnings({
           ...earnings,
           alliance_combined_earnings:
-            BigInt(earnings.alliance_combined_earnings) -
-            BigInt(Number(result.amount)),
+            Number(earnings.alliance_combined_earnings) - Number(result.amount),
           alliance_olympus_earnings:
-            BigInt(earnings.alliance_olympus_earnings) -
-            BigInt(olympusDeduction),
+            Number(earnings.alliance_olympus_earnings) -
+            Number(olympusDeduction),
           alliance_referral_bounty:
-            BigInt(earnings.alliance_referral_bounty) -
-            BigInt(referralDeduction),
+            Number(earnings.alliance_referral_bounty) -
+            Number(referralDeduction),
         });
       }
 
@@ -259,7 +263,7 @@ const AvailPackagePage = ({
                 variant="card"
                 type="button"
                 onClick={() => {
-                  setValue("amount", maxAmount.toString());
+                  setValue("amount", maxAmount.toFixed(2).toString());
                 }}
                 className="h-8 text-sm text-black"
               >
@@ -285,8 +289,8 @@ const AvailPackagePage = ({
                 placeholder="Gross Income"
                 value={
                   sumOfTotal.toLocaleString("en-US", {
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 0,
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
                   }) || ""
                 }
               />

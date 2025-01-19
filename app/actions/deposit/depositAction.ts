@@ -11,7 +11,7 @@ const topUpFormSchema = z.object({
   amount: z
     .string()
     .min(3, "Amount is required and must be at least 300 pesos")
-    .max(6, "Amount must be less than 6 digits")
+    .max(8, "Amount must be less than 8 digits")
     .regex(/^\d+$/, "Amount must be a number")
     .refine((amount) => parseInt(amount, 10) >= 300, {
       message: "Amount must be at least 300 pesos",
@@ -56,14 +56,6 @@ export const depositWalletData = async (params: {
 
     if (!amount || !topUpMode || !accountName || !accountNumber || !publicUrl) {
       throw new Error("All fields are required.");
-    }
-
-    if (amount.length > 7 || amount.length < 3) {
-      throw new Error("Invalid Request.");
-    }
-
-    if (parseInt(amount, 10) < 300) {
-      throw new Error("Invalid Request.");
     }
 
     const merchantData = await prisma.merchant_table.findFirst({

@@ -139,15 +139,7 @@ const DashboardWithdrawalModalForm = ({
       const email = sanitizedData.email;
       const cellphoneNumber = sanitizedData.cellphoneNumber;
 
-      if (email) {
-        await handleSendEmailRequest(sanitizedData);
-      }
-
-      if (cellphoneNumber) {
-        await handleSendSMSRequest(sanitizedData);
-      }
-
-      await createWithdrawalRequest({
+      const result = await createWithdrawalRequest({
         WithdrawFormValues: sanitizedData,
         teamMemberId: teamMemberProfile.alliance_member_id,
       });
@@ -174,22 +166,25 @@ const DashboardWithdrawalModalForm = ({
 
             // Ensure no remaining amount (sanity check)
             if (remainingAmount > 0) {
-              console.error("Insufficient funds to update state.");
+              toast({
+                title: "Insufficient funds to update state.",
+                description: "Please try again later.",
+                variant: "destructive",
+              });
               break;
             }
 
-            // Update state with new earnings values
             setEarnings({
               ...earnings,
               alliance_combined_earnings:
-                BigInt(earnings.alliance_combined_earnings) -
-                BigInt(Number(sanitizedData.amount)),
+                Number(earnings.alliance_combined_earnings) -
+                Number(sanitizedData.amount),
               alliance_olympus_earnings:
-                BigInt(earnings.alliance_olympus_earnings) -
-                BigInt(olympusDeduction),
+                Number(earnings.alliance_olympus_earnings) -
+                Number(olympusDeduction),
               alliance_referral_bounty:
-                BigInt(earnings.alliance_referral_bounty) -
-                BigInt(referralDeduction),
+                Number(earnings.alliance_referral_bounty) -
+                Number(referralDeduction),
             });
           }
           break;
@@ -204,7 +199,7 @@ const DashboardWithdrawalModalForm = ({
       const transactionHistory: alliance_transaction_table = {
         transaction_member_id: teamMemberProfile.alliance_member_id,
         transaction_description: "Withdrawal Ongoing",
-        transaction_amount: BigInt(transactionAmount),
+        transaction_amount: Math.floor(transactionAmount),
         transaction_date: new Date(),
         transaction_id: uuidv4(),
       };
@@ -233,6 +228,14 @@ const DashboardWithdrawalModalForm = ({
         read: [],
         count: userNotification.count + 1,
       });
+
+      if (email && result.ok) {
+        await handleSendEmailRequest(sanitizedData);
+      }
+
+      if (cellphoneNumber && result.ok) {
+        await handleSendSMSRequest(sanitizedData);
+      }
 
       toast({
         title: "Withdrawal Request Successfully",
@@ -269,8 +272,8 @@ const DashboardWithdrawalModalForm = ({
           calculateFinalAmount(Number(amount || 0), "TOTAL").toLocaleString(
             "en-US",
             {
-              minimumFractionDigits: 0,
-              maximumFractionDigits: 0,
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
             }
           ),
       });
@@ -304,14 +307,14 @@ const DashboardWithdrawalModalForm = ({
               Number(amount || 0),
               selectedEarnings
             ).toLocaleString("en-US", {
-              minimumFractionDigits: 0,
-              maximumFractionDigits: 0,
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
             }),
           balance:
             "₱" +
             (totalEarnings - Number(amount || 0)).toLocaleString("en-US", {
-              minimumFractionDigits: 0,
-              maximumFractionDigits: 0,
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
             }),
         },
         message: "We noticed a new transaction on your account.",
@@ -339,8 +342,8 @@ const DashboardWithdrawalModalForm = ({
         <Label className="text-green-700" htmlFor="earnings">
           Your Available Balance: ₱
           {totalEarnings.toLocaleString("en-US", {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
           })}
         </Label>
       </div>
@@ -552,7 +555,7 @@ const DashboardWithdrawalModalForm = ({
                 });
                 return;
               }
-              setValue("amount", getMaxAmount().toFixed(0).toString());
+              setValue("amount", getMaxAmount().toFixed(2).toString());
             }}
           >
             MAX
@@ -577,8 +580,8 @@ const DashboardWithdrawalModalForm = ({
               Number(amount || 0),
               selectedEarnings
             ).toLocaleString("en-US", {
-              minimumFractionDigits: 0,
-              maximumFractionDigits: 0,
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
             })}
           />
         </div>

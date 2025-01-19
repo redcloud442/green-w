@@ -303,8 +303,8 @@ const DashboardPage = ({
               Number(earnings?.alliance_combined_earnings ?? 0).toLocaleString(
                 "en-US",
                 {
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0,
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
                 }
               ) as unknown as number
             }
@@ -351,8 +351,8 @@ const DashboardPage = ({
                     ) : (
                       "₱ " +
                       (totalEarnings?.totalEarnings.toLocaleString("en-US", {
-                        minimumFractionDigits: 0,
-                        maximumFractionDigits: 0,
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
                       }) ?? 0)
                     )}
                   </p>
@@ -382,8 +382,8 @@ const DashboardPage = ({
                     ) : (
                       "₱ " +
                       (totalEarnings?.withdrawalAmount.toLocaleString("en-US", {
-                        minimumFractionDigits: 0,
-                        maximumFractionDigits: 0,
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
                       }) ?? 0)
                     )}
                   </p>
@@ -411,12 +411,12 @@ const DashboardPage = ({
                   </div>
                   <p className="text-sm sm:text-lg font-bold">
                     {refresh ? (
-                      <Skeleton className="h-5 sm:h-8 w-[120px] sm:w-[200px]" />
+                      <Skeleton className="h-5 sm:h-8 w-[80px] sm:w-[200px]" />
                     ) : (
                       "₱ " +
                       (totalEarnings?.package_income.toLocaleString("en-US", {
-                        minimumFractionDigits: 0,
-                        maximumFractionDigits: 0,
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
                       }) ?? 0)
                     )}
                   </p>
@@ -442,14 +442,14 @@ const DashboardPage = ({
                   </div>
                   <p className="text-sm sm:text-lg font-bold">
                     {refresh ? (
-                      <Skeleton className="h-5 sm:h-8 w-[120px] sm:w-[200px]" />
+                      <Skeleton className="h-5 sm:h-8 w-[80px] sm:w-[200px]" />
                     ) : (
                       "₱ " +
                       (totalEarnings?.directReferralAmount.toLocaleString(
                         "en-US",
                         {
-                          minimumFractionDigits: 0,
-                          maximumFractionDigits: 0,
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
                         }
                       ) ?? 0)
                     )}
@@ -475,14 +475,14 @@ const DashboardPage = ({
                   </div>
                   <p className="text-sm sm:text-lg font-bold">
                     {refresh ? (
-                      <Skeleton className="h-5 sm:h-8 w-[120px] sm:w-[200px]" />
+                      <Skeleton className="h-5 sm:h-8 w-[80px] sm:w-[200px]" />
                     ) : (
                       "₱ " +
                       (totalEarnings?.indirectReferralAmount.toLocaleString(
                         "en-US",
                         {
-                          minimumFractionDigits: 0,
-                          maximumFractionDigits: 0,
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
                         }
                       ) ?? 0)
                     )}

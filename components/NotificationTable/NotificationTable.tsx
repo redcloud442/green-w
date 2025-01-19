@@ -64,6 +64,7 @@ const NotificationTable = ({ teamMemberProfile }: DataTableProps) => {
     } finally {
     }
   };
+  console.log(userNotification.count);
 
   useEffect(() => {
     fetchRequest();
@@ -201,7 +202,7 @@ const NotificationTable = ({ teamMemberProfile }: DataTableProps) => {
                   </p>
                 )}
                 {userNotification.unread.length > 0 &&
-                  userNotification.unread.length < count && (
+                  userNotification.unread.length < userNotification.count && (
                     <Button
                       className="mt-2 w-full"
                       variant="card"

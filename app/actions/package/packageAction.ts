@@ -3,8 +3,8 @@
 import { applyRateLimitMember } from "@/utils/function";
 import prisma from "@/utils/prisma";
 import { protectionMemberUser } from "@/utils/serversideProtection";
+import { Decimal } from "@prisma/client/runtime/library";
 import { z } from "zod";
-
 const availPackageSchema = z.object({
   amount: z.number().min(1),
   earnings: z.number().min(1),
@@ -57,9 +57,10 @@ export const claimPackage = async (params: {
     // }
 
     const totalClaimedAmount =
-      packageConnection.package_member_amount +
-      packageConnection.package_amount_earnings;
-    const totalAmountToBeClaimed = BigInt(amount) + BigInt(earnings);
+      new Decimal(packageConnection.package_member_amount).toNumber() +
+      new Decimal(packageConnection.package_amount_earnings).toNumber();
+    const totalAmountToBeClaimed =
+      new Decimal(amount).toNumber() + new Decimal(earnings).toNumber();
 
     if (totalClaimedAmount !== totalAmountToBeClaimed) {
       throw new Error("Invalid request");

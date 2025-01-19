@@ -99,17 +99,17 @@ export async function PUT(
           },
           data: {
             alliance_olympus_wallet: {
-              increment: BigInt(
+              increment: Number(
                 updatedRequest.alliance_withdrawal_request_earnings_amount
               ),
             },
             alliance_olympus_earnings: {
-              increment: BigInt(
+              increment: Number(
                 updatedRequest.alliance_withdrawal_request_earnings_amount
               ),
             },
             alliance_combined_earnings: {
-              increment: BigInt(
+              increment: Number(
                 updatedRequest.alliance_withdrawal_request_amount
               ),
             },
@@ -124,7 +124,7 @@ export async function PUT(
               ? "Congratulations! Withdrawal Request Sent"
               : `Withdrawal Request Failed, ${note}`
           }`,
-          transaction_amount: BigInt(
+          transaction_amount: Number(
             updatedRequest.alliance_withdrawal_request_amount
           ),
           transaction_member_id:

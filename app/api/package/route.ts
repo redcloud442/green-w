@@ -94,7 +94,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { teamMemberProfile } = await protectionMemberUser(ip);
+    await protectionMemberUser(ip);
     await applyRateLimit(teamMemberId, ip);
 
     // Round off amount and convert to BigInt
@@ -153,7 +153,7 @@ export async function POST(request: Request) {
       alliance_combined_earnings,
     } = earningsData;
 
-    const combinedEarnings = Math.round(Number(alliance_combined_earnings));
+    const combinedEarnings = Number(alliance_combined_earnings);
     if (combinedEarnings < roundedAmount) {
       return NextResponse.json(
         { error: "Insufficient balance in the combined wallet." },
@@ -170,19 +170,17 @@ export async function POST(request: Request) {
     } = deductFromWallets(
       roundedAmount,
       combinedEarnings,
-      Math.round(Number(alliance_olympus_wallet)),
-      Math.round(Number(alliance_olympus_earnings)),
-      Math.round(Number(alliance_referral_bounty))
+      Number(alliance_olympus_wallet),
+      Number(alliance_olympus_earnings),
+      Number(alliance_referral_bounty)
     );
 
     const packagePercentage = new Prisma.Decimal(
       Number(packageData.package_percentage)
     ).div(100);
 
-    const packageAmountEarnings = Math.round(
-      Number(
-        new Prisma.Decimal(roundedAmount).mul(packagePercentage).toNumber()
-      )
+    const packageAmountEarnings = new Prisma.Decimal(roundedAmount).mul(
+      packagePercentage
     );
 
     // Generate referral chain with a capped depth
@@ -204,8 +202,8 @@ export async function POST(request: Request) {
         data: {
           package_member_member_id: teamMemberId,
           package_member_package_id: packageId,
-          package_member_amount: amountBigInt,
-          package_amount_earnings: BigInt(packageAmountEarnings),
+          package_member_amount: Number(amountBigInt),
+          package_amount_earnings: Number(packageAmountEarnings),
           package_member_status: "ACTIVE",
         },
       });
@@ -213,17 +211,17 @@ export async function POST(request: Request) {
       await tx.alliance_transaction_table.create({
         data: {
           transaction_member_id: teamMemberId,
-          transaction_amount: BigInt(packageAmountEarnings),
+          transaction_amount: Number(packageAmountEarnings),
           transaction_description: `Package Enrolled: ${packageData.package_name}`,
         },
       });
       await tx.alliance_earnings_table.update({
         where: { alliance_earnings_member_id: teamMemberId },
         data: {
-          alliance_combined_earnings: BigInt(updatedCombinedWallet),
-          alliance_olympus_wallet: BigInt(olympusWallet),
-          alliance_olympus_earnings: BigInt(olympusEarnings),
-          alliance_referral_bounty: BigInt(referralWallet),
+          alliance_combined_earnings: updatedCombinedWallet,
+          alliance_olympus_wallet: olympusWallet,
+          alliance_olympus_earnings: olympusEarnings,
+          alliance_referral_bounty: referralWallet,
         },
       });
 
@@ -240,14 +238,13 @@ export async function POST(request: Request) {
 
           bountyLogs = batch.map((ref) => {
             // Calculate earnings based on ref.percentage and round to the nearest integer
-            const calculatedEarnings = Math.round(
-              (Number(amount) * Number(ref.percentage)) / 100
-            );
+            const calculatedEarnings =
+              (Number(amount) * Number(ref.percentage)) / 100;
 
             return {
               package_ally_bounty_member_id: ref.referrerId,
               package_ally_bounty_percentage: ref.percentage,
-              package_ally_bounty_earnings: BigInt(calculatedEarnings), // Use the rounded value
+              package_ally_bounty_earnings: calculatedEarnings, // Use the rounded value
               package_ally_bounty_type: ref.level === 1 ? "DIRECT" : "INDIRECT",
               package_ally_bounty_connection_id:
                 connectionData.package_member_connection_id,
@@ -256,13 +253,12 @@ export async function POST(request: Request) {
           });
 
           transactionLogs = batch.map((ref) => {
-            const calculatedEarnings = Math.round(
-              (Number(amount) * Number(ref.percentage)) / 100
-            );
+            const calculatedEarnings =
+              (Number(amount) * Number(ref.percentage)) / 100;
 
             return {
               transaction_member_id: ref.referrerId,
-              transaction_amount: BigInt(calculatedEarnings),
+              transaction_amount: calculatedEarnings,
               transaction_description:
                 ref.level === 1
                   ? "Referral Income"
@@ -283,8 +279,8 @@ export async function POST(request: Request) {
               tx.alliance_earnings_table.update({
                 where: { alliance_earnings_member_id: ref.referrerId },
                 data: {
-                  alliance_referral_bounty: BigInt(packageAmountEarnings),
-                  alliance_combined_earnings: BigInt(packageAmountEarnings),
+                  alliance_referral_bounty: Number(packageAmountEarnings),
+                  alliance_combined_earnings: Number(packageAmountEarnings),
                 },
               })
             )

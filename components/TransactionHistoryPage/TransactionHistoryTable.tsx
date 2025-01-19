@@ -147,7 +147,8 @@ const TransactionHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
                   className={`flex items-center justify-center text-black font-bold text-sm sm:text-3xl ${
                     data.transaction_description.includes("Success") ||
                     data.transaction_description.includes("Claimed") ||
-                    data.transaction_description.includes("Income")
+                    data.transaction_description.includes("Income") ||
+                    data.transaction_description.includes("Deposit")
                       ? "text-green-500"
                       : "text-red-500"
                   }`}
@@ -155,8 +156,8 @@ const TransactionHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
                   ₱{" "}
                   {data.transaction_amount
                     ? Number(data.transaction_amount).toLocaleString("en-US", {
-                        minimumFractionDigits: 0,
-                        maximumFractionDigits: 0,
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
                       })
                     : "0.00"}
                 </div>

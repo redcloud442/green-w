@@ -1,7 +1,17 @@
+import { applyRateLimitMember } from "@/utils/function";
+import { createClientServerSide } from "@/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
+    const supabase = await createClientServerSide();
+
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+
+    if (userError) throw userError;
+
+    applyRateLimitMember(userData.user.id);
+
     // Parse the request body
     const { number, message } = await req.json();
 
@@ -40,6 +50,8 @@ export async function POST(req: NextRequest) {
     });
 
     const result = await response.json();
+
+    console.log(result);
 
     if (!response.ok) {
       return NextResponse.json(
