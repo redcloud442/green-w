@@ -1,6 +1,6 @@
 import { TOP_UP_STATUS } from "@/utils/constant";
-import { applyRateLimit } from "@/utils/function";
 import prisma from "@/utils/prisma";
+import { rateLimit } from "@/utils/redis/redis";
 import { protectionMerchantUser } from "@/utils/serversideProtection";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
@@ -54,7 +54,18 @@ export async function PUT(
       return sendErrorResponse("User authentication failed.", 401);
     }
 
-    await applyRateLimit(teamMemberProfile.alliance_member_id, ip);
+    const isAllowed = await rateLimit(
+      `rate-limit:${teamMemberProfile?.alliance_member_id}`,
+      50,
+      60
+    );
+
+    if (!isAllowed) {
+      return NextResponse.json(
+        { message: "Too many requests. Please try again later." },
+        { status: 429 }
+      );
+    }
 
     const [existingRequest, merchant] = await Promise.all([
       prisma.alliance_top_up_request_table.findUnique({

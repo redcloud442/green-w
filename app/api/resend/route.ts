@@ -1,7 +1,7 @@
 import BankingEmailNotificationTemplate, {
   BankingEmailNotificationTemplateProps,
 } from "@/components/EmailTemplate.tsx/EmailTemplate";
-import { applyRateLimitMember } from "@/utils/function";
+import { rateLimit } from "@/utils/redis/redis";
 import { createClientServerSide } from "@/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
@@ -20,7 +20,14 @@ export async function POST(req: NextRequest) {
           "The user does not have an active session or is not authenticated",
       });
 
-    applyRateLimitMember(userData.user.id);
+    const isAllowed = await rateLimit(`rate-limit:${userData.user.id}`, 5, 60);
+
+    if (!isAllowed) {
+      return NextResponse.json(
+        { message: "Too many requests. Please try again later." },
+        { status: 429 }
+      );
+    }
 
     const {
       to,

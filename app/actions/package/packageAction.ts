@@ -1,9 +1,8 @@
 "use server";
 
-import { applyRateLimitMember } from "@/utils/function";
 import prisma from "@/utils/prisma";
+import { rateLimit } from "@/utils/redis/redis";
 import { protectionMemberUser } from "@/utils/serversideProtection";
-import { Decimal } from "@prisma/client/runtime/library";
 import { z } from "zod";
 const availPackageSchema = z.object({
   amount: z.number().min(1),
@@ -37,7 +36,15 @@ export const claimPackage = async (params: {
       throw new Error("User authentication failed.");
     }
 
-    await applyRateLimitMember(teamMemberProfile.alliance_member_id);
+    const isAllowed = await rateLimit(
+      `rate-limit:${teamMemberProfile?.alliance_member_id}`,
+      10,
+      60
+    );
+
+    if (!isAllowed) {
+      throw new Error("Too many requests. Please try again later.");
+    }
 
     const packageConnection =
       await prisma.package_member_connection_table.findUnique({
@@ -57,10 +64,10 @@ export const claimPackage = async (params: {
     // }
 
     const totalClaimedAmount =
-      new Decimal(packageConnection.package_member_amount).toNumber() +
-      new Decimal(packageConnection.package_amount_earnings).toNumber();
+      Math.floor(Number(packageConnection.package_member_amount)) +
+      Math.floor(Number(packageConnection.package_amount_earnings));
     const totalAmountToBeClaimed =
-      new Decimal(amount).toNumber() + new Decimal(earnings).toNumber();
+      Math.floor(Number(amount)) + Math.floor(Number(earnings));
 
     if (totalClaimedAmount !== totalAmountToBeClaimed) {
       throw new Error("Invalid request");

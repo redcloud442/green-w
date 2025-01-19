@@ -1,5 +1,6 @@
 "use server";
 import prisma from "@/utils/prisma";
+import { rateLimit } from "@/utils/redis/redis";
 import { createClientServerSide } from "@/utils/supabase/server";
 import { ChartDataMember } from "@/utils/types";
 import { Prisma } from "@prisma/client";
@@ -15,6 +16,16 @@ export const notifyAction = async (params: {
 
     if (authError || !authData?.user) {
       throw new Error("User not authenticated");
+    }
+
+    const isAllowed = await rateLimit(
+      `rate-limit:${authData?.user?.id}`,
+      10,
+      60
+    );
+
+    if (!isAllowed) {
+      throw new Error("Too many requests. Please try again later.");
     }
 
     const { chartData, memberId } = params;

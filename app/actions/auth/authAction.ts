@@ -1,7 +1,8 @@
 "use server";
 
-import { applyRateLimitMember, hashData } from "@/utils/function";
+import { hashData } from "@/utils/function";
 import prisma from "@/utils/prisma";
+import { rateLimit } from "@/utils/redis/redis";
 import {
   protectionAdminUser,
   protectionMemberUser,
@@ -34,7 +35,15 @@ export const changeUserPassword = async (params: {
 
   const { teamMemberProfile: role } = await protectionMemberUser();
 
-  applyRateLimitMember(role?.alliance_member_id || "");
+  const isAllowed = await rateLimit(
+    `rate-limit:${role?.alliance_member_id}`,
+    10,
+    60
+  );
+
+  if (!isAllowed) {
+    throw new Error("Too many requests. Please try again later.");
+  }
 
   const iv = crypto.randomBytes(16);
   const allowedKey = process.env.ALLOWED_CRYPTO_KEY;
@@ -153,6 +162,18 @@ export const registerUser = async (params: {
       throw new Error(validate.error.message);
     }
 
+    const { teamMemberProfile } = await protectionMemberUser();
+
+    const isAllowed = await rateLimit(
+      `rate-limit:${teamMemberProfile?.alliance_member_id}`,
+      10,
+      60
+    );
+
+    if (!isAllowed) {
+      throw new Error("Too many requests. Please try again later.");
+    }
+
     const {
       userName,
       password,
@@ -218,7 +239,18 @@ export const handleSignInUser = async (params: {
     }
 
     const { formattedUserName, password } = params;
-    await protectionAdminUser();
+
+    const { teamMemberProfile } = await protectionAdminUser();
+
+    const isAllowed = await rateLimit(
+      `rate-limit:${teamMemberProfile?.alliance_member_id}`,
+      10,
+      60
+    );
+
+    if (!isAllowed) {
+      throw new Error("Too many requests. Please try again later.");
+    }
 
     const { error: signInError } = await supabaseClient.auth.signInWithPassword(
       {

@@ -1,8 +1,8 @@
 "use server";
 
 import { TopUpFormValues } from "@/components/DashboardPage/DashboardDepositRequest/DashboardDepositModal/DashboardDepositModalDeposit";
-import { applyRateLimitMember } from "@/utils/function";
 import prisma from "@/utils/prisma";
+import { rateLimit } from "@/utils/redis/redis";
 import { protectionMemberUser } from "@/utils/serversideProtection";
 import { createClientServerSide } from "@/utils/supabase/server";
 import { z } from "zod";
@@ -49,7 +49,15 @@ export const depositWalletData = async (params: {
       throw new Error("Member ID is required");
     }
 
-    await applyRateLimitMember(teamMemberProfile.alliance_member_id);
+    const isAllowed = await rateLimit(
+      `rate-limit:${teamMemberProfile?.alliance_member_id}`,
+      10,
+      60
+    );
+
+    if (!isAllowed) {
+      throw new Error("Too many requests. Please try again later.");
+    }
 
     const { amount, topUpMode, accountName, accountNumber } =
       params.TopUpFormValues;

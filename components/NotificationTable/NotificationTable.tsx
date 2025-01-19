@@ -64,7 +64,6 @@ const NotificationTable = ({ teamMemberProfile }: DataTableProps) => {
     } finally {
     }
   };
-  console.log(userNotification.count);
 
   useEffect(() => {
     fetchRequest();

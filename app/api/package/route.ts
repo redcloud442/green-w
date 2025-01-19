@@ -1,5 +1,5 @@
-import { applyRateLimit } from "@/utils/function";
 import prisma from "@/utils/prisma";
+import { rateLimit } from "@/utils/redis/redis";
 import { protectionMemberUser } from "@/utils/serversideProtection";
 import { createClientServerSide } from "@/utils/supabase/server";
 import { Prisma } from "@prisma/client";
@@ -15,7 +15,18 @@ export async function GET(request: Request) {
 
     const { teamMemberProfile } = await protectionMemberUser(ip);
 
-    await applyRateLimit(teamMemberProfile?.alliance_member_id || "", ip);
+    const isAllowed = await rateLimit(
+      `rate-limit:${teamMemberProfile?.alliance_member_id}`,
+      50,
+      60
+    );
+
+    if (!isAllowed) {
+      return NextResponse.json(
+        { message: "Too many requests. Please try again later." },
+        { status: 429 }
+      );
+    }
 
     const supabaseClient = await createClientServerSide();
 
@@ -94,11 +105,20 @@ export async function POST(request: Request) {
       );
     }
 
-    await protectionMemberUser(ip);
-    await applyRateLimit(teamMemberId, ip);
+    const { teamMemberProfile } = await protectionMemberUser(ip);
+
+    const isAllowed = await rateLimit(`rate-limit:${teamMemberId}`, 50, 60);
+
+    if (!isAllowed) {
+      return NextResponse.json(
+        { message: "Too many requests. Please try again later." },
+        { status: 429 }
+      );
+    }
 
     // Round off amount and convert to BigInt
     const roundedAmount = Math.round(amount); // Remove decimals
+
     const amountBigInt = BigInt(roundedAmount); // Convert to BigInt
 
     const [packageData, earningsData, referralData] = await Promise.all([
@@ -301,6 +321,15 @@ export async function POST(request: Request) {
           data: notificationLogs,
         }),
       ]);
+    }
+
+    if (!teamMemberProfile?.alliance_member_is_active) {
+      await prisma.alliance_member_table.update({
+        where: { alliance_member_id: teamMemberId },
+        data: {
+          alliance_member_is_active: true,
+        },
+      });
     }
 
     return NextResponse.json({ success: true });

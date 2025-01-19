@@ -1,4 +1,4 @@
-import { applyRateLimitMember } from "@/utils/function";
+import { rateLimit } from "@/utils/redis/redis";
 import { createClientServerSide } from "@/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -10,7 +10,14 @@ export async function POST(req: NextRequest) {
 
     if (userError) throw userError;
 
-    applyRateLimitMember(userData.user.id);
+    const isAllowed = await rateLimit(`rate-limit:${userData.user.id}`, 10, 60);
+
+    if (!isAllowed) {
+      return NextResponse.json(
+        { message: "Too many requests. Please try again later." },
+        { status: 429 }
+      );
+    }
 
     // Parse the request body
     const { number, message } = await req.json();
@@ -50,8 +57,6 @@ export async function POST(req: NextRequest) {
     });
 
     const result = await response.json();
-
-    console.log(result);
 
     if (!response.ok) {
       return NextResponse.json(

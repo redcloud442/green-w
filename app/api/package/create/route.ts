@@ -1,5 +1,5 @@
-import { applyRateLimit } from "@/utils/function";
 import prisma from "@/utils/prisma";
+import { rateLimit } from "@/utils/redis/redis";
 import { protectionAdminUser } from "@/utils/serversideProtection";
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -62,7 +62,18 @@ export async function POST(request: Request) {
       );
     }
 
-    await applyRateLimit(teamMemberProfile.alliance_member_id, ip);
+    const isAllowed = await rateLimit(
+      `rate-limit:${teamMemberProfile.alliance_member_id}`,
+      50,
+      60
+    );
+
+    if (!isAllowed) {
+      return NextResponse.json(
+        { message: "Too many requests. Please try again later." },
+        { status: 429 }
+      );
+    }
 
     const checkIfPackageExists = await prisma.package_table.findFirst({
       where: { package_name: packageName },

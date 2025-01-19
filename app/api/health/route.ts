@@ -1,4 +1,4 @@
-import { loginRateLimit } from "@/utils/function";
+import { rateLimit } from "@/utils/redis/redis";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
@@ -7,6 +7,13 @@ export async function GET(request: Request) {
     request.headers.get("cf-connecting-ip") ||
     "unknown";
 
-  loginRateLimit(ip);
+  const isAllowed = await rateLimit(`rate-limit:${ip}`, 5, 60);
+
+  if (!isAllowed) {
+    return sendErrorResponse("Too many requests. Please try again later.", 429);
+  }
   return NextResponse.json({ status: "OK" }, { status: 200 });
+}
+function sendErrorResponse(arg0: string, arg1: number) {
+  throw new Error("Function not implemented.");
 }

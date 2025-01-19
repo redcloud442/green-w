@@ -1,5 +1,6 @@
 import { loginRateLimit } from "@/utils/function";
 import prisma from "@/utils/prisma";
+import { rateLimit } from "@/utils/redis/redis";
 import {
   protectionAdminUser,
   protectionMemberUser,
@@ -36,7 +37,14 @@ export async function PUT(
 
     await protectionMemberUser(ip);
 
-    loginRateLimit(ip);
+    const isAllowed = await rateLimit(`rate-limit:${ip}`, 10, 60);
+
+    if (!isAllowed) {
+      return NextResponse.json(
+        { message: "Too many requests. Please try again later." },
+        { status: 429 }
+      );
+    }
 
     const { userId } = await context.params;
 

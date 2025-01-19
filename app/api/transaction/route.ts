@@ -1,4 +1,5 @@
 import prisma from "@/utils/prisma";
+import { rateLimit } from "@/utils/redis/redis";
 import { protectionMemberUser } from "@/utils/serversideProtection";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
@@ -30,6 +31,19 @@ export async function POST(request: NextRequest) {
     const safePage = Math.max(Number(page), 1); // Ensure page is at least 1
 
     const { teamMemberProfile } = await protectionMemberUser();
+
+    const isAllowed = await rateLimit(
+      `rate-limit:${teamMemberProfile?.alliance_member_id}`,
+      10,
+      60
+    );
+
+    if (!isAllowed) {
+      return NextResponse.json(
+        { message: "Too many requests. Please try again later." },
+        { status: 429 }
+      );
+    }
 
     if (!teamMemberProfile) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

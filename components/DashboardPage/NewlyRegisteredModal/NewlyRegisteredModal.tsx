@@ -19,7 +19,7 @@ const NewlyRegisteredModal = ({ isActive, setOpen }: Props) => {
     if (!isActive) {
       setIsModalOpen(true);
     }
-  }, []);
+  }, [isActive]);
 
   return (
     <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>

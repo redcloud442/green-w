@@ -1,6 +1,7 @@
 import { ROLE } from "@/utils/constant";
-import { decryptData, loginRateLimit } from "@/utils/function";
+import { decryptData } from "@/utils/function";
 import prisma from "@/utils/prisma";
+import { rateLimit } from "@/utils/redis/redis";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -21,7 +22,14 @@ export async function POST(request: Request) {
         400
       );
 
-    loginRateLimit(ip);
+    const isAllowed = await rateLimit(`rate-limit:${ip}`, 5, 60);
+
+    if (!isAllowed) {
+      return sendErrorResponse(
+        "Too many requests. Please try again later.",
+        429
+      );
+    }
 
     const {
       userName,
@@ -153,6 +161,7 @@ const LoginSchema = z.object({
       "Username can only contain letters, numbers, and underscores"
     ),
 });
+
 export async function GET(request: Request) {
   try {
     const ip = getClientIP(request);
@@ -173,8 +182,14 @@ export async function GET(request: Request) {
       return sendErrorResponse("Invalid request.", 400);
     }
 
-    loginRateLimit(ip, userName ?? undefined);
+    const isAllowed = await rateLimit(`rate-limit:${ip}`, 5, 60);
 
+    if (!isAllowed) {
+      return sendErrorResponse(
+        "Too many requests. Please try again later.",
+        429
+      );
+    }
     if (!userName) {
       return sendErrorResponse("Username is required.", 400);
     }

@@ -1,4 +1,4 @@
-import { loginRateLimit } from "@/utils/function";
+import { rateLimit } from "@/utils/redis/redis";
 import { protectionAllUser } from "@/utils/serversideProtection";
 import { createClientSide } from "@/utils/supabase/client";
 import { NextResponse } from "next/server";
@@ -36,9 +36,20 @@ export async function POST(request: Request) {
     }
     const supabaseClient = createClientSide();
 
-    await protectionAllUser(ip);
+    const { teamMemberProfile } = await protectionAllUser(ip);
 
-    loginRateLimit(ip);
+    const isAllowed = await rateLimit(
+      `rate-limit:${teamMemberProfile?.alliance_member_id}`,
+      10,
+      60
+    );
+
+    if (!isAllowed) {
+      return NextResponse.json(
+        { message: "Too many requests. Please try again later." },
+        { status: 429 }
+      );
+    }
     const { data: userData, error } = await supabaseClient.rpc(
       "get_user_sponsor",
       {

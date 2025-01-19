@@ -1,6 +1,7 @@
 "use server";
 
 import prisma from "@/utils/prisma";
+import { rateLimit } from "@/utils/redis/redis";
 import { protectionMemberUser } from "@/utils/serversideProtection";
 import { alliance_preferred_withdrawal_table } from "@prisma/client";
 import { z } from "zod";
@@ -34,6 +35,15 @@ export const handleAddPreferredWithdrawal = async (formData: FormData) => {
 
     const { teamMemberProfile } = await protectionMemberUser();
 
+    const isAllowed = await rateLimit(
+      `rate-limit:${teamMemberProfile?.alliance_member_id}`,
+      10,
+      60
+    );
+
+    if (!isAllowed) {
+      throw new Error("Too many requests. Please try again later.");
+    }
     const preferredWithdrawal =
       await prisma.alliance_preferred_withdrawal_table.create({
         data: {

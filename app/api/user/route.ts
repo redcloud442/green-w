@@ -1,5 +1,6 @@
 import { applyRateLimit, serializeBigIntRecursive } from "@/utils/function";
 import prisma from "@/utils/prisma";
+import { rateLimit } from "@/utils/redis/redis";
 import { protectionMemberUser } from "@/utils/serversideProtection";
 import { alliance_preferred_withdrawal_table } from "@prisma/client";
 import { NextResponse } from "next/server";
@@ -28,7 +29,18 @@ export async function PUT(request: Request) {
 
     const { teamMemberProfile: profile } = await protectionMemberUser();
 
-    applyRateLimit(profile?.alliance_member_id || "", ip);
+    const isAllowed = await rateLimit(
+      `rate-limit:${profile?.alliance_member_id}`,
+      10,
+      60
+    );
+
+    if (!isAllowed) {
+      return NextResponse.json(
+        { message: "Too many requests. Please try again later." },
+        { status: 429 }
+      );
+    }
 
     const { email, password, userId } = await request.json();
 

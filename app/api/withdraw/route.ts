@@ -6,6 +6,7 @@ import {
   escapeFormData,
 } from "@/utils/function";
 import prisma from "@/utils/prisma";
+import { rateLimit } from "@/utils/redis/redis";
 import { protectionMemberUser } from "@/utils/serversideProtection";
 import { createClientServerSide } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
@@ -143,7 +144,18 @@ export async function POST(request: Request) {
 
     const { teamMemberProfile } = await protectionMemberUser(ip);
 
-    await applyRateLimit(teamMemberId, ip);
+    const isAllowed = await rateLimit(
+      `rate-limit:${teamMemberProfile?.alliance_member_id}`,
+      10,
+      60
+    );
+
+    if (!isAllowed) {
+      return NextResponse.json(
+        { message: "Too many requests. Please try again later." },
+        { status: 429 }
+      );
+    }
 
     const amountMatch = await prisma.alliance_earnings_table.findUnique({
       where: { alliance_earnings_member_id: teamMemberId },
