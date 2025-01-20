@@ -68,6 +68,7 @@ export const updateUserNotification = async (teamMemberId: string) => {
   await prisma.alliance_notification_table.updateMany({
     where: {
       alliance_notification_user_id: teamMemberId,
+      alliance_notification_is_read: false,
     },
     data: {
       alliance_notification_is_read: true,

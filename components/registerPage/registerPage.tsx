@@ -159,8 +159,8 @@ const RegisterPage = ({ referralLink }: Props) => {
       setIsSuccess(true);
 
       toast({
-        title: "Welcome to Elevate and Congratulations on your free account!",
-        description: "Mag avail na ng package para makapagsimula ng kumita!",
+        title: "Registration Success",
+        description: "Please wait",
       });
       router.push("/");
     } catch (e) {

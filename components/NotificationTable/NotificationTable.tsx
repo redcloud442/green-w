@@ -6,7 +6,7 @@ import {
 } from "@/app/actions/user/userAction";
 import { useUserNotificationStore } from "@/store/userNotificationStore";
 import { alliance_member_table } from "@prisma/client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "../ui/button";
 import { Card, CardHeader, CardTitle } from "../ui/card";
 import { DialogContent, DialogFooter, DialogTitle } from "../ui/dialog";
@@ -20,7 +20,7 @@ type DataTableProps = {
 const NotificationTable = ({ teamMemberProfile }: DataTableProps) => {
   const [activePage, setActivePage] = useState(1);
   const [isFetchingList, setIsFetchingList] = useState(false);
-
+  const fetchCalled = useRef(false);
   const { userNotification, setUserNotification, setAddUserNotification } =
     useUserNotificationStore();
 
@@ -35,7 +35,13 @@ const NotificationTable = ({ teamMemberProfile }: DataTableProps) => {
         isRead: false,
       });
 
-      await updateUserNotification(teamMemberProfile.alliance_member_id);
+      if (
+        userNotification.notifications.some(
+          (n) => n.alliance_notification_is_read === false
+        )
+      ) {
+        await updateUserNotification(teamMemberProfile.alliance_member_id);
+      }
 
       setUserNotification({
         notifications: data,
@@ -47,6 +53,8 @@ const NotificationTable = ({ teamMemberProfile }: DataTableProps) => {
   };
 
   useEffect(() => {
+    if (fetchCalled.current) return;
+    fetchCalled.current = true;
     fetchRequest();
   }, [teamMemberProfile]);
 
