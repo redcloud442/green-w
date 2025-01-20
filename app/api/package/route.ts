@@ -64,12 +64,9 @@ export async function GET(request: Request) {
 }
 
 const topupSchema = z.object({
-  amount: z
-    .number()
-    .min(2, "Minimum amount is 50 pesos")
-    .refine((val) => !isNaN(Number(val)), {
-      message: "Amount must be a number",
-    }),
+  amount: z.number().refine((val) => Number(val) >= 50, {
+    message: "Minimum amount is 50 pesos",
+  }),
   packageId: z.string().uuid(),
 });
 

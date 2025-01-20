@@ -191,34 +191,19 @@ export const protectionMemberUser = async (ip?: string) => {
       return { redirect: "/500" };
     }
 
-    const [referal, earnings] = await Promise.all([
-      prisma.alliance_referral_link_table.findFirst({
-        where: {
-          alliance_referral_link_member_id: teamMember.alliance_member_id,
-        },
-        select: {
-          alliance_referral_link: true,
-        },
-      }),
-      prisma.alliance_earnings_table.findFirst({
-        where: { alliance_earnings_member_id: teamMember.alliance_member_id },
-        select: {
-          alliance_olympus_wallet: true,
-          alliance_referral_bounty: true,
-          alliance_olympus_earnings: true,
-          alliance_combined_earnings: true,
-        },
-      }),
-    ]);
-
-    if (!earnings) {
-      return { redirect: "/404" };
-    }
+    const referal = await prisma.alliance_referral_link_table.findFirst({
+      where: {
+        alliance_referral_link_member_id: teamMember.alliance_member_id,
+      },
+      select: {
+        alliance_referral_link: true,
+      },
+    });
 
     return {
       profile: profile as user_table,
       teamMemberProfile: teamMember as alliance_member_table,
-      earnings: earnings as alliance_earnings_table,
+
       referal: referal as alliance_referral_link_table,
     };
   } catch (e) {

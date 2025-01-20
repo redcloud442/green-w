@@ -9,7 +9,6 @@ import { useUserDashboardEarningsStore } from "@/store/useUserDashboardEarnings"
 import { useUserEarningsStore } from "@/store/useUserEarningsStore";
 import { createClientSide } from "@/utils/supabase/client";
 import {
-  alliance_earnings_table,
   alliance_member_table,
   alliance_referral_link_table,
   package_table,
@@ -36,7 +35,6 @@ import DashboardWithdrawModalWithdraw from "./DashboardWithdrawRequest/Dashboard
 import NewlyRegisteredModal from "./NewlyRegisteredModal/NewlyRegisteredModal";
 
 type Props = {
-  earnings: alliance_earnings_table;
   teamMemberProfile: alliance_member_table;
   referal: alliance_referral_link_table;
   packages: package_table[];

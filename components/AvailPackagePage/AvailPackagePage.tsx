@@ -54,8 +54,8 @@ const AvailPackagePage = ({
     amount: z
       .string()
       .min(2, "Minimum amount is 50 pesos")
-      .refine((val) => !isNaN(Number(val)), {
-        message: "Amount must be a number",
+      .refine((val) => Number(val) >= 50, {
+        message: "Minimum amount is 50 pesos",
       })
       .refine((val) => Number(val) <= Number(maxAmount), {
         message: `Amount cannot exceed ${formattedMaxAmount}`,

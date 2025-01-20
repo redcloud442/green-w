@@ -28,19 +28,19 @@ const NotificationTable = ({ teamMemberProfile }: DataTableProps) => {
     if (!teamMemberProfile) return;
 
     try {
-      const { data, count } = await getUnserNotificationWithLimit({
+      const { data } = await getUnserNotificationWithLimit({
         page: activePage,
         limit: 10,
         teamMemberId: teamMemberProfile.alliance_member_id,
         isRead: false,
       });
 
+      await updateUserNotification(teamMemberProfile.alliance_member_id);
+
       setUserNotification({
         notifications: data,
-        count: count,
+        count: 0,
       });
-
-      await updateUserNotification(teamMemberProfile.alliance_member_id);
     } catch (error) {
     } finally {
     }
