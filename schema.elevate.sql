@@ -11,6 +11,7 @@ CREATE EXTENSION IF NOT EXISTS plv8;
 
 
 
+DROP view alliance_schema.dashboard_earnings_summary;
 CREATE OR REPLACE VIEW alliance_schema.dashboard_earnings_summary AS
 WITH 
     earnings AS (
@@ -33,6 +34,7 @@ WITH
     direct_referrals AS (
         SELECT 
             package_ally_bounty_member_id AS member_id,
+            COUNT(DISTINCT(package_ally_bounty_from)) AS direct_referral_count,
             COALESCE(SUM(package_ally_bounty_earnings::BIGINT), 0) AS direct_referral_amount
         FROM packages_schema.package_ally_bounty_log
         WHERE package_ally_bounty_type = 'DIRECT'
@@ -61,14 +63,14 @@ SELECT
     COALESCE(w.total_withdrawals, 0) AS total_withdrawals,
     COALESCE(d.direct_referral_amount, 0) AS direct_referral_amount,
     COALESCE(i.indirect_referral_amount, 0) AS indirect_referral_amount,
-    COALESCE(p.package_income, 0) AS package_income
+    COALESCE(p.package_income, 0) AS package_income,
+    COALESCE(d.direct_referral_count, 0) AS direct_referral_count
 FROM alliance_schema.alliance_member_table m
 LEFT JOIN earnings e ON m.alliance_member_id = e.member_id
 LEFT JOIN withdrawals w ON m.alliance_member_id = w.member_id
 LEFT JOIN direct_referrals d ON m.alliance_member_id = d.member_id
 LEFT JOIN indirect_referrals i ON m.alliance_member_id = i.member_id
 LEFT JOIN package_income p ON m.alliance_member_id = p.member_id;
-
 
 
 CREATE OR REPLACE FUNCTION get_current_date()
@@ -197,7 +199,6 @@ plv8.subtransaction(function() {
     user: result[0],
   };
   }
-
 });
 function handleReferral(referalLink, allianceMemberId) {
   
@@ -349,27 +350,26 @@ plv8.subtransaction(function() {
     ${dateFilterCondition}
     GROUP BY t.alliance_withdrawal_request_status
   `, [teamId]);
-
-['APPROVED', 'REJECTED', 'PENDING'].forEach((status) => {
-  const match = statusCount.find(item => item.status.trim().toUpperCase() === status);
-  returnData.data[status].count = match ? BigInt(match.count) : BigInt(0);
-});
-
-
-  withdrawRequest.forEach(request => {
-    if (returnData.data[request.alliance_withdrawal_request_status]) {
-      returnData.data[request.alliance_withdrawal_request_status].data.push(request);
-    }
+    
+  ['APPROVED', 'REJECTED', 'PENDING'].forEach((status) => {
+    const match = statusCount.find(item => item.status.trim().toUpperCase() === status);
+    returnData.data[status].count = match ? BigInt(match.count) : BigInt(0);
   });
-});
-const stringifyWithBigInt = (key, value) => {
-  if (typeof value === "bigint") {
-    return value.toString(); // Convert BigInt to string
-  }
-  return value;
-};
 
-// Return serialized result
+
+    withdrawRequest.forEach(request => {
+      if (returnData.data[request.alliance_withdrawal_request_status]) {
+        returnData.data[request.alliance_withdrawal_request_status].data.push(request);
+      }
+    });
+  });
+  const stringifyWithBigInt = (key, value) => {
+    if (typeof value === "bigint") {
+      return value.toString(); // Convert BigInt to string
+    }
+    return value;
+  };
+
 return JSON.parse(JSON.stringify(returnData, stringifyWithBigInt));
 $$ LANGUAGE plv8;
 
@@ -668,7 +668,6 @@ CREATE OR REPLACE FUNCTION get_merchant_data(
 RETURNS JSON
 SET search_path TO ''
 AS $$
-
 let returnData = {
   data: [],
   totalCount: 0,
@@ -789,7 +788,6 @@ let returnData = {
   },
   totalCount: BigInt(0),
 };
-
 plv8.subtransaction(function() {
   const {
     page = 1,
@@ -920,20 +918,16 @@ plv8.subtransaction(function() {
     BigInt(0)
   );
 });
-
-// Custom serialization for BigInt
-const stringifyWithBigInt = (key, value) => {
-  if (typeof value === "bigint") {
-    return value.toString(); // Convert BigInt to string
-  }
-  return value;
-};
+  const stringifyWithBigInt = (key, value) => {
+    if (typeof value === "bigint") {
+      return value.toString(); // Convert BigInt to string
+    }
+    return value;
+  };
 
 // Return serialized result
 return JSON.parse(JSON.stringify(returnData, stringifyWithBigInt));
 $$ LANGUAGE plv8;
-
-
 
 
 CREATE OR REPLACE FUNCTION get_admin_user_data(
@@ -1417,16 +1411,11 @@ plv8.subtransaction(function() {
         total_withdrawals,
         direct_referral_amount,
         indirect_referral_amount,
-        package_income
+        package_income,
+        direct_referral_count
     FROM alliance_schema.dashboard_earnings_summary
     WHERE member_id = $1
   `, [teamMemberId]);
-
-  const totalCount = plv8.execute(`
-    SELECT COUNT(*)
-    FROM alliance_schema.alliance_referral_table
-    WHERE alliance_referral_from_member_id = $1
-  `, [teamMemberId])[0].count;
 
   if (!earningsData.length) {
     returnData = {
@@ -1442,14 +1431,10 @@ plv8.subtransaction(function() {
     return;
   }
 
-  const referralCount = plv8.execute(`
-    SELECT COUNT(*)
-    FROM alliance_schema.alliance_referral_table
-    WHERE alliance_referral_from_member_id = $1
-  `, [teamMemberId])[0].count;
 
   const data = earningsData[0];
   const totalEarnings = Number(data.total_earnings) || 0;
+  const referralCount = Number(data.direct_referral_count) || 0;
 
   // Rank and income tag mapping
   const rankMapping = [
@@ -1624,7 +1609,7 @@ plv8.subtransaction(function() {
       completion: percentage,
       amount: parseFloat(row.amount),
       profit_amount: parseFloat(row.package_amount_earnings),
-      is_ready_to_claim: true,
+      is_ready_to_claim: isReadyToClaim,
       is_notified: row.package_member_is_notified,
     });
 

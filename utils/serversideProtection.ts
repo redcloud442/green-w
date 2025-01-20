@@ -55,7 +55,7 @@ export const protectionAdminUser = async (ip?: string) => {
 
     const { data: authData, error: authError } = await supabase.auth.getUser();
     if (authError || !authData?.user) {
-      return { redirect: "/auth/login" };
+      return { redirect: "/login" };
     }
 
     const userId = authData.user.id;
@@ -94,7 +94,7 @@ export const protectionAdminUser = async (ip?: string) => {
     ]);
 
     if (!profile || !teamMember) {
-      return { redirect: "/auth/login" };
+      return { redirect: "/login" };
     }
 
     const validRoles = new Set(["ADMIN"]);
@@ -103,7 +103,7 @@ export const protectionAdminUser = async (ip?: string) => {
       !validRoles.has(teamMember.alliance_member_role) ||
       teamMember.alliance_member_restricted
     ) {
-      return { redirect: "/auth/login" };
+      return { redirect: "/login" };
     }
     const referral = await prisma.alliance_referral_link_table.findFirst({
       where: {
@@ -115,7 +115,7 @@ export const protectionAdminUser = async (ip?: string) => {
     });
 
     if (!referral) {
-      return { redirect: "/auth/login" };
+      return { redirect: "/login" };
     }
     return {
       profile: profile as user_table,
@@ -203,7 +203,6 @@ export const protectionMemberUser = async (ip?: string) => {
     return {
       profile: profile as user_table,
       teamMemberProfile: teamMember as alliance_member_table,
-
       referal: referal as alliance_referral_link_table,
     };
   } catch (e) {

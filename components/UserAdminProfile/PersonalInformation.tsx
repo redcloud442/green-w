@@ -1,12 +1,14 @@
+import { handleSignInUser } from "@/app/actions/auth/authAction";
 import { useToast } from "@/hooks/use-toast";
 import { logError } from "@/services/Error/ErrorLogs";
-import { handleSignInUser } from "@/services/User/Admin";
 import { getUserSponsor } from "@/services/User/User";
 import { MAX_FILE_SIZE_MB, ROLE } from "@/utils/constant";
 import { useRole } from "@/utils/context/roleContext";
+import { userNameToEmail } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
 import { UserRequestdata } from "@/utils/types";
 import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
@@ -38,7 +40,7 @@ const schema = z.object({
 export type PersonalInformationSchema = z.infer<typeof schema>;
 const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
   const supabaseClient = createClientSide();
-
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [userSponsor, setUserSponsor] = useState<{
     user_username: string;
@@ -54,13 +56,14 @@ const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
   const handleSignIn = async () => {
     try {
       setIsLoading(true);
-      await handleSignInUser(supabaseClient, {
-        userName: userProfile.user_username ?? "",
-        password: userProfile.user_password,
-        role: type,
-        iv: userProfile.user_iv ?? "",
-        userProfile: userProfile,
+      const data = await handleSignInUser({
+        formattedUserName: userNameToEmail(userProfile.user_username ?? ""),
       });
+
+      window.open(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/auth/callback?hashed_token=${data.url.hashed_token}`,
+        "_blank"
+      );
     } catch (e) {
       if (e instanceof Error) {
         await logError(supabaseClient, {
@@ -187,36 +190,7 @@ const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
               variant="card"
               className="lg:ml-auto"
               onClick={async () => {
-                // Open a new tab with a placeholder URL
-                const newTab = window.open("/", "_blank");
-                try {
-                  await handleSignIn();
-
-                  if (userProfile.alliance_member_restricted) {
-                    newTab?.close(); // Close the new tab if user is banned
-                    return toast({
-                      title: "User is banned.",
-                      description: "Cannot sign in as banned user.",
-                      variant: "destructive",
-                    });
-                  }
-
-                  setRole({
-                    role: userProfile.alliance_member_role,
-                    userName: userProfile.user_username ?? "",
-                    teamMemberId: userProfile.alliance_member_id,
-                    mobileNumber: userProfile.user_active_mobile ?? "",
-                    email: userProfile.user_email ?? "",
-                  });
-
-                  // Redirect the new tab to the desired URL
-                  if (newTab) {
-                    newTab.location.href = "/";
-                  }
-                } catch (error) {
-                  newTab?.close(); // Close the new tab on error
-                  console.error("Sign-in failed:", error);
-                }
+                await handleSignIn();
               }}
             >
               Sign In as {userProfile.user_username}

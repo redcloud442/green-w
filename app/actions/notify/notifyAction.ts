@@ -36,7 +36,6 @@ export const notifyAction = async (params: {
 
     for (const item of chartData) {
       if (!item.package_connection_id) {
-        console.warn("Skipping item with missing package_connection_id:", item);
         continue;
       }
 

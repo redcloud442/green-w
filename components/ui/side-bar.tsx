@@ -178,7 +178,7 @@ const AppSidebar = ({ userData, teamMemberProfile }: Props) => {
         <SidebarHeader>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton>PR1MEPH</SidebarMenuButton>
+              <SidebarMenuButton>ELEVATEGLOBAL</SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarHeader>

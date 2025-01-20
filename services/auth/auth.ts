@@ -1,5 +1,4 @@
-import { handleSignInUser, registerUser } from "@/app/actions/auth/authAction";
-import { decryptData } from "@/utils/function";
+import { registerUser } from "@/app/actions/auth/authAction";
 import { UserRequestdata } from "@/utils/types";
 import { SupabaseClient } from "@supabase/supabase-js";
 
@@ -83,22 +82,11 @@ export const loginValidation = async (
     }
   }
 
-  if (role === "ADMIN") {
-    const decryptedPassword = await decryptData(password, iv ?? "");
-
-    await handleSignInUser({
-      formattedUserName,
-      password: decryptedPassword,
-    });
-  } else {
-    const { error: signInError } = await supabaseClient.auth.signInWithPassword(
-      {
-        email: formattedUserName,
-        password,
-      }
-    );
-    if (signInError) throw signInError;
-  }
+  const { error: signInError } = await supabaseClient.auth.signInWithPassword({
+    email: formattedUserName,
+    password,
+  });
+  if (signInError) throw signInError;
 
   const result = await response.json();
 

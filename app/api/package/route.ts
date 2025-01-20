@@ -280,7 +280,7 @@ export async function POST(request: Request) {
               transaction_description:
                 ref.level === 1
                   ? "Referral Income"
-                  : `Network Income Level ${ref.level}`,
+                  : `Network Income ${ref.level}${ref.level === 2 ? "nd" : ref.level === 3 ? "rd" : "th"} level`,
             };
           });
 
@@ -289,7 +289,7 @@ export async function POST(request: Request) {
             alliance_notification_message:
               ref.level === 1
                 ? "Referral Income"
-                : `Network Income Level ${ref.level}`,
+                : `Network Income ${ref.level}${ref.level === 2 ? "nd" : ref.level === 3 ? "rd" : "th"} level`,
           }));
 
           await Promise.all(

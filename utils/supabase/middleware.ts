@@ -8,37 +8,34 @@ export async function updateSession(request: NextRequest) {
     return addSecurityHeaders(NextResponse.next());
   }
 
-  let supabaseResponse = NextResponse.next({
-    request,
-  });
-
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            request.cookies.set(name, value)
-          );
-          supabaseResponse = NextResponse.next({
-            request,
+        getAll: () => request.cookies.getAll(),
+        setAll: (cookiesToSet) => {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            request.cookies.set(name, value);
           });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          );
         },
       },
     }
   );
 
+  const isMagicLinkCallback = request.nextUrl.pathname === "/auth/callback";
+
+  if (isMagicLinkCallback) {
+    // Bypass session validation for magic link processing
+    return addSecurityHeaders(NextResponse.next());
+  }
+
+  // Retrieve user session
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Validate the session
   const result = await ensureValidSession();
 
   if (!result && user) {
@@ -47,16 +44,24 @@ export async function updateSession(request: NextRequest) {
     return addSecurityHeaders(response);
   }
 
-  const publicRoutes = ["/login", "/register", "/api/auth", "/api/health"];
+  // Define public and private routes
+  const publicRoutes = [
+    "/login",
+    "/register",
+    "/api/auth",
+    "/api/health",
+    "/auth/callback",
+  ];
   const privateRoutes = [
     "/",
     "/dashboard",
     "/api/auth",
-    "/admin",
+    "/admin/*",
     "/api/health",
   ];
   const currentPath = request.nextUrl.pathname;
 
+  // Handle routing based on user session
   if (!user) {
     if (publicRoutes.some((route) => currentPath.startsWith(route))) {
       return addSecurityHeaders(NextResponse.next());
@@ -81,8 +86,10 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  supabaseResponse.headers.set("x-session-checked", "true");
-  return addSecurityHeaders(supabaseResponse);
+  // Set session validation header
+  const response = NextResponse.next();
+  response.headers.set("x-session-checked", "true");
+  return addSecurityHeaders(response);
 }
 
 function addSecurityHeaders(response: NextResponse) {

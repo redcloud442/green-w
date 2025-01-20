@@ -223,22 +223,20 @@ export const registerUser = async (params: {
 
 const signInUserSchema = z.object({
   formattedUserName: z.string().email(),
-  password: z.string().min(6),
 });
 
 export const handleSignInUser = async (params: {
   formattedUserName: string;
-  password: string;
 }) => {
   try {
-    const supabaseClient = await createClientServerSide();
+    const supabaseClient = await createServiceRoleClientServerSide();
     const validate = signInUserSchema.safeParse(params);
 
     if (!validate.success) {
       throw new Error(validate.error.message);
     }
 
-    const { formattedUserName, password } = params;
+    const { formattedUserName } = params;
 
     const { teamMemberProfile } = await protectionAdminUser();
 
@@ -252,14 +250,13 @@ export const handleSignInUser = async (params: {
       throw new Error("Too many requests. Please try again later.");
     }
 
-    const { error: signInError } = await supabaseClient.auth.signInWithPassword(
-      {
-        email: formattedUserName,
-        password: password,
-      }
-    );
+    const { data, error } = await supabaseClient.auth.admin.generateLink({
+      type: "magiclink",
+      email: formattedUserName,
+    });
 
-    if (signInError) throw signInError;
+    if (error) throw error;
+    return { success: true, url: data.properties };
   } catch (error) {
     throw new Error(
       error instanceof Error ? error.message : "An unknown error occurred."

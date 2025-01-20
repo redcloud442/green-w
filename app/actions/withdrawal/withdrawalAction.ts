@@ -27,7 +27,6 @@ export const handleAddPreferredWithdrawal = async (formData: FormData) => {
       });
 
     if (!validatedData.success) {
-      console.error("Validation Error:", validatedData.error.errors); // Log the error details
       return {
         error: validatedData.error.errors.map((e) => e.message).join(", "),
       };
@@ -64,7 +63,6 @@ export const handleAddPreferredWithdrawal = async (formData: FormData) => {
 
     return preferredWithdrawal as alliance_preferred_withdrawal_table;
   } catch (error) {
-    console.error("Error in handleAddPreferredWithdrawal:", error);
     throw new Error("Internal valid request");
   }
 };
