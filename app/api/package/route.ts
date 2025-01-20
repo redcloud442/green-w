@@ -123,6 +123,7 @@ export async function POST(request: Request) {
         where: { package_id: packageId },
         select: {
           package_percentage: true,
+          packages_days: true,
           package_is_disabled: true,
           package_name: true,
         },
@@ -223,6 +224,9 @@ export async function POST(request: Request) {
           package_member_amount: Number(amountBigInt),
           package_amount_earnings: Number(packageAmountEarnings),
           package_member_status: "ACTIVE",
+          package_member_completion_date: new Date(
+            Date.now() + packageData.packages_days * 24 * 60 * 60 * 1000
+          ),
         },
       });
 

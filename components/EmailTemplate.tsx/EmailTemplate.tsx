@@ -54,7 +54,7 @@ const BankingEmailNotificationTemplate: React.FC<
       {/* Logo Section */}
 
       <h1 style={{ fontSize: "20px", color: "#0056b3" }}>{greetingPhrase}</h1>
-      <p>Dear {accountHolderName},</p>
+      {accountHolderName && <p>Dear {accountHolderName},</p>}
       <p>{message}</p>
 
       {/* Transaction Details */}

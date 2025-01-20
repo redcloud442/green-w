@@ -82,3 +82,62 @@ export const createPackage = async (params: {
 
   return response;
 };
+
+export const batchPackageNotification = async (params: {
+  batchData: {
+    to: string[];
+    from: string;
+    subject: string;
+    html: React.ReactNode;
+  }[];
+}) => {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/resend/batch`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(params),
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.error || "An error occurred while sending the batch notification."
+    );
+  }
+
+  return response;
+};
+
+export const batchMessageNotification = async (params: {
+  number: string[];
+  message: string;
+}) => {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/message/batch`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        number: params.number,
+        message: params.message,
+      }),
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.error || "An error occurred while sending the batch notification."
+    );
+  }
+
+  return response;
+};

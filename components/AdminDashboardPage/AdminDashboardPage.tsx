@@ -12,6 +12,7 @@ import { AdminDashboardData, AdminDashboardDataByDate } from "@/utils/types";
 import {
   alliance_member_table,
   alliance_referral_link_table,
+  package_notification_logs,
 } from "@prisma/client";
 import { format } from "date-fns";
 import {
@@ -24,6 +25,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import AdminUserNotifyModal from "../AdminNotifyUserModal/AdminUserNotifyModal";
 import { Button } from "../ui/button";
 import { Calendar } from "../ui/calendar";
 import {
@@ -42,6 +44,7 @@ import AdminDashboardChart from "./AdminDashboardChart";
 type Props = {
   teamMemberProfile: alliance_member_table;
   referral: alliance_referral_link_table;
+  packageNotification: package_notification_logs[];
 };
 
 type FormContextType = {
@@ -51,7 +54,11 @@ type FormContextType = {
   };
 };
 
-const AdminDashboardPage = ({ teamMemberProfile, referral }: Props) => {
+const AdminDashboardPage = ({
+  teamMemberProfile,
+  referral,
+  packageNotification,
+}: Props) => {
   const supabaseClient = createClientSide();
   const router = useRouter();
   const { toast } = useToast();
@@ -156,6 +163,7 @@ const AdminDashboardPage = ({ teamMemberProfile, referral }: Props) => {
       {isLoading && <TableLoading />}
       <div className="flex flex-col md:flex-row items-center justify-between">
         <h1 className="Title">Admin Dashboard</h1>
+
         <form
           onSubmit={handleSubmit(fetchAdminDashboardData)}
           className="flex flex-wrap items-center gap-4"
@@ -232,6 +240,7 @@ const AdminDashboardPage = ({ teamMemberProfile, referral }: Props) => {
           </Button>
         </form>
       </div>
+      <AdminUserNotifyModal packageNotification={packageNotification} />
       <div className="flex flex-col gap-6">
         <div>
           <AdminDashboardCard

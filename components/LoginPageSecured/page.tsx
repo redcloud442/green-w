@@ -92,11 +92,11 @@ const LoginPageSecured = () => {
 
       toast({
         title: "OTP sent to your email",
-        description: `Check your inbox (${userEmail}) for the OTP.`,
+        description: `Check your inbox for the OTP.`,
       });
 
       setStep("verify");
-      reset(); // Reset form for OTP input
+      reset();
     } catch (e) {
       if (e instanceof Error) {
         toast({

@@ -1562,14 +1562,14 @@ plv8.subtransaction(function() {
       p.packages_days::INTEGER AS packages_days,
       pmc.package_member_status,
       pmc.package_member_connection_created::TEXT AS package_member_connection_created,
-      (pmc.package_member_connection_created + (p.packages_days || ' days')::INTERVAL)::TEXT AS completion_date,
       (pmc.package_member_amount) AS amount,
       pmc.package_member_connection_id,
       pmc.package_member_package_id,
       pmc.package_member_member_id,
       pmc.package_member_amount,
       pmc.package_member_is_notified,
-      pmc.package_amount_earnings
+      pmc.package_amount_earnings,
+      pmc.package_member_completion_date
     FROM packages_schema.package_member_connection_table pmc
     JOIN packages_schema.package_table p
       ON pmc.package_member_package_id = p.package_id
@@ -1580,7 +1580,7 @@ plv8.subtransaction(function() {
   
   returnData = chartData.reduce((acc, row) => {
     const startDate = new Date(row.package_member_connection_created);
-    const completionDate = new Date(row.completion_date);
+    const completionDate = new Date(row.package_member_completion_date);
 
     const elapsedTimeMs = Math.max(currentTimestamp - startDate, 0);
     const totalTimeMs = Math.max(completionDate - startDate, 0);
