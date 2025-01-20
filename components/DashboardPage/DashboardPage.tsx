@@ -419,7 +419,7 @@ const DashboardPage = ({
 
               <Separator className="text-white" />
 
-              <div className="flex justify-center gap-2">
+              <div className="flex justify-center bg-gray-200/50 p-2 rounded-xl gap-2">
                 <div className="flex flex-col text-center">
                   <p className="text-md sm:text-lg font-extralight">
                     DAILY INTEREST RATE

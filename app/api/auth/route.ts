@@ -179,19 +179,28 @@ export async function GET(request: Request) {
     });
 
     if (!loginData.success) {
-      return sendErrorResponse("Invalid request.", 400);
+      return NextResponse.json({ success: false, userName });
     }
 
     const isAllowed = await rateLimit(`rate-limit:${ip}`, 5, 60);
 
     if (!isAllowed) {
-      return sendErrorResponse(
-        "Too many requests. Please try again later.",
-        429
-      );
+      return NextResponse.json({ success: false, userName });
     }
-    if (!userName) {
-      return sendErrorResponse("Username is required.", 400);
+
+    const user = await prisma.user_table.findFirst({
+      where: {
+        user_username: {
+          equals: userName,
+          mode: "insensitive",
+        },
+      },
+    });
+    if (user) {
+      return NextResponse.json({
+        success: false,
+        message: "Username already exists",
+      });
     }
 
     return NextResponse.json({ success: true, userName });

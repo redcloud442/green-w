@@ -112,8 +112,9 @@ const RegisterPage = ({ referralLink }: Props) => {
 
     try {
       const result = await checkUserName({ userName: value });
-      if (result.error) {
-        setError("userName", { message: result.error });
+
+      if (!result.success) {
+        setError("userName", { message: "Username already exists" });
       } else {
         clearErrors("userName");
         setIsUsernameValidated(true);
