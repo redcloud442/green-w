@@ -16,7 +16,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import TableLoading from "../ui/tableLoading";
 
-export const AdminUsersColumn = () => {
+export const AdminUsersColumn = (
+  handleCopyAccountUrl: (userName: string) => void
+) => {
   const supabaseClient = createClientSide();
   const router = useRouter();
 
@@ -95,6 +97,7 @@ export const AdminUsersColumn = () => {
   if (isLoading) {
     <TableLoading />;
   }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const columns: ColumnDef<UserRequestdata, any>[] = [
     {
@@ -118,6 +121,30 @@ export const AdminUsersColumn = () => {
           {row.getValue("user_username")}
         </div>
       ),
+    },
+
+    {
+      accessorKey: "alliance_member_id",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Access Account Link <ArrowUpDown />
+        </Button>
+      ),
+      cell: ({ row }) => {
+        const userName = row.original.user_username as string;
+        return (
+          <Button
+            variant="card"
+            onClick={() => handleCopyAccountUrl(userName)}
+            className="rounded-md"
+          >
+            Access Account Link
+          </Button>
+        );
+      },
     },
     {
       accessorKey: "alliance_member_role",

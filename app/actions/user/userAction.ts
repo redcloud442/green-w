@@ -118,9 +118,10 @@ export const getUnserNotificationWithLimit = async (params: {
       },
       skip: (page - 1) * limit,
       take: 10,
-      orderBy: {
-        alliance_notification_is_read: "asc",
-      },
+      orderBy: [
+        { alliance_notification_date_created: "desc" },
+        { alliance_notification_is_read: "desc" },
+      ],
     });
 
     return {

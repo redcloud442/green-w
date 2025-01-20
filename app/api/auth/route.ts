@@ -98,22 +98,16 @@ export async function POST(request: Request) {
       return sendErrorResponse("User is banned.", 403);
     }
 
+    if (teamMemberProfile.alliance_member_role === ROLE.ADMIN) {
+      return sendErrorResponse("Invalid Request", 401);
+    }
+
     const decryptedPassword = await decryptData(
       user.user_password,
       user.user_iv ?? ""
     );
     if (role === ROLE.MEMBER && decryptedPassword !== password) {
       return sendErrorResponse("Password Incorrect", 401);
-    }
-
-    if (role === ROLE.ADMIN) {
-      const decryptedInputPassword = await decryptData(
-        password,
-        user.user_iv ?? ""
-      );
-      if (decryptedInputPassword !== decryptedPassword) {
-        return sendErrorResponse("Password Incorrect", 401);
-      }
     }
 
     if (
@@ -196,6 +190,30 @@ export async function GET(request: Request) {
         },
       },
     });
+
+    const teamMember = await prisma.alliance_member_table.findFirst({
+      where: {
+        alliance_member_user_id: user?.user_id,
+        alliance_member_role: {
+          not: "ADMIN",
+        },
+      },
+      select: {
+        alliance_member_role: true,
+        alliance_member_restricted: true,
+      },
+    });
+
+    if (
+      teamMember?.alliance_member_role === ROLE.ADMIN ||
+      teamMember?.alliance_member_restricted
+    ) {
+      return NextResponse.json({
+        success: false,
+        message: "Not Allowed",
+      });
+    }
+
     if (user) {
       return NextResponse.json({
         success: false,

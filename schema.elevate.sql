@@ -413,10 +413,16 @@ plv8.subtransaction(function() {
   const startDate = dateFilter.start || currentDate.toISOString().split('T')[0];
   const endDate = dateFilter.end || new Date(currentDate.setHours(23, 59, 59, 999)).toISOString();
 
-  const totalEarnings = plv8.execute(`
+  const packageEarnings = plv8.execute(`
     SELECT COALESCE(SUM(package_member_amount), 0) AS total_earnings
     FROM packages_schema.package_member_connection_table
     WHERE package_member_connection_created::Date BETWEEN $1 AND $2
+  `, [startDate, endDate])[0];
+
+  const totalEarnings = plv8.execute(`
+    SELECT COALESCE(SUM(alliance_top_up_request_amount), 0) AS total_earnings
+    FROM alliance_schema.alliance_top_up_request_table
+    WHERE alliance_top_up_request_date::Date BETWEEN $1 AND $2
   `, [startDate, endDate])[0];
 
   const totalActivatedUserByDate = plv8.execute(`
@@ -457,11 +463,11 @@ plv8.subtransaction(function() {
     WITH
       daily_earnings AS (
         SELECT
-          DATE_TRUNC('day', package_member_connection_created) AS date,
-          SUM(package_member_amount) AS earnings
-        FROM packages_schema.package_member_connection_table
-        WHERE package_member_connection_created::Date BETWEEN $1 AND $2
-        GROUP BY DATE_TRUNC('day', package_member_connection_created)
+          DATE_TRUNC('day', alliance_top_up_request_date) AS date,
+          SUM(alliance_top_up_request_amount) AS earnings
+        FROM alliance_schema.alliance_top_up_request_table
+        WHERE alliance_top_up_request_date::Date BETWEEN $1 AND $2
+        GROUP BY DATE_TRUNC('day', alliance_top_up_request_date)
       ),
       daily_withdraw AS (
         SELECT
@@ -521,6 +527,7 @@ plv8.subtransaction(function() {
   returnData.activePackageWithinTheDay = Number(activePackageWithinTheDay);
   returnData.totalApprovedWithdrawal = Number(totalApprovedWithdrawal);
   returnData.totalActivatedUserByDate = Number(totalActivatedUserByDate);
+  returnData.packageEarnings = Number(packageEarnings.total_earnings);
 });
 return returnData;
 $$ LANGUAGE plv8;
@@ -827,7 +834,10 @@ plv8.subtransaction(function() {
     : "";
 
   const userCondition = userFilter
-    ? `AND u.user_id = '${userFilter}'`
+    ? `AND (u.user_username ILIKE '%${search}%' 
+           OR u.user_id::TEXT ILIKE '%${search}%' 
+           OR u.user_first_name ILIKE '%${search}%' 
+           OR u.user_last_name ILIKE '%${search}%')`
     : "";
 
   const statusCondition = statusFilter
@@ -840,7 +850,7 @@ plv8.subtransaction(function() {
 
   const searchCondition = search
     ? `AND (u.user_username ILIKE '%${search}%' 
-           OR u.user_id ILIKE '%${search}%' 
+           OR u.user_id::TEXT ILIKE '%${search}%' 
            OR u.user_first_name ILIKE '%${search}%' 
            OR u.user_last_name ILIKE '%${search}%')`
     : "";
@@ -928,7 +938,6 @@ plv8.subtransaction(function() {
 // Return serialized result
 return JSON.parse(JSON.stringify(returnData, stringifyWithBigInt));
 $$ LANGUAGE plv8;
-
 
 CREATE OR REPLACE FUNCTION get_admin_user_data(
     input_data JSON

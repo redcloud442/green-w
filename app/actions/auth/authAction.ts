@@ -263,3 +263,69 @@ export const handleSignInUser = async (params: {
     );
   }
 };
+
+const signInAdminSchema = z.object({
+  userName: z
+    .string()
+    .min(6, "Username must be at least 6 characters")
+    .max(20, "Username must be at most 20 characters")
+    .regex(
+      /^[a-zA-Z0-9_]+$/,
+      "Username can only contain letters, numbers, and underscores"
+    ),
+});
+
+export const handleSigninAdmin = async (params: { userName: string }) => {
+  try {
+    const validate = signInAdminSchema.safeParse(params);
+
+    if (!validate.success) {
+      throw new Error(validate.error.message);
+    }
+
+    const { userName } = params;
+
+    const { teamMemberProfile } = await protectionAdminUser();
+
+    const isAllowed = await rateLimit(
+      `rate-limit:${teamMemberProfile?.alliance_member_id}`,
+      10,
+      60
+    );
+
+    if (!isAllowed) {
+      throw new Error("Too many requests. Please try again later.");
+    }
+
+    const user = await prisma.user_table.findFirst({
+      where: {
+        user_username: userName,
+      },
+      select: {
+        user_id: true,
+        user_active_mobile: true,
+      },
+    });
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const teamMember = await prisma.alliance_member_table.findFirst({
+      where: {
+        alliance_member_user_id: user.user_id,
+        alliance_member_role: "ADMIN",
+      },
+    });
+
+    if (!teamMember) {
+      throw new Error("User is not an admin");
+    }
+
+    return { success: true, user };
+  } catch (error) {
+    throw new Error(
+      error instanceof Error ? error.message : "An unknown error occurred."
+    );
+  }
+};

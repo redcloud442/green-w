@@ -1,5 +1,6 @@
 "use client";
 
+import { handleSignInUser } from "@/app/actions/auth/authAction";
 import {
   Table,
   TableBody,
@@ -15,7 +16,7 @@ import {
   handleUpdateRole,
   handleUpdateUserRestriction,
 } from "@/services/User/Admin";
-import { escapeFormData } from "@/utils/function";
+import { escapeFormData, userNameToEmail } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
 import { UserRequestdata } from "@/utils/types";
 import { alliance_member_table } from "@prisma/client";
@@ -140,8 +141,32 @@ const AdminUsersTable = ({ teamMemberProfile }: DataTableProps) => {
     } catch (e) {}
   };
 
+  const handleCopyAccountUrl = async (userName: string) => {
+    try {
+      const data = await handleSignInUser({
+        formattedUserName: userNameToEmail(userName),
+      });
+
+      navigator.clipboard.writeText(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/auth/callback?hashed_token=${data.url.hashed_token}`
+      );
+
+      toast({
+        title: "Copied to clipboard",
+        description: `You may now access the user's account by accessing the link.`,
+      });
+    } catch (e) {
+      toast({
+        title: "Error",
+        description:
+          e instanceof Error ? e.message : "An unexpected error occurred.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const { columns, isOpenModal, setIsOpenModal, setIsLoading, isLoading } =
-    AdminUsersColumn();
+    AdminUsersColumn(handleCopyAccountUrl);
 
   const table = useReactTable<UserRequestdata>({
     data: requestData,
