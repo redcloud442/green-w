@@ -12,6 +12,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { getEarnings } from "@/services/User/User";
+import { useUserEarningsStore } from "@/store/useUserEarningsStore";
 import {
   alliance_earnings_table,
   alliance_member_table,
@@ -19,21 +20,19 @@ import {
   user_table,
 } from "@prisma/client";
 import Image from "next/image";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import DashboardAddUserPreferredBank from "./DashboardAddUserPreferredBank";
 import DashboardWithdrawalModalForm from "./DashboardWithdrawalModalForm";
 
 type Props = {
   teamMemberProfile: alliance_member_table;
   earnings: alliance_earnings_table | null;
-  setEarnings: Dispatch<SetStateAction<alliance_earnings_table | null>>;
   profile: user_table;
 };
 
 const DashboardWithdrawModalWithdraw = ({
   teamMemberProfile,
   earnings,
-  setEarnings,
   profile,
 }: Props) => {
   const [open, setOpen] = useState(false);
@@ -45,6 +44,7 @@ const DashboardWithdrawModalWithdraw = ({
   >([]);
   const [isFetching, setIsFetching] = useState(false);
   const { toast } = useToast();
+  const { setEarnings } = useUserEarningsStore();
 
   const fetchEarnings = async () => {
     try {
@@ -150,7 +150,6 @@ const DashboardWithdrawModalWithdraw = ({
               profile={profile}
               teamMemberProfile={teamMemberProfile}
               earnings={earnings}
-              setEarnings={setEarnings}
               setOpen={setOpen}
               preferredEarnings={preferredEarnings ?? null}
               preferredType={preferredType ?? null}

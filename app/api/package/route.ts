@@ -173,22 +173,23 @@ export async function POST(request: Request) {
       alliance_combined_earnings,
     } = earningsData;
 
-    const combinedEarnings = Number(alliance_combined_earnings);
-    if (combinedEarnings < roundedAmount) {
+    const combinedEarnings = Number(alliance_combined_earnings.toFixed(2));
+    const requestedAmount = Number(amount.toFixed(2));
+
+    if (combinedEarnings < requestedAmount) {
       return NextResponse.json(
-        { error: "Insufficient balance in the combined wallet." },
+        { error: "Insufficient balance in the wallet." },
         { status: 400 }
       );
     }
 
-    // Deduct from the wallets
     const {
       olympusWallet,
       olympusEarnings,
       referralWallet,
       updatedCombinedWallet,
     } = deductFromWallets(
-      roundedAmount,
+      requestedAmount,
       combinedEarnings,
       Number(alliance_olympus_wallet),
       Number(alliance_olympus_earnings),

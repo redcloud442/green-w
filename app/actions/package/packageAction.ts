@@ -64,10 +64,9 @@ export const claimPackage = async (params: {
     // }
 
     const totalClaimedAmount =
-      Math.floor(Number(packageConnection.package_member_amount)) +
-      Math.floor(Number(packageConnection.package_amount_earnings));
-    const totalAmountToBeClaimed =
-      Math.floor(Number(amount)) + Math.floor(Number(earnings));
+      Number(packageConnection.package_member_amount) +
+      Number(packageConnection.package_amount_earnings);
+    const totalAmountToBeClaimed = Number(amount) + Number(earnings);
 
     if (totalClaimedAmount !== totalAmountToBeClaimed) {
       throw new Error("Invalid request");

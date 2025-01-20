@@ -17,6 +17,7 @@ import {
 } from "@/services/Withdrawal/Member";
 import { useUserNotificationStore } from "@/store/userNotificationStore";
 import { useUserTransactionHistoryStore } from "@/store/userTransactionHistoryStore";
+import { useUserEarningsStore } from "@/store/useUserEarningsStore";
 import { BANKS, E_WALLETS, FINANCIAL_SERVICES } from "@/utils/constant";
 import {
   calculateFinalAmount,
@@ -68,7 +69,6 @@ export type WithdrawalFormValues = z.infer<typeof withdrawalFormSchema>;
 type Props = {
   teamMemberProfile: alliance_member_table;
   earnings: alliance_earnings_table | null;
-  setEarnings: Dispatch<SetStateAction<alliance_earnings_table | null>>;
   setOpen: Dispatch<SetStateAction<boolean>>;
   preferredEarnings: alliance_preferred_withdrawal_table | null;
   preferredType: string | null;
@@ -78,13 +78,13 @@ type Props = {
 const DashboardWithdrawalModalForm = ({
   teamMemberProfile,
   earnings,
-  setEarnings,
   setOpen,
   preferredEarnings,
   preferredType,
   profile,
 }: Props) => {
   const { toast } = useToast();
+  const { setEarnings } = useUserEarningsStore();
   const { userNotification, setAddUserNotification } =
     useUserNotificationStore();
   const { setAddTransactionHistory } = useUserTransactionHistoryStore();
@@ -224,8 +224,7 @@ const DashboardWithdrawalModalForm = ({
       setAddTransactionHistory([transactionHistory]);
 
       setAddUserNotification({
-        unread: [notification],
-        read: [],
+        notifications: [notification],
         count: userNotification.count + 1,
       });
 

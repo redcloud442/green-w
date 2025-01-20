@@ -14,12 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { logError } from "@/services/Error/ErrorLogs";
 import { getPackageModalData } from "@/services/Package/Member";
 import { createClientSide } from "@/utils/supabase/client";
-import { ChartDataMember } from "@/utils/types";
-import {
-  alliance_earnings_table,
-  alliance_member_table,
-  package_table,
-} from "@prisma/client";
+import { alliance_member_table, package_table } from "@prisma/client";
 import Image from "next/image";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
@@ -27,11 +22,10 @@ type Props = {
   className: string;
   teamMemberProfile: alliance_member_table;
   packages: package_table[];
-  earnings: alliance_earnings_table | null;
-  setEarnings: Dispatch<SetStateAction<alliance_earnings_table | null>>;
-  setChartData: Dispatch<SetStateAction<ChartDataMember[]>>;
+
   setIsActive: Dispatch<SetStateAction<boolean>>;
   open: boolean;
+  active: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
 };
 
@@ -39,11 +33,9 @@ const DashboardDepositModalPackages = ({
   className,
   packages: initialPackage,
   teamMemberProfile,
-  earnings,
-  setEarnings,
-  setChartData,
   setIsActive,
   open,
+  active,
   setOpen,
 }: Props) => {
   const supabaseClient = createClientSide();
@@ -129,13 +121,12 @@ const DashboardDepositModalPackages = ({
           </div>
           {selectedPackage && (
             <AvailPackagePage
+              active={active}
+              setActive={setIsActive}
               setOpen={setOpen}
               setSelectedPackage={setSelectedPackage}
-              earnings={earnings}
               pkg={selectedPackage}
               teamMemberProfile={teamMemberProfile}
-              setEarnings={setEarnings}
-              setChartData={setChartData}
               selectedPackage={selectedPackage}
             />
           )}

@@ -30,6 +30,9 @@ export default async function AppLayout({
       <RoleProvider
         initialRole={teamMemberProfile.alliance_member_role}
         initialUserName={profile.user_username ?? ""}
+        initialTeamMemberId={teamMemberProfile.alliance_member_id}
+        initialMobileNumber={profile.user_active_mobile ?? ""}
+        initialEmail={profile.user_email ?? ""}
       >
         <LayoutContent profile={profile} teamMemberProfile={teamMemberProfile}>
           {children}

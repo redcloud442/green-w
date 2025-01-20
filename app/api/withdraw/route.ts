@@ -149,6 +149,7 @@ export async function POST(request: Request) {
       await prisma.alliance_withdrawal_request_table.findFirst({
         where: {
           alliance_withdrawal_request_member_id: teamMemberId,
+          alliance_withdrawal_request_status: WITHDRAWAL_STATUS.APPROVED,
           AND: [
             {
               alliance_withdrawal_request_date: {

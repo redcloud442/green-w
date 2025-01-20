@@ -33,6 +33,16 @@ export const getUserNotification = async () => {
       },
     });
 
+    const userNotification = await prisma.alliance_notification_table.findMany({
+      where: {
+        alliance_notification_user_id: teamMemberProfile?.alliance_member_id,
+      },
+      take: 10,
+      orderBy: {
+        alliance_notification_is_read: "asc",
+      },
+    });
+
     if (!teamMemberProfile) {
       redirect("/");
     }
@@ -46,12 +56,23 @@ export const getUserNotification = async () => {
 
     return {
       teamMemberProfile,
-
+      userNotification: userNotification,
       count: count,
     };
   } catch (error) {
     throw new Error("Failed to fetch user notification");
   }
+};
+
+export const updateUserNotification = async (teamMemberId: string) => {
+  await prisma.alliance_notification_table.updateMany({
+    where: {
+      alliance_notification_user_id: teamMemberId,
+    },
+    data: {
+      alliance_notification_is_read: true,
+    },
+  });
 };
 
 const getUnserNotificationWithLimitSchema = z.object({
@@ -74,7 +95,7 @@ export const getUnserNotificationWithLimit = async (params: {
       throw new Error(validate.error.message);
     }
 
-    const { page, limit, teamMemberId, isRead } = params;
+    const { page, limit, teamMemberId } = params;
 
     const isAllowed = await rateLimit(`rate-limit:${teamMemberId}`, 10, 60);
 
@@ -86,25 +107,18 @@ export const getUnserNotificationWithLimit = async (params: {
     const count = await prisma.alliance_notification_table.count({
       where: {
         alliance_notification_user_id: teamMemberId,
-        alliance_notification_is_read: isRead,
+        alliance_notification_is_read: false,
       },
     });
-
-    // Calculate the number of rows remaining
-    const remainingRows = count - (page - 1) * limit;
-
-    // Adjust the `take` value to fetch only the remaining rows
-    const take = Math.min(limit, remainingRows);
 
     const userNotification = await prisma.alliance_notification_table.findMany({
       where: {
         alliance_notification_user_id: teamMemberId,
-        alliance_notification_is_read: isRead,
       },
-      skip: (page - 1) * limit, // Correctly skip rows based on the page
-      take, // Dynamically adjust the number of rows to fetch
+      skip: (page - 1) * limit,
+      take: 10,
       orderBy: {
-        alliance_notification_date_created: "desc",
+        alliance_notification_is_read: "asc",
       },
     });
 
@@ -234,6 +248,42 @@ export const getUserEarnings = async (params: { memberId: string }) => {
       totalEarnings,
       userEarningsData: userEarningsData as unknown as alliance_earnings_table,
       userRanking,
+    };
+  } catch (error) {
+    throw new Error("Failed to fetch user earnings");
+  }
+};
+
+export const getuserWallet = async (params: { memberId: string }) => {
+  try {
+    const validate = getUserEarningsSchema.safeParse(params);
+
+    if (!validate.success) {
+      throw new Error(validate.error.message);
+    }
+
+    const { memberId } = params;
+
+    const { teamMemberProfile } = await protectionMemberUser();
+
+    const isAllowed = await rateLimit(
+      `rate-limit:${teamMemberProfile?.alliance_member_id}`,
+      10,
+      60
+    );
+
+    if (!isAllowed) {
+      throw new Error("Too many requests. Please try again later.");
+    }
+
+    const userEarnings = await prisma.alliance_earnings_table.findUnique({
+      where: {
+        alliance_earnings_member_id: memberId,
+      },
+    });
+
+    return {
+      userEarningsData: userEarnings as unknown as alliance_earnings_table,
     };
   } catch (error) {
     throw new Error("Failed to fetch user earnings");

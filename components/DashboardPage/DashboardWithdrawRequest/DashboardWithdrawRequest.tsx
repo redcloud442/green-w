@@ -39,7 +39,6 @@ const DashboardWithdrawRequest = ({
               profile={profile}
               teamMemberProfile={teamMemberProfile}
               earnings={earnings}
-              setEarnings={setEarnings}
             />
             <DashboardWithdrawModalHistory
               teamMemberProfile={teamMemberProfile}

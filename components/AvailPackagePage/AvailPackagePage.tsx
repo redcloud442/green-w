@@ -4,15 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { createPackageConnection } from "@/services/Package/Member";
+import { usePackageChartData } from "@/store/usePackageChartData";
 import { useUserTransactionHistoryStore } from "@/store/userTransactionHistoryStore";
+import { useUserEarningsStore } from "@/store/useUserEarningsStore";
 import { escapeFormData } from "@/utils/function";
-import { ChartDataMember } from "@/utils/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  alliance_earnings_table,
-  alliance_member_table,
-  package_table,
-} from "@prisma/client";
+import { alliance_member_table, package_table } from "@prisma/client";
 import { Loader2 } from "lucide-react";
 import { Dispatch, SetStateAction, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -21,26 +18,26 @@ import * as z from "zod";
 import { Label } from "../ui/label";
 import PackageCard from "../ui/packageCard";
 type Props = {
-  earnings: alliance_earnings_table | null;
   pkg: package_table | [];
   teamMemberProfile: alliance_member_table;
-  setEarnings: Dispatch<SetStateAction<alliance_earnings_table | null>>;
   setOpen: Dispatch<SetStateAction<boolean>>;
-  setChartData: Dispatch<SetStateAction<ChartDataMember[]>>;
   setSelectedPackage: Dispatch<SetStateAction<package_table | null>>;
   selectedPackage: package_table | null;
+  setActive: Dispatch<SetStateAction<boolean>>;
+  active: boolean;
 };
 
 const AvailPackagePage = ({
-  earnings,
   pkg,
   teamMemberProfile,
-  setEarnings,
   setOpen,
-  setChartData,
   setSelectedPackage,
   selectedPackage,
+  setActive,
+  active,
 }: Props) => {
+  const { earnings, setEarnings } = useUserEarningsStore();
+  const { chartData, setChartData } = usePackageChartData();
   const { toast } = useToast();
   const [maxAmount, setMaxAmount] = useState(
     earnings?.alliance_combined_earnings ?? 0
@@ -158,7 +155,7 @@ const AvailPackagePage = ({
 
       setMaxAmount((prev) => Number(prev) - Number(result.amount));
 
-      setChartData((prev) => [
+      setChartData([
         {
           package: selectedPackage?.package_name || "",
           completion: 0,
@@ -173,8 +170,13 @@ const AvailPackagePage = ({
           package_member_id: teamMemberProfile?.alliance_member_id,
           package_days: Number(selectedPackage?.packages_days || 0),
         },
-        ...prev,
+        ...chartData,
       ]);
+
+      if (!active) {
+        setActive(true);
+      }
+
       setSelectedPackage(null);
       setOpen(false);
     } catch (e) {

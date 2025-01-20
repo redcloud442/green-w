@@ -204,6 +204,9 @@ const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
                   setRole({
                     role: userProfile.alliance_member_role,
                     userName: userProfile.user_username ?? "",
+                    teamMemberId: userProfile.alliance_member_id,
+                    mobileNumber: userProfile.user_active_mobile ?? "",
+                    email: userProfile.user_email ?? "",
                   });
 
                   // Redirect the new tab to the desired URL

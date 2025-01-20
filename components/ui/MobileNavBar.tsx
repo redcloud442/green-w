@@ -1,6 +1,9 @@
 "use client";
 
-import { getUserNotification } from "@/app/actions/user/userAction";
+import {
+  getUserNotification,
+  getuserWallet,
+} from "@/app/actions/user/userAction";
 import {
   Dialog,
   DialogContent,
@@ -8,7 +11,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { getDashboard, getDashboardEarnings } from "@/services/Dasboard/Member";
+import { useUserLoadingStore } from "@/store/useLoadingState";
+import { usePackageChartData } from "@/store/usePackageChartData";
 import { useUserNotificationStore } from "@/store/userNotificationStore";
+import { useUserDashboardEarningsStore } from "@/store/useUserDashboardEarnings";
+import { useUserEarningsStore } from "@/store/useUserEarningsStore";
+import { useRole } from "@/utils/context/roleContext";
 import { createClientSide } from "@/utils/supabase/client";
 import { alliance_member_table } from "@prisma/client";
 import { BookOpenIcon, DoorOpen, HomeIcon, UserIcon } from "lucide-react";
@@ -34,7 +43,10 @@ const MobileNavBar = () => {
   const [teamMemberProfile, setTeamMemberProfile] =
     useState<alliance_member_table | null>(null);
   const { setUserNotification } = useUserNotificationStore();
-
+  const { setEarnings } = useUserEarningsStore();
+  const { setTotalEarnings } = useUserDashboardEarningsStore();
+  const { setChartData } = usePackageChartData();
+  const { setLoading } = useUserLoadingStore();
   const handleSignOut = async () => {
     try {
       await supabase.auth.signOut();
@@ -85,21 +97,50 @@ const MobileNavBar = () => {
     }
   };
 
+  const { role, teamMemberId, mobileNumber, email } = useRole();
+
   useEffect(() => {
     const handleFetchUserInformation = async () => {
       try {
-        const { count, teamMemberProfile } = await getUserNotification();
+        if (!teamMemberId) return;
+        setLoading(true);
+        const { count, teamMemberProfile, userNotification } =
+          await getUserNotification();
         setUserNotification({
-          unread: [],
-          read: [],
-          count,
+          notifications: userNotification,
+          count: count,
         });
         setTeamMemberProfile(teamMemberProfile);
-      } catch (error) {}
+
+        const { userEarningsData } = await getuserWallet({
+          memberId: teamMemberId,
+        });
+
+        setEarnings(userEarningsData);
+
+        const dashboardEarnings = await getDashboardEarnings(supabase, {
+          teamMemberId: teamMemberId,
+        });
+
+        setTotalEarnings(dashboardEarnings);
+
+        const { data } = await getDashboard(supabase, {
+          activePhoneNumber: mobileNumber,
+          activeEmail: email,
+          teamMemberId: teamMemberId,
+        });
+
+        setChartData(data);
+
+        setLoading(false);
+      } catch (error) {
+      } finally {
+        setLoading(false);
+      }
     };
 
     handleFetchUserInformation();
-  }, []);
+  }, [teamMemberId, role]);
 
   return (
     <>

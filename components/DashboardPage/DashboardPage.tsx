@@ -2,11 +2,12 @@
 
 import { getUserEarnings } from "@/app/actions/user/userAction";
 import { toast } from "@/hooks/use-toast";
-import { getDashboard, getDashboardEarnings } from "@/services/Dasboard/Member";
 import { logError } from "@/services/Error/ErrorLogs";
-import { useRole } from "@/utils/context/roleContext";
+import { useUserLoadingStore } from "@/store/useLoadingState";
+import { usePackageChartData } from "@/store/usePackageChartData";
+import { useUserDashboardEarningsStore } from "@/store/useUserDashboardEarnings";
+import { useUserEarningsStore } from "@/store/useUserEarningsStore";
 import { createClientSide } from "@/utils/supabase/client";
-import { ChartDataMember, DashboardEarnings } from "@/utils/types";
 import {
   alliance_earnings_table,
   alliance_member_table,
@@ -17,16 +18,16 @@ import {
 import { Info } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import TransactionHistoryTable from "../TransactionHistoryPage/TransactionHistoryTable";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Badge } from "../ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import CardAmount from "../ui/cardAmount";
+import NavigationLoader from "../ui/NavigationLoader";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Separator } from "../ui/separator";
 import { Skeleton } from "../ui/skeleton";
-import TableLoading from "../ui/tableLoading";
 import DashboardDepositModalDeposit from "./DashboardDepositRequest/DashboardDepositModal/DashboardDepositModalDeposit";
 import DashboardDepositModalPackages from "./DashboardDepositRequest/DashboardDepositModal/DashboardDepositPackagesModal";
 import DashboardGenerateQrCode from "./DashboardDepositRequest/DashboardDepositModal/DashboardGenerateQrCode";
@@ -44,7 +45,6 @@ type Props = {
 };
 
 const DashboardPage = ({
-  earnings: initialEarnings,
   teamMemberProfile,
   packages,
   profile,
@@ -52,65 +52,16 @@ const DashboardPage = ({
 }: Props) => {
   const supabaseClient = createClientSide();
   const router = useRouter();
-  const [chartData, setChartData] = useState<ChartDataMember[]>([]);
+  const { earnings, setEarnings } = useUserEarningsStore();
+  const { totalEarnings, setTotalEarnings } = useUserDashboardEarningsStore();
+  const { chartData } = usePackageChartData();
+  const { loading } = useUserLoadingStore();
   const [open, setOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [earnings, setEarnings] = useState<alliance_earnings_table | null>(
-    initialEarnings
-  );
+
   const [isActive, setIsActive] = useState(
     teamMemberProfile.alliance_member_is_active
   );
   const [refresh, setRefresh] = useState(false);
-  const [totalEarnings, setTotalEarnings] = useState<DashboardEarnings | null>(
-    null
-  );
-
-  const { role } = useRole();
-
-  const getDasboardEarningsData = async () => {
-    try {
-      const dashboardEarnings = await getDashboardEarnings(supabaseClient, {
-        teamMemberId: teamMemberProfile.alliance_member_id,
-      });
-
-      setTotalEarnings(dashboardEarnings);
-    } catch (e) {
-      if (e instanceof Error) {
-        await logError(supabaseClient, {
-          errorMessage: e.message,
-        });
-      }
-    }
-  };
-
-  const getPackagesData = async () => {
-    try {
-      setIsLoading(true);
-      const { data } = await getDashboard(supabaseClient, {
-        activePhoneNumber: profile.user_active_mobile ?? "",
-        activeEmail: profile.user_email ?? "",
-        teamMemberId: teamMemberProfile.alliance_member_id,
-      });
-      setChartData(data);
-
-      await getDasboardEarningsData();
-    } catch (e) {
-      if (e instanceof Error) {
-        await logError(supabaseClient, {
-          errorMessage: e.message,
-          stackTrace: e.stack,
-          stackPath: "components/DashboardPage/DashboardPage.tsx",
-        });
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    getPackagesData();
-  }, [role]);
 
   const handleRefresh = async () => {
     try {
@@ -123,10 +74,12 @@ const DashboardPage = ({
       if (!totalEarnings || !userEarningsData) return;
 
       setTotalEarnings({
+        ...totalEarnings,
         directReferralAmount: Number(totalEarnings.directReferralAmount ?? 0),
         indirectReferralAmount: Number(
           totalEarnings.indirectReferralAmount ?? 0
         ),
+
         totalEarnings: Number(totalEarnings.totalEarnings ?? 0),
         withdrawalAmount: Number(totalEarnings.withdrawalAmount ?? 0),
         directReferralCount: 0,
@@ -136,24 +89,7 @@ const DashboardPage = ({
         tags: userRanking?.alliance_total_income_tag?.split(",") ?? [],
       });
 
-      setEarnings((prev) => {
-        if (!prev) return null;
-        return {
-          ...prev,
-          alliance_combined_earnings:
-            userEarningsData.alliance_combined_earnings ??
-            prev.alliance_combined_earnings,
-          alliance_olympus_earnings:
-            userEarningsData.alliance_olympus_earnings ??
-            prev.alliance_olympus_earnings,
-          alliance_olympus_wallet:
-            userEarningsData.alliance_olympus_wallet ??
-            prev.alliance_olympus_wallet,
-          alliance_referral_bounty:
-            userEarningsData.alliance_referral_bounty ??
-            prev.alliance_referral_bounty,
-        };
-      });
+      setEarnings(userEarningsData);
     } catch (e) {
       if (e instanceof Error) {
         await logError(supabaseClient, {
@@ -176,7 +112,7 @@ const DashboardPage = ({
 
   return (
     <div className="relative min-h-screen mx-auto space-y-4 py-2 px-2 sm:px-0 mt-20 sm:mt-20 sm:mb-20 overflow-x-hidden">
-      {isLoading && <TableLoading />}
+      {loading && <NavigationLoader visible={loading} />}
       <NewlyRegisteredModal isActive={isActive} setOpen={setOpen} />
       <div
         className={`flex flex-row fixed sm:fixed w-full sm:min-w-fit sm:max-w-lg justify-between px-0 bg-inherit py-4 sm:px-2 items-center top-2 sm:bg-cardColor sm:rounded-tr-lg sm:rounded-br-lg z-50 ${
@@ -513,7 +449,6 @@ const DashboardPage = ({
             <DashboardWithdrawModalWithdraw
               teamMemberProfile={teamMemberProfile}
               earnings={earnings}
-              setEarnings={setEarnings}
               profile={profile}
             />
           </div>
@@ -522,14 +457,12 @@ const DashboardPage = ({
           <div className="flex-shrink-0 relative ">
             <DashboardDepositModalPackages
               packages={packages}
-              earnings={earnings}
-              setEarnings={setEarnings}
-              setChartData={setChartData}
               setIsActive={setIsActive}
               teamMemberProfile={teamMemberProfile}
               className="w-full"
               open={open}
               setOpen={setOpen}
+              active={isActive}
             />
           </div>
 
@@ -570,9 +503,6 @@ const DashboardPage = ({
             <DashboardPackages
               teamMemberProfile={teamMemberProfile}
               chartData={chartData}
-              setChartData={setChartData}
-              setEarnings={setEarnings}
-              setTotalEarnings={setTotalEarnings}
             />
           </div>
         )}

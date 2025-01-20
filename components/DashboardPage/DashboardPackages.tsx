@@ -10,13 +10,16 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { usePackageChartData } from "@/store/usePackageChartData";
 import { useUserTransactionHistoryStore } from "@/store/userTransactionHistoryStore";
+import { useUserDashboardEarningsStore } from "@/store/useUserDashboardEarnings";
+import { useUserEarningsStore } from "@/store/useUserEarningsStore";
 import { formatMonthDateYear, formatTime } from "@/utils/function";
-import { ChartDataMember, DashboardEarnings } from "@/utils/types";
-import { alliance_earnings_table, alliance_member_table } from "@prisma/client";
+import { ChartDataMember } from "@/utils/types";
+import { alliance_member_table } from "@prisma/client";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
-import { Dispatch, SetStateAction, useState } from "react";
+import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Button } from "../ui/button";
 import {
@@ -33,20 +36,14 @@ import { Separator } from "../ui/separator";
 
 type Props = {
   chartData: ChartDataMember[];
-  setChartData: Dispatch<SetStateAction<ChartDataMember[]>>;
-  setEarnings: Dispatch<SetStateAction<alliance_earnings_table | null>>;
-  setTotalEarnings: Dispatch<SetStateAction<DashboardEarnings | null>>;
   teamMemberProfile: alliance_member_table;
 };
 
-const DashboardPackages = ({
-  chartData,
-  setChartData,
-  setEarnings,
-  setTotalEarnings,
-  teamMemberProfile,
-}: Props) => {
+const DashboardPackages = ({ chartData, teamMemberProfile }: Props) => {
   const { toast } = useToast();
+  const { setChartData } = usePackageChartData();
+  const { earnings, setEarnings } = useUserEarningsStore();
+  const { totalEarnings, setTotalEarnings } = useUserDashboardEarningsStore();
   const [openDialogId, setOpenDialogId] = useState<string | null>(null); // Track which dialog is open
   const [isLoading, setIsLoading] = useState<string | null>(null); // Track loading state for specific packages
   const { setAddTransactionHistory } = useUserTransactionHistoryStore();
@@ -81,34 +78,26 @@ const DashboardPackages = ({
         });
 
         // Update chart data to remove the claimed package
-        setChartData((prev) =>
-          prev.filter(
+        setChartData(
+          chartData.filter(
             (data) => data.package_connection_id !== package_connection_id
           )
         );
 
-        // Update earnings
-        setEarnings((prev) => {
-          if (!prev) return null;
-          const newEarnings = amount + profit_amount;
-          return {
-            ...prev,
-            alliance_olympus_earnings:
-              prev.alliance_olympus_earnings + newEarnings,
-            alliance_combined_earnings:
-              prev.alliance_combined_earnings + newEarnings,
-          };
-        });
+        const newEarnings = amount + profit_amount;
 
+        setEarnings({
+          ...earnings,
+          alliance_olympus_earnings:
+            earnings.alliance_olympus_earnings + newEarnings,
+          alliance_combined_earnings:
+            earnings.alliance_combined_earnings + newEarnings,
+        });
         // Update total earnings
-        setTotalEarnings((prev) => {
-          if (!prev) return null;
-          const newEarnings = amount + profit_amount;
-          return {
-            ...prev,
-            totalEarnings: prev.totalEarnings + newEarnings,
-            package_income: prev.package_income + newEarnings,
-          };
+        setTotalEarnings({
+          ...totalEarnings!,
+          totalEarnings: totalEarnings!.totalEarnings + newEarnings,
+          package_income: totalEarnings!.package_income + newEarnings,
         });
       }
     } catch (error) {
