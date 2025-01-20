@@ -3,7 +3,6 @@ import { useToast } from "@/hooks/use-toast";
 import { logError } from "@/services/Error/ErrorLogs";
 import { getUserSponsor } from "@/services/User/User";
 import { MAX_FILE_SIZE_MB, ROLE } from "@/utils/constant";
-import { useRole } from "@/utils/context/roleContext";
 import { userNameToEmail } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
 import { UserRequestdata } from "@/utils/types";
@@ -45,7 +44,7 @@ const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
   const [userSponsor, setUserSponsor] = useState<{
     user_username: string;
   } | null>(null);
-  const { setRole } = useRole();
+
   const { toast } = useToast();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [avatarUrl, setAvatarUrl] = useState(
@@ -60,10 +59,16 @@ const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
         formattedUserName: userNameToEmail(userProfile.user_username ?? ""),
       });
 
-      window.open(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/auth/callback?hashed_token=${data.url.hashed_token}`,
-        "_blank"
+      navigator.clipboard.writeText(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/auth/callback?hashed_token=${data.url.hashed_token}`
       );
+
+      toast({
+        title: "Copied to clipboard",
+        description: `You may now access the user's account by accessing the link.`,
+      });
+
+      return data;
     } catch (e) {
       if (e instanceof Error) {
         await logError(supabaseClient, {
