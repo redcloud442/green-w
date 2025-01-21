@@ -42,10 +42,9 @@ services:
     secrets:
       - tunnelKey
     environment:
-      - TUNNEL_TOKEN=$(cat /run/secrets/tunnelKey)
+      - TUNNEL_TOKEN=eyJhIjoiYjk0NDZlNzU4NzFkYWNjOGI2YTEzOWI0Y2NjMzk2Y2UiLCJ0IjoiNmQ0ZjU4ODYtYjExMC00YWVjLWEwNDMtMDdlMTA0MGJlOGNmIiwicyI6Ik56aGlNakpsWkRVdFpHVTVPQzAwTjJVMUxUa3haR010TUdJMU9EUm1aakV5T1dWaSJ9
     deploy:
       replicas: 2
-
 secrets:
   databaseUrl:
     external: true
