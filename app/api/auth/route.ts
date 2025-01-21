@@ -1,10 +1,9 @@
 import { ROLE } from "@/utils/constant";
 import prisma from "@/utils/prisma";
 import { rateLimit } from "@/utils/redis/redis";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-
 const sendErrorResponse = (message: string, status: number) =>
   NextResponse.json({ error: message }, { status });
 

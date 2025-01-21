@@ -6,7 +6,7 @@ import { createClientServerSide } from "@/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY || "re_123");
 
 export async function POST(req: NextRequest) {
   try {
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
 
     const domain =
       process.env.NODE_ENV === "production"
-        ? "<help@portfolio-glorioso.site>"
+        ? "<info@help.elevateglobal.app>"
         : "<help@portfolio-glorioso.site>";
 
     const { data, error } = await resend.emails.send({

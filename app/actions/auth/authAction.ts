@@ -10,7 +10,7 @@ import {
   createClientServerSide,
   createServiceRoleClientServerSide,
 } from "@/utils/supabase/server";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { z } from "zod";
 
 const changeUserPasswordSchema = z.object({
