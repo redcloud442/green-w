@@ -14,6 +14,8 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
 
+    environment: Production # Or Preview, depending on your deployment
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -28,9 +30,9 @@ jobs:
       - name: Build Docker image
         run: |
           docker build \
-            --build-arg NEXT_PUBLIC_SUPABASE_URL="${{ vars.SUPABASE_URL }}" \
-            --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY="${{ vars.SUPABASE_ANON_KEY }}" \
-            --build-arg NEXT_PUBLIC_BASE_URL="${{ vars.BASE_URL }}" \
+            --build-arg NEXT_PUBLIC_SUPABASE_URL="${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" \
+            --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY="${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" \
+            --build-arg NEXT_PUBLIC_BASE_URL="${{ secrets.NEXT_PUBLIC_BASE_URL }}" \
             -t ghcr.io/redcloud442/elevateglobal:prod .
 
       - name: Verify Docker login
