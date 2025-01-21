@@ -94,7 +94,7 @@ const AdminUserNotifyModal = ({ packageNotification }: Props) => {
             for (const batch of chunkArray(activeEmails, 100)) {
               batchEmails.push({
                 to: batch.map((user) => user.email || ""),
-                from: "Elevate Team <help@portfolio-glorioso.site>",
+                from: "Elevate Team <info@help.elevateglobal.app>",
                 subject: "Package Notification",
                 html: ReactDOMServer.renderToStaticMarkup(
                   <BankingEmailNotificationTemplate
