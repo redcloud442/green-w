@@ -472,8 +472,8 @@ const DashboardPage = ({
             <Image
               src="/assets/referral.ico"
               alt="plans"
-              width={40}
-              height={40}
+              width={35}
+              height={35}
             />
             <p className="text-sm sm:text-lg font-thin">REFERRAL</p>
           </div>
@@ -486,8 +486,8 @@ const DashboardPage = ({
             <Image
               src="/assets/network.ico"
               alt="plans"
-              width={40}
-              height={40}
+              width={35}
+              height={35}
             />
             <p className="text-sm sm:text-lg font-thin ">NETWORK</p>
           </div>

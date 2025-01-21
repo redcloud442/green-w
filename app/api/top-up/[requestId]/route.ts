@@ -2,6 +2,7 @@ import { TOP_UP_STATUS } from "@/utils/constant";
 import prisma from "@/utils/prisma";
 import { rateLimit } from "@/utils/redis/redis";
 import { protectionMerchantUser } from "@/utils/serversideProtection";
+import { alliance_top_up_request_table } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -67,10 +68,7 @@ export async function PUT(
       );
     }
 
-    const [existingRequest, merchant] = await Promise.all([
-      prisma.alliance_top_up_request_table.findUnique({
-        where: { alliance_top_up_request_id: requestId },
-      }),
+    const [merchant] = await Promise.all([
       prisma.merchant_member_table.findFirst({
         where: {
           merchant_member_merchant_id: teamMemberProfile.alliance_member_id,
@@ -78,17 +76,30 @@ export async function PUT(
       }),
     ]);
 
-    if (!existingRequest) return sendErrorResponse("Request not found.", 404);
     if (!merchant && teamMemberProfile.alliance_member_role === "MERCHANT")
       return sendErrorResponse("Merchant not found.", 404);
 
-    if (
-      existingRequest.alliance_top_up_request_status !== TOP_UP_STATUS.PENDING
-    ) {
-      return sendErrorResponse("Invalid request.");
-    }
-
     const result = await prisma.$transaction(async (tx) => {
+      const existingRequest =
+        await tx.$queryRawUnsafe<alliance_top_up_request_table>(
+          `
+        SELECT * 
+        FROM alliance_top_up_request_table
+        WHERE alliance_top_up_request_id = $1
+        FOR UPDATE
+        `,
+          requestId
+        );
+
+      if (!existingRequest) {
+        throw new Error("Request not found.");
+      }
+
+      if (
+        existingRequest.alliance_top_up_request_status !== TOP_UP_STATUS.PENDING
+      ) {
+        throw new Error("Invalid request.");
+      }
       const updatedRequest = await tx.alliance_top_up_request_table.update({
         where: { alliance_top_up_request_id: requestId },
         data: {

@@ -100,7 +100,7 @@ const TransactionHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
           </CardTitle>
           <Separator className="my-2 bg-zinc-800" />
         </CardHeader>
-        <ScrollArea className="w-full min-h-auto max-h-[500px] ">
+        <ScrollArea className="w-full h-[500px] ">
           {transactionHistory?.map((data, index) => (
             <CardContent
               key={data.transaction_id || `transaction-${index}`}

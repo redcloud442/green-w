@@ -203,7 +203,7 @@ const DashboardDepositModalDeposit = ({
           className="p-0 bg-transparent shadow-none h-full flex flex-col items-center justify-center"
           onClick={() => setOpen(true)}
         >
-          <Image src="/assets/deposit.ico" alt="plans" width={40} height={40} />
+          <Image src="/assets/deposit.ico" alt="plans" width={35} height={35} />
           <p className="text-sm sm:text-lg font-thin ">DEPOSIT</p>
         </Button>
       </DialogTrigger>

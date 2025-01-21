@@ -90,8 +90,8 @@ const DashboardDepositModalPackages = ({
           <Image
             src="/assets/packages.ico"
             alt="plans"
-            width={40}
-            height={40}
+            width={35}
+            height={35}
           />
           <p className="text-sm sm:text-lg font-thin">PACKAGES</p>
         </Button>

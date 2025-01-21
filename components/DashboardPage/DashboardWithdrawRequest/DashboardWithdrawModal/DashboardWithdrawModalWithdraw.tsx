@@ -97,8 +97,8 @@ const DashboardWithdrawModalWithdraw = ({
             <Image
               src="/assets/withdraw.ico"
               alt="plans"
-              width={40}
-              height={40}
+              width={35}
+              height={35}
             />
             <p className="text-sm sm:text-lg font-thin ">WITHDRAW</p>
           </Button>
@@ -108,8 +108,8 @@ const DashboardWithdrawModalWithdraw = ({
               <Image
                 src="/assets/withdraw.ico"
                 alt="plans"
-                width={40}
-                height={40}
+                width={35}
+                height={35}
               />
               <p className="text-sm sm:text-lg font-thin ">WITHDRAW</p>
             </PopoverTrigger>

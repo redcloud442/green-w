@@ -1,5 +1,3 @@
-"use client";
-
 import {
   getUnserNotificationWithLimit,
   updateUserNotification,
@@ -7,7 +5,6 @@ import {
 import { useUserNotificationStore } from "@/store/userNotificationStore";
 import { alliance_member_table } from "@prisma/client";
 import { useEffect, useRef, useState } from "react";
-import { Button } from "../ui/button";
 import { Card, CardHeader, CardTitle } from "../ui/card";
 import { DialogContent, DialogFooter, DialogTitle } from "../ui/dialog";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
@@ -21,6 +18,7 @@ const NotificationTable = ({ teamMemberProfile }: DataTableProps) => {
   const [activePage, setActivePage] = useState(1);
   const [isFetchingList, setIsFetchingList] = useState(false);
   const fetchCalled = useRef(false);
+  const observerRef = useRef<HTMLDivElement | null>(null);
   const { userNotification, setUserNotification, setAddUserNotification } =
     useUserNotificationStore();
 
@@ -52,16 +50,8 @@ const NotificationTable = ({ teamMemberProfile }: DataTableProps) => {
     }
   };
 
-  useEffect(() => {
-    if (fetchCalled.current) return;
-    fetchCalled.current = true;
-    fetchRequest();
-  }, [teamMemberProfile]);
-
   const loadMoreNotifications = async () => {
-    if (!teamMemberProfile) return;
-    setActivePage(activePage + 1);
-
+    if (!teamMemberProfile || isFetchingList) return;
     const nextPage = activePage + 1;
 
     try {
@@ -77,11 +67,40 @@ const NotificationTable = ({ teamMemberProfile }: DataTableProps) => {
         notifications: data,
         count,
       });
+
+      setActivePage(nextPage);
     } catch (error) {
     } finally {
       setIsFetchingList(false);
     }
   };
+
+  useEffect(() => {
+    if (fetchCalled.current) return;
+    fetchCalled.current = true;
+    fetchRequest();
+  }, [teamMemberProfile]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !isFetchingList) {
+          loadMoreNotifications();
+        }
+      },
+      { root: null, rootMargin: "0px", threshold: 1.0 }
+    );
+
+    if (observerRef.current) {
+      observer.observe(observerRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observer.unobserve(observerRef.current);
+      }
+    };
+  }, [isFetchingList]);
 
   return (
     <ScrollArea className="w-full overflow-x-auto">
@@ -107,7 +126,11 @@ const NotificationTable = ({ teamMemberProfile }: DataTableProps) => {
                 {userNotification.notifications.map((notification) => (
                   <li
                     key={notification.alliance_notification_id}
-                    className={`p-2 ${notification.alliance_notification_is_read ? "bg-zinc-400/50" : ""} bg-gray-100 dark:bg-gray-800 rounded-md shadow-sm flex items-center justify-between px-4 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700`}
+                    className={`p-2 ${
+                      notification.alliance_notification_is_read
+                        ? "bg-zinc-400/50"
+                        : ""
+                    } bg-gray-100 dark:bg-gray-800 rounded-md shadow-sm flex items-center justify-between px-4 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700`}
                   >
                     <div className="space-y-1">
                       <p className="text-sm font-medium">
@@ -127,18 +150,15 @@ const NotificationTable = ({ teamMemberProfile }: DataTableProps) => {
                 No unread notifications available.
               </p>
             )}
-            {userNotification.notifications.length > 0 &&
-              userNotification.notifications.length <
-                userNotification.count && (
-                <Button
-                  className="mt-2 w-full"
-                  variant="card"
-                  onClick={loadMoreNotifications}
-                  disabled={isFetchingList}
-                >
-                  {isFetchingList ? "Loading..." : "Load More"}
-                </Button>
-              )}
+
+            {/* Observer for Infinite Scroll */}
+            <div ref={observerRef} className="h-1" />
+
+            {isFetchingList && (
+              <p className="text-sm text-gray-500 text-center mt-2">
+                Loading more notifications...
+              </p>
+            )}
 
             <DialogFooter className="flex justify-center"></DialogFooter>
             <ScrollBar orientation="horizontal" />

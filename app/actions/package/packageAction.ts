@@ -7,6 +7,7 @@ import {
   protectionMemberUser,
 } from "@/utils/serversideProtection";
 import { createClientServerSide } from "@/utils/supabase/server";
+import { package_member_connection_table } from "@prisma/client";
 import { z } from "zod";
 const availPackageSchema = z.object({
   amount: z.number().min(1),
@@ -50,34 +51,35 @@ export const claimPackage = async (params: {
       throw new Error("Too many requests. Please try again later.");
     }
 
-    const packageConnection =
-      await prisma.package_member_connection_table.findUnique({
-        where: { package_member_connection_id: packageConnectionId },
-      });
+    const result = await prisma.$transaction(async (tx) => {
+      // Lock the row with `FOR UPDATE`
+      const packageConnection =
+        await tx.$queryRawUnsafe<package_member_connection_table>(
+          `
+        SELECT * 
+        FROM packages_schema.package_member_connection_table
+        WHERE package_member_connection_id = $1
+        FOR UPDATE
+        `,
+          packageConnectionId
+        );
 
-    if (!packageConnection) {
-      throw new Error("Package connection not found.");
-    }
+      if (!packageConnection) {
+        throw new Error("Package connection not found.");
+      }
 
-    // if (packageConnection.package_member_status !== "ENDED") {
-    //   throw new Error("Invalid request");
-    // }
+      if (packageConnection.package_member_status !== "ENDED") {
+        throw new Error("Invalid request. Package is not in ENDED status.");
+      }
 
-    // if (packageConnection.package_member_is_ready_to_claim) {
-    //   throw new Error("Invalid request. Package is already claimed.");
-    // }
+      if (!packageConnection.package_member_is_ready_to_claim) {
+        throw new Error("Invalid request. Package is not ready to claim.");
+      }
 
-    // if (!packageConnection.package_member_is_ready_to_claim) {
-    //   throw new Error("Invalid request. Package is not ready to claim.");
-    // }
+      const totalClaimedAmount =
+        Number(packageConnection.package_member_amount) +
+        Number(packageConnection.package_amount_earnings);
 
-    console.log(packageConnection);
-
-    const totalClaimedAmount =
-      Number(packageConnection.package_member_amount) +
-      Number(packageConnection.package_amount_earnings);
-
-    await prisma.$transaction(async (tx) => {
       await tx.package_member_connection_table.update({
         where: { package_member_connection_id: packageConnectionId },
         data: {
@@ -86,6 +88,7 @@ export const claimPackage = async (params: {
         },
       });
 
+      // Update the member's earnings
       await tx.alliance_earnings_table.update({
         where: {
           alliance_earnings_member_id: teamMemberProfile.alliance_member_id,
@@ -96,14 +99,16 @@ export const claimPackage = async (params: {
         },
       });
 
+      // Create a transaction log for the claim
       await tx.alliance_transaction_table.create({
         data: {
           transaction_member_id: teamMemberProfile.alliance_member_id,
           transaction_amount: totalClaimedAmount,
-          transaction_description: `Package Claimed ${packageName}`,
+          transaction_description: `Package Claimed: ${packageName}`,
         },
       });
 
+      // Log the package earnings
       await tx.package_earnings_log.create({
         data: {
           package_member_connection_id: packageConnectionId,
@@ -117,10 +122,13 @@ export const claimPackage = async (params: {
           package_member_status: "ENDED",
         },
       });
+
+      return totalClaimedAmount;
     });
 
-    return { success: true, totalClaimedAmount };
+    return { success: true, totalClaimedAmount: result };
   } catch (error) {
+    console.error("Error claiming package:", error);
     throw new Error("Internal server error");
   }
 };
