@@ -136,7 +136,8 @@ export async function PUT(
               : `Withdrawal Request Failed, ${note}`
           }`,
           transaction_amount: Number(
-            updatedRequest.alliance_withdrawal_request_amount
+            updatedRequest.alliance_withdrawal_request_amount -
+              updatedRequest.alliance_withdrawal_request_fee
           ),
           transaction_member_id:
             updatedRequest.alliance_withdrawal_request_member_id,
