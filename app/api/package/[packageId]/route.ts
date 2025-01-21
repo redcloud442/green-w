@@ -106,7 +106,6 @@ export async function PUT(
 
     return successResponse(updatedPackage);
   } catch (error) {
-    console.log(error);
     return errorResponse("Internal Server Error.", 500);
   }
 }

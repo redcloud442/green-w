@@ -315,7 +315,6 @@ export const handleSigninAdmin = async (params: {
 
     return { success: true, user };
   } catch (error) {
-    console.log(error);
     throw new Error(
       error instanceof Error ? error.message : "An unknown error occurred."
     );

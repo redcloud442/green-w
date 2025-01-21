@@ -89,10 +89,8 @@ export async function PUT(
     }
 
     if (
-      status === TOP_UP_STATUS.APPROVED &&
-      teamMemberProfile.alliance_member_role === "MERCHANT" &&
       existingRequest.alliance_top_up_request_amount >
-        (merchant?.merchant_member_balance ?? 0)
+      (merchant?.merchant_member_balance ?? 0)
     ) {
       return sendErrorResponse("Insufficient merchant balance.");
     }
@@ -120,12 +118,20 @@ export async function PUT(
       });
 
       if (status === TOP_UP_STATUS.APPROVED) {
-        const updatedEarnings = await tx.alliance_earnings_table.update({
+        const updatedEarnings = await tx.alliance_earnings_table.upsert({
           where: {
             alliance_earnings_member_id:
               updatedRequest.alliance_top_up_request_member_id,
           },
-          data: {
+          create: {
+            alliance_earnings_member_id:
+              updatedRequest.alliance_top_up_request_member_id,
+            alliance_olympus_wallet:
+              updatedRequest.alliance_top_up_request_amount,
+            alliance_combined_earnings:
+              updatedRequest.alliance_top_up_request_amount,
+          },
+          update: {
             alliance_olympus_wallet: {
               increment: updatedRequest.alliance_top_up_request_amount,
             },

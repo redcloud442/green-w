@@ -145,7 +145,6 @@ const LoginPageSecured = () => {
 
       window.location.href = "/admin";
     } catch (e) {
-      console.log(e);
       if (e instanceof Error) {
         toast({
           title: e.message,
