@@ -42,7 +42,7 @@ services:
     secrets:
       - tunnelKey
     environment:
-      - TUNNEL_TOKEN=/run/secrets/tunnelKey
+      - TUNNEL_TOKEN=$(cat /run/secrets/tunnelKey)
     deploy:
       replicas: 2
 
