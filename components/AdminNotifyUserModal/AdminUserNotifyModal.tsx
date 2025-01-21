@@ -49,10 +49,10 @@ const AdminUserNotifyModal = ({ packageNotification }: Props) => {
   const handleConfirm = async () => {
     try {
       setLoading(true);
-      const limit = 100; // Fetch 100 records per page
+      const limit = 100;
       let page = 1;
       let totalFetched = 0;
-      let totalCount = 0; // Initialize totalCount
+      let totalCount = 0;
       let batchEmails: {
         to: string[];
         from: string;
