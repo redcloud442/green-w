@@ -91,6 +91,7 @@ export type AdminDashboardDataByDate = {
   directLoot: number;
   indirectLoot: number;
   totalApprovedWithdrawal: number;
+  totalActivatedUserByDate: number;
   packageEarnings: number;
   chartData: ChartData[];
 };
