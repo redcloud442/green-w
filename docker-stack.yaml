@@ -28,7 +28,7 @@ services:
       - moviderSecret
     deploy:
       mode: replicated
-      replicas: 5
+      replicas: 7
       update_config:
         order: start-first
     ports:
