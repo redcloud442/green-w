@@ -14,8 +14,8 @@ const successResponse = (data: object = {}) =>
 const updatePackageSchema = z.object({
   packageName: z.string().min(3),
   packageDescription: z.string().min(3),
-  packagePercentage: z.number().min(1),
-  packageDays: z.number().min(1),
+  packagePercentage: z.string().min(1),
+  packageDays: z.string().min(1),
   packageIsDisabled: z.boolean(),
   packageColor: z.string().min(3),
   package_image: z.string().min(3),
@@ -106,6 +106,7 @@ export async function PUT(
 
     return successResponse(updatedPackage);
   } catch (error) {
+    console.log(error);
     return errorResponse("Internal Server Error.", 500);
   }
 }

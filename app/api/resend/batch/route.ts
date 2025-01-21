@@ -36,7 +36,6 @@ export async function POST(req: NextRequest) {
     const { data, error } = await resend.batch.send(emails);
 
     if (error) {
-      console.error("Error sending batch emails:", error);
       return NextResponse.json(error, { status: 500 });
     }
 
@@ -45,7 +44,6 @@ export async function POST(req: NextRequest) {
       data,
     });
   } catch (error) {
-    console.error("Error processing batch email request:", error);
     return NextResponse.json(
       { error: "Error processing batch email request" },
       { status: 500 }

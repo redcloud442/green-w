@@ -70,6 +70,16 @@ const LoginPageSecured = () => {
 
       const sanitizedData = escapeFormData(data);
 
+      const validation = LoginSchema.safeParse(sanitizedData);
+
+      if (!validation.success) {
+        toast({
+          title: "Invalid input",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { userName, password } = sanitizedData;
 
       const result = await handleSigninAdmin({ userName, password });
