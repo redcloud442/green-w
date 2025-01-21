@@ -464,25 +464,17 @@ export const protectionAllUser = async (ip?: string) => {
       return { redirect: "/login" };
     }
 
-    const [referal, earnings] = await Promise.all([
+    const [referal] = await Promise.all([
       prisma.alliance_referral_link_table.findFirst({
         where: {
           alliance_referral_link_member_id: teamMember.alliance_member_id,
         },
       }),
-      prisma.alliance_earnings_table.findFirst({
-        where: { alliance_earnings_member_id: teamMember.alliance_member_id },
-      }),
     ]);
-
-    if (!earnings) {
-      return { redirect: "/login" };
-    }
 
     return {
       profile: profile as user_table,
       teamMemberProfile: teamMember as alliance_member_table,
-      earnings: earnings as alliance_earnings_table,
       referal: referal as alliance_referral_link_table,
     };
   } catch (e) {

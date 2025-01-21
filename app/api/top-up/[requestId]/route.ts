@@ -88,13 +88,6 @@ export async function PUT(
       return sendErrorResponse("Invalid request.");
     }
 
-    if (
-      existingRequest.alliance_top_up_request_amount >
-      (merchant?.merchant_member_balance ?? 0)
-    ) {
-      return sendErrorResponse("Insufficient merchant balance.");
-    }
-
     const result = await prisma.$transaction(async (tx) => {
       const updatedRequest = await tx.alliance_top_up_request_table.update({
         where: { alliance_top_up_request_id: requestId },
