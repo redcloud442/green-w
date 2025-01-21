@@ -11,14 +11,15 @@ CREATE EXTENSION IF NOT EXISTS plv8;
 
 
 
-DROP table alliance_schema.dashboard_earnings_summary;
+
+DROP view alliance_schema.dashboard_earnings_summary;
 CREATE OR REPLACE VIEW alliance_schema.dashboard_earnings_summary AS
 WITH 
     earnings AS (
         SELECT 
             package_member_member_id AS member_id,
-            COALESCE(SUM(package_member_amount::BIGINT), 0) AS total_amount,
-            COALESCE(SUM(package_member_amount_earnings::BIGINT), 0) AS total_earnings
+            COALESCE(SUM(package_member_amount::DECIMAL), 0) AS total_amount,
+            COALESCE(SUM(package_member_amount_earnings::DECIMAL), 0) AS total_earnings
         FROM packages_schema.package_earnings_log
         WHERE package_member_status = 'ENDED'
         GROUP BY package_member_member_id
@@ -26,7 +27,7 @@ WITH
     withdrawals AS (
         SELECT 
             alliance_withdrawal_request_member_id AS member_id,
-            COALESCE(SUM(alliance_withdrawal_request_amount::BIGINT), 0) AS total_withdrawals
+            COALESCE(SUM(alliance_withdrawal_request_amount::DECIMAL), 0) AS total_withdrawals
         FROM alliance_schema.alliance_withdrawal_request_table
         WHERE alliance_withdrawal_request_status = 'APPROVED'
         GROUP BY alliance_withdrawal_request_member_id
@@ -35,7 +36,7 @@ WITH
         SELECT 
             package_ally_bounty_member_id AS member_id,
             COUNT(DISTINCT(package_ally_bounty_from)) AS direct_referral_count,
-            COALESCE(SUM(package_ally_bounty_earnings::BIGINT), 0) AS direct_referral_amount
+            COALESCE(SUM(package_ally_bounty_earnings::DECIMAL), 0) AS direct_referral_amount
         FROM packages_schema.package_ally_bounty_log
         WHERE package_ally_bounty_type = 'DIRECT'
         GROUP BY package_ally_bounty_member_id
@@ -43,34 +44,24 @@ WITH
     indirect_referrals AS (
         SELECT 
             package_ally_bounty_member_id AS member_id,
-            COALESCE(SUM(package_ally_bounty_earnings::BIGINT), 0) AS indirect_referral_amount
+            COALESCE(SUM(package_ally_bounty_earnings::DECIMAL), 0) AS indirect_referral_amount
         FROM packages_schema.package_ally_bounty_log
         WHERE package_ally_bounty_type = 'INDIRECT'
         GROUP BY package_ally_bounty_member_id
-    ),
-    package_income AS (
-        SELECT 
-            package_member_member_id AS member_id,
-            COALESCE(SUM((package_member_amount + package_member_amount_earnings)::BIGINT), 0) AS package_income
-        FROM packages_schema.package_earnings_log
-        WHERE package_member_status = 'ENDED'
-        GROUP BY package_member_member_id
     )
 SELECT 
     m.alliance_member_id AS member_id,
-    COALESCE(e.total_amount, 0) AS total_amount,
-    COALESCE(e.total_earnings, 0) AS total_earnings,
+    COALESCE(e.total_earnings + d.direct_referral_amount + e.total_amount, 0) AS total_earnings,
     COALESCE(w.total_withdrawals, 0) AS total_withdrawals,
     COALESCE(d.direct_referral_amount, 0) AS direct_referral_amount,
     COALESCE(i.indirect_referral_amount, 0) AS indirect_referral_amount,
-    COALESCE(p.package_income, 0) AS package_income,
+    COALESCE(e.total_amount + e.total_earnings, 0) AS package_income,
     COALESCE(d.direct_referral_count, 0) AS direct_referral_count
 FROM alliance_schema.alliance_member_table m
 LEFT JOIN earnings e ON m.alliance_member_id = e.member_id
 LEFT JOIN withdrawals w ON m.alliance_member_id = w.member_id
 LEFT JOIN direct_referrals d ON m.alliance_member_id = d.member_id
 LEFT JOIN indirect_referrals i ON m.alliance_member_id = i.member_id
-LEFT JOIN package_income p ON m.alliance_member_id = p.member_id;
 
 
 CREATE OR REPLACE FUNCTION get_current_date()
@@ -171,12 +162,6 @@ plv8.subtransaction(function() {
     VALUES ($1, $2, $3)
     RETURNING alliance_member_id
   `, ['MEMBER', DEFAULT_ALLIANCE_ID, userId])[0].alliance_member_id;
-
-  plv8.execute(`
-    INSERT INTO alliance_schema.alliance_earnings_table (alliance_earnings_member_id)
-    VALUES ($1)
-  `, [allianceMemberId]);
-
 
   const referralLinkURL = `${url}/${encodeURIComponent(userName)}`;
   plv8.execute(`
@@ -455,8 +440,8 @@ plv8.subtransaction(function() {
 
   const activePackageWithinTheDay = plv8.execute(`
     SELECT COUNT(*) AS active_packages
-    FROM alliance_schema.alliance_member_table
-    WHERE alliance_member_date_created::Date BETWEEN $1 AND $2
+    FROM packages_schema.package_member_connection_table
+    WHERE package_member_status = 'ACTIVE' AND package_member_connection_created::Date BETWEEN $1 AND $2
   `, [startDate, endDate])[0].active_packages;
 
   const chartData = plv8.execute(`
@@ -1615,7 +1600,7 @@ plv8.subtransaction(function() {
       completion: percentage,
       amount: parseFloat(row.amount),
       profit_amount: parseFloat(row.package_amount_earnings),
-      is_ready_to_claim: true,
+      is_ready_to_claim: isReadyToClaim,
       is_notified: row.package_member_is_notified,
     });
 
