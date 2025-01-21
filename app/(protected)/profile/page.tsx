@@ -36,7 +36,6 @@ const Page = async () => {
         user_first_name: true,
         user_last_name: true,
         user_email: true,
-        user_iv: true,
         user_profile_picture: true,
         user_active_mobile: true,
       },

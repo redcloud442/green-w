@@ -32,7 +32,6 @@ model user_table {
   user_last_name        String?
   user_email            String          
   user_password         String
-  user_iv               String?
   user_active_mobile    String?
   user_profile_picture  String?
 

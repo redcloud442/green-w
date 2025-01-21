@@ -1,8 +1,7 @@
-import { applyRateLimit, serializeBigIntRecursive } from "@/utils/function";
+import { applyRateLimit } from "@/utils/function";
 import prisma from "@/utils/prisma";
 import { rateLimit } from "@/utils/redis/redis";
 import { protectionMemberUser } from "@/utils/serversideProtection";
-import { alliance_preferred_withdrawal_table } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -148,14 +147,10 @@ export async function GET(request: Request) {
     });
 
   // Serialize all BigInt values recursively
-  const serializedData = serializeBigIntRecursive(primaryData);
-  const serializedPreferredWithdrawal = serializeBigIntRecursive(
-    preferredWithdrawal as alliance_preferred_withdrawal_table[]
-  );
 
   return NextResponse.json({
     success: true,
-    data: serializedData,
-    preferredWithdrawal: serializedPreferredWithdrawal,
+    data: primaryData,
+    preferredWithdrawal: preferredWithdrawal,
   });
 }

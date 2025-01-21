@@ -19,6 +19,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 import { Card } from "../ui/card";
 import { Label } from "../ui/label";
+import { PasswordInput } from "../ui/passwordInput";
 // Zod Schema for Login Form
 
 export const LoginSchema = z.object({
@@ -30,6 +31,7 @@ export const LoginSchema = z.object({
       /^[a-zA-Z0-9_]+$/,
       "Username can only contain letters, numbers, and underscores"
     ),
+  password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 // Zod Schema for OTP Form
@@ -68,9 +70,9 @@ const LoginPageSecured = () => {
 
       const sanitizedData = escapeFormData(data);
 
-      const { userName } = sanitizedData;
+      const { userName, password } = sanitizedData;
 
-      const result = await handleSigninAdmin({ userName });
+      const result = await handleSigninAdmin({ userName, password });
 
       if (!result.success) {
         toast({
@@ -131,7 +133,6 @@ const LoginPageSecured = () => {
         title: "Successfully logged in!",
       });
 
-      // Redirect to dashboard or other secured page
       window.location.href = "/admin";
     } catch (e) {
       if (e instanceof Error) {
@@ -166,6 +167,18 @@ const LoginPageSecured = () => {
                 variant="non-card"
                 id="username"
                 {...register("userName")}
+              />
+              {errors.root && (
+                <p className="text-sm text-primaryRed">{errors.root.message}</p>
+              )}
+            </div>
+
+            <div className="w-full text-center">
+              <Label htmlFor="password">Password</Label>
+              <PasswordInput
+                variant="non-card"
+                id="password"
+                {...register("password")}
               />
               {errors.root && (
                 <p className="text-sm text-primaryRed">{errors.root.message}</p>

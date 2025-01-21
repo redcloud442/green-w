@@ -1,5 +1,6 @@
 "use server";
 
+import { WITHDRAWAL_STATUS } from "@/utils/constant";
 import prisma from "@/utils/prisma";
 import { rateLimit } from "@/utils/redis/redis";
 import { protectionMemberUser } from "@/utils/serversideProtection";
@@ -290,4 +291,36 @@ export const getuserWallet = async (params: { memberId: string }) => {
   } catch (error) {
     throw new Error("Failed to fetch user earnings");
   }
+};
+
+export const handUserWithdrawWithninTheDay = async (params: {
+  memberId: string;
+}) => {
+  const { memberId } = params;
+  let isWithdrawalToday = false;
+  const today = new Date().toISOString().split("T")[0];
+  const existingWithdrawal =
+    await prisma.alliance_withdrawal_request_table.findFirst({
+      where: {
+        alliance_withdrawal_request_member_id: memberId,
+        alliance_withdrawal_request_status: WITHDRAWAL_STATUS.APPROVED,
+        AND: [
+          {
+            alliance_withdrawal_request_date: {
+              gte: new Date(`${today}T00:00:00Z`), // Start of the day
+            },
+          },
+          {
+            alliance_withdrawal_request_date: {
+              lte: new Date(`${today}T23:59:59Z`), // End of the day
+            },
+          },
+        ],
+      },
+    });
+
+  if (existingWithdrawal) {
+    isWithdrawalToday = true;
+  }
+  return isWithdrawalToday;
 };

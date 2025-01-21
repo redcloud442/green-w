@@ -38,12 +38,15 @@ export const refreshSession = async () => {
 export const ensureValidSession = async () => {
   const supabase = await createClientServerSide();
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  if (!session) {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
     return false;
   }
-  if (session.expires_at && session.expires_at * 1000 < Date.now() + 60000) {
+  if (
+    user.user_metadata.expires_at &&
+    user.user_metadata.expires_at * 1000 < Date.now() + 60000
+  ) {
     return await refreshSession();
   }
   return true;

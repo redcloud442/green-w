@@ -1413,7 +1413,7 @@ plv8.subtransaction(function() {
     return;
   }
 
-  // Fetch earnings data
+
   const earningsData = plv8.execute(`
     SELECT 
         total_earnings,
@@ -1561,7 +1561,7 @@ plv8.subtransaction(function() {
       p.package_color,
       p.packages_days::INTEGER AS packages_days,
       pmc.package_member_status,
-      pmc.package_member_connection_created::TEXT AS package_member_connection_created,
+      pmc.package_member_connection_created,
       (pmc.package_member_amount) AS amount,
       pmc.package_member_connection_id,
       pmc.package_member_package_id,
@@ -1589,10 +1589,8 @@ plv8.subtransaction(function() {
       ? parseFloat(((elapsedTimeMs / totalTimeMs) * 100).toFixed(2))
       : 100.0;
 
-    // Cap percentage at 100%
     percentage = Math.min(percentage, 100);
 
-    // Check if the package is ready to claim
     const isReadyToClaim = percentage === 100;
 
     if (isReadyToClaim) {

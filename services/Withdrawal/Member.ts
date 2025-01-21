@@ -126,6 +126,8 @@ export const sendWithdrawalEmail = async (params: {
     content_id: string;
   }[];
 }) => {
+  console.log(params);
+
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_BASE_URL}/api/resend`,
     {

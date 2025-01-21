@@ -59,9 +59,13 @@ export const claimPackage = async (params: {
       throw new Error("Package connection not found.");
     }
 
-    if (packageConnection.package_member_status === "ENDED") {
-      throw new Error("Invalid request. Package already ended.");
-    }
+    // if (packageConnection.package_member_status !== "ENDED") {
+    //   throw new Error("Invalid request");
+    // }
+
+    // if (packageConnection.package_member_is_ready_to_claim) {
+    //   throw new Error("Invalid request. Package is already claimed.");
+    // }
 
     // if (!packageConnection.package_member_is_ready_to_claim) {
     //   throw new Error("Invalid request. Package is not ready to claim.");
@@ -79,7 +83,10 @@ export const claimPackage = async (params: {
     await prisma.$transaction(async (tx) => {
       await tx.package_member_connection_table.update({
         where: { package_member_connection_id: packageConnectionId },
-        data: { package_member_status: "ENDED" },
+        data: {
+          package_member_status: "ENDED",
+          package_member_is_ready_to_claim: false,
+        },
       });
 
       await tx.alliance_earnings_table.update({
@@ -117,6 +124,7 @@ export const claimPackage = async (params: {
 
     return { success: true, totalClaimedAmount };
   } catch (error) {
+    console.log(error);
     throw new Error("Internal server error");
   }
 };

@@ -3,6 +3,7 @@
 import {
   getUserNotification,
   getuserWallet,
+  handUserWithdrawWithninTheDay,
 } from "@/app/actions/user/userAction";
 import {
   Dialog,
@@ -14,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { getDashboard, getDashboardEarnings } from "@/services/Dasboard/Member";
 import { useUserLoadingStore } from "@/store/useLoadingState";
 import { usePackageChartData } from "@/store/usePackageChartData";
+import { useUserHaveAlreadyWithdraw } from "@/store/userHaveAlreadyWithdraw";
 import { useUserNotificationStore } from "@/store/userNotificationStore";
 import { useUserDashboardEarningsStore } from "@/store/useUserDashboardEarnings";
 import { useUserEarningsStore } from "@/store/useUserEarningsStore";
@@ -47,6 +49,7 @@ const MobileNavBar = () => {
   const { setTotalEarnings } = useUserDashboardEarningsStore();
   const { setChartData } = usePackageChartData();
   const { setLoading } = useUserLoadingStore();
+  const { setIsWithdrawalToday } = useUserHaveAlreadyWithdraw();
   const handleSignOut = async () => {
     try {
       await supabase.auth.signOut();
@@ -106,10 +109,12 @@ const MobileNavBar = () => {
         setLoading(true);
         const { count, teamMemberProfile, userNotification } =
           await getUserNotification();
+
         setUserNotification({
           notifications: userNotification,
           count: count,
         });
+
         setTeamMemberProfile(teamMemberProfile);
 
         const { userEarningsData } = await getuserWallet({
@@ -117,6 +122,12 @@ const MobileNavBar = () => {
         });
 
         setEarnings(userEarningsData);
+
+        const isWithdrawalToday = await handUserWithdrawWithninTheDay({
+          memberId: teamMemberId,
+        });
+
+        setIsWithdrawalToday(isWithdrawalToday);
 
         const dashboardEarnings = await getDashboardEarnings(supabase, {
           teamMemberId: teamMemberId,

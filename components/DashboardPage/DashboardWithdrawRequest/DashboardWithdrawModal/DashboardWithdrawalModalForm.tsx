@@ -290,7 +290,7 @@ const DashboardWithdrawalModalForm = ({
         accountHolderName: profile.user_username ?? sanitizedData.accountName,
         accountType:
           preferredEarnings?.alliance_preferred_withdrawal_account_name ??
-          sanitizedData.bank,
+          sanitizedData.accountName,
         accountBank:
           preferredEarnings?.alliance_preferred_withdrawal_bank_name ??
           sanitizedData.bank,

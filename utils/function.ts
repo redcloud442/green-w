@@ -1,38 +1,12 @@
 import crypto from "crypto";
 import { LRUCache } from "lru-cache";
 import { RegisterFormData } from "./types";
-
 // export const hashData = async (data: string) => {
 //   const saltRounds = 10;
 //   const hashedPassword = await bcrypt.hash(data, saltRounds);
 
 //   return hashedPassword;
 // };
-
-export const decryptData = async (encryptedData: string, ivHex: string) => {
-  const key = process.env.NEXT_PUBLIC_CRYPTO_SECRET_KEY;
-
-  if (!key) {
-    throw new Error("CRYPTO_SECRET_KEY is not defined");
-  }
-
-  if (key.length !== 64) {
-    throw new Error(
-      "CRYPTO_SECRET_KEY must be a 32-byte (64 characters) hex string"
-    );
-  }
-
-  const decipher = crypto.createDecipheriv(
-    "aes-256-cbc",
-    Buffer.from(key, "hex"),
-    Buffer.from(ivHex, "hex")
-  );
-
-  let decrypted = decipher.update(encryptedData, "hex", "utf-8");
-  decrypted += decipher.final("utf-8");
-
-  return decrypted;
-};
 
 export const hashData = async (data: string) => {
   const iv = crypto.randomBytes(16);
@@ -287,28 +261,4 @@ export const calculateFee = (
 
 export const userNameToEmail = (userName: string) => {
   return `${userName}@gmail.com`;
-};
-
-export const serializeBigIntRecursive = (data: any): any => {
-  if (data === null || data === undefined) return data;
-
-  if (typeof data === "bigint") {
-    return data.toString();
-  }
-
-  if (Array.isArray(data)) {
-    return data.map(serializeBigIntRecursive);
-  }
-
-  if (typeof data === "object") {
-    return Object.entries(data).reduce(
-      (acc, [key, value]) => {
-        acc[key] = serializeBigIntRecursive(value);
-        return acc;
-      },
-      {} as Record<string, any>
-    );
-  }
-
-  return data;
 };

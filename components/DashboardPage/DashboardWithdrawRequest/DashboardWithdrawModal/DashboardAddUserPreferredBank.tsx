@@ -103,7 +103,7 @@ const DashboardAddUserPreferredBank = ({
       </div>
 
       {open && (
-        <Card className="p-4 bg-sky-300 w-full max-w-[310px] sm:max-w-md">
+        <Card className="p-4 bg-sky-300 w-full max-w-[320px] sm:max-w-md">
           <form
             action={(formData) => handleSubmit(formData)}
             className="space-y-4"

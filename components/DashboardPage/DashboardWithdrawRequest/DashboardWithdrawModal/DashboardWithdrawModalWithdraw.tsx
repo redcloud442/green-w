@@ -8,10 +8,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { getEarnings } from "@/services/User/User";
+import { useUserHaveAlreadyWithdraw } from "@/store/userHaveAlreadyWithdraw";
 import { useUserEarningsStore } from "@/store/useUserEarningsStore";
 import {
   alliance_earnings_table,
@@ -45,6 +51,7 @@ const DashboardWithdrawModalWithdraw = ({
   const [isFetching, setIsFetching] = useState(false);
   const { toast } = useToast();
   const { setEarnings } = useUserEarningsStore();
+  const { isWithdrawalToday } = useUserHaveAlreadyWithdraw();
 
   const fetchEarnings = async () => {
     try {
@@ -82,18 +89,36 @@ const DashboardWithdrawModalWithdraw = ({
       }}
     >
       <DialogTrigger asChild>
-        <Button
-          className="bg-transparent p-0 shadow-none h-full flex flex-col items-center justify-center"
-          onClick={() => setOpen(true)}
-        >
-          <Image
-            src="/assets/withdraw.ico"
-            alt="plans"
-            width={40}
-            height={40}
-          />
-          <p className="text-sm sm:text-lg font-thin ">WITHDRAW</p>
-        </Button>
+        {!isWithdrawalToday ? (
+          <Button
+            className="bg-transparent p-0 shadow-none h-full flex flex-col items-center justify-center"
+            onClick={() => setOpen(true)}
+          >
+            <Image
+              src="/assets/withdraw.ico"
+              alt="plans"
+              width={40}
+              height={40}
+            />
+            <p className="text-sm sm:text-lg font-thin ">WITHDRAW</p>
+          </Button>
+        ) : (
+          <Popover>
+            <PopoverTrigger>
+              <Image
+                src="/assets/withdraw.ico"
+                alt="plans"
+                width={40}
+                height={40}
+              />
+              <p className="text-sm sm:text-lg font-thin ">WITHDRAW</p>
+            </PopoverTrigger>
+            <PopoverContent>
+              You have already made a withdrawal today, Please try again
+              tomorrow.
+            </PopoverContent>
+          </Popover>
+        )}
       </DialogTrigger>
 
       <DialogContent className="">

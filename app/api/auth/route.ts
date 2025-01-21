@@ -1,7 +1,7 @@
 import { ROLE } from "@/utils/constant";
-import { decryptData } from "@/utils/function";
 import prisma from "@/utils/prisma";
 import { rateLimit } from "@/utils/redis/redis";
+import bcrypt from "bcrypt";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -55,6 +55,13 @@ export async function POST(request: Request) {
           equals: userName,
           mode: "insensitive",
         },
+        alliance_member_table: {
+          some: {
+            alliance_member_role: {
+              not: "ADMIN",
+            },
+          },
+        },
       },
       include: {
         alliance_member_table: true,
@@ -102,11 +109,9 @@ export async function POST(request: Request) {
       return sendErrorResponse("Invalid Request", 401);
     }
 
-    const decryptedPassword = await decryptData(
-      user.user_password,
-      user.user_iv ?? ""
-    );
-    if (role === ROLE.MEMBER && decryptedPassword !== password) {
+    const comparePassword = await bcrypt.compare(password, user.user_password);
+
+    if (role === ROLE.MEMBER && !comparePassword) {
       return sendErrorResponse("Password Incorrect", 401);
     }
 
@@ -128,7 +133,6 @@ export async function POST(request: Request) {
 
     const redirects: Record<string, string> = {
       MEMBER: "/",
-      ADMIN: "/admin",
     };
 
     const redirect = redirects[teamMemberProfile.alliance_member_role] || "/";

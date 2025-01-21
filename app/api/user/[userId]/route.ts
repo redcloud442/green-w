@@ -111,7 +111,6 @@ export async function PUT(
       },
       data: {
         user_password: password,
-        user_iv: iv,
       },
     });
 

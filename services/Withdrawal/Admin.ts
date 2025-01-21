@@ -62,10 +62,11 @@ export const updateWithdrawalStatus = async (params: {
       to: data.updatedRequest.alliance_withdrawal_request_email,
       from: "Elevate Team",
       subject: `Withdrawal Request ${data.updatedRequest.alliance_withdrawal_request_status.slice(0, 1) + data.updatedRequest.alliance_withdrawal_request_status.slice(1).toLowerCase()}.`,
-      accountHolderName: data.username ?? "",
-      accountType: data.alliance_withdrawal_request_bank_name ?? "",
-      accountBank:
+      accountHolderName:
         data.updatedRequest.alliance_withdrawal_request_bank_name ?? "",
+      accountType:
+        data.updatedRequest.alliance_withdrawal_request_bank_name ?? "",
+      accountBank: data.updatedRequest.alliance_withdrawal_request_type ?? "",
       accountNumber:
         data.updatedRequest.alliance_withdrawal_request_account ?? "",
       transactionDetails: {
