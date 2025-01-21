@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   web:
-    image: ghcr.io/redcloud442/red:prod
+    image: ghcr.io/redcloud442/elevateglobal:prod
     environment:
       NEXT_PUBLIC_SUPABASE_URL: /run/secrets/supabaseUrl
       NEXT_PUBLIC_SUPABASE_ANON_KEY: /run/secrets/anonKey
@@ -13,7 +13,7 @@ services:
       UPSTASH_REDIS_REST_TOKEN: /run/secrets/redisToken
       RESEND_API_KEY: /run/secrets/resendKey
       MOVIDER_API_KEY: /run/secrets/moviderKey
-      MOVIDER_API_SECRET: /run/secrets/moviderToken
+      MOVIDER_API_SECRET: /run/secrets/moviderSecret
     secrets:
       - databaseUrl
       - directUrl
@@ -25,7 +25,7 @@ services:
       - redisToken
       - resendKey
       - moviderKey
-      - moviderToken
+      - moviderSecret
     deploy:
       mode: replicated
       replicas: 5
@@ -68,6 +68,8 @@ secrets:
   resendKey:
     external: true
   moviderKey:
+    external: true
+  moviderSecret:
     external: true
 
 networks:
