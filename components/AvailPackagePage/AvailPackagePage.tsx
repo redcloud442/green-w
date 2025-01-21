@@ -265,7 +265,7 @@ const AvailPackagePage = ({
                 variant="card"
                 type="button"
                 onClick={() => {
-                  setValue("amount", maxAmount.toFixed(0).toString());
+                  setValue("amount", maxAmount.toFixed(2).toString());
                 }}
                 className="h-8 text-sm text-black"
               >

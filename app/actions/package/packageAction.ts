@@ -71,14 +71,11 @@ export const claimPackage = async (params: {
     //   throw new Error("Invalid request. Package is not ready to claim.");
     // }
 
+    console.log(packageConnection);
+
     const totalClaimedAmount =
       Number(packageConnection.package_member_amount) +
       Number(packageConnection.package_amount_earnings);
-    const totalAmountToBeClaimed = Number(amount) + Number(earnings);
-
-    if (totalClaimedAmount !== totalAmountToBeClaimed) {
-      throw new Error("Invalid request");
-    }
 
     await prisma.$transaction(async (tx) => {
       await tx.package_member_connection_table.update({

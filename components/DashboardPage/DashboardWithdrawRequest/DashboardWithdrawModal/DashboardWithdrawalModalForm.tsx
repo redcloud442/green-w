@@ -109,6 +109,8 @@ const DashboardWithdrawalModalForm = ({
     },
   });
 
+  console.log(earnings);
+
   const supabase = createClientSide();
   const selectedEarnings = watch("earnings");
   const amount = watch("amount");
@@ -534,7 +536,7 @@ const DashboardWithdrawalModalForm = ({
                   // Enforce the maximum amount value
                   const numericValue = parseFloat(value || "0");
                   if (!isNaN(numericValue) && numericValue > maxAmount) {
-                    value = maxAmount.toFixed(0); // Adjust precision to match allowed decimals
+                    value = maxAmount.toFixed(2); // Adjust precision to match allowed decimals
                   }
 
                   field.onChange(value);
@@ -554,7 +556,7 @@ const DashboardWithdrawalModalForm = ({
                 });
                 return;
               }
-              setValue("amount", getMaxAmount().toFixed(0).toString());
+              setValue("amount", getMaxAmount().toFixed(2).toString());
             }}
           >
             MAX

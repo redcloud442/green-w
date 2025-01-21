@@ -104,7 +104,7 @@ const DashboardWithdrawModalWithdraw = ({
           </Button>
         ) : (
           <Popover>
-            <PopoverTrigger>
+            <PopoverTrigger className="bg-transparent p-0 shadow-none h-full flex flex-col items-center justify-center">
               <Image
                 src="/assets/withdraw.ico"
                 alt="plans"

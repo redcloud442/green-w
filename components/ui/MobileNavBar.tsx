@@ -50,13 +50,30 @@ const MobileNavBar = () => {
   const { setChartData } = usePackageChartData();
   const { setLoading } = useUserLoadingStore();
   const { setIsWithdrawalToday } = useUserHaveAlreadyWithdraw();
+
   const handleSignOut = async () => {
     try {
       await supabase.auth.signOut();
-      router.push("/auth/login");
+
+      // Clear all user-specific states
+      setUserNotification({ notifications: [], count: 0 });
+      setEarnings({
+        alliance_earnings_id: "",
+        alliance_olympus_wallet: 0,
+        alliance_olympus_earnings: 0,
+        alliance_referral_bounty: 0,
+        alliance_combined_earnings: 0,
+        alliance_earnings_member_id: "",
+      }); // Reset earnings
+      setTotalEarnings(null); // Reset dashboard earnings
+      setChartData([]); // Clear chart data
+      setIsWithdrawalToday(false); // Reset withdrawal status
+      setTeamMemberProfile(null); // Clear profile
+      setLoading(false); // Reset loading state
     } catch (e) {
     } finally {
       setIsModalOpen(false);
+      router.push("/auth/login");
     }
   };
 

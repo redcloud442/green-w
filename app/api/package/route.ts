@@ -113,11 +113,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Round off amount and convert to BigInt
-    const roundedAmount = Math.round(amount); // Remove decimals
-
-    const amountBigInt = BigInt(roundedAmount); // Convert to BigInt
-
     const [packageData, earningsData, referralData] = await Promise.all([
       prisma.package_table.findUnique({
         where: { package_id: packageId },
@@ -198,7 +193,7 @@ export async function POST(request: Request) {
       Number(packageData.package_percentage)
     ).div(100);
 
-    const packageAmountEarnings = new Prisma.Decimal(roundedAmount).mul(
+    const packageAmountEarnings = new Prisma.Decimal(requestedAmount).mul(
       packagePercentage
     );
 
@@ -221,8 +216,8 @@ export async function POST(request: Request) {
         data: {
           package_member_member_id: teamMemberId,
           package_member_package_id: packageId,
-          package_member_amount: Number(amountBigInt),
-          package_amount_earnings: Number(packageAmountEarnings),
+          package_member_amount: Number(requestedAmount.toFixed(2)),
+          package_amount_earnings: Number(packageAmountEarnings.toFixed(2)),
           package_member_status: "ACTIVE",
           package_member_completion_date: new Date(
             Date.now() + packageData.packages_days * 24 * 60 * 60 * 1000

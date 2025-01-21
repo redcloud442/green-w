@@ -24,6 +24,7 @@ COPY . .
 COPY /scripts/entrypoint_overwrited.sh /usr/src/app/entrypoint.sh
 
 # Ensure the script is executable
+RUN dos2unix /usr/src/app/entrypoint.sh
 RUN chmod +x /usr/src/app/entrypoint.sh
 
 
