@@ -14,7 +14,7 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
 
-    environment: Production # Or Preview, depending on your deployment
+    environment: Production
 
     steps:
       - name: Checkout code
