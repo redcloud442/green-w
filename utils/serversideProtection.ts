@@ -1,6 +1,5 @@
 import { logError } from "@/services/Error/ErrorLogs";
 import {
-  alliance_earnings_table,
   alliance_member_table,
   alliance_referral_link_table,
   user_table,
@@ -279,7 +278,7 @@ export const protectionMerchantUser = async (ip?: string) => {
       return { redirect: "/auth/login" };
     }
 
-    const [referal, earnings] = await Promise.all([
+    const [referal] = await Promise.all([
       prisma.alliance_referral_link_table.findFirst({
         where: {
           alliance_referral_link_member_id: teamMember.alliance_member_id,
@@ -288,25 +287,11 @@ export const protectionMerchantUser = async (ip?: string) => {
           alliance_referral_link: true,
         },
       }),
-      prisma.alliance_earnings_table.findFirst({
-        where: { alliance_earnings_member_id: teamMember.alliance_member_id },
-        select: {
-          alliance_olympus_wallet: true,
-          alliance_referral_bounty: true,
-          alliance_olympus_earnings: true,
-          alliance_combined_earnings: true,
-        },
-      }),
     ]);
-
-    if (!earnings) {
-      return { redirect: "/auth/login" };
-    }
 
     return {
       profile: profile as user_table,
       teamMemberProfile: teamMember as alliance_member_table,
-      earnings: earnings as alliance_earnings_table,
       referal: referal as alliance_referral_link_table,
     };
   } catch (e) {
@@ -379,25 +364,17 @@ export const protectionAccountingUser = async (ip?: string) => {
       return { redirect: "/auth/login" };
     }
 
-    const [referal, earnings] = await Promise.all([
+    const [referal] = await Promise.all([
       prisma.alliance_referral_link_table.findFirst({
         where: {
           alliance_referral_link_member_id: teamMember.alliance_member_id,
         },
       }),
-      prisma.alliance_earnings_table.findFirst({
-        where: { alliance_earnings_member_id: teamMember.alliance_member_id },
-      }),
     ]);
-
-    if (!earnings) {
-      return { redirect: "/auth/login" };
-    }
 
     return {
       profile: profile as user_table,
       teamMemberProfile: teamMember as alliance_member_table,
-      earnings: earnings as alliance_earnings_table,
       referal: referal as alliance_referral_link_table,
     };
   } catch (e) {

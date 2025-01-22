@@ -228,7 +228,7 @@ export async function POST(request: Request) {
       await tx.alliance_transaction_table.create({
         data: {
           transaction_member_id: teamMemberId,
-          transaction_amount: Number(packageAmountEarnings),
+          transaction_amount: Number(requestedAmount.toFixed(2)),
           transaction_description: `Package Enrolled: ${packageData.package_name}`,
         },
       });
