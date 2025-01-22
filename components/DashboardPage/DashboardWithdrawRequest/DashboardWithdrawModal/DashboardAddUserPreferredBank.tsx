@@ -167,6 +167,9 @@ const DashboardAddUserPreferredBank = ({
           ) : (
             preferredWithdrawalList?.map((item) => (
               <Card
+                onClick={() =>
+                  setSelectedOption(item.alliance_preferred_withdrawal_id)
+                }
                 key={item.alliance_preferred_withdrawal_id}
                 className="flex items-center justify-between bg-sky-300 px-4 py-1"
               >

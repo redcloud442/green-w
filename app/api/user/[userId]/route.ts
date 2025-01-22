@@ -158,7 +158,17 @@ export async function PATCH(
     if (action === "updateRole") {
       await prisma.alliance_member_table.update({
         where: { alliance_member_id: userId },
-        data: { alliance_member_role: role },
+        data: {
+          alliance_member_role: role,
+
+          alliance_member_is_active: role.includes(
+            "ADMIN",
+            "MERCHANT",
+            "ACCOUNTING"
+          )
+            ? true
+            : false,
+        },
       });
 
       if (role === "MERCHANT") {
