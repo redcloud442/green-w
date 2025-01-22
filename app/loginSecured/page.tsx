@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   title: "Log in your account",
   description: "Sign in an account",
   openGraph: {
-    url: "/login",
+    url: "/loginSecured",
   },
 };
 
