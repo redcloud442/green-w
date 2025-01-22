@@ -109,8 +109,6 @@ const DashboardWithdrawalModalForm = ({
     },
   });
 
-  console.log(earnings);
-
   const supabase = createClientSide();
   const selectedEarnings = watch("earnings");
   const amount = watch("amount");

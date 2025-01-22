@@ -1,3 +1,4 @@
+import { WITHDRAWAL_STATUS } from "@/utils/constant";
 import { loginRateLimit } from "@/utils/function";
 import prisma from "@/utils/prisma";
 import { rateLimit } from "@/utils/redis/redis";
@@ -6,6 +7,7 @@ import {
   protectionMemberUser,
 } from "@/utils/serversideProtection";
 import { createServiceRoleClientServerSide } from "@/utils/supabase/server";
+import { alliance_earnings_table } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -193,3 +195,106 @@ export async function PATCH(
     );
   }
 }
+
+const getUserEarningsSchema = z.object({
+  userId: z.string().uuid(),
+});
+
+export const POST = async (
+  request: Request,
+  context: { params: Promise<{ userId: string }> }
+) => {
+  try {
+    const { userId } = await context.params;
+
+    const params = {
+      userId,
+    };
+
+    const validate = getUserEarningsSchema.safeParse(params);
+
+    if (!validate.success) {
+      return NextResponse.json(
+        { error: validate.error.message },
+        { status: 400 }
+      );
+    }
+
+    const { teamMemberProfile } = await protectionMemberUser();
+
+    const isAllowed = await rateLimit(
+      `rate-limit:${teamMemberProfile?.alliance_member_id}`,
+      10,
+      60
+    );
+
+    if (!isAllowed) {
+      throw new Error("Too many requests. Please try again later.");
+    }
+
+    const userEarnings = await prisma.alliance_earnings_table.findUnique({
+      where: {
+        alliance_earnings_member_id: userId,
+      },
+    });
+
+    return NextResponse.json({
+      userEarningsData: userEarnings as unknown as alliance_earnings_table,
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Unknown error." },
+      { status: 500 }
+    );
+  }
+};
+
+export const GET = async (
+  request: Request,
+  context: { params: Promise<{ userId: string }> }
+) => {
+  try {
+    const { userId } = await context.params;
+
+    const validate = getUserEarningsSchema.safeParse({ userId });
+
+    if (!validate.success) {
+      return NextResponse.json(
+        { error: validate.error.message },
+        { status: 400 }
+      );
+    }
+
+    let isWithdrawalToday = false;
+    const today = new Date().toISOString().split("T")[0];
+    const existingWithdrawal =
+      await prisma.alliance_withdrawal_request_table.findFirst({
+        where: {
+          alliance_withdrawal_request_member_id: userId,
+          alliance_withdrawal_request_status: WITHDRAWAL_STATUS.APPROVED,
+          AND: [
+            {
+              alliance_withdrawal_request_date: {
+                gte: new Date(`${today}T00:00:00Z`), // Start of the day
+              },
+            },
+            {
+              alliance_withdrawal_request_date: {
+                lte: new Date(`${today}T23:59:59Z`), // End of the day
+              },
+            },
+          ],
+        },
+      });
+
+    if (existingWithdrawal) {
+      isWithdrawalToday = true;
+    }
+    return NextResponse.json({ isWithdrawalToday });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Unknown error." },
+      { status: 500 }
+    );
+  }
+};

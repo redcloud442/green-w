@@ -1,7 +1,5 @@
-import {
-  getUnserNotificationWithLimit,
-  updateUserNotification,
-} from "@/app/actions/user/userAction";
+import { updateUserNotification } from "@/app/actions/user/userAction";
+import { getUserNotificationWithLimit } from "@/services/User/User";
 import { useUserNotificationStore } from "@/store/userNotificationStore";
 import { alliance_member_table } from "@prisma/client";
 import { useEffect, useRef, useState } from "react";
@@ -26,11 +24,10 @@ const NotificationTable = ({ teamMemberProfile }: DataTableProps) => {
     if (!teamMemberProfile) return;
 
     try {
-      const { data } = await getUnserNotificationWithLimit({
+      const { data, count } = await getUserNotificationWithLimit({
         page: activePage,
         limit: 10,
         teamMemberId: teamMemberProfile.alliance_member_id,
-        isRead: false,
       });
 
       if (
@@ -43,7 +40,7 @@ const NotificationTable = ({ teamMemberProfile }: DataTableProps) => {
 
       setUserNotification({
         notifications: data,
-        count: 0,
+        count: count,
       });
     } catch (error) {
     } finally {
@@ -56,11 +53,10 @@ const NotificationTable = ({ teamMemberProfile }: DataTableProps) => {
 
     try {
       setIsFetchingList(true);
-      const { data, count } = await getUnserNotificationWithLimit({
+      const { data, count } = await getUserNotificationWithLimit({
         page: nextPage,
         limit: 10,
         teamMemberId: teamMemberProfile?.alliance_member_id,
-        isRead: false,
       });
 
       setAddUserNotification({

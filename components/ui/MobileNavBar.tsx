@@ -1,11 +1,6 @@
 "use client";
 
 import {
-  getUserNotification,
-  getuserWallet,
-  handUserWithdrawWithninTheDay,
-} from "@/app/actions/user/userAction";
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -13,6 +8,11 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { getDashboard, getDashboardEarnings } from "@/services/Dasboard/Member";
+import {
+  getUserEarnings,
+  getUserNotification,
+  getUserWithdrawalToday,
+} from "@/services/User/User";
 import { useUserLoadingStore } from "@/store/useLoadingState";
 import { usePackageChartData } from "@/store/usePackageChartData";
 import { useUserHaveAlreadyWithdraw } from "@/store/userHaveAlreadyWithdraw";
@@ -124,6 +124,7 @@ const MobileNavBar = () => {
       try {
         if (!teamMemberId) return;
         setLoading(true);
+
         const { count, teamMemberProfile, userNotification } =
           await getUserNotification();
 
@@ -134,14 +135,14 @@ const MobileNavBar = () => {
 
         setTeamMemberProfile(teamMemberProfile);
 
-        const { userEarningsData } = await getuserWallet({
-          memberId: teamMemberId,
+        const { userEarningsData } = await getUserEarnings({
+          userId: teamMemberId,
         });
 
         setEarnings(userEarningsData);
 
-        const isWithdrawalToday = await handUserWithdrawWithninTheDay({
-          memberId: teamMemberId,
+        const isWithdrawalToday = await getUserWithdrawalToday({
+          userId: teamMemberId,
         });
 
         setIsWithdrawalToday(isWithdrawalToday);

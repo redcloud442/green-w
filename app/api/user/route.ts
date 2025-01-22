@@ -2,6 +2,7 @@ import { applyRateLimit } from "@/utils/function";
 import prisma from "@/utils/prisma";
 import { rateLimit } from "@/utils/redis/redis";
 import { protectionMemberUser } from "@/utils/serversideProtection";
+import { alliance_earnings_table } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -9,6 +10,10 @@ const updateUserSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
   iv: z.string().min(6),
+});
+
+const getUserEarningsSchema = z.object({
+  memberId: z.string().uuid(),
 });
 
 export async function PUT(request: Request) {
@@ -154,3 +159,86 @@ export async function GET(request: Request) {
     preferredWithdrawal: preferredWithdrawal,
   });
 }
+
+export const POST = async (request: Request) => {
+  try {
+    const { memberId } = await request.json();
+
+    const validate = getUserEarningsSchema.safeParse({ memberId });
+
+    if (!validate.success) {
+      throw new Error(validate.error.message);
+    }
+
+    const { teamMemberProfile } = await protectionMemberUser();
+
+    const isAllowed = await rateLimit(
+      `rate-limit:${teamMemberProfile?.alliance_member_id}`,
+      10,
+      60
+    );
+
+    if (!isAllowed) {
+      throw new Error("Too many requests. Please try again later.");
+    }
+
+    const user = await prisma.dashboard_earnings_summary.findUnique({
+      where: {
+        member_id: memberId,
+      },
+      select: {
+        direct_referral_amount: true,
+        indirect_referral_amount: true,
+        total_earnings: true,
+        total_withdrawals: true,
+        package_income: true,
+      },
+    });
+
+    const userEarnings = await prisma.alliance_earnings_table.findUnique({
+      where: {
+        alliance_earnings_member_id: memberId,
+      },
+      select: {
+        alliance_olympus_wallet: true,
+        alliance_olympus_earnings: true,
+        alliance_combined_earnings: true,
+        alliance_referral_bounty: true,
+      },
+    });
+
+    const userRanking = await prisma.alliance_ranking_table.findFirst({
+      where: {
+        alliance_ranking_member_id: memberId,
+      },
+      select: {
+        alliance_rank: true,
+        alliance_total_income_tag: true,
+      },
+    });
+
+    const totalEarnings = {
+      directReferralAmount: user?.direct_referral_amount,
+      indirectReferralAmount: user?.indirect_referral_amount,
+      totalEarnings: user?.total_earnings,
+      withdrawalAmount: user?.total_withdrawals,
+      package_income: user?.package_income,
+    };
+
+    const userEarningsData = {
+      ...userEarnings,
+      package_income: user?.package_income,
+    };
+
+    return NextResponse.json({
+      totalEarnings,
+      userEarningsData: userEarningsData as unknown as alliance_earnings_table,
+      userRanking,
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Unknown error." },
+      { status: 500 }
+    );
+  }
+};

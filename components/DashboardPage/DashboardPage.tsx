@@ -1,8 +1,8 @@
 "use client";
 
-import { getUserEarnings } from "@/app/actions/user/userAction";
 import { toast } from "@/hooks/use-toast";
 import { logError } from "@/services/Error/ErrorLogs";
+import { getuserTotalEarnings } from "@/services/User/User";
 import { useUserLoadingStore } from "@/store/useLoadingState";
 import { usePackageChartData } from "@/store/usePackageChartData";
 import { useUserDashboardEarningsStore } from "@/store/useUserDashboardEarnings";
@@ -65,7 +65,7 @@ const DashboardPage = ({
     try {
       setRefresh(true);
       const { totalEarnings, userEarningsData, userRanking } =
-        await getUserEarnings({
+        await getuserTotalEarnings({
           memberId: teamMemberProfile.alliance_member_id,
         });
 

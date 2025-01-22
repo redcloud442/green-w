@@ -131,7 +131,6 @@ export const claimPackage = async (params: {
 
     return { success: true, totalClaimedAmount: result };
   } catch (error) {
-    console.error("Error claiming package:", error);
     throw new Error("Internal server error");
   }
 };
