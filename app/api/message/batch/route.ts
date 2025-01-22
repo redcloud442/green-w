@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     const formattedNumbers = number
       .map((num) => {
         // Remove any non-digit characters except "+"
-        let cleaned = num.replace(/[^0-9+]/g, "").trim();
+        const cleaned = num.replace(/[^0-9+]/g, "").trim();
 
         return cleaned;
       })

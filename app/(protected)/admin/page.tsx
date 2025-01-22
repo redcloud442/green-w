@@ -23,6 +23,9 @@ const Page = async () => {
         lte: new Date(`${today}T23:59:59Z`),
       },
     },
+    orderBy: {
+      package_notification_logs_date: "desc",
+    },
   });
 
   if (!teamMemberProfile) return redirect("/auth/login");

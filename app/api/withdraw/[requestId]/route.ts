@@ -105,6 +105,7 @@ export async function PUT(
           alliance_withdrawal_request_approved_by:
             teamMemberProfile.alliance_member_id,
           alliance_withdrawal_request_reject_note: note ?? null,
+          alliance_withdrawal_request_date_updated: new Date(),
         },
       });
 

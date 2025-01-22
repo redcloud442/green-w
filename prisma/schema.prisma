@@ -213,6 +213,7 @@ model alliance_withdrawal_request_table {
   alliance_withdrawal_request_cellphone_number    String?
   
   alliance_withdrawal_request_date      DateTime  @default(now())
+  alliance_withdrawal_request_date_updated DateTime?
   alliance_withdrawal_request_status    String    @default("APPROVED")
   alliance_withdrawal_request_account   String    @default("APPROVED")
   alliance_withdrawal_request_type      String

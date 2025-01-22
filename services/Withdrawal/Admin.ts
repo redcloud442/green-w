@@ -73,10 +73,12 @@ export const updateWithdrawalStatus = async (params: {
         balance: "",
         date:
           formatMonthDateYear(
-            data.updatedRequest.alliance_withdrawal_request_date
+            data.updatedRequest.alliance_withdrawal_request_date_updated
           ) +
           ", " +
-          formatTime(data.updatedRequest.alliance_withdrawal_request_date),
+          formatTime(
+            data.updatedRequest.alliance_withdrawal_request_date_updated
+          ),
         description: `Withdrawal ${data.updatedRequest.alliance_withdrawal_request_status.slice(0, 1) + data.updatedRequest.alliance_withdrawal_request_status.slice(1).toLowerCase()} ${data.updatedRequest.alliance_withdrawal_request_reject_note ? `(${data.updatedRequest.alliance_withdrawal_request_reject_note})` : ""} !`,
         amount:
           "₱" +
