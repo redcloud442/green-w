@@ -282,16 +282,16 @@ const AdminDashboardPage = ({
               <Button
                 variant="card"
                 className="w-full md:w-auto rounded-md"
-                onClick={() => router.push("/direct-referral")}
+                onClick={() => router.push("/referral")}
               >
-                Direct Referral
+                Referral
               </Button>
               <Button
                 variant="card"
                 className="w-full md:w-auto rounded-md"
-                onClick={() => router.push("/indirect-referral")}
+                onClick={() => router.push("/network")}
               >
-                Indirect Referral
+                Network
               </Button>
             </div>
           </CardContent>

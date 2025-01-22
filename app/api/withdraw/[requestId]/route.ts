@@ -2,7 +2,6 @@ import { WITHDRAWAL_STATUS } from "@/utils/constant";
 import prisma from "@/utils/prisma";
 import { rateLimit } from "@/utils/redis/redis";
 import { protectionAccountingUser } from "@/utils/serversideProtection";
-import { alliance_withdrawal_request_table } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -68,15 +67,11 @@ export async function PUT(
 
     const result = await prisma.$transaction(async (tx) => {
       const existingRequest =
-        await tx.$queryRawUnsafe<alliance_withdrawal_request_table>(
-          `
-        SELECT * 
-        FROM alliance_withdrawal_request_table
-        WHERE alliance_withdrawal_request_id = $1
-        FOR UPDATE
-        `,
-          requestId
-        );
+        await tx.alliance_withdrawal_request_table.findUnique({
+          where: {
+            alliance_withdrawal_request_id: requestId,
+          },
+        });
 
       if (!existingRequest) {
         throw new Error("Request not found.");

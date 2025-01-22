@@ -7,7 +7,6 @@ import {
   protectionMemberUser,
 } from "@/utils/serversideProtection";
 import { createClientServerSide } from "@/utils/supabase/server";
-import { package_member_connection_table } from "@prisma/client";
 import { z } from "zod";
 const availPackageSchema = z.object({
   amount: z.number().min(1),
@@ -54,18 +53,22 @@ export const claimPackage = async (params: {
     const result = await prisma.$transaction(async (tx) => {
       // Lock the row with `FOR UPDATE`
       const packageConnection =
-        await tx.$queryRawUnsafe<package_member_connection_table>(
-          `
-        SELECT * 
-        FROM packages_schema.package_member_connection_table
-        WHERE package_member_connection_id = $1
-        FOR UPDATE
-        `,
-          packageConnectionId
-        );
+        await tx.package_member_connection_table.findUnique({
+          where: {
+            package_member_connection_id: packageConnectionId,
+          },
+          select: {
+            package_member_status: true,
+            package_member_is_ready_to_claim: true,
+            package_member_amount: true,
+            package_amount_earnings: true,
+            package_member_package_id: true,
+            package_member_connection_created: true,
+          },
+        });
 
       if (!packageConnection) {
-        throw new Error("Package connection not found.");
+        throw new Error("Invalid request.");
       }
 
       if (packageConnection.package_member_status !== "ENDED") {

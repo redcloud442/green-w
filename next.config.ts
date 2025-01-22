@@ -14,7 +14,6 @@ const nextConfig = {
       },
     ],
   },
-
   async headers() {
     return [
       {
@@ -35,7 +34,7 @@ const nextConfig = {
 
           {
             key: "Strict-Transport-Security",
-            value: "max-age=63072000; includeSubDomains; preload", // Enforce HTTPS for 2 years
+            value: "max-age=63072000; includeSubDomains; preload",
           },
           {
             key: "Referrer-Policy",

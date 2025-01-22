@@ -2,7 +2,6 @@ import { TOP_UP_STATUS } from "@/utils/constant";
 import prisma from "@/utils/prisma";
 import { rateLimit } from "@/utils/redis/redis";
 import { protectionMerchantUser } from "@/utils/serversideProtection";
-import { alliance_top_up_request_table } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -80,16 +79,13 @@ export async function PUT(
       return sendErrorResponse("Merchant not found.", 404);
 
     const result = await prisma.$transaction(async (tx) => {
-      const existingRequest =
-        await tx.$queryRawUnsafe<alliance_top_up_request_table>(
-          `
-        SELECT * 
-        FROM alliance_top_up_request_table
-        WHERE alliance_top_up_request_id = $1
-        FOR UPDATE
-        `,
-          requestId
-        );
+      const existingRequest = await tx.alliance_top_up_request_table.findUnique(
+        {
+          where: {
+            alliance_top_up_request_id: requestId,
+          },
+        }
+      );
 
       if (!existingRequest) {
         throw new Error("Request not found.");
@@ -184,11 +180,7 @@ export async function PUT(
     );
   } catch (error) {
     return NextResponse.json(
-      {
-        error:
-          error instanceof Error ? error.message : "Unexpected error occurred.",
-        stack: error instanceof Error ? error.stack : undefined,
-      },
+      { error: error instanceof Error ? error.message : "Unknown error." },
       { status: 500 }
     );
   }
