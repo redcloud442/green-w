@@ -17,8 +17,8 @@ const updatePackageSchema = z.object({
   packagePercentage: z.string().min(1),
   packageDays: z.string().min(1),
   packageIsDisabled: z.boolean(),
-  packageColor: z.string().min(3),
-  package_image: z.string().min(3),
+  packageColor: z.string().nullable().optional(),
+  package_image: z.string().nullable().optional(),
 });
 
 export async function PUT(

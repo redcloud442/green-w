@@ -119,7 +119,6 @@ const EditPackagesModal = ({
     const sanitizedData = escapeFormData(data);
 
     try {
-      // Upload all files concurrently
       const uploadResults = await Promise.all(
         filesToUpload.map(async ({ file, path }) => {
           if (!file) return { path, publicUrl: null };

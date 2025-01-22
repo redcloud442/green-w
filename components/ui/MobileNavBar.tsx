@@ -135,7 +135,7 @@ const MobileNavBar = () => {
 
         setTeamMemberProfile(teamMemberProfile);
 
-        const { userEarningsData } = await getUserEarnings({
+        const userEarningsData = await getUserEarnings({
           userId: teamMemberId,
         });
 
