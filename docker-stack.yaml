@@ -31,6 +31,9 @@ services:
       replicas: 7
       update_config:
         order: start-first
+      labels:
+        - shepherd.enable=true
+        - shepherd.auth.config=ghcr.io
     ports:
       - "8080:8080"
 
@@ -42,9 +45,29 @@ services:
     secrets:
       - tunnelKey
     environment:
-      - TUNNEL_TOKEN=eyJhIjoiYjk0NDZlNzU4NzFkYWNjOGI2YTEzOWI0Y2NjMzk2Y2UiLCJ0IjoiNmQ0ZjU4ODYtYjExMC00YWVjLWEwNDMtMDdlMTA0MGJlOGNmIiwicyI6Ik56aGlNakpsWkRVdFpHVTVPQzAwTjJVMUxUa3haR010TUdJMU9EUm1aakV5T1dWaSJ9
+      - TUNNEL_TOKEN=/run/secrets/tunnelKey
     deploy:
       replicas: 2
+
+  shepherd:
+    image: containrrr/shepherd:latest
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager # Shepherd should run on a manager node
+      labels:
+        - shepherd.enable=true
+        - shepherd.auth.config=ghcr.io
+    environment:
+      REGISTRIES_FILE: /run/secrets/shepherd-registries-auth
+      SHEPHERD_LOG_LEVEL: info # Logging level (info, debug, error)
+      SHEPHERD_POLL_INTERVAL: 60 # Interval in seconds for checking updates
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    secrets:
+      - shepherd-registries-auth
+
 secrets:
   databaseUrl:
     external: true
@@ -69,6 +92,8 @@ secrets:
   moviderKey:
     external: true
   moviderSecret:
+    external: true
+  shepherd-registries-auth:
     external: true
 
 networks:
