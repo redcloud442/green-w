@@ -112,6 +112,7 @@ export const getUserEarnings = async (params: { userId: string }) => {
     );
   }
 
+  //fixed
   const { userEarningsData } = result;
 
   return userEarningsData as alliance_earnings_table;
