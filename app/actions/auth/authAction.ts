@@ -16,7 +16,7 @@ import { z } from "zod";
 const changeUserPasswordSchema = z.object({
   email: z.string().email(),
   userId: z.string().uuid(),
-  password: z.string().min(6),
+  password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 export const changeUserPassword = async (params: {
