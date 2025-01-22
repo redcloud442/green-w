@@ -70,6 +70,7 @@ export const depositWalletData = async (params: {
       where: {
         merchant_account_name: accountName,
         merchant_account_number: accountNumber,
+        merchant_id: topUpMode,
       },
       select: {
         merchant_account_name: true,
@@ -87,7 +88,7 @@ export const depositWalletData = async (params: {
         await tx.alliance_top_up_request_table.create({
           data: {
             alliance_top_up_request_amount: Number(amount),
-            alliance_top_up_request_type: topUpMode,
+            alliance_top_up_request_type: merchantData.merchant_account_name,
             alliance_top_up_request_name: accountName,
             alliance_top_up_request_account: accountNumber,
             alliance_top_up_request_attachment: publicUrl,

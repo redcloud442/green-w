@@ -136,7 +136,7 @@ export const protectionMemberUser = async (ip?: string) => {
     const { data: authData, error: authError } = await supabase.auth.getUser();
 
     if (authError || !authData?.user) {
-      return { redirect: "/auth/login" };
+      return { redirect: "/login" };
     }
 
     const userId = authData.user.id;
@@ -225,7 +225,7 @@ export const protectionMerchantUser = async (ip?: string) => {
     const { data: authData, error: authError } = await supabase.auth.getUser();
 
     if (authError || !authData?.user) {
-      return { redirect: "/auth/login" };
+      return { redirect: "/login" };
     }
 
     const userId = authData.user.id;
@@ -264,18 +264,18 @@ export const protectionMerchantUser = async (ip?: string) => {
     ]);
 
     if (!profile) {
-      return { redirect: "/auth/login" };
+      return { redirect: "/login" };
     }
 
     if (
       !teamMember?.alliance_member_alliance_id ||
       !["MERCHANT", "ADMIN"].includes(teamMember.alliance_member_role)
     ) {
-      return { redirect: "/auth/login" };
+      return { redirect: "/login" };
     }
 
     if (teamMember.alliance_member_restricted) {
-      return { redirect: "/auth/login" };
+      return { redirect: "/login" };
     }
 
     const [referal] = await Promise.all([
@@ -302,7 +302,7 @@ export const protectionMerchantUser = async (ip?: string) => {
         stackPath: "utils/serversideProtection.ts",
       });
     }
-    return { redirect: "/auth/login" };
+    return { redirect: "/login" };
   }
 };
 
@@ -312,7 +312,7 @@ export const protectionAccountingUser = async (ip?: string) => {
     const { data: authData, error: authError } = await supabase.auth.getUser();
 
     if (authError || !authData?.user) {
-      return { redirect: "/auth/login" };
+      return { redirect: "/login" };
     }
 
     const userId = authData.user.id;
@@ -350,18 +350,18 @@ export const protectionAccountingUser = async (ip?: string) => {
     ]);
 
     if (!profile) {
-      return { redirect: "/auth/login" };
+      return { redirect: "/login" };
     }
 
     if (
       !teamMember?.alliance_member_alliance_id ||
       !["ADMIN", "ACCOUNTING"].includes(teamMember.alliance_member_role)
     ) {
-      return { redirect: "/auth/login" };
+      return { redirect: "/login" };
     }
 
     if (teamMember.alliance_member_restricted) {
-      return { redirect: "/auth/login" };
+      return { redirect: "/login" };
     }
 
     const [referal] = await Promise.all([
@@ -385,7 +385,7 @@ export const protectionAccountingUser = async (ip?: string) => {
         stackPath: "utils/serversideProtection.ts",
       });
     }
-    return { redirect: "/auth/login" };
+    return { redirect: "/login" };
   }
 };
 

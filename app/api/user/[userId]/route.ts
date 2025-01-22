@@ -160,14 +160,11 @@ export async function PATCH(
         where: { alliance_member_id: userId },
         data: {
           alliance_member_role: role,
-
-          alliance_member_is_active: role.includes(
-            "ADMIN",
-            "MERCHANT",
-            "ACCOUNTING"
-          )
-            ? true
-            : false,
+          alliance_member_is_active:
+            role &&
+            ["ADMIN", "MERCHANT", "ACCOUNTING"].some((r) => role.includes(r))
+              ? true
+              : undefined, // Stay as is if no role is included
         },
       });
 

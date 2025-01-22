@@ -14,7 +14,6 @@ type Props = {
 
 const NewlyRegisteredModal = ({ isActive, setOpen }: Props) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   useEffect(() => {
     if (!isActive) {
       setIsModalOpen(true);
