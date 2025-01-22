@@ -31,7 +31,14 @@ const nextConfig = {
             key: "Access-Control-Allow-Origin",
             value: "*",
           },
-
+          {
+            key: "Access-Control-Allow-Methods",
+            value: "GET, POST, PUT, DELETE, OPTIONS", // Specify allowed methods
+          },
+          {
+            key: "Access-Control-Allow-Headers",
+            value: "Content-Type, Authorization, X-Requested-With, Accept", // Add required headers
+          },
           {
             key: "Strict-Transport-Security",
             value: "max-age=63072000; includeSubDomains; preload",
