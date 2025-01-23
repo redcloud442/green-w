@@ -80,20 +80,6 @@ export async function POST(request: Request) {
         { status: 401 }
       );
     }
-    // const banned = await prisma.user_history_log.findFirst({
-    //   where: {
-    //     user_history_user_id: user.user_id,
-    //     user_ip_address: ip,
-    //     alliance_member_table: {
-    //       alliance_member_alliance_id: user.alliance_member_table[0]
-    //         ?.alliance_member_alliance_id,
-    //     },
-    //   },
-    // });
-
-    // if (banned) {
-    //   return sendErrorResponse("User is banned.", 403);
-    // }
 
     const teamMemberProfile = user.alliance_member_table[0];
 
