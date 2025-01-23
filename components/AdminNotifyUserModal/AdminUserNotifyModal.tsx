@@ -53,19 +53,19 @@ const AdminUserNotifyModal = ({ packageNotification }: Props) => {
       let page = 1;
       let totalFetched = 0;
       let totalCount = 0;
-      let batchEmails: {
+      const batchEmails: {
         to: string[];
         from: string;
         subject: string;
         html: React.ReactNode;
       }[] = [];
 
-      let batchUpdate: {
+      const batchUpdate: {
         packageConnectionId: string;
         teamMemberId: string;
       }[] = [];
 
-      let number: string[] = [];
+      const number: string[] = [];
 
       do {
         // Fetch paginated data from the server

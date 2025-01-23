@@ -459,10 +459,8 @@ const DashboardWithdrawalModalForm = ({
             />
           )}
         />
-        {errors.accountNumber && (
-          <p className="text-primaryRed text-sm mt-1">
-            {errors.accountNumber.message}
-          </p>
+        {errors.email && (
+          <p className="text-primaryRed text-sm mt-1">{errors.email.message}</p>
         )}
       </div>
 
