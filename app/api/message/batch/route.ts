@@ -1,6 +1,12 @@
 import { rateLimit } from "@/utils/redis/redis";
 import { protectionAdminUser } from "@/utils/serversideProtection";
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+
+const postMessageSchema = z.object({
+  number: z.string().min(10).max(11),
+  message: z.string().min(1),
+});
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,12 +22,19 @@ export async function POST(req: NextRequest) {
 
     // Parse and validate the request body
     const { number, message } = await req.json();
+
+    const validate = postMessageSchema.safeParse({ number, message });
+
+    if (!validate.success) {
+      throw new Error(validate.error.message);
+    }
     if (!Array.isArray(number) || number.length === 0) {
       return NextResponse.json(
         { error: "Number must be a non-empty array." },
         { status: 400 }
       );
     }
+
     if (typeof message !== "string" || message.trim() === "") {
       return NextResponse.json(
         { error: "Message must be a non-empty string." },

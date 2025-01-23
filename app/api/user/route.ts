@@ -9,7 +9,6 @@ import { z } from "zod";
 const updateUserSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
-  iv: z.string().min(6),
 });
 
 const getUserEarningsSchema = z.object({

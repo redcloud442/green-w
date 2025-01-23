@@ -1,4 +1,4 @@
-import { applyRateLimitMember, loginRateLimit } from "@/utils/function";
+import { loginRateLimit } from "@/utils/function";
 import prisma from "@/utils/prisma";
 import { rateLimit } from "@/utils/redis/redis";
 import {
@@ -81,6 +81,12 @@ export async function PATCH(request: Request) {
   }
 }
 
+const postMerchantSchema = z.object({
+  accountNumber: z.string().min(1),
+  accountType: z.string().min(1),
+  accountName: z.string().min(1),
+});
+
 export async function POST(request: Request) {
   try {
     const ip =
@@ -93,9 +99,23 @@ export async function POST(request: Request) {
         "Unable to determine IP address for rate limiting."
       );
 
-    await protectionMerchantUser(ip);
+    const validate = postMerchantSchema.safeParse(await request.json());
 
-    applyRateLimitMember(ip);
+    if (!validate.success) {
+      throw new Error(validate.error.message);
+    }
+
+    const { teamMemberProfile } = await protectionMerchantUser(ip);
+
+    const isAllowed = await rateLimit(
+      `rate-limit:${teamMemberProfile?.alliance_member_id}`,
+      5,
+      60
+    );
+
+    if (!isAllowed) {
+      return NextResponse.json({ success: false, ip });
+    }
 
     const { accountNumber, accountType, accountName } = await request.json();
 
@@ -124,6 +144,10 @@ export async function POST(request: Request) {
   }
 }
 
+const deleteMerchantSchema = z.object({
+  merchantId: z.string().uuid(),
+});
+
 export async function DELETE(request: Request) {
   try {
     const ip =
@@ -136,8 +160,23 @@ export async function DELETE(request: Request) {
         "Unable to determine IP address for rate limiting."
       );
 
-    await protectionMerchantUser(ip);
-    loginRateLimit(ip);
+    const validate = deleteMerchantSchema.safeParse(await request.json());
+
+    if (!validate.success) {
+      throw new Error(validate.error.message);
+    }
+
+    const { teamMemberProfile } = await protectionMerchantUser(ip);
+
+    const isAllowed = await rateLimit(
+      `rate-limit:${teamMemberProfile?.alliance_member_id}`,
+      5,
+      60
+    );
+
+    if (!isAllowed) {
+      return NextResponse.json({ success: false, ip });
+    }
 
     const { merchantId } = await request.json();
 

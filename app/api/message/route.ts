@@ -1,6 +1,12 @@
 import { rateLimit } from "@/utils/redis/redis";
 import { createClientServerSide } from "@/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+
+const postMessageSchema = z.object({
+  number: z.string().min(10).max(11),
+  message: z.string().min(1),
+});
 
 export async function POST(req: NextRequest) {
   try {
@@ -9,6 +15,12 @@ export async function POST(req: NextRequest) {
     const { data: userData, error: userError } = await supabase.auth.getUser();
 
     if (userError) throw userError;
+
+    const validate = postMessageSchema.safeParse(await req.json());
+
+    if (!validate.success) {
+      throw new Error(validate.error.message);
+    }
 
     const isAllowed = await rateLimit(`rate-limit:${userData.user.id}`, 10, 60);
 
