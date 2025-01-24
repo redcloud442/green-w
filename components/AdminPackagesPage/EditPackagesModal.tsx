@@ -23,6 +23,7 @@ import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import FileUpload from "../ui/dropZone";
+import { ScrollArea } from "../ui/scroll-area";
 
 type Props = {
   teamMemberProfile: alliance_member_table;
@@ -202,177 +203,181 @@ const EditPackagesModal = ({
           Update Package
         </Button>
       </DialogTrigger>
+
       <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-bold">
-            Update Package
-          </DialogTitle>
-          <DialogDescription></DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div className="flex justify-between items-center space-x-2">
-            <Label htmlFor="packageIsDisabled">Package Disabled</Label>
-            <div className="flex items-center space-x-2">
+        <ScrollArea className="h-[600px] sm:h-[700px]">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">
+              Update Package
+            </DialogTitle>
+            <DialogDescription></DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <div className="flex justify-between items-center space-x-2">
+              <Label htmlFor="packageIsDisabled">Package Disabled</Label>
+              <div className="flex items-center space-x-2">
+                <Controller
+                  name="packageIsDisabled"
+                  control={control}
+                  render={({ field }) => (
+                    <>
+                      <span className="text-sm">
+                        {field.value ? "Hide" : "Show"}
+                      </span>
+                      <Switch
+                        id="packageIsDisabled"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </>
+                  )}
+                />
+              </div>
+            </div>
+            {/* Package Name */}
+            <div>
+              <Label htmlFor="packageName">Package Name</Label>
               <Controller
-                name="packageIsDisabled"
+                name="packageName"
                 control={control}
                 render={({ field }) => (
-                  <>
-                    <span className="text-sm">
-                      {field.value ? "Hide" : "Show"}
-                    </span>
-                    <Switch
-                      id="packageIsDisabled"
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </>
+                  <Input
+                    id="packageName"
+                    placeholder="Enter package name"
+                    readOnly={control._formValues.packageIsDisabled}
+                    {...field}
+                  />
                 )}
               />
+              {errors.packageName && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.packageName.message}
+                </p>
+              )}
             </div>
-          </div>
-          {/* Package Name */}
-          <div>
-            <Label htmlFor="packageName">Package Name</Label>
-            <Controller
-              name="packageName"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  id="packageName"
-                  placeholder="Enter package name"
-                  readOnly={control._formValues.packageIsDisabled}
-                  {...field}
-                />
+
+            {/* Package Description */}
+            <div>
+              <Label htmlFor="packageDescription">Package Description</Label>
+              <Controller
+                name="packageDescription"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    id="packageDescription"
+                    placeholder="Enter package description"
+                    readOnly={control._formValues.packageIsDisabled}
+                    {...field}
+                  />
+                )}
+              />
+              {errors.packageDescription && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.packageDescription.message}
+                </p>
               )}
-            />
-            {errors.packageName && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.packageName.message}
-              </p>
-            )}
-          </div>
+            </div>
 
-          {/* Package Description */}
-          <div>
-            <Label htmlFor="packageDescription">Package Description</Label>
-            <Controller
-              name="packageDescription"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  id="packageDescription"
-                  placeholder="Enter package description"
-                  readOnly={control._formValues.packageIsDisabled}
-                  {...field}
-                />
+            {/* Package Percentage */}
+            <div>
+              <Label htmlFor="packagePercentage">Package Percentage</Label>
+              <Controller
+                name="packagePercentage"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    id="packagePercentage"
+                    type="number"
+                    placeholder="Enter package percentage"
+                    readOnly={true}
+                    min="1"
+                    {...field}
+                  />
+                )}
+              />
+              {errors.packagePercentage && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.packagePercentage.message}
+                </p>
               )}
-            />
-            {errors.packageDescription && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.packageDescription.message}
-              </p>
-            )}
-          </div>
+            </div>
 
-          {/* Package Percentage */}
-          <div>
-            <Label htmlFor="packagePercentage">Package Percentage</Label>
-            <Controller
-              name="packagePercentage"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  id="packagePercentage"
-                  type="number"
-                  placeholder="Enter package percentage"
-                  readOnly={true}
-                  min="1"
-                  {...field}
-                />
+            {/* Package Days */}
+            <div>
+              <Label htmlFor="packageDays">Package Days</Label>
+              <Controller
+                name="packageDays"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    id="packageDays"
+                    type="number"
+                    placeholder="Enter package days"
+                    readOnly={true}
+                    min="1"
+                    {...field}
+                  />
+                )}
+              />
+              {errors.packageDays && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.packageDays.message}
+                </p>
               )}
-            />
-            {errors.packagePercentage && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.packagePercentage.message}
-              </p>
-            )}
-          </div>
+            </div>
 
-          {/* Package Days */}
-          <div>
-            <Label htmlFor="packageDays">Package Days</Label>
-            <Controller
-              name="packageDays"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  id="packageDays"
-                  type="number"
-                  placeholder="Enter package days"
-                  readOnly={true}
-                  min="1"
-                  {...field}
-                />
+            <div className="flex flex-col gap-2">
+              <Controller
+                name="packageColor"
+                control={control}
+                render={({ field }) => (
+                  <FileUpload
+                    label="Upload Package Banner"
+                    onFileChange={(file) => field.onChange(file)}
+                  />
+                )}
+              />
+
+              {errors.packageColor && (
+                <p className="text-primaryRed text-sm mt-1">
+                  {errors.packageColor?.message}
+                </p>
               )}
-            />
-            {errors.packageDays && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.packageDays.message}
-              </p>
-            )}
-          </div>
+            </div>
 
-          <div className="flex flex-col gap-2">
-            <Controller
-              name="packageColor"
-              control={control}
-              render={({ field }) => (
-                <FileUpload
-                  label="Upload Package Banner"
-                  onFileChange={(file) => field.onChange(file)}
-                />
+            <div>
+              <Controller
+                name="file"
+                control={control}
+                render={({ field }) => (
+                  <FileUpload
+                    label="Upload Package Image"
+                    onFileChange={(file) => field.onChange(file)}
+                  />
+                )}
+              />
+
+              {errors.file && (
+                <p className="text-primaryRed text-sm mt-1">
+                  {errors.file?.message}
+                </p>
               )}
-            />
+            </div>
 
-            {errors.packageColor && (
-              <p className="text-primaryRed text-sm mt-1">
-                {errors.packageColor?.message}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <Controller
-              name="file"
-              control={control}
-              render={({ field }) => (
-                <FileUpload
-                  label="Upload Package Image"
-                  onFileChange={(file) => field.onChange(file)}
-                />
-              )}
-            />
-
-            {errors.file && (
-              <p className="text-primaryRed text-sm mt-1">
-                {errors.file?.message}
-              </p>
-            )}
-          </div>
-
-          <div className="flex justify-center items-center">
-            <Button
-              type="submit"
-              variant="card"
-              className="w-full md:w-auto rounded-md"
-              disabled={isSubmitting}
-            >
-              {isSubmitting && <Loader2 className="animate-spin mr-2" />} Submit
-            </Button>
-          </div>
-        </form>
-        <DialogFooter></DialogFooter>
+            <div className="flex justify-center items-center">
+              <Button
+                type="submit"
+                variant="card"
+                className="w-full md:w-auto rounded-md"
+                disabled={isSubmitting}
+              >
+                {isSubmitting && <Loader2 className="animate-spin mr-2" />}{" "}
+                Submit
+              </Button>
+            </div>
+          </form>
+          <DialogFooter></DialogFooter>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );
