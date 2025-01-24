@@ -382,7 +382,7 @@ const DashboardDepositModalDeposit = ({
                       <p className="text-md">STATUS: </p>{" "}
                       {uploadedFile ? (
                         <p className="text-md font-thin text-green-700">
-                          RECIEPT UPLOADED SUCCESSFULLY
+                          RECEIPT UPLOADED SUCCESSFULLY
                         </p>
                       ) : (
                         <p className="text-md font-thin text-red-700">
