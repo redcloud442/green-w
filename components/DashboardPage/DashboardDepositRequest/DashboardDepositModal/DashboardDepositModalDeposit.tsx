@@ -386,7 +386,7 @@ const DashboardDepositModalDeposit = ({
                         </p>
                       ) : (
                         <p className="text-md font-thin text-red-700">
-                          NO RECIEPT UPLOADED
+                          NO RECEIPT UPLOADED
                         </p>
                       )}
                     </div>

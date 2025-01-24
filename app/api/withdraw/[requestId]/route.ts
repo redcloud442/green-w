@@ -12,6 +12,7 @@ function sendErrorResponse(message: string, status: number = 400) {
 const updateWithdrawalRequestSchema = z.object({
   status: z.string().min(3),
   note: z.string().optional(),
+  requestId: z.string().uuid(),
 });
 
 export async function PUT(
@@ -34,6 +35,7 @@ export async function PUT(
     const validate = updateWithdrawalRequestSchema.safeParse({
       status,
       note,
+      requestId,
     });
 
     if (!validate.success) {
