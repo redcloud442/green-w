@@ -71,10 +71,6 @@ export const claimPackage = async (params: {
         throw new Error("Invalid request.");
       }
 
-      if (packageConnection.package_member_status !== "ENDED") {
-        throw new Error("Invalid request. Package is not in ENDED status.");
-      }
-
       if (!packageConnection.package_member_is_ready_to_claim) {
         throw new Error("Invalid request. Package is not ready to claim.");
       }
