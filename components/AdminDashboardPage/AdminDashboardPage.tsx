@@ -25,7 +25,6 @@ import {
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import AdminUserNotifyModal from "../AdminNotifyUserModal/AdminUserNotifyModal";
 import { Button } from "../ui/button";
 import { Calendar } from "../ui/calendar";
 import {
@@ -240,7 +239,7 @@ const AdminDashboardPage = ({
           </Button>
         </form>
       </div>
-      <AdminUserNotifyModal packageNotification={packageNotification} />
+      {/* <AdminUserNotifyModal packageNotification={packageNotification} /> */}
       <div className="flex flex-col gap-6">
         <div>
           <AdminDashboardCard

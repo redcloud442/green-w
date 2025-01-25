@@ -27,7 +27,8 @@ WITH
     withdrawals AS (
         SELECT 
             alliance_withdrawal_request_member_id AS member_id,
-            COALESCE(SUM(alliance_withdrawal_request_amount::DECIMAL), 0) AS total_withdrawals
+            COALESCE(SUM(alliance_withdrawal_request_amount::DECIMAL), 0) AS total_withdrawals,
+            COALESCE(SUM(alliance_withdrawal_request_fee::DECIMAL), 0) AS total_fee
         FROM alliance_schema.alliance_withdrawal_request_table
         WHERE alliance_withdrawal_request_status = 'APPROVED'
         GROUP BY alliance_withdrawal_request_member_id
@@ -51,8 +52,8 @@ WITH
     )
 SELECT 
     m.alliance_member_id AS member_id,
-    COALESCE(e.total_earnings + d.direct_referral_amount + e.total_amount, 0) AS total_earnings,
-    COALESCE(w.total_withdrawals, 0) AS total_withdrawals,
+    COALESCE(e.total_earnings + e.total_amount + d.direct_referral_amount + i.indirect_referral_amount, 0) AS total_earnings,
+    COALESCE(w.total_withdrawals - w.total_fee, 0) AS total_withdrawals,
     COALESCE(d.direct_referral_amount, 0) AS direct_referral_amount,
     COALESCE(i.indirect_referral_amount, 0) AS indirect_referral_amount,
     COALESCE(e.total_amount + e.total_earnings, 0) AS package_income,
@@ -62,7 +63,6 @@ LEFT JOIN earnings e ON m.alliance_member_id = e.member_id
 LEFT JOIN withdrawals w ON m.alliance_member_id = w.member_id
 LEFT JOIN direct_referrals d ON m.alliance_member_id = d.member_id
 LEFT JOIN indirect_referrals i ON m.alliance_member_id = i.member_id
-
 
 CREATE OR REPLACE FUNCTION get_current_date()
 RETURNS TIMESTAMPTZ

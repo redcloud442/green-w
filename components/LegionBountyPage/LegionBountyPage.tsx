@@ -15,7 +15,7 @@ const LegionBountyPage = ({ teamMemberProfile }: Props) => {
         <div className="flex justify-center items-start">
           <Image
             src="/app-logo.png"
-            alt="referral-header"
+            alt="network-header"
             width={200}
             height={200}
           />

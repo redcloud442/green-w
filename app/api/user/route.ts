@@ -1,4 +1,3 @@
-import { applyRateLimit } from "@/utils/function";
 import prisma from "@/utils/prisma";
 import { rateLimit } from "@/utils/redis/redis";
 import { protectionMemberUser } from "@/utils/serversideProtection";
@@ -128,7 +127,15 @@ export async function GET(request: Request) {
 
   const { teamMemberProfile } = await protectionMemberUser();
 
-  applyRateLimit(teamMemberProfile?.alliance_member_id || "", ip);
+  const isAllowed = await rateLimit(
+    `rate-limit:${teamMemberProfile?.alliance_member_id}`,
+    10,
+    60
+  );
+
+  if (!isAllowed) {
+    throw new Error("Too many requests. Please try again later.");
+  }
 
   const primaryData = await prisma.alliance_earnings_table.findUnique({
     where: {

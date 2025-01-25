@@ -4,6 +4,7 @@ import prisma from "@/utils/prisma";
 import { rateLimit } from "@/utils/redis/redis";
 import {
   protectionAdminUser,
+  protectionAllUser,
   protectionMemberUser,
 } from "@/utils/serversideProtection";
 import { createServiceRoleClientServerSide } from "@/utils/supabase/server";
@@ -270,6 +271,18 @@ export const GET = async (
         { error: validate.error.message },
         { status: 400 }
       );
+    }
+
+    const { teamMemberProfile } = await protectionAllUser();
+
+    const isAllowed = await rateLimit(
+      `rate-limit:${teamMemberProfile?.alliance_member_id}`,
+      10,
+      60
+    );
+
+    if (!isAllowed) {
+      throw new Error("Too many requests. Please try again later.");
     }
 
     let isWithdrawalToday = false;

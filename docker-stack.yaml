@@ -55,14 +55,16 @@ services:
       replicas: 1
       placement:
         constraints:
-          - node.role == manager # Shepherd should run on a manager node
+          - node.role == manager
       labels:
         - shepherd.enable=true
         - shepherd.auth.config=ghcr.io
     environment:
       REGISTRIES_FILE: /run/secrets/shepherd-registries-auth
-      SHEPHERD_LOG_LEVEL: info # Logging level (info, debug, error)
-      SHEPHERD_POLL_INTERVAL: 60 # Interval in seconds for checking updates
+      SHEPHERD_LOG_LEVEL: info
+      SHEPHERD_POLL_INTERVAL: 60
+      ROLLBACK_ON_FAILURE: true
+      IGNORELIST_SERVICES: shepherd cloudflared
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     secrets:

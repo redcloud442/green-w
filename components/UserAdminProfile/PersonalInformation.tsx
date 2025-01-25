@@ -7,7 +7,6 @@ import { userNameToEmail } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
 import { UserRequestdata } from "@/utils/types";
 import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
@@ -39,7 +38,7 @@ const schema = z.object({
 export type PersonalInformationSchema = z.infer<typeof schema>;
 const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
   const supabaseClient = createClientSide();
-  const router = useRouter();
+
   const [isLoading, setIsLoading] = useState(false);
   const [userSponsor, setUserSponsor] = useState<{
     user_username: string;

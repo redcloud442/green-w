@@ -12,10 +12,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  batchMessageNotification,
-  batchPackageNotification,
-} from "@/services/Package/Admin";
 import { package_notification_logs } from "@prisma/client";
 import { useState } from "react";
 import ReactDOMServer from "react-dom/server";
@@ -129,16 +125,16 @@ const AdminUserNotifyModal = ({ packageNotification }: Props) => {
         }
       } while (totalFetched < totalCount);
 
-      if (batchEmails.length > 0) {
-        await batchPackageNotification({ batchData: batchEmails });
-      }
+      // if (batchEmails.length > 0) {
+      //   await batchPackageNotification({ batchData: batchEmails });
+      // }
 
-      if (number.length > 0) {
-        await batchMessageNotification({
-          number,
-          message: "Hello, Do not forget to claim your package tomorrow !",
-        });
-      }
+      // if (number.length > 0) {
+      //   await batchMessageNotification({
+      //     number,
+      //     message: "Hello, Do not forget to claim your package tomorrow !",
+      //   });
+      // }
 
       if (batchUpdate.length > 0) {
         await handleUpdateManyPackageMemberConnection(batchUpdate);
