@@ -89,7 +89,7 @@ const DashboardWithdrawModalWithdraw = ({
       }}
     >
       <DialogTrigger asChild>
-        {isWithdrawalToday ? (
+        {!isWithdrawalToday ? (
           <Button
             className="bg-transparent p-0 shadow-none h-full flex flex-col items-center justify-center"
             onClick={() => setOpen(true)}
