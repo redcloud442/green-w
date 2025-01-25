@@ -74,7 +74,7 @@ export const POST = async (req: NextRequest) => {
 
     const { page, limit, teamMemberId } = params;
 
-    const isAllowed = await rateLimit(`rate-limit:${teamMemberId}`, 10, 60);
+    const isAllowed = await rateLimit(`rate-limit:${teamMemberId}`, 50, 60);
 
     if (!isAllowed) {
       return NextResponse.json({

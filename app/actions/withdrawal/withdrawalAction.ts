@@ -36,7 +36,7 @@ export const handleAddPreferredWithdrawal = async (formData: FormData) => {
 
     const isAllowed = await rateLimit(
       `rate-limit:${teamMemberProfile?.alliance_member_id}`,
-      10,
+      50,
       60
     );
 

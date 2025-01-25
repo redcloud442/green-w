@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
           "The user does not have an active session or is not authenticated",
       });
 
-    const isAllowed = await rateLimit(`rate-limit:${userData.user.id}`, 5, 60);
+    const isAllowed = await rateLimit(`rate-limit:${userData.user.id}`, 10, 60);
 
     if (!isAllowed) {
       return NextResponse.json(

@@ -30,12 +30,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const {
-      userName,
-      password,
-      role = "MEMBER",
-      userProfile,
-    } = await request.json();
+    const { userName, password } = await request.json();
     if (!userName || !password)
       return sendErrorResponse("Email and password are required.", 400);
 
@@ -74,13 +69,6 @@ export async function POST(request: Request) {
       );
     }
 
-    if (userProfile && userProfile.alliance_member_restricted) {
-      return NextResponse.json(
-        { error: "Invalid username or password" },
-        { status: 401 }
-      );
-    }
-
     const teamMemberProfile = user.alliance_member_table[0];
 
     if (!teamMemberProfile)
@@ -96,7 +84,7 @@ export async function POST(request: Request) {
 
     const comparePassword = await bcrypt.compare(password, user.user_password);
 
-    if (role === ROLE.MEMBER && !comparePassword) {
+    if (!comparePassword) {
       return sendErrorResponse("Password Incorrect", 401);
     }
 

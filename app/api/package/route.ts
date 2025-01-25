@@ -6,6 +6,15 @@ import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+const getPackageSchema = z.object({
+  search: z.string().optional(),
+  page: z.number().optional(),
+  limit: z.number().optional(),
+  sortBy: z.boolean().optional(),
+  columnAccessor: z.string().optional(),
+  teamMemberId: z.string().optional(),
+});
+
 export async function GET(request: Request) {
   try {
     const ip =
@@ -38,6 +47,19 @@ export async function GET(request: Request) {
     const columnAccessor = url.searchParams.get("columnAccessor") || "";
     const teamMemberId = url.searchParams.get("teamMemberId") || "";
 
+    const validate = getPackageSchema.safeParse({
+      search,
+      page,
+      limit,
+      sortBy,
+      columnAccessor,
+      teamMemberId,
+    });
+
+    if (!validate.success) {
+      throw new Error(validate.error.message);
+    }
+
     const { data, error } = await supabaseClient.rpc(
       "get_member_package_history",
       {
@@ -68,6 +90,7 @@ const topupSchema = z.object({
     message: "Minimum amount is 50 pesos",
   }),
   packageId: z.string().uuid(),
+  teamMemberId: z.string().uuid(),
 });
 
 export async function POST(request: Request) {
@@ -80,7 +103,11 @@ export async function POST(request: Request) {
     const { amount, packageId, teamMemberId } = await request.json();
 
     // Validate input data
-    const parsedData = topupSchema.safeParse({ amount, packageId });
+    const parsedData = topupSchema.safeParse({
+      amount,
+      packageId,
+      teamMemberId,
+    });
     if (!parsedData.success) {
       return NextResponse.json(
         { error: parsedData.error.message },
@@ -126,6 +153,8 @@ export async function POST(request: Request) {
       prisma.alliance_earnings_table.findUnique({
         where: { alliance_earnings_member_id: teamMemberId },
         select: {
+          alliance_earnings_id: true,
+          alliance_earnings_member_id: true,
           alliance_olympus_wallet: true,
           alliance_referral_bounty: true,
           alliance_olympus_earnings: true,
@@ -201,7 +230,7 @@ export async function POST(request: Request) {
     const referralChain = generateReferralChain(
       referralData?.alliance_referral_hierarchy ?? null,
       teamMemberId,
-      100 // Cap the depth to 100 levels
+      100
     );
 
     let bountyLogs: Prisma.package_ally_bounty_logCreateManyInput[] = [];
@@ -232,8 +261,16 @@ export async function POST(request: Request) {
           transaction_description: `Package Enrolled: ${packageData.package_name}`,
         },
       });
+
+      if (!earningsData) {
+        return NextResponse.json(
+          { error: "Earnings record not found." },
+          { status: 404 }
+        );
+      }
+
       await tx.alliance_earnings_table.update({
-        where: { alliance_earnings_member_id: teamMemberId },
+        where: { alliance_earnings_id: earningsData.alliance_earnings_id },
         data: {
           alliance_combined_earnings: updatedCombinedWallet,
           alliance_olympus_wallet: olympusWallet,
@@ -331,10 +368,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (e) {
-    return NextResponse.json(
-      { error: e instanceof Error ? e.message : "Unknown error." },
-      { status: 500 }
-    );
+    if (e instanceof Error) {
+      return NextResponse.json({ error: e.message }, { status: 500 });
+    }
+    return NextResponse.json({ error: "Unknown error." }, { status: 500 });
   }
 }
 

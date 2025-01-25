@@ -160,8 +160,7 @@ model alliance_earnings_table {
   alliance_earnings_id         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   alliance_olympus_wallet      Float    @default(0)
   alliance_olympus_earnings    Float    @default(0)
-  // alliance_ally_bounty         Float    @default(0.0)
-  // alliance_legion_bounty       Float    @default(0.0)
+  
   alliance_referral_bounty     Float    @default(0)
   alliance_combined_earnings  Float    @default(0)
   alliance_earnings_member_id  String   @db.Uuid @unique

@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
       throw new Error(validate.error.message);
     }
 
-    const isAllowed = await rateLimit(`rate-limit:${userData.user.id}`, 10, 60);
+    const isAllowed = await rateLimit(`rate-limit:${userData.user.id}`, 50, 60);
 
     if (!isAllowed) {
       return NextResponse.json(

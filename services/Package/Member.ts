@@ -31,12 +31,8 @@ export const createPackageConnection = async (params: {
     );
   }
 
-  return response as unknown as {
-    directIncome: number;
-    indirectIncome: number;
-  };
+  return response;
 };
-
 
 export const getPackageModalData = async () => {
   const response = await fetch(
@@ -133,4 +129,3 @@ export const claimPackage = async (params: {
 
   return response;
 };
-
