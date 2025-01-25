@@ -1,6 +1,5 @@
 import { WITHDRAWAL_STATUS } from "@/utils/constant";
 import {
-  applyRateLimit,
   calculateFee,
   calculateFinalAmount,
   escapeFormData,
@@ -23,14 +22,17 @@ const getWithdrawalHistorySchema = z.object({
 
 export async function GET(request: Request) {
   try {
-    const ip =
-      request.headers.get("x-forwarded-for") ||
-      request.headers.get("cf-connecting-ip") ||
-      "unknown";
-
     const { teamMemberProfile } = await protectionMemberUser();
 
-    await applyRateLimit(teamMemberProfile?.alliance_member_id || "", ip);
+    const isAllowed = await rateLimit(
+      `rate-limit:${teamMemberProfile?.alliance_member_id}`,
+      10,
+      60
+    );
+
+    if (!isAllowed) {
+      throw new Error("Too many requests. Please try again later.");
+    }
 
     const supabaseClient = await createClientServerSide();
 
