@@ -10,20 +10,12 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { logError } from "@/services/Error/ErrorLogs";
-import {
-  createWithdrawalRequest,
-  sendWithdrawalEmail,
-  sendWithdrawalSMS,
-} from "@/services/Withdrawal/Member";
+import { createWithdrawalRequest } from "@/services/Withdrawal/Member";
 import { useUserNotificationStore } from "@/store/userNotificationStore";
 import { useUserTransactionHistoryStore } from "@/store/userTransactionHistoryStore";
 import { useUserEarningsStore } from "@/store/useUserEarningsStore";
 import { BANKS, E_WALLETS, FINANCIAL_SERVICES } from "@/utils/constant";
-import {
-  calculateFinalAmount,
-  escapeFormData,
-  formatMonthDateYear,
-} from "@/utils/function";
+import { calculateFinalAmount, escapeFormData } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -228,13 +220,13 @@ const DashboardWithdrawalModalForm = ({
         count: userNotification.count + 1,
       });
 
-      if (email && result) {
-        await handleSendEmailRequest(sanitizedData);
-      }
+      // if (email && result) {
+      //   await handleSendEmailRequest(sanitizedData);
+      // }
 
-      if (cellphoneNumber && result) {
-        await handleSendSMSRequest(sanitizedData);
-      }
+      // if (cellphoneNumber && result) {
+      //   await handleSendSMSRequest(sanitizedData);
+      // }
 
       toast({
         title: "Withdrawal Request Successfully",
@@ -262,74 +254,74 @@ const DashboardWithdrawalModalForm = ({
     }
   };
 
-  const handleSendSMSRequest = async (sanitizedData: WithdrawalFormValues) => {
-    try {
-      await sendWithdrawalSMS({
-        number: sanitizedData.cellphoneNumber ?? "",
-        message:
-          "Withdrawal request is Ongoing amounting to ₱ " +
-          calculateFinalAmount(Number(amount || 0), "TOTAL").toLocaleString(
-            "en-US",
-            {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            }
-          ),
-      });
-    } catch (e) {}
-  };
+  // const handleSendSMSRequest = async (sanitizedData: WithdrawalFormValues) => {
+  //   try {
+  //     await sendWithdrawalSMS({
+  //       number: sanitizedData.cellphoneNumber ?? "",
+  //       message:
+  //         "Withdrawal request is Ongoing amounting to ₱ " +
+  //         calculateFinalAmount(Number(amount || 0), "TOTAL").toLocaleString(
+  //           "en-US",
+  //           {
+  //             minimumFractionDigits: 2,
+  //             maximumFractionDigits: 2,
+  //           }
+  //         ),
+  //     });
+  //   } catch (e) {}
+  // };
 
-  const handleSendEmailRequest = async (
-    sanitizedData: WithdrawalFormValues
-  ) => {
-    try {
-      await sendWithdrawalEmail({
-        to: sanitizedData.email ?? "",
-        from: "Elevate Team",
-        subject: "Withdrawal Request Ongoing.",
-        accountHolderName: profile.user_username ?? sanitizedData.accountName,
-        accountType:
-          preferredEarnings?.alliance_preferred_withdrawal_account_name ??
-          sanitizedData.accountName,
-        accountBank:
-          preferredEarnings?.alliance_preferred_withdrawal_bank_name ??
-          sanitizedData.bank,
-        accountNumber:
-          preferredEarnings?.alliance_preferred_withdrawal_account_number ??
-          sanitizedData.accountNumber,
-        transactionDetails: {
-          date: formatMonthDateYear(new Date().toISOString()),
-          description: "Withdrawal Request Ongoing.",
-          amount:
-            "₱" +
-            calculateFinalAmount(
-              Number(amount || 0),
-              selectedEarnings
-            ).toLocaleString("en-US", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            }),
-          balance:
-            "₱" +
-            (totalEarnings - Number(amount || 0)).toLocaleString("en-US", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            }),
-        },
-        message: "We noticed a new transaction on your account.",
-        greetingPhrase: "Hello!",
-        closingPhrase: "Thank you for continuously Elevating with us.",
-        signature: "The Elevate Team",
-      });
-    } catch (e) {
-      if (e instanceof Error) {
-        await logError(supabase, {
-          errorMessage: e.message,
-          stackTrace: e.stack,
-        });
-      }
-    }
-  };
+  // const handleSendEmailRequest = async (
+  //   sanitizedData: WithdrawalFormValues
+  // ) => {
+  //   try {
+  //     await sendWithdrawalEmail({
+  //       to: sanitizedData.email ?? "",
+  //       from: "Elevate Team",
+  //       subject: "Withdrawal Request Ongoing.",
+  //       accountHolderName: profile.user_username ?? sanitizedData.accountName,
+  //       accountType:
+  //         preferredEarnings?.alliance_preferred_withdrawal_account_name ??
+  //         sanitizedData.accountName,
+  //       accountBank:
+  //         preferredEarnings?.alliance_preferred_withdrawal_bank_name ??
+  //         sanitizedData.bank,
+  //       accountNumber:
+  //         preferredEarnings?.alliance_preferred_withdrawal_account_number ??
+  //         sanitizedData.accountNumber,
+  //       transactionDetails: {
+  //         date: formatMonthDateYear(new Date().toISOString()),
+  //         description: "Withdrawal Request Ongoing.",
+  //         amount:
+  //           "₱" +
+  //           calculateFinalAmount(
+  //             Number(amount || 0),
+  //             selectedEarnings
+  //           ).toLocaleString("en-US", {
+  //             minimumFractionDigits: 2,
+  //             maximumFractionDigits: 2,
+  //           }),
+  //         balance:
+  //           "₱" +
+  //           (totalEarnings - Number(amount || 0)).toLocaleString("en-US", {
+  //             minimumFractionDigits: 2,
+  //             maximumFractionDigits: 2,
+  //           }),
+  //       },
+  //       message: "We noticed a new transaction on your account.",
+  //       greetingPhrase: "Hello!",
+  //       closingPhrase: "Thank you for continuously Elevating with us.",
+  //       signature: "The Elevate Team",
+  //     });
+  //   } catch (e) {
+  //     if (e instanceof Error) {
+  //       await logError(supabase, {
+  //         errorMessage: e.message,
+  //         stackTrace: e.stack,
+  //       });
+  //     }
+  //   }
+  // };
 
   return (
     <form
