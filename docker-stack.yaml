@@ -63,8 +63,10 @@ services:
       REGISTRIES_FILE: /run/secrets/shepherd-registries-auth
       SHEPHERD_LOG_LEVEL: info
       SHEPHERD_POLL_INTERVAL: 60
+      IMAGE_AUTO_CLEANUP: true
       ROLLBACK_ON_FAILURE: true
       IGNORELIST_SERVICES: shepherd cloudflared
+      UPDATE_OPTIONS: "--update-delay=30s"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     secrets:

@@ -104,14 +104,14 @@ const DashboardWithdrawModalWithdraw = ({
           </Button>
         ) : (
           <Popover>
-            <PopoverTrigger className="bg-transparent p-0 shadow-none h-full flex flex-col items-center justify-center">
+            <PopoverTrigger className="bg-transparent pt-0 shadow-none h-full flex flex-col items-center justify-center">
               <Image
                 src="/assets/withdraw.ico"
                 alt="plans"
                 width={35}
                 height={35}
               />
-              <p className="text-sm sm:text-lg font-thin ">WITHDRAW</p>
+              <p className="text-sm sm:text-lg font-thin pt-2">WITHDRAW</p>
             </PopoverTrigger>
             <PopoverContent>
               You have already made a withdrawal today, Please try again

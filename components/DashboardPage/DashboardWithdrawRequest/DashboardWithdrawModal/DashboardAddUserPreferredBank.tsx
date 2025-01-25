@@ -45,9 +45,10 @@ const DashboardAddUserPreferredBank = ({
   const { toast } = useToast();
   const [selectedOption, setSelectedOption] = useState<string>("");
   const [open, setOpen] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (formData: FormData) => {
+    setIsLoading(true);
     const validation = preferredWithdrawalSchema.safeParse({
       accountName: formData.get("accountName")?.toString(),
       accountNumber: formData.get("accountNumber")?.toString(),
@@ -64,7 +65,6 @@ const DashboardAddUserPreferredBank = ({
     }
 
     try {
-      setIsLoading(true);
       const data = await handleAddPreferredWithdrawal(formData);
 
       toast({
@@ -105,7 +105,11 @@ const DashboardAddUserPreferredBank = ({
       {open && (
         <Card className="p-4 bg-sky-300 w-full max-w-[320px] sm:max-w-md">
           <form
-            action={(formData) => handleSubmit(formData)}
+            onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              handleSubmit(formData);
+            }}
             className="space-y-4"
           >
             <Input type="text" name="accountName" placeholder="Account Name" />
@@ -153,14 +157,14 @@ const DashboardAddUserPreferredBank = ({
                 setSelectedOption("");
               }}
             >
-              close
+              CLOSE
             </Button>
           </form>
         </Card>
       )}
 
       {/* Favorite Card with Radio Button */}
-      <ScrollArea className="min-h-auto max-h-[200px]">
+      <ScrollArea className="h-[200px]">
         <div className="flex flex-col gap-2 border-2 border-white p-2">
           {isFetching ? (
             <Skeleton className="h-12 w-full rounded-lg" />
@@ -201,7 +205,7 @@ const DashboardAddUserPreferredBank = ({
               </Card>
             ))
           )}
-          {preferredWithdrawalList?.length === 0 && (
+          {!isFetching && preferredWithdrawalList?.length === 0 && (
             <p className="text-sm">No favorite accounts found</p>
           )}
         </div>
