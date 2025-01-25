@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
   try {
     const { profile } = await protectionAdminUser();
 
-    const isAllowed = await rateLimit(`rate-limit:${profile?.user_id}`, 10, 60);
+    const isAllowed = await rateLimit(`rate-limit:${profile?.user_id}`, 50, 60);
     if (!isAllowed) {
       return NextResponse.json(
         { message: "Too many requests. Please try again later." },

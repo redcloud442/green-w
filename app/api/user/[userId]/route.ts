@@ -40,7 +40,7 @@ export async function PUT(
 
     await protectionMemberUser(ip);
 
-    const isAllowed = await rateLimit(`rate-limit:${ip}`, 10, 60);
+    const isAllowed = await rateLimit(`rate-limit:${ip}`, 50, 60);
 
     if (!isAllowed) {
       return NextResponse.json(
@@ -232,7 +232,7 @@ export const POST = async (
 
     const isAllowed = await rateLimit(
       `rate-limit:${teamMemberProfile?.alliance_member_id}`,
-      10,
+      50,
       60
     );
 
@@ -277,7 +277,7 @@ export const GET = async (
 
     const isAllowed = await rateLimit(
       `rate-limit:${teamMemberProfile?.alliance_member_id}`,
-      10,
+      50,
       60
     );
 

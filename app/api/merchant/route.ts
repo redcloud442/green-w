@@ -1,4 +1,3 @@
-import { loginRateLimit } from "@/utils/function";
 import prisma from "@/utils/prisma";
 import { rateLimit } from "@/utils/redis/redis";
 import {
@@ -34,7 +33,7 @@ export async function PATCH(request: Request) {
 
     const isAllowed = await rateLimit(
       `rate-limit:${teamMemberProfile?.alliance_member_id}`,
-      10,
+      50,
       60
     );
 
@@ -109,7 +108,7 @@ export async function POST(request: Request) {
 
     const isAllowed = await rateLimit(
       `rate-limit:${teamMemberProfile?.alliance_member_id}`,
-      5,
+      50,
       60
     );
 
@@ -170,7 +169,7 @@ export async function DELETE(request: Request) {
 
     const isAllowed = await rateLimit(
       `rate-limit:${teamMemberProfile?.alliance_member_id}`,
-      5,
+      50,
       60
     );
 
@@ -213,9 +212,17 @@ export async function GET(request: Request) {
         "Unable to determine IP address for rate limiting."
       );
 
-    await protectionAllUser(ip);
+    const { teamMemberProfile } = await protectionAllUser(ip);
 
-    loginRateLimit(ip);
+    const isAllowed = await rateLimit(
+      `rate-limit:${teamMemberProfile?.alliance_member_id}`,
+      50,
+      60
+    );
+
+    if (!isAllowed) {
+      return NextResponse.json({ success: false, ip });
+    }
 
     const merchant = await prisma.$transaction(async (tx) => {
       const merchant = await tx.merchant_table.findMany({

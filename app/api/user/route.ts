@@ -33,7 +33,7 @@ export async function PUT(request: Request) {
 
     const isAllowed = await rateLimit(
       `rate-limit:${profile?.alliance_member_id}`,
-      10,
+      50,
       60
     );
 
@@ -129,7 +129,7 @@ export async function GET(request: Request) {
 
   const isAllowed = await rateLimit(
     `rate-limit:${teamMemberProfile?.alliance_member_id}`,
-    10,
+    50,
     60
   );
 
@@ -180,7 +180,7 @@ export const POST = async (request: Request) => {
 
     const isAllowed = await rateLimit(
       `rate-limit:${teamMemberProfile?.alliance_member_id}`,
-      10,
+      50,
       60
     );
 

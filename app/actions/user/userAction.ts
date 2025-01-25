@@ -35,7 +35,7 @@ export const convertUnreadToRead = async (params: {
 
     const { notificationId, teamMemberId } = params;
 
-    const isAllowed = await rateLimit(`rate-limit:${teamMemberId}`, 10, 60);
+    const isAllowed = await rateLimit(`rate-limit:${teamMemberId}`, 50, 60);
 
     if (!isAllowed) {
       throw new Error("Too many requests. Please try again later.");

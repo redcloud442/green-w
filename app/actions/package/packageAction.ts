@@ -42,7 +42,7 @@ export const claimPackage = async (params: {
 
     const isAllowed = await rateLimit(
       `rate-limit:${teamMemberProfile?.alliance_member_id}`,
-      10,
+      50,
       60
     );
 
@@ -69,10 +69,6 @@ export const claimPackage = async (params: {
 
       if (!packageConnection) {
         throw new Error("Invalid request.");
-      }
-
-      if (packageConnection.package_member_status !== "ENDED") {
-        throw new Error("Invalid request. Package is not in ENDED status.");
       }
 
       if (!packageConnection.package_member_is_ready_to_claim) {
@@ -141,7 +137,7 @@ export const handleBatchPackageNotification = async (page = 1, limit = 100) => {
 
     const isAllowed = await rateLimit(
       `rate-limit:admin-batch-package-notification`,
-      10,
+      50,
       60
     );
 

@@ -20,7 +20,7 @@ export const notifyAction = async (params: {
 
     const isAllowed = await rateLimit(
       `rate-limit:${authData?.user?.id}`,
-      10,
+      50,
       60
     );
 

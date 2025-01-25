@@ -222,8 +222,7 @@ export async function POST(request: Request) {
       );
     }
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Internal Server Error.";
+    const errorMessage = "Internal Server Error";
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
