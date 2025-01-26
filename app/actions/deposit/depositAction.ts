@@ -51,7 +51,7 @@ export const depositWalletData = async (params: {
 
     const isAllowed = await rateLimit(
       `rate-limit:${teamMemberProfile?.alliance_member_id}`,
-      10,
+      50,
       60
     );
 
@@ -88,7 +88,7 @@ export const depositWalletData = async (params: {
         await tx.alliance_top_up_request_table.create({
           data: {
             alliance_top_up_request_amount: Number(amount),
-            alliance_top_up_request_type: merchantData.merchant_account_name,
+            alliance_top_up_request_type: merchantData.merchant_account_type,
             alliance_top_up_request_name: accountName,
             alliance_top_up_request_account: accountNumber,
             alliance_top_up_request_attachment: publicUrl,
