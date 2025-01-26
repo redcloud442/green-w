@@ -24,95 +24,99 @@ export const changeUserPassword = async (params: {
   userId: string;
   password: string;
 }) => {
-  const validate = changeUserPasswordSchema.safeParse(params);
+  try {
+    const validate = changeUserPasswordSchema.safeParse(params);
 
-  if (!validate.success) {
-    throw new Error(validate.error.message);
-  }
-
-  const { email, password, userId } = validate.data;
-
-  const { teamMemberProfile: role } = await protectionMemberUser();
-
-  const isAllowed = await rateLimit(
-    `rate-limit:${role?.alliance_member_id}`,
-    10,
-    60
-  );
-
-  if (!isAllowed) {
-    throw new Error("Too many requests. Please try again later.");
-  }
-
-  if (!password || !email || !userId) {
-    throw new Error("Invalid input");
-  }
-
-  // Fetch user data from Prisma
-  const user = await prisma.user_table.findFirst({
-    where: {
-      user_email: {
-        equals: email,
-        mode: "insensitive",
-      },
-    },
-  });
-
-  if (!user) {
-    throw new Error("User not found.");
-  }
-
-  const userCompare = await bcrypt.compare(password, user.user_password);
-
-  if (userCompare) {
-    throw new Error("Do not use the same password.");
-  }
-
-  const teamMemberProfile = await prisma.alliance_member_table.findFirst({
-    where: { alliance_member_user_id: user.user_id },
-  });
-
-  if (!teamMemberProfile) {
-    throw new Error("User profile not found or incomplete.");
-  }
-
-  if (
-    teamMemberProfile.alliance_member_restricted ||
-    !teamMemberProfile.alliance_member_alliance_id
-  ) {
-    throw new Error("Access restricted or incomplete profile.");
-  }
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  await prisma.$transaction(async (tx) => {
-    await tx.user_table.update({
-      where: {
-        user_id: userId,
-      },
-      data: {
-        user_password: hashedPassword,
-      },
-    });
-  });
-
-  // Update password in Supabase
-  if (role?.alliance_member_role !== "ADMIN") {
-    const supabaseClient = await createClientServerSide();
-    const { error } = await supabaseClient.auth.updateUser({
-      email: email,
-      password: password,
-    });
-    if (error) {
-      throw new Error("Failed to update user password");
+    if (!validate.success) {
+      throw new Error(validate.error.message);
     }
-  } else {
-    const supabaseClient = await createServiceRoleClientServerSide();
-    await supabaseClient.auth.admin.updateUserById(userId, {
-      password: password,
+
+    const { email, password, userId } = validate.data;
+
+    const { teamMemberProfile: role } = await protectionMemberUser();
+
+    const isAllowed = await rateLimit(
+      `rate-limit:${role?.alliance_member_id}`,
+      10,
+      60
+    );
+
+    if (!isAllowed) {
+      throw new Error("Too many requests. Please try again later.");
+    }
+
+    if (!password || !email || !userId) {
+      throw new Error("Invalid input");
+    }
+
+    // Fetch user data from Prisma
+    const user = await prisma.user_table.findFirst({
+      where: {
+        user_email: {
+          equals: email,
+          mode: "insensitive",
+        },
+      },
     });
+
+    if (!user) {
+      throw new Error("User not found.");
+    }
+
+    const userCompare = await bcrypt.compare(password, user.user_password);
+
+    if (userCompare) {
+      throw new Error("Do not use the same password.");
+    }
+
+    const teamMemberProfile = await prisma.alliance_member_table.findFirst({
+      where: { alliance_member_user_id: user.user_id },
+    });
+
+    if (!teamMemberProfile) {
+      throw new Error("User profile not found or incomplete.");
+    }
+
+    if (
+      teamMemberProfile.alliance_member_restricted ||
+      !teamMemberProfile.alliance_member_alliance_id
+    ) {
+      throw new Error("Access restricted or incomplete profile.");
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await prisma.$transaction(async (tx) => {
+      await tx.user_table.update({
+        where: {
+          user_id: userId,
+        },
+        data: {
+          user_password: hashedPassword,
+        },
+      });
+    });
+
+    // Update password in Supabase
+    if (role?.alliance_member_role !== "ADMIN") {
+      const supabaseClient = await createClientServerSide();
+      const { error } = await supabaseClient.auth.updateUser({
+        email: email,
+        password: password,
+      });
+      if (error) {
+        throw new Error("Failed to update user password");
+      }
+    } else {
+      const supabaseClient = await createServiceRoleClientServerSide();
+      await supabaseClient.auth.admin.updateUserById(userId, {
+        password: password,
+      });
+    }
+    return { success: true };
+  } catch (error) {
+    throw new Error("An unknown error occurred.");
   }
-  return { success: true };
 };
 
 const registerUserSchema = z.object({

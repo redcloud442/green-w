@@ -157,6 +157,20 @@ export async function PATCH(
     const { action, role } = await request.json();
 
     if (action === "updateRole") {
+      const existingEarnings = await prisma.alliance_earnings_table.findUnique({
+        where: {
+          alliance_earnings_member_id: userId,
+        },
+      });
+
+      if (existingEarnings) {
+        await prisma.alliance_earnings_table.delete({
+          where: {
+            alliance_earnings_member_id: userId,
+          },
+        });
+      }
+
       await prisma.alliance_member_table.update({
         where: { alliance_member_id: userId },
         data: {

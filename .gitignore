@@ -41,5 +41,6 @@ Dockerfile
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+next.config.ts
 
 
