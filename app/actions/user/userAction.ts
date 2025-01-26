@@ -2,6 +2,7 @@
 
 import prisma from "@/utils/prisma";
 import { rateLimit } from "@/utils/redis/redis";
+import { protectionMemberUser } from "@/utils/serversideProtection";
 import { alliance_notification_table } from "@prisma/client";
 import { z } from "zod";
 
@@ -34,6 +35,8 @@ export const convertUnreadToRead = async (params: {
     }
 
     const { notificationId, teamMemberId } = params;
+
+    const { teamMemberProfile } = await protectionMemberUser();
 
     const isAllowed = await rateLimit(`rate-limit:${teamMemberId}`, 50, 60);
 

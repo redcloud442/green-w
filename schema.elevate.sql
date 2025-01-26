@@ -62,7 +62,7 @@ FROM alliance_schema.alliance_member_table m
 LEFT JOIN earnings e ON m.alliance_member_id = e.member_id
 LEFT JOIN withdrawals w ON m.alliance_member_id = w.member_id
 LEFT JOIN direct_referrals d ON m.alliance_member_id = d.member_id
-LEFT JOIN indirect_referrals i ON m.alliance_member_id = i.member_id
+LEFT JOIN indirect_referrals i ON m.alliance_member_id = i.member_id;
 
 CREATE OR REPLACE FUNCTION get_current_date()
 RETURNS TIMESTAMPTZ
@@ -407,7 +407,7 @@ plv8.subtransaction(function() {
   const totalEarnings = plv8.execute(`
     SELECT COALESCE(SUM(alliance_top_up_request_amount), 0) AS total_earnings
     FROM alliance_schema.alliance_top_up_request_table
-    WHERE alliance_top_up_request_date::Date BETWEEN $1 AND $2
+    WHERE alliance_top_up_request_date::Date BETWEEN $1 AND $2 AND alliance_top_up_request_status = 'APPROVED'
   `, [startDate, endDate])[0];
 
   const totalActivatedUserByDate = plv8.execute(`
@@ -823,10 +823,7 @@ plv8.subtransaction(function() {
       : "";
 
     const userCondition = userFilter
-      ? `AND (u.user_username ILIKE '%${search}%' 
-            OR u.user_id::TEXT ILIKE '%${search}%' 
-            OR u.user_first_name ILIKE '%${search}%' 
-            OR u.user_last_name ILIKE '%${search}%')`
+      ? `AND u.user_id = '${userFilter}'`
       : "";
 
     const statusCondition = statusFilter
@@ -1553,7 +1550,8 @@ plv8.subtransaction(function() {
       pmc.package_member_amount,
       pmc.package_member_is_notified,
       pmc.package_amount_earnings,
-      pmc.package_member_completion_date
+      pmc.package_member_completion_date,
+      pmc.package_member_is_ready_to_claim
     FROM packages_schema.package_member_connection_table pmc
     JOIN packages_schema.package_table p
       ON pmc.package_member_package_id = p.package_id
@@ -1577,14 +1575,11 @@ plv8.subtransaction(function() {
 
     const isReadyToClaim = percentage === 100;
 
-    if (isReadyToClaim) {
-      const earnings = row.amount;
-      totalCompletedAmount += earnings; 
+    if (isReadyToClaim && !row.package_member_is_ready_to_claim) {
 
       plv8.execute(
         `UPDATE packages_schema.package_member_connection_table
-         SET package_member_status = 'ENDED', 
-         package_member_is_ready_to_claim = true
+         SET package_member_is_ready_to_claim = true
          WHERE package_member_connection_id = $1`,
         [row.package_member_connection_id]
       );
