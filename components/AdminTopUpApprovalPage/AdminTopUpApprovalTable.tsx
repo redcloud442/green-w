@@ -186,7 +186,7 @@ const AdminTopUpApprovalTable = ({ teamMemberProfile }: DataTableProps) => {
 
   const handleFilter = async () => {
     try {
-      await fetchRequest();
+      await handleRefresh();
     } catch (e) {}
   };
 
