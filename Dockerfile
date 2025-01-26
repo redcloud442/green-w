@@ -34,7 +34,7 @@ ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
 ARG NEXT_PUBLIC_BASE_URL
 ARG NEXT_PUBLIC_CRYPTO_SECRET_KEY
 ARG SUPABASE_SERVICE_ROLE_KEY
-ARG DATABASE_URL="postgresql://postgres.vhgdbzosfxfdloxdfrir:Blackl3002424@aws-0-us-west-1.pooler.supabase.com:6543/postgres?pgbouncer=true"
+ARG DATABASE_URL="postgresql://postgres.vhgdbzosfxfdloxdfrir:Blackl300123!@aws-0-us-west-1.pooler.supabase.com:6543/postgres?pgbouncer=true"
 ARG DIRECT_URL
 ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
 ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
