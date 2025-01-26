@@ -44,15 +44,16 @@ export async function PATCH(request: Request) {
       );
     }
 
-    const validate = updateMerchantBalanceSchema.safeParse(
-      await request.json()
-    );
+    const { amount, memberId } = await request.json();
+
+    const validate = updateMerchantBalanceSchema.safeParse({
+      amount,
+      memberId,
+    });
 
     if (!validate.success) {
       throw new Error(validate.error.message);
     }
-
-    const { amount, memberId } = validate.data;
 
     const result = await prisma.$transaction(async (tx) => {
       const merchant = await tx.merchant_member_table.findFirst({
@@ -97,8 +98,13 @@ export async function POST(request: Request) {
       return sendErrorResponse(
         "Unable to determine IP address for rate limiting."
       );
+    const { accountNumber, accountType, accountName } = await request.json();
 
-    const validate = postMerchantSchema.safeParse(await request.json());
+    const validate = postMerchantSchema.safeParse({
+      accountNumber,
+      accountType,
+      accountName,
+    });
 
     if (!validate.success) {
       throw new Error(validate.error.message);
@@ -115,8 +121,6 @@ export async function POST(request: Request) {
     if (!isAllowed) {
       return NextResponse.json({ success: false, ip });
     }
-
-    const { accountNumber, accountType, accountName } = await request.json();
 
     const result = await prisma.$transaction(async (tx) => {
       const merchant = await tx.merchant_table.findFirst({
@@ -159,7 +163,9 @@ export async function DELETE(request: Request) {
         "Unable to determine IP address for rate limiting."
       );
 
-    const validate = deleteMerchantSchema.safeParse(await request.json());
+    const { merchantId } = await request.json();
+
+    const validate = deleteMerchantSchema.safeParse({ merchantId });
 
     if (!validate.success) {
       throw new Error(validate.error.message);
@@ -176,8 +182,6 @@ export async function DELETE(request: Request) {
     if (!isAllowed) {
       return NextResponse.json({ success: false, ip });
     }
-
-    const { merchantId } = await request.json();
 
     const result = await prisma.$transaction(async (tx) => {
       const merchant = await tx.merchant_table.findFirst({

@@ -21,7 +21,9 @@ export async function POST(request: Request) {
         400
       );
 
-    const isAllowed = await rateLimit(`rate-limit:${ip}`, 5, 60);
+    const { userName, password } = await request.json();
+
+    const isAllowed = await rateLimit(`rate-limit:${userName}`, 5, 60);
 
     if (!isAllowed) {
       return sendErrorResponse(
@@ -30,7 +32,6 @@ export async function POST(request: Request) {
       );
     }
 
-    const { userName, password } = await request.json();
     if (!userName || !password)
       return sendErrorResponse("Email and password are required.", 400);
 
@@ -153,7 +154,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ success: false, userName });
     }
 
-    const isAllowed = await rateLimit(`rate-limit:${ip}`, 5, 60);
+    const isAllowed = await rateLimit(`rate-limit:${userName}`, 5, 60);
 
     if (!isAllowed) {
       return NextResponse.json({ success: false, userName });

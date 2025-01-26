@@ -121,7 +121,7 @@ export async function POST(request: Request) {
       !packageId ||
       !teamMemberId ||
       amount === 0 ||
-      integerLength < 1
+      integerLength < 2
     ) {
       return NextResponse.json(
         { error: "Invalid input or amount must be between 1 and 1 digits." },
