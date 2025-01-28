@@ -329,15 +329,22 @@ export async function POST(request: Request) {
           }));
 
           await Promise.all(
-            batch.map((ref) =>
+            batch.map((ref) => {
+              const calculatedEarnings =
+                (Number(amount) * Number(ref.percentage)) / 100;
+
               tx.alliance_earnings_table.update({
                 where: { alliance_earnings_member_id: ref.referrerId },
                 data: {
-                  alliance_referral_bounty: Number(packageAmountEarnings),
-                  alliance_combined_earnings: Number(packageAmountEarnings),
+                  alliance_referral_bounty: {
+                    increment: calculatedEarnings,
+                  },
+                  alliance_combined_earnings: {
+                    increment: calculatedEarnings,
+                  },
                 },
-              })
-            )
+              });
+            })
           );
         }
       }
