@@ -2590,12 +2590,26 @@ DROP POLICY IF EXISTS "Allow READ for authenticated users" ON alliance_schema.al
 CREATE POLICY "Allow READ for anon users" ON alliance_schema.alliance_withdrawal_request_table
 AS PERMISSIVE FOR SELECT
 TO authenticated
-USING (true);
+USING (
+  EXISTS (
+    SELECT 1
+    FROM alliance_schema.alliance_member_table amt
+    WHERE amt.alliance_member_user_id = auth.uid()
+    AND amt.alliance_member_role IN ('MEMBER', 'MERCHANT', 'ACCOUNTING', 'ADMIN')
+  )
+);
 
 DROP POLICY IF EXISTS "Allow Insert for authenticated users" ON alliance_schema.alliance_withdrawal_request_table;
 CREATE POLICY "Allow Insert for anon users" ON alliance_schema.alliance_withdrawal_request_table
 AS PERMISSIVE FOR INSERT
-WITH CHECK (true);
+WITH CHECK (
+  EXISTS (
+    SELECT 1
+    FROM alliance_schema.alliance_member_table amt
+    WHERE amt.alliance_member_user_id = auth.uid()
+    AND amt.alliance_member_role IN ('MEMBER', 'MERCHANT', 'ACCOUNTING', 'ADMIN')
+  )
+);
 
 
 CREATE POLICY "Allow UPDATE for authenticated users with ACCOUNTING role" 
@@ -2626,12 +2640,26 @@ DROP POLICY IF EXISTS "Allow READ for authenticated users" ON packages_schema.pa
 CREATE POLICY "Allow READ for anon users" ON packages_schema.package_ally_bounty_log
 AS PERMISSIVE FOR SELECT
 TO authenticated
-USING (true);
+USING (
+  EXISTS (
+    SELECT 1
+    FROM alliance_schema.alliance_member_table amt
+    WHERE amt.alliance_member_user_id = auth.uid()
+    AND amt.alliance_member_role IN ('MEMBER', 'MERCHANT', 'ACCOUNTING', 'ADMIN')
+  )
+);
 
 DROP POLICY IF EXISTS "Allow Insert for authenticated users" ON packages_schema.package_ally_bounty_log;
 CREATE POLICY "Allow Insert for anon users" ON packages_schema.package_ally_bounty_log
 AS PERMISSIVE FOR INSERT
-WITH CHECK (true);
+WITH CHECK (
+  EXISTS (
+    SELECT 1
+    FROM alliance_schema.alliance_member_table amt
+    WHERE amt.alliance_member_user_id = auth.uid()
+    AND amt.alliance_member_role IN ('MEMBER', 'MERCHANT', 'ACCOUNTING', 'ADMIN')
+  )
+);
 
 ALTER TABLE packages_schema.package_earnings_log ENABLE ROW LEVEL SECURITY;
 
@@ -2639,12 +2667,26 @@ DROP POLICY IF EXISTS "Allow READ for authenticated users" ON packages_schema.pa
 CREATE POLICY "Allow READ for anon users" ON packages_schema.package_earnings_log
 AS PERMISSIVE FOR SELECT
 TO authenticated
-USING (true);
+USING (
+  EXISTS (
+    SELECT 1
+    FROM alliance_schema.alliance_member_table amt
+    WHERE amt.alliance_member_user_id = auth.uid()
+    AND amt.alliance_member_role IN ('MEMBER', 'MERCHANT', 'ACCOUNTING', 'ADMIN')
+  )
+);
 
 DROP POLICY IF EXISTS "Allow Insert for authenticated users" ON packages_schema.package_earnings_log;
 CREATE POLICY "Allow Insert for anon users" ON packages_schema.package_earnings_log
 AS PERMISSIVE FOR INSERT
-WITH CHECK (true);
+WITH CHECK (
+  EXISTS (
+    SELECT 1
+    FROM alliance_schema.alliance_member_table amt
+    WHERE amt.alliance_member_user_id = auth.uid()
+    AND amt.alliance_member_role IN ('MEMBER', 'MERCHANT', 'ACCOUNTING', 'ADMIN')
+  )
+);
 
 -- Enable Row Level Security (RLS) for the table
 ALTER TABLE packages_schema.package_member_connection_table ENABLE ROW LEVEL SECURITY;
@@ -2698,7 +2740,45 @@ DROP POLICY IF EXISTS "Allow READ for authenticated users" ON packages_schema.pa
 CREATE POLICY "Allow READ for anon users" ON packages_schema.package_table
 AS PERMISSIVE FOR SELECT
 TO authenticated
-USING (true);
+USING (
+  EXISTS (
+    SELECT 1
+    FROM alliance_schema.alliance_member_table amt
+    WHERE amt.alliance_member_user_id = auth.uid()
+    AND amt.alliance_member_role IN ('MEMBER', 'MERCHANT', 'ACCOUNTING', 'ADMIN')
+  )
+);
+
+DROP POLICY IF EXISTS "Allow Insert for authenticated users" ON packages_schema.package_table;
+CREATE POLICY "Allow Insert for authenticated users" ON packages_schema.package_table
+AS PERMISSIVE FOR INSERT
+TO authenticated
+WITH CHECK (
+  EXISTS (
+    SELECT 1
+    FROM alliance_schema.alliance_member_table amt
+    WHERE amt.alliance_member_user_id = auth.uid()
+    AND amt.alliance_member_role IN ('ADMIN')
+  )
+);
+
+DROP POLICY IF EXISTS "Allow Update for authenticated users" ON packages_schema.package_table;
+CREATE POLICY "Allow Update for authenticated users" ON packages_schema.package_table
+AS PERMISSIVE FOR UPDATE
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1
+    FROM alliance_schema.alliance_member_table amt
+    WHERE amt.alliance_member_user_id = auth.uid()
+    AND amt.alliance_member_role IN ('ADMIN')
+  )
+);
+
+
+
+
+
 
 DROP POLICY IF EXISTS "Allow INSERT for authenticated users with ADMIN role" ON packages_schema.package_table;
 
@@ -2742,12 +2822,26 @@ DROP POLICY IF EXISTS "Allow READ for authenticated users" ON alliance_schema.al
 CREATE POLICY "Allow READ for anon users" ON alliance_schema.alliance_top_up_request_table
 AS PERMISSIVE FOR SELECT
 TO authenticated
-USING (true);
+USING (
+  EXISTS (
+    SELECT 1
+    FROM alliance_schema.alliance_member_table amt
+    WHERE amt.alliance_member_user_id = auth.uid()
+    AND amt.alliance_member_role IN ('MEMBER', 'MERCHANT', 'ACCOUNTING', 'ADMIN')
+  )
+);
 
 DROP POLICY IF EXISTS "Allow Insert for authenticated users" ON alliance_schema.alliance_top_up_request_table;
 CREATE POLICY "Allow Insert for anon users" ON alliance_schema.alliance_top_up_request_table
 AS PERMISSIVE FOR INSERT
-WITH CHECK (true);
+WITH CHECK (
+  EXISTS (
+    SELECT 1
+    FROM alliance_schema.alliance_member_table amt
+    WHERE amt.alliance_member_user_id = auth.uid()
+    AND amt.alliance_member_role IN ('MEMBER', 'MERCHANT', 'ACCOUNTING', 'ADMIN')
+  )
+);
 
 CREATE POLICY "Allow UPDATE for authenticated users with MERCHANT role" 
 ON alliance_schema.alliance_top_up_request_table
@@ -3025,6 +3119,7 @@ WITH CHECK (
 );
 
 
+
   ALTER TABLE merchant_schema.merchant_table ENABLE ROW LEVEL SECURITY;
 
   DROP POLICY IF EXISTS "Allow READ for Authenticated users" ON merchant_schema.merchant_table;
@@ -3048,9 +3143,10 @@ WITH CHECK (
           SELECT 1
           FROM alliance_schema.alliance_member_table amt
           WHERE amt.alliance_member_user_id = auth.uid()
-          AND amt.alliance_member_role = 'ADMIN'
+          AND amt.alliance_member_role IN ('ADMIN','MERCHANT')
       )
   );
+
 
 
 ALTER TABLE packages_schema.package_notification_logs ENABLE ROW LEVEL SECURITY;
