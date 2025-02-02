@@ -63,16 +63,6 @@ export const AdminUsersColumn = (
         memberId: alliance_member_alliance_id,
         type: "BAN",
       });
-
-      // await handleUpdateUserRestriction({
-      //   userId: alliance_member_alliance_id,
-      // });
-      // handleFetch();
-      // toast({
-      //   title: `User Banned`,
-      //   description: `User Banned Sucessfully`,
-      //   variant: "success",
-      // });
     } catch (e) {
     } finally {
     }
@@ -105,7 +95,7 @@ export const AdminUsersColumn = (
           <Avatar>
             <AvatarImage src={row.original.user_profile_picture ?? ""} />
             <AvatarFallback>
-              {row.original.user_username?.charAt(0)}
+              {row.original.user_username?.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <p className="text-wrap text-blue-500">
@@ -140,7 +130,6 @@ export const AdminUsersColumn = (
     },
     {
       accessorKey: "alliance_member_role",
-
       header: ({ column }) => (
         <Button
           variant="ghost"

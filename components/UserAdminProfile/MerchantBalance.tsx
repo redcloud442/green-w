@@ -5,16 +5,17 @@ import { escapeFormData } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
 import { UserRequestdata } from "@/utils/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { user_table } from "@prisma/client";
+import { merchant_balance_log, user_table } from "@prisma/client";
 import { PhilippinePeso } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Input } from "../ui/input";
 import TableLoading from "../ui/tableLoading";
-
+import MerchantBalanceModal from "./MerchantBalanceModal";
 type Props = {
   userProfile: UserRequestdata;
   profile: user_table;
@@ -35,6 +36,13 @@ const MerchantBalance = ({ userProfile, profile }: Props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [merchantData, setMerchantData] =
     useState<UserRequestdata>(userProfile);
+  const [merchantBalanceHistory, setMerchantBalanceHistory] = useState({
+    data: [] as merchant_balance_log[],
+    count: 0,
+  });
+  const cache = useRef<
+    Record<number, { data: merchant_balance_log[]; count: number }>
+  >({});
 
   const {
     control,
@@ -62,9 +70,22 @@ const MerchantBalance = ({ userProfile, profile }: Props) => {
         merchant_member_balance:
           Number(sanitizedData.balance) + merchantData.merchant_member_balance,
       }));
+
+      setMerchantBalanceHistory((prev) => ({
+        ...prev,
+        data: [
+          {
+            merchant_balance_log_id: uuidv4(),
+            merchant_balance_log_date: new Date(),
+            merchant_balance_log_amount: Number(sanitizedData.balance),
+            merchant_balance_log_user: userProfile.user_username || "",
+          },
+          ...prev.data,
+        ],
+        count: prev.count + 1,
+      }));
       toast({
         title: "Merchant Balance Updated Successfully",
-        variant: "success",
       });
       reset();
     } catch (e) {
@@ -103,6 +124,7 @@ const MerchantBalance = ({ userProfile, profile }: Props) => {
           </span>
         </div>
       </CardHeader>
+
       <CardContent>
         <form
           className="flex flex-col gap-4 pt-6"
@@ -140,9 +162,15 @@ const MerchantBalance = ({ userProfile, profile }: Props) => {
               {errors.balance.message?.toString()}
             </span>
           )}
-          <Button variant="card" className="rounded-md" type="submit">
+          <Button type="submit" variant="outline">
             Update Balance
           </Button>
+          <MerchantBalanceModal
+            cache={cache}
+            merchantBalanceHistory={merchantBalanceHistory}
+            setMerchantBalanceHistory={setMerchantBalanceHistory}
+            userProfile={userProfile}
+          />
         </form>
       </CardContent>
     </Card>
