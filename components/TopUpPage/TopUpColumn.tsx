@@ -7,6 +7,7 @@ import { createClientSide } from "@/utils/supabase/client";
 import { AdminTopUpRequestData, TopUpRequestData } from "@/utils/types";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
+import Image from "next/image";
 import { Dispatch, SetStateAction, useState } from "react";
 import { Badge } from "../ui/badge";
 import {
@@ -138,6 +139,7 @@ export const TopUpColumn = (
       header: ({ column }) => (
         <Button
           variant="ghost"
+          className="p-1"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Requestor Username <ArrowUpDown />
@@ -153,6 +155,7 @@ export const TopUpColumn = (
       header: ({ column }) => (
         <Button
           variant="ghost"
+          className="p-1"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Status <ArrowUpDown />
@@ -171,6 +174,7 @@ export const TopUpColumn = (
       header: ({ column }) => (
         <Button
           variant="ghost"
+          className="p-1"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Amount <ArrowUpDown />
@@ -184,31 +188,14 @@ export const TopUpColumn = (
           style: "currency",
           currency: "PHP",
         }).format(amount);
-        return <div className="font-medium text-center">{formatted}</div>;
+        return <div className="font-medium text-wrap">{formatted}</div>;
       },
     },
     {
-      accessorKey: "alliance_top_up_request_type",
-
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Bank Name <ArrowUpDown />
-        </Button>
-      ),
-      cell: ({ row }) => (
-        <div className="text-center">
-          {row.getValue("alliance_top_up_request_type")}
-        </div>
-      ),
-    },
-    {
       accessorKey: "alliance_top_up_request_name",
-
       header: ({ column }) => (
         <Button
+          className="p-1"
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
@@ -216,8 +203,26 @@ export const TopUpColumn = (
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="text-center">
+        <div className="text-wrap">
           {row.getValue("alliance_top_up_request_name")}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "alliance_top_up_request_type",
+
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          className="p-1"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Bank Name <ArrowUpDown />
+        </Button>
+      ),
+      cell: ({ row }) => (
+        <div className="text-wrap">
+          {row.getValue("alliance_top_up_request_type")}
         </div>
       ),
     },
@@ -226,13 +231,14 @@ export const TopUpColumn = (
       header: ({ column }) => (
         <Button
           variant="ghost"
+          className="p-1"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Bank Account <ArrowUpDown />
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="text-center">
+        <div className="text-wrap">
           {row.getValue("alliance_top_up_request_account")}
         </div>
       ),
@@ -243,13 +249,14 @@ export const TopUpColumn = (
       header: ({ column }) => (
         <Button
           variant="ghost"
+          className="p-1"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Date Created <ArrowUpDown />
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="text-center">
+        <div className="text-wrap">
           {formatDateToYYYYMMDD(row.getValue("alliance_top_up_request_date"))},
           {formatTime(row.getValue("alliance_top_up_request_date"))}
         </div>
@@ -257,7 +264,7 @@ export const TopUpColumn = (
     },
     {
       accessorKey: "alliance_top_up_request_attachment",
-      header: () => <div>Attachment</div>,
+      header: () => <div className="p-1">Attachment</div>,
       cell: ({ row }) => {
         const attachmentUrl = row.getValue(
           "alliance_top_up_request_attachment"
@@ -273,7 +280,9 @@ export const TopUpColumn = (
                 <DialogTitle>Attachment</DialogTitle>
               </DialogHeader>
               <div className="flex justify-center items-center">
-                <img
+                <Image
+                  width={100}
+                  height={100}
                   src={attachmentUrl || ""}
                   alt="Attachment Preview"
                   className="object-contain w-full h-full"

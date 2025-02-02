@@ -162,11 +162,12 @@ export const WithdrawalColumn = (
         const amount = parseFloat(
           row.getValue("alliance_withdrawal_request_amount")
         );
+        const fee = row.original.alliance_withdrawal_request_fee;
         const formatted = new Intl.NumberFormat("en-PH", {
           style: "currency",
           currency: "PHP",
-        }).format(amount);
-        return <div className="font-medium text-center">{formatted}</div>;
+        }).format(amount - fee);
+        return <div className="font-medium text-wrap">{formatted}</div>;
       },
     },
     {

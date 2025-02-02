@@ -126,6 +126,7 @@ export const useAdminTopUpApprovalColumns = (
       header: ({ column }) => (
         <Button
           variant="ghost"
+          className="p-1"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Requestor Username <ArrowUpDown />
@@ -154,6 +155,7 @@ export const useAdminTopUpApprovalColumns = (
       header: ({ column }) => (
         <Button
           variant="ghost"
+          className="p-1"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Status <ArrowUpDown />
@@ -165,14 +167,13 @@ export const useAdminTopUpApprovalColumns = (
         return <Badge className={`${color} text-white`}>{status}</Badge>;
       },
     },
-
     {
       accessorKey: "alliance_top_up_request_amount",
-
       header: ({ column }) => (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="p-1"
         >
           Amount <ArrowUpDown />
         </Button>
@@ -190,51 +191,51 @@ export const useAdminTopUpApprovalColumns = (
     },
     {
       accessorKey: "alliance_top_up_request_name",
-
       header: ({ column }) => (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="p-1"
         >
           Bank Name <ArrowUpDown />
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="text-center">
+        <div className="text-wrap">
           {row.getValue("alliance_top_up_request_name")}
         </div>
       ),
     },
     {
       accessorKey: "alliance_top_up_request_account",
-
       header: ({ column }) => (
         <Button
           variant="ghost"
+          className="p-1"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Bank Account <ArrowUpDown />
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="text-center">
+        <div className="text-wrap">
           {row.getValue("alliance_top_up_request_account")}
         </div>
       ),
     },
     {
       accessorKey: "alliance_top_up_request_date",
-
       header: ({ column }) => (
         <Button
           variant="ghost"
+          className="p-1"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Date Created <ArrowUpDown />
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="text-center">
+        <div className="text-wrap">
           {formatDateToYYYYMMDD(row.getValue("alliance_top_up_request_date"))},
           {formatTime(row.getValue("alliance_top_up_request_date"))}
         </div>
@@ -242,11 +243,11 @@ export const useAdminTopUpApprovalColumns = (
     },
     {
       accessorKey: "approver_username",
-
       header: ({ column }) => (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="p-1"
         >
           Approver <ArrowUpDown />
         </Button>
@@ -278,17 +279,17 @@ export const useAdminTopUpApprovalColumns = (
     },
     {
       accessorKey: "alliance_top_up_request_date_updated",
-
       header: ({ column }) => (
         <Button
           variant="ghost"
+          className="p-1"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Date Updated <ArrowUpDown />
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="text-center">
+        <div className="text-wrap">
           {row.getValue("alliance_top_up_request_date_updated")
             ? formatDateToYYYYMMDD(
                 row.getValue("alliance_top_up_request_date_updated")
@@ -301,7 +302,7 @@ export const useAdminTopUpApprovalColumns = (
     },
     {
       accessorKey: "alliance_top_up_request_attachment",
-      header: () => <div>Attachment</div>,
+      header: () => <div className="p-1">Attachment</div>,
       cell: ({ row }) => {
         const attachmentUrl = row.getValue(
           "alliance_top_up_request_attachment"

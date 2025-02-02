@@ -2,10 +2,9 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { updateWithdrawalStatus } from "@/services/Withdrawal/Admin";
 import { formatDateToYYYYMMDD, formatTime } from "@/utils/function";
-import { createClientSide } from "@/utils/supabase/client";
 import { AdminWithdrawaldata, WithdrawalRequestData } from "@/utils/types";
 import { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, ClipboardCopy } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Dispatch, SetStateAction, useCallback, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
@@ -32,7 +31,6 @@ export const AdminWithdrawalHistoryColumn = (
   profile: user_table,
   setRequestData: Dispatch<SetStateAction<AdminWithdrawaldata | null>>
 ) => {
-  const supabaseClient = createClientSide();
   const { toast } = useToast();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -110,14 +108,22 @@ export const AdminWithdrawalHistoryColumn = (
     [handleFetch, toast]
   );
 
+  const handleCopyToClipboard = (text: string, variant: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: `Copied to clipboard`,
+      description: `${variant} copied to clipboard`,
+    });
+  };
+
   const columns: ColumnDef<WithdrawalRequestData>[] = [
     {
       accessorKey: "user_username",
-
       header: ({ column }) => (
         <Button
           variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="p-1"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "desc")}
         >
           Requestor Name <ArrowUpDown />
         </Button>
@@ -130,7 +136,7 @@ export const AdminWithdrawalHistoryColumn = (
           <Avatar>
             <AvatarImage src={row.original.user_profile_picture ?? ""} />
             <AvatarFallback>
-              {row.original.user_username?.charAt(0)}
+              {row.original.user_username?.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
 
@@ -142,11 +148,11 @@ export const AdminWithdrawalHistoryColumn = (
     },
     {
       accessorKey: "alliance_withdrawal_request_status",
-
       header: ({ column }) => (
         <Button
           variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="p-1"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "desc")}
         >
           Status <ArrowUpDown />
         </Button>
@@ -162,11 +168,11 @@ export const AdminWithdrawalHistoryColumn = (
 
     {
       accessorKey: "alliance_withdrawal_request_amount",
-
       header: ({ column }) => (
         <Button
           variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="p-1"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "desc")}
         >
           Amount <ArrowUpDown />
         </Button>
@@ -175,76 +181,103 @@ export const AdminWithdrawalHistoryColumn = (
         const amount = parseFloat(
           row.getValue("alliance_withdrawal_request_amount")
         );
+        const fee = row.original.alliance_withdrawal_request_fee;
         const formatted = new Intl.NumberFormat("en-PH", {
           style: "currency",
           currency: "PHP",
-        }).format(amount);
-        return <div className="font-medium text-center">{formatted}</div>;
+        }).format(amount - fee);
+        return <div className="font-medium text-wrap">{formatted}</div>;
       },
     },
     {
       accessorKey: "alliance_withdrawal_request_type",
-
       header: ({ column }) => (
         <Button
           variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          onClick={() => column.toggleSorting(column.getIsSorted() === "desc")}
         >
           Bank Type <ArrowUpDown />
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="text-center">
+        <div className="text-wrap">
           {row.getValue("alliance_withdrawal_request_type")}
         </div>
       ),
     },
     {
       accessorKey: "alliance_withdrawal_request_bank_name",
-
       header: ({ column }) => (
         <Button
           variant="ghost"
+          className="p-1"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Bank Name <ArrowUpDown />
         </Button>
       ),
-      cell: ({ row }) => (
-        <div className="text-center">
-          {row.getValue("alliance_withdrawal_request_bank_name")}
-        </div>
-      ),
+      cell: ({ row }) => {
+        const value = row.getValue(
+          "alliance_withdrawal_request_bank_name"
+        ) as string;
+        return (
+          <div className="flex items-center gap-2 text-wrap">
+            <span>{value}</span>
+            <Button
+              variant="card"
+              size="icon"
+              onClick={() => handleCopyToClipboard(value, "Bank Name")}
+              className="p-1"
+            >
+              <ClipboardCopy className="w-3 h-3" />
+            </Button>
+          </div>
+        );
+      },
     },
     {
       accessorKey: "alliance_withdrawal_request_account",
-
       header: ({ column }) => (
         <Button
           variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="p-1"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "desc")}
         >
           Bank Account <ArrowUpDown />
         </Button>
       ),
-      cell: ({ row }) => (
-        <div className="text-center">
-          {row.getValue("alliance_withdrawal_request_account")}
-        </div>
-      ),
+      cell: ({ row }) => {
+        const value = row.getValue(
+          "alliance_withdrawal_request_account"
+        ) as string;
+        return (
+          <div className="flex items-center gap-2 text-wrap">
+            <span>{value}</span>
+            <Button
+              variant="card"
+              size="icon"
+              onClick={() => handleCopyToClipboard(value, "Bank Account")}
+              className="p-1"
+            >
+              <ClipboardCopy className="w-3 h-3" />
+            </Button>
+          </div>
+        );
+      },
     },
     {
       accessorKey: "alliance_withdrawal_request_date",
       header: ({ column }) => (
         <Button
           variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="p-1"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "desc")}
         >
           Date Created <ArrowUpDown />
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="text-center">
+        <div className="text-wrap">
           {formatDateToYYYYMMDD(
             row.getValue("alliance_withdrawal_request_date")
           )}
@@ -258,7 +291,8 @@ export const AdminWithdrawalHistoryColumn = (
       header: ({ column }) => (
         <Button
           variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="p-1"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "desc")}
         >
           Approver <ArrowUpDown />
         </Button>
@@ -294,13 +328,14 @@ export const AdminWithdrawalHistoryColumn = (
       header: ({ column }) => (
         <Button
           variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="p-1"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "desc")}
         >
           Date Updated <ArrowUpDown />
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="text-center">
+        <div className="text-wrap">
           {row.getValue("alliance_withdrawal_request_date_updated")
             ? formatDateToYYYYMMDD(
                 row.getValue("alliance_withdrawal_request_date_updated")
@@ -315,7 +350,7 @@ export const AdminWithdrawalHistoryColumn = (
     },
     {
       accessorKey: "alliance_withdrawal_request_reject_note",
-      header: () => <div>Rejection Note</div>,
+      header: () => <div className="p-1">Rejection Note</div>,
       cell: ({ row }) => {
         const rejectionNote = row.getValue(
           "alliance_withdrawal_request_reject_note"
