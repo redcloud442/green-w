@@ -14,6 +14,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import TableLoading from "../ui/tableLoading";
 
 export const AdminUsersColumn = (
@@ -41,23 +42,6 @@ export const AdminUsersColumn = (
         memberId: alliance_member_alliance_id,
         type: "PROMOTE",
       });
-
-      // await handleUpdateRole({ userId: alliance_member_alliance_id, role });
-
-      // if (role === "ADMIN") {
-      //   const supabase = createServiceRoleClient();
-      //   const { data, error } = await supabase.auth.admin.updateUserById(
-      //     userId,
-      //     {
-      //       password: newPassword,
-      //     }
-      //   );
-      // }
-      // toast({
-      //   title: `Role Updated`,
-      //   description: `Role Updated Sucessfully`,
-      //   variant: "success",
-      // });
     } catch (e) {
       if (e instanceof Error) {
         await logError(supabaseClient, {
@@ -116,9 +100,17 @@ export const AdminUsersColumn = (
           onClick={() =>
             router.push(`/admin/users/${row.original.alliance_member_user_id}`)
           }
-          className="text-blue-500 text-wrap cursor-pointer hover:underline"
+          className="flex items-center gap-2 text-wrap cursor-pointer hover:underline"
         >
-          {row.getValue("user_username")}
+          <Avatar>
+            <AvatarImage src={row.original.user_profile_picture ?? ""} />
+            <AvatarFallback>
+              {row.original.user_username?.charAt(0)}
+            </AvatarFallback>
+          </Avatar>
+          <p className="text-wrap text-blue-500">
+            {row.getValue("user_username")}
+          </p>
         </div>
       ),
     },
@@ -138,8 +130,8 @@ export const AdminUsersColumn = (
         return (
           <Button
             variant="card"
+            className="p-1 rounded-md"
             onClick={() => handleCopyAccountUrl(userName)}
-            className="rounded-md"
           >
             Access Account Link
           </Button>
@@ -167,6 +159,7 @@ export const AdminUsersColumn = (
       header: ({ column }) => (
         <Button
           variant="ghost"
+          className="p-1"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           First Name <ArrowUpDown />
@@ -182,6 +175,7 @@ export const AdminUsersColumn = (
       header: ({ column }) => (
         <Button
           variant="ghost"
+          className="p-1"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Last Name <ArrowUpDown />
@@ -196,6 +190,7 @@ export const AdminUsersColumn = (
       header: ({ column }) => (
         <Button
           variant="ghost"
+          className="p-1"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Date Created <ArrowUpDown />
@@ -213,13 +208,14 @@ export const AdminUsersColumn = (
       header: ({ column }) => (
         <Button
           variant="ghost"
+          className="p-1"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Restricted <ArrowUpDown />
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="text-wrap">
+        <div className="text-balance">
           {row.getValue("alliance_member_restricted") ? "YES" : "NO"}
         </div>
       ),
@@ -231,6 +227,7 @@ export const AdminUsersColumn = (
       header: ({ column }) => (
         <Button
           variant="ghost"
+          className="p-1"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Active <ArrowUpDown />

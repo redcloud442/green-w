@@ -7,12 +7,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import { getDashboard, getDashboardEarnings } from "@/services/Dasboard/Member";
-import {
-  getUserEarnings,
-  getUserNotification,
-  getUserWithdrawalToday,
-} from "@/services/User/User";
+import { getDashboard } from "@/services/Dasboard/Member";
+import { getUserEarnings, getUserWithdrawalToday } from "@/services/User/User";
 import { useUserLoadingStore } from "@/store/useLoadingState";
 import { usePackageChartData } from "@/store/usePackageChartData";
 import { useUserHaveAlreadyWithdraw } from "@/store/userHaveAlreadyWithdraw";
@@ -20,12 +16,13 @@ import { useUserNotificationStore } from "@/store/userNotificationStore";
 import { useUserDashboardEarningsStore } from "@/store/useUserDashboardEarnings";
 import { useUserEarningsStore } from "@/store/useUserEarningsStore";
 import { useRole } from "@/utils/context/roleContext";
+import initializeSocket from "@/utils/socket/socket";
 import { createClientSide } from "@/utils/supabase/client";
-import { alliance_member_table } from "@prisma/client";
 import { BookOpenIcon, DoorOpen, HomeIcon, UserIcon } from "lucide-react";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Socket } from "socket.io-client";
 import DashboardNotification from "../DashboardPage/DashboardDepositRequest/DashboardDepositModal/DashboardNotification";
 import { Button } from "./button";
 import { DialogFooter, DialogHeader } from "./dialog";
@@ -42,14 +39,14 @@ const MobileNavBar = () => {
   const pathname = usePathname();
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [teamMemberProfile, setTeamMemberProfile] =
-    useState<alliance_member_table | null>(null);
+
   const { setUserNotification } = useUserNotificationStore();
   const { setEarnings } = useUserEarningsStore();
   const { setTotalEarnings } = useUserDashboardEarningsStore();
   const { setChartData } = usePackageChartData();
   const { setLoading } = useUserLoadingStore();
   const { setIsWithdrawalToday } = useUserHaveAlreadyWithdraw();
+  const [socket, setSocket] = useState<Socket | null>(null);
 
   const handleSignOut = async () => {
     try {
@@ -68,7 +65,7 @@ const MobileNavBar = () => {
       setTotalEarnings(null); // Reset dashboard earnings
       setChartData([]); // Clear chart data
       setIsWithdrawalToday(false); // Reset withdrawal status
-      setTeamMemberProfile(null); // Clear profile
+
       setLoading(false); // Reset loading state
     } catch (e) {
     } finally {
@@ -117,7 +114,7 @@ const MobileNavBar = () => {
     }
   };
 
-  const { role, teamMemberId, mobileNumber, email } = useRole();
+  const { role, teamMemberId } = useRole();
 
   useEffect(() => {
     const handleFetchUserInformation = async () => {
@@ -125,39 +122,20 @@ const MobileNavBar = () => {
         if (!teamMemberId) return;
         setLoading(true);
 
-        const { count, teamMemberProfile, userNotification } =
-          await getUserNotification();
+        const [userEarningsData, isWithdrawalToday, data] = await Promise.all([
+          getUserEarnings({
+            memberId: teamMemberId,
+          }),
+          getUserWithdrawalToday(),
 
-        setUserNotification({
-          notifications: userNotification,
-          count: count,
-        });
-
-        setTeamMemberProfile(teamMemberProfile);
-
-        const userEarningsData = await getUserEarnings({
-          userId: teamMemberId,
-        });
-
-        setEarnings(userEarningsData);
-
-        const isWithdrawalToday = await getUserWithdrawalToday({
-          userId: teamMemberId,
-        });
+          getDashboard({
+            teamMemberId: teamMemberId,
+          }),
+        ]);
 
         setIsWithdrawalToday(isWithdrawalToday);
-
-        const dashboardEarnings = await getDashboardEarnings(supabase, {
-          teamMemberId: teamMemberId,
-        });
-
-        setTotalEarnings(dashboardEarnings);
-
-        const { data } = await getDashboard(supabase, {
-          activePhoneNumber: mobileNumber,
-          activeEmail: email,
-          teamMemberId: teamMemberId,
-        });
+        setTotalEarnings(userEarningsData.totalEarnings);
+        setEarnings(userEarningsData.userEarningsData);
 
         setChartData(data);
 
@@ -170,6 +148,47 @@ const MobileNavBar = () => {
 
     handleFetchUserInformation();
   }, [teamMemberId, role]);
+
+  useEffect(() => {
+    async function connectSocket() {
+      const socketInstance = await initializeSocket();
+      if (socketInstance) {
+        setSocket(socketInstance);
+
+        socketInstance.on("connect", () => {
+          console.log("Socket connected:", socketInstance.id);
+          socketInstance.emit("join-room", { teamMemberId });
+        });
+
+        socketInstance.on("notification-update", (data) => {
+          console.log("Received notifications:", data);
+          setUserNotification({
+            notifications: data.notifications,
+            count: data.count,
+          });
+        });
+
+        socketInstance.emit("get-notification", { teamMemberId });
+      }
+    }
+
+    connectSocket();
+  }, [teamMemberId]);
+
+  const handleOnOpen = () => {
+    try {
+      socket?.emit("update-notification", { teamMemberId });
+      socket?.on("notification-update", (data) => {
+        console.log("Received notifications:", data);
+        setUserNotification({
+          notifications: data.notifications,
+          count: 0,
+        });
+      });
+    } catch (e) {
+      console.error("Error in handleOnOpen:", e);
+    }
+  };
 
   return (
     <>
@@ -207,7 +226,10 @@ const MobileNavBar = () => {
                   </span>
                 </Button>
               ) : item.label === "Notification" ? (
-                <DashboardNotification teamMemberProfile={teamMemberProfile} />
+                <DashboardNotification
+                  handleOpen={handleOnOpen}
+                  teamMemberId={teamMemberId}
+                />
               ) : (
                 <Button
                   onClick={() => handleNavigation(item.href, item.onClick)}

@@ -1,102 +1,19 @@
-import { updateUserNotification } from "@/app/actions/user/userAction";
-import { getUserNotificationWithLimit } from "@/services/User/User";
 import { useUserNotificationStore } from "@/store/userNotificationStore";
-import { alliance_member_table } from "@prisma/client";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Card, CardHeader, CardTitle } from "../ui/card";
 import { DialogContent, DialogFooter, DialogTitle } from "../ui/dialog";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { Separator } from "../ui/separator";
 
 type DataTableProps = {
-  teamMemberProfile: alliance_member_table | null;
+  teamMemberId: string | null;
 };
 
-const NotificationTable = ({ teamMemberProfile }: DataTableProps) => {
+const NotificationTable = ({ teamMemberId }: DataTableProps) => {
   const [activePage, setActivePage] = useState(1);
   const [isFetchingList, setIsFetchingList] = useState(false);
-  const fetchCalled = useRef(false);
   const observerRef = useRef<HTMLDivElement | null>(null);
-  const { userNotification, setUserNotification, setAddUserNotification } =
-    useUserNotificationStore();
-
-  const fetchRequest = async () => {
-    if (!teamMemberProfile) return;
-
-    try {
-      const { data, count } = await getUserNotificationWithLimit({
-        page: activePage,
-        limit: 10,
-        teamMemberId: teamMemberProfile.alliance_member_id,
-      });
-
-      if (
-        userNotification.notifications.some(
-          (n) => n.alliance_notification_is_read === false
-        )
-      ) {
-        await updateUserNotification(teamMemberProfile.alliance_member_id);
-      }
-
-      setUserNotification({
-        notifications: data,
-        count: count,
-      });
-    } catch (error) {
-    } finally {
-    }
-  };
-
-  const loadMoreNotifications = async () => {
-    if (!teamMemberProfile || isFetchingList) return;
-    const nextPage = activePage + 1;
-
-    try {
-      setIsFetchingList(true);
-      const { data, count } = await getUserNotificationWithLimit({
-        page: nextPage,
-        limit: 10,
-        teamMemberId: teamMemberProfile?.alliance_member_id,
-      });
-
-      setAddUserNotification({
-        notifications: data,
-        count,
-      });
-
-      setActivePage(nextPage);
-    } catch (error) {
-    } finally {
-      setIsFetchingList(false);
-    }
-  };
-
-  useEffect(() => {
-    if (fetchCalled.current) return;
-    fetchCalled.current = true;
-    fetchRequest();
-  }, [teamMemberProfile]);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && !isFetchingList) {
-          loadMoreNotifications();
-        }
-      },
-      { root: null, rootMargin: "0px", threshold: 1.0 }
-    );
-
-    if (observerRef.current) {
-      observer.observe(observerRef.current);
-    }
-
-    return () => {
-      if (observerRef.current) {
-        observer.unobserve(observerRef.current);
-      }
-    };
-  }, [isFetchingList]);
+  const { userNotification } = useUserNotificationStore();
 
   return (
     <ScrollArea className="w-full overflow-x-auto">

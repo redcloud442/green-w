@@ -19,7 +19,7 @@ import { createClientSide } from "@/utils/supabase/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { alliance_member_table, package_table } from "@prisma/client";
 import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import FileUpload from "../ui/dropZone";
@@ -29,7 +29,8 @@ type Props = {
   teamMemberProfile: alliance_member_table;
   selectedPackage: package_table | null;
   handleSelectPackage: () => void;
-  fetchPackages: () => void;
+  setPackages: Dispatch<SetStateAction<package_table[]>>;
+  closeModal: () => void;
 };
 
 const PackagesSchema = z.object({
@@ -70,10 +71,12 @@ const EditPackagesModal = ({
   teamMemberProfile,
   selectedPackage,
   handleSelectPackage,
-  fetchPackages,
+  setPackages,
+  closeModal,
 }: Props) => {
   const supabaseClient = createClientSide();
   const [open, setOpen] = useState(false);
+
   const { toast } = useToast();
 
   const {
@@ -150,10 +153,11 @@ const EditPackagesModal = ({
           packagePercentage: sanitizedData.packagePercentage,
           packageDays: sanitizedData.packageDays,
           packageIsDisabled: sanitizedData.packageIsDisabled ?? false,
-          packageColor: packageColor ?? null,
-          package_image: packageBanner ?? null,
+          packageColor: packageColor ?? "",
+          packageImage: packageBanner ?? "",
         },
         teamMemberId: teamMemberProfile.alliance_member_id,
+
         packageId: selectedPackage?.package_id ?? "",
       });
       toast({
@@ -163,8 +167,23 @@ const EditPackagesModal = ({
       });
       setOpen(false);
       reset();
-
-      fetchPackages();
+      closeModal();
+      setPackages((prev) =>
+        prev.map((pkg) =>
+          pkg.package_id === selectedPackage?.package_id
+            ? {
+                ...pkg,
+                package_name: sanitizedData.packageName,
+                package_description: sanitizedData.packageDescription,
+                package_percentage: Number(sanitizedData.packagePercentage),
+                packages_days: Number(sanitizedData.packageDays),
+                package_is_disabled: sanitizedData.packageIsDisabled ?? false,
+                package_color: packageColor ?? "",
+                package_image: packageBanner ?? "",
+              }
+            : pkg
+        )
+      );
     } catch (e) {
       if (e instanceof Error) {
         await logError(supabaseClient, {
@@ -185,6 +204,9 @@ const EditPackagesModal = ({
     setOpen(false);
     reset();
   };
+
+  const bannerImage = watch("file");
+  const packageColor = watch("packageColor");
 
   return (
     <Dialog
@@ -337,6 +359,11 @@ const EditPackagesModal = ({
                   />
                 )}
               />
+              {!errors.packageColor && packageColor && (
+                <p className="text-md font-bold text-green-700">
+                  {"File Uploaded Successfully"}
+                </p>
+              )}
 
               {errors.packageColor && (
                 <p className="text-primaryRed text-sm mt-1">
@@ -356,6 +383,12 @@ const EditPackagesModal = ({
                   />
                 )}
               />
+
+              {!errors.file && bannerImage && (
+                <p className="text-md font-bold text-green-700">
+                  {"File Uploaded Successfully"}
+                </p>
+              )}
 
               {errors.file && (
                 <p className="text-primaryRed text-sm mt-1">

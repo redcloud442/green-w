@@ -25,43 +25,7 @@ type Props = {
   setIsActive: Dispatch<SetStateAction<boolean>>;
 };
 
-const DashboardDepositRequest = ({
-  packages,
-  setChartData,
-  teamMemberProfile,
-  earnings,
-  setEarnings,
-  setIsActive,
-}: Props) => {
-  // const [runTour, setRunTour] = useState(false); // Manage tour state
-
-  // const steps = [
-  //   {
-  //     target: ".deposit-button", // Add this class to the Deposit Now button
-  //     content: "Click here to start your deposit request.",
-  //   },
-  //   {
-  //     target: ".package-selection", // Add this class to the package selection modal button
-  //     content: "Select from the available packages to invest in your future.",
-  //   },
-  // ];
-
-  // const handleJoyrideCallback = (data: { status: string }) => {
-  //   const { status } = data;
-  //   if (["finished", "skipped"].includes(status)) {
-  //     setRunTour(false);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   if (teamMemberProfile.alliance_member_is_active) {
-  //     setTimeout(
-  //       () => setRunTour(!teamMemberProfile.alliance_member_is_active),
-  //       1000
-  //     );
-  //   }
-  // }, [teamMemberProfile]);
-
+const DashboardDepositRequest = ({ teamMemberProfile }: Props) => {
   return (
     <>
       <Card className="w-full mx-auto">
@@ -85,17 +49,6 @@ const DashboardDepositRequest = ({
           </div>
         </CardContent>
       </Card>
-      {/* <ReactJoyride
-        steps={steps}
-        run={runTour}
-        continuous
-        callback={handleJoyrideCallback}
-        styles={{
-          options: {
-            zIndex: 10000,
-          },
-        }}
-      /> */}
     </>
   );
 };

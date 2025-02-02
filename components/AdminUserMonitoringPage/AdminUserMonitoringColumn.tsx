@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { user_table } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 export const AdminUserMonitoringColumn = (): ColumnDef<user_table>[] => {
   const router = useRouter();
@@ -22,9 +23,16 @@ export const AdminUserMonitoringColumn = (): ColumnDef<user_table>[] => {
         return (
           <div
             onClick={() => router.push(`/admin/users/${id}`)}
-            className="text-wrap cursor-pointer hover:underline text-blue-500"
+            className="flex items-center gap-2 text-wrap cursor-pointer hover:underline"
           >
-            {row.getValue("user_username")}
+            <Avatar>
+              <AvatarImage src={row.original.user_profile_picture ?? ""} />
+
+              <AvatarFallback>
+                {row.original.user_username?.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
+            <p className="text-wrap">{row.getValue("user_username")}</p>
           </div>
         );
       },

@@ -101,20 +101,17 @@ const AdminDashboardPage = ({
         ? formatDateToLocal(new Date(endDate.setHours(23, 59, 59, 999)))
         : "";
 
-      const data = await getAdminDashboardByDate(supabaseClient, {
-        teamMemberId: teamMemberProfile.alliance_member_id,
-        dateFilter: {
-          start: formattedStartDate,
-          end: formattedEndDate,
-        },
-      });
+      const [data, totalReferral] = await Promise.all([
+        getAdminDashboardByDate(supabaseClient, {
+          dateFilter: {
+            start: formattedStartDate,
+            end: formattedEndDate,
+          },
+        }),
+        getTotalReferral(supabaseClient),
+      ]);
 
       setAdminDashboardByDate(data);
-
-      const totalReferral = await getTotalReferral(supabaseClient, {
-        teamMemberId: teamMemberProfile.alliance_member_id,
-      });
-
       setTotalReferral(totalReferral);
     } catch (e) {
       if (e instanceof Error) {
@@ -136,9 +133,7 @@ const AdminDashboardPage = ({
   useEffect(() => {
     const fetchAdminDashboardData = async () => {
       if (!teamMemberProfile) return;
-      const data = await getAdminDashboard(supabaseClient, {
-        teamMemberId: teamMemberProfile.alliance_member_id,
-      });
+      const data = await getAdminDashboard(supabaseClient);
 
       setAdminDashboard(data);
     };

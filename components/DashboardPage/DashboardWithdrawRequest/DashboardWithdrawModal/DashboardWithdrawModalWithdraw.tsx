@@ -16,9 +16,8 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { getEarnings } from "@/services/User/User";
+import { getPreferredWithdrawal } from "@/services/Withdrawal/Member";
 import { useUserHaveAlreadyWithdraw } from "@/store/userHaveAlreadyWithdraw";
-import { useUserEarningsStore } from "@/store/useUserEarningsStore";
 import {
   alliance_earnings_table,
   alliance_member_table,
@@ -50,15 +49,15 @@ const DashboardWithdrawModalWithdraw = ({
   >([]);
   const [isFetching, setIsFetching] = useState(false);
   const { toast } = useToast();
-  const { setEarnings } = useUserEarningsStore();
   const { isWithdrawalToday } = useUserHaveAlreadyWithdraw();
 
   const fetchEarnings = async () => {
     try {
       if (!open) return;
       setIsFetching(true);
-      const { earnings, preferredWithdrawal } = await getEarnings();
-      setEarnings(earnings);
+
+      const preferredWithdrawal = await getPreferredWithdrawal();
+
       setPreferredWithdrawalList(preferredWithdrawal);
     } catch (e) {
       const errorMessage =

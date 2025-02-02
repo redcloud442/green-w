@@ -16,18 +16,22 @@ import { createClientSide } from "@/utils/supabase/client";
 import { logError } from "@/services/Error/ErrorLogs";
 import { createPackage } from "@/services/Package/Admin";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { package_table } from "@prisma/client";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 import FileUpload from "../ui/dropZone";
 
 type Props = {
-  fetchPackages: () => void;
+  setPackages: Dispatch<SetStateAction<package_table[]>>;
+  closeModal: () => void;
 };
 
 const PackagesSchema = z.object({
   packageName: z.string().min(1, "Package name is required"),
+
   packageDescription: z.string().min(1, "Package description is required"),
   packagePercentage: z.string().refine((value) => Number(value) > 0, {
     message: "Percentage must be greater than 0",
@@ -57,7 +61,7 @@ const PackagesSchema = z.object({
 
 export type PackagesFormValues = z.infer<typeof PackagesSchema>;
 
-const CreatePackageModal = ({ fetchPackages }: Props) => {
+const CreatePackageModal = ({ setPackages, closeModal }: Props) => {
   const supabaseClient = createClientSide();
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
@@ -77,8 +81,6 @@ const CreatePackageModal = ({ fetchPackages }: Props) => {
       packageDays: "",
     },
   });
-
-  const uploadedFile = watch("file");
 
   const onSubmit = async (data: PackagesFormValues) => {
     const filesToUpload = [
@@ -120,10 +122,25 @@ const CreatePackageModal = ({ fetchPackages }: Props) => {
         packageDescription: data.packageDescription,
         packagePercentage: data.packagePercentage,
         packageDays: data.packageDays,
-        packageImage: packageBanner,
-        packageColor: packageColor,
+        packageImage: packageColor,
+        packageColor: packageBanner,
       });
 
+      setPackages((prev) => [
+        ...prev,
+        {
+          package_id: uuidv4(),
+          package_name: data.packageName,
+          package_description: data.packageDescription,
+          package_percentage: Number(data.packagePercentage),
+          package_days: Number(data.packageDays),
+          package_is_disabled: false,
+          package_color: packageColor ? packageColor : null,
+          package_image: packageBanner ? packageBanner : null,
+          packages_days: Number(data.packageDays),
+        },
+      ]);
+      closeModal();
       toast({
         title: "Success",
         description: "Files uploaded successfully.",
@@ -150,6 +167,9 @@ const CreatePackageModal = ({ fetchPackages }: Props) => {
     setOpen(false);
     reset();
   };
+
+  const bannerImage = watch("file");
+  const packageColor = watch("packageColor");
 
   return (
     <Dialog
@@ -230,6 +250,7 @@ const CreatePackageModal = ({ fetchPackages }: Props) => {
                 />
               )}
             />
+
             {errors.packagePercentage && (
               <p className="text-red-500 text-sm mt-1">
                 {errors.packagePercentage.message}
@@ -271,11 +292,12 @@ const CreatePackageModal = ({ fetchPackages }: Props) => {
                 />
               )}
             />
-            {!errors.file && uploadedFile && (
+            {!errors.file && bannerImage && (
               <p className="text-md font-bold text-green-700">
                 {"File Uploaded Successfully"}
               </p>
             )}
+
             {errors.file && (
               <p className="text-primaryRed text-sm mt-1">
                 {errors.file?.message}
@@ -294,11 +316,12 @@ const CreatePackageModal = ({ fetchPackages }: Props) => {
                 />
               )}
             />
-            {!errors.packageColor && uploadedFile && (
+            {!errors.packageColor && packageColor && (
               <p className="text-md font-bold text-green-700">
                 {"File Uploaded Successfully"}
               </p>
             )}
+
             {errors.packageColor && (
               <p className="text-primaryRed text-sm mt-1">
                 {errors.packageColor?.message}

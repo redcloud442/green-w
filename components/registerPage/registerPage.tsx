@@ -113,14 +113,14 @@ const RegisterPage = ({ referralLink }: Props) => {
     try {
       const result = await checkUserName({ userName: value });
 
-      if (!result.success) {
-        setError("userName", { message: "Username already exists" });
+      if (!result.ok) {
+        setError("userName", { message: "Username is already taken" });
       } else {
         clearErrors("userName");
         setIsUsernameValidated(true);
       }
     } catch (e) {
-      setError("userName", { message: "Validation failed. Try again." });
+      setError("userName", { message: "Fetching username failed. Try again." });
     } finally {
       setIsUsernameLoading(false);
     }

@@ -1,7 +1,6 @@
-import { handleSignInUser } from "@/app/actions/auth/authAction";
 import { useToast } from "@/hooks/use-toast";
 import { logError } from "@/services/Error/ErrorLogs";
-import { getUserSponsor } from "@/services/User/User";
+import { getUserSponsor, handleGenerateLink } from "@/services/User/User";
 import { MAX_FILE_SIZE_MB, ROLE } from "@/utils/constant";
 import { userNameToEmail } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
@@ -54,7 +53,7 @@ const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
   const handleSignIn = async () => {
     try {
       setIsLoading(true);
-      const data = await handleSignInUser({
+      const data = await handleGenerateLink({
         formattedUserName: userNameToEmail(userProfile.user_username ?? ""),
       });
 
@@ -89,7 +88,7 @@ const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
           userId: userProfile.user_id,
         });
 
-        setUserSponsor(userSponsor);
+        setUserSponsor({ user_username: userSponsor });
       } catch (e) {
         if (e instanceof Error) {
           await logError(supabaseClient, {

@@ -153,8 +153,9 @@ const DashboardDepositModalDeposit = ({
       setAddTransactionHistory([transactionHistory]);
 
       toast({
-        title: "Deposit Request Successfully",
-        description: "Please wait for your request to be approved.",
+        title: "Elevate Deposit is now on review",
+        description:
+          "Elevate team will review your request and approve it soon.",
       });
 
       setOpen(false);

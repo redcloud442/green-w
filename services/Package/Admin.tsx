@@ -1,17 +1,22 @@
 import { package_table } from "@prisma/client";
-import { SupabaseClient } from "@supabase/supabase-js";
 
-export const getAdminPackages = async (
-  supabaseClient: SupabaseClient,
-  params: {
-    teamMemberId: string;
-  }
-) => {
-  const { data, error } = await supabaseClient.rpc("get_packages_admin", {
-    input_data: params,
+export const getAdminPackages = async () => {
+  const response = await fetch(`/api/v1/package/list`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
 
-  if (error) throw error;
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.error || "An error occurred while creating the top-up request."
+    );
+  }
+
+  const { data } = result;
 
   return data as package_table[];
 };
@@ -22,25 +27,22 @@ export const updatePackagesData = async (params: {
     packageDescription: string;
     packagePercentage: string;
     packageDays: string;
+    packageColor: string;
+    packageImage: string;
     packageIsDisabled: boolean;
-    packageColor: string | null;
-    package_image: string | null;
   };
   packageId: string;
   teamMemberId: string;
 }) => {
   const { packageId } = params;
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/package/` + packageId,
-    {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(params),
-    }
-  );
+  const response = await fetch(`/api/v1/package/` + packageId, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(params),
+  });
 
   const result = await response.json();
 
@@ -50,7 +52,7 @@ export const updatePackagesData = async (params: {
     );
   }
 
-  return response;
+  return result;
 };
 
 export const createPackage = async (params: {
@@ -61,16 +63,13 @@ export const createPackage = async (params: {
   packageImage: string;
   packageColor: string;
 }) => {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/package/create`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(params),
-    }
-  );
+  const response = await fetch(`/api/v1/package/create`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(params),
+  });
 
   const result = await response.json();
 
@@ -80,64 +79,7 @@ export const createPackage = async (params: {
     );
   }
 
-  return response;
-};
+  const { data } = result;
 
-export const batchPackageNotification = async (params: {
-  batchData: {
-    to: string[];
-    from: string;
-    subject: string;
-    html: React.ReactNode;
-  }[];
-}) => {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/resend/batch`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(params),
-    }
-  );
-
-  const result = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      result.error || "An error occurred while sending the batch notification."
-    );
-  }
-
-  return response;
-};
-
-export const batchMessageNotification = async (params: {
-  number: string[];
-  message: string;
-}) => {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/message/batch`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        number: params.number,
-        message: params.message,
-      }),
-    }
-  );
-
-  const result = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      result.error || "An error occurred while sending the batch notification."
-    );
-  }
-
-  return response;
+  return data;
 };

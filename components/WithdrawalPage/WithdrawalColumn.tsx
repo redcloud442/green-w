@@ -4,10 +4,10 @@ import { logError } from "@/services/Error/ErrorLogs";
 import { updateWithdrawalStatus } from "@/services/Withdrawal/Admin";
 import { formatDateToYYYYMMDD } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
-import { WithdrawalRequestData } from "@/utils/types";
+import { AdminWithdrawaldata, WithdrawalRequestData } from "@/utils/types";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
-import { useCallback, useState } from "react";
+import { Dispatch, SetStateAction, useCallback, useState } from "react";
 import { Badge } from "../ui/badge";
 import {
   Dialog,
@@ -27,7 +27,7 @@ const statusColorMap: Record<string, string> = {
 
 export const WithdrawalColumn = (
   handleFetch: () => void,
-  reset: () => void
+  setRequestData: Dispatch<SetStateAction<AdminWithdrawaldata | null>>
 ) => {
   const { toast } = useToast();
   const supabaseClient = createClientSide();
@@ -43,12 +43,52 @@ export const WithdrawalColumn = (
       try {
         setIsLoading(true);
         await updateWithdrawalStatus({ status, requestId, note });
-        handleFetch();
-        reset();
+
+        setRequestData((prev) => {
+          if (!prev) return prev;
+
+          // Extract PENDING data and filter out the item being updated
+          const pendingData = prev.data["PENDING"]?.data ?? [];
+          const updatedItem = pendingData.find(
+            (item) => item.alliance_withdrawal_request_id === requestId
+          );
+          const newPendingList = pendingData.filter(
+            (item) => item.alliance_withdrawal_request_id !== requestId
+          );
+          const currentStatusData = prev.data[status as keyof typeof prev.data];
+          const hasExistingData = currentStatusData?.data?.length > 0;
+
+          if (!updatedItem) return prev;
+
+          return {
+            ...prev,
+            data: {
+              ...prev.data,
+              PENDING: {
+                ...prev.data["PENDING"],
+                data: newPendingList,
+                count: Number(prev.data["PENDING"]?.count) - 1,
+              },
+              [status as keyof typeof prev.data]: {
+                ...currentStatusData,
+                data: hasExistingData
+                  ? [
+                      {
+                        ...updatedItem,
+                        alliance_withdrawal_request_status: status,
+                      },
+                      ...currentStatusData.data,
+                    ]
+                  : [],
+                count: Number(currentStatusData?.count || 0) + 1,
+              },
+            },
+          };
+        });
+
         toast({
           title: `Status Update`,
           description: `${status} Request Successfully`,
-          variant: "success",
         });
         setIsOpenModal({ open: false, requestId: "", status: "" });
       } catch (e) {

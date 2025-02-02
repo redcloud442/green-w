@@ -12,11 +12,16 @@ export const metadata: Metadata = {
 };
 
 const Page = async () => {
-  const { teamMemberProfile } = await protectionAdminUser();
+  const { teamMemberProfile, profile } = await protectionAdminUser();
 
   if (!teamMemberProfile) return redirect("/auth/login");
 
-  return <AdminWithdrawalHistoryPage teamMemberProfile={teamMemberProfile} />;
+  return (
+    <AdminWithdrawalHistoryPage
+      teamMemberProfile={teamMemberProfile}
+      profile={profile}
+    />
+  );
 };
 
 export default Page;

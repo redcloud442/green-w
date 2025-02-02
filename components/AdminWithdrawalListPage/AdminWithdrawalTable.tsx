@@ -57,6 +57,7 @@ import AdminWithdrawalTabs from "./AdminWithdrawalTabs";
 
 type DataTableProps = {
   teamMemberProfile: alliance_member_table;
+  profile: user_table;
 };
 
 type FilterFormValues = {
@@ -67,7 +68,10 @@ type FilterFormValues = {
   dateFilter: { start: string; end: string };
 };
 
-const AdminWithdrawalHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
+const AdminWithdrawalHistoryTable = ({
+  teamMemberProfile,
+  profile,
+}: DataTableProps) => {
   const supabaseClient = createClientSide();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -97,9 +101,7 @@ const AdminWithdrawalHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
         ? new Date(dateFilter.start)
         : undefined;
       const endDate = startDate ? new Date(startDate) : undefined;
-      const requestData = await getAdminWithdrawalRequest(supabaseClient, {
-        teamId: teamMemberProfile.alliance_member_alliance_id,
-        teamMemberId: teamMemberProfile.alliance_member_id,
+      const requestData = await getAdminWithdrawalRequest({
         page: activePage,
         limit: 10,
         columnAccessor: columnAccessor,
@@ -110,7 +112,9 @@ const AdminWithdrawalHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
         dateFilter: {
           start:
             startDate && !isNaN(startDate.getTime())
-              ? startDate.toISOString()
+              ? new Date(
+                  startDate.setDate(startDate.getDate() + 1)
+                ).toISOString()
               : undefined,
           end:
             endDate && !isNaN(endDate.getTime())
@@ -203,29 +207,29 @@ const AdminWithdrawalHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
         : undefined;
       const endDate = startDate ? new Date(startDate) : undefined;
 
-      for (const status of statuses) {
-        const requestData = await getAdminWithdrawalRequest(supabaseClient, {
-          teamId: teamMemberProfile.alliance_member_alliance_id,
-          teamMemberId: teamMemberProfile.alliance_member_id,
-          page: activePage,
-          limit: 10,
-          columnAccessor: columnAccessor,
-          isAscendingSort: isAscendingSort,
-          search: referenceId,
-          userFilter,
-          statusFilter: statusFilter || "PENDING",
-          dateFilter: {
-            start:
-              startDate && !isNaN(startDate.getTime())
-                ? startDate.toISOString()
-                : undefined,
-            end:
-              endDate && !isNaN(endDate.getTime())
-                ? new Date(endDate.setHours(23, 59, 59, 999)).toISOString()
-                : undefined,
-          },
-        });
+      const requestData = await getAdminWithdrawalRequest({
+        page: activePage,
+        limit: 10,
+        columnAccessor: columnAccessor,
+        isAscendingSort: isAscendingSort,
+        search: referenceId,
+        userFilter,
+        statusFilter: statusFilter || "PENDING",
+        dateFilter: {
+          start:
+            startDate && !isNaN(startDate.getTime())
+              ? new Date(
+                  startDate.setDate(startDate.getDate() + 1)
+                ).toISOString()
+              : undefined,
+          end:
+            endDate && !isNaN(endDate.getTime())
+              ? new Date(endDate.setHours(23, 59, 59, 999)).toISOString()
+              : undefined,
+        },
+      });
 
+      for (const status of statuses) {
         updatedData.data[status] = requestData?.data?.[status] || {
           data: [],
           count: 0,
@@ -246,6 +250,14 @@ const AdminWithdrawalHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
     }
   };
 
+  const {
+    columns,
+    isOpenModal,
+    isLoading,
+    setIsOpenModal,
+    handleUpdateStatus,
+  } = AdminWithdrawalHistoryColumn(fetchRequest, profile, setRequestData);
+
   const { register, handleSubmit, watch, getValues, control, reset, setValue } =
     useForm<FilterFormValues>({
       defaultValues: {
@@ -259,14 +271,6 @@ const AdminWithdrawalHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
         rejectNote: "",
       },
     });
-
-  const {
-    columns,
-    isOpenModal,
-    isLoading,
-    setIsOpenModal,
-    handleUpdateStatus,
-  } = AdminWithdrawalHistoryColumn(fetchRequest, reset);
 
   const status = watch("statusFilter") as "PENDING" | "APPROVED" | "REJECTED";
 
@@ -298,10 +302,9 @@ const AdminWithdrawalHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
         let allUserOptions: user_table[] = [];
 
         while (true) {
-          const userData = await getUserOptions(supabaseClient, {
+          const userData = await getUserOptions({
             page: currentUserPage,
             limit: pageLimit,
-            teamMemberId: teamMemberProfile.alliance_member_id,
           });
 
           if (!userData?.length) {
@@ -347,7 +350,7 @@ const AdminWithdrawalHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
       return;
     }
 
-    await fetchRequest();
+    await handleRefresh();
   };
 
   const rejectNote = watch("rejectNote");
@@ -432,13 +435,11 @@ const AdminWithdrawalHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
               disabled={isFetchingList}
               size="sm"
               variant="card"
-              className="w-full md:w-auto rounded-md"
             >
               <Search />
             </Button>
             <Button
               variant="card"
-              className="w-full md:w-auto rounded-md"
               onClick={handleRefresh}
               disabled={isFetchingList}
               size="sm"
@@ -489,7 +490,7 @@ const AdminWithdrawalHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
-                        variant="outline"
+                        variant="card"
                         className="font-normal justify-start"
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
@@ -516,18 +517,13 @@ const AdminWithdrawalHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
 
               {/* End Date Picker */}
 
-              <Button
-                variant="card"
-                className="w-full md:w-auto rounded-md"
-                onClick={handleRefresh}
-              >
+              <Button variant="card" onClick={fetchRequest}>
                 Submit
               </Button>
             </div>
           )}
         </form>
       </div>
-
       <ScrollArea className="w-full overflow-x-auto ">
         {isFetchingList && <TableLoading />}
 
@@ -571,14 +567,13 @@ const AdminWithdrawalHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
             />
           </TabsContent>
         </Tabs>
-
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
 
       <div className="flex items-center justify-end gap-x-4 py-4">
         {activePage > 1 && (
           <Button
-            variant="outline"
+            variant="card"
             size="sm"
             onClick={() => setActivePage((prev) => Math.max(prev - 1, 1))}
             disabled={activePage <= 1}
@@ -641,7 +636,6 @@ const AdminWithdrawalHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
         {activePage < pageCount && (
           <Button
             variant="card"
-            className="md:w-auto rounded-md"
             size="sm"
             onClick={() =>
               setActivePage((prev) => Math.min(prev + 1, pageCount))

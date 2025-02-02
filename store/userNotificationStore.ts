@@ -29,7 +29,7 @@ export const useUserNotificationStore = create<userNotificationState>(
       set((state) => ({
         userNotification: {
           notifications: notification.notifications,
-          count: notification.count || state.userNotification.count,
+          count:notification.count,
         },
       })),
 

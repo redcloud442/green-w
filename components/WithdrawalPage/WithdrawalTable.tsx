@@ -2,7 +2,7 @@
 
 import { logError } from "@/services/Error/ErrorLogs";
 import { getUserOptions } from "@/services/Options/Options";
-import { getWithdrawalRequestAccountant } from "@/services/Withdrawal/Member";
+import { getAdminWithdrawalRequest } from "@/services/Withdrawal/Admin";
 import { escapeFormData } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
 import { AdminWithdrawaldata } from "@/utils/types";
@@ -76,7 +76,6 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
   const [requestData, setRequestData] = useState<AdminWithdrawaldata | null>(
     null
   );
-  const [requestCount, setRequestCount] = useState(0);
   const [activePage, setActivePage] = useState(1);
   const [isFetchingList, setIsFetchingList] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
@@ -99,9 +98,7 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
         ? new Date(dateFilter.start)
         : undefined;
       const endDate = startDate ? new Date(startDate) : undefined;
-      const requestData = await getWithdrawalRequestAccountant(supabaseClient, {
-        teamId: teamMemberProfile.alliance_member_alliance_id,
-        teamMemberId: teamMemberProfile.alliance_member_id,
+      const requestData = await getAdminWithdrawalRequest({
         page: activePage,
         limit: 10,
         columnAccessor: columnAccessor,
@@ -205,32 +202,27 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
         : undefined;
       const endDate = startDate ? new Date(startDate) : undefined;
 
-      for (const status of statuses) {
-        const requestData = await getWithdrawalRequestAccountant(
-          supabaseClient,
-          {
-            teamId: teamMemberProfile.alliance_member_alliance_id,
-            teamMemberId: teamMemberProfile.alliance_member_id,
-            page: activePage,
-            limit: 10,
-            columnAccessor: columnAccessor,
-            isAscendingSort: isAscendingSort,
-            search: referenceId,
-            userFilter,
-            statusFilter: statusFilter,
-            dateFilter: {
-              start:
-                startDate && !isNaN(startDate.getTime())
-                  ? startDate.toISOString()
-                  : undefined,
-              end:
-                endDate && !isNaN(endDate.getTime())
-                  ? new Date(endDate.setHours(23, 59, 59, 999)).toISOString()
-                  : undefined,
-            },
-          }
-        );
+      const requestData = await getAdminWithdrawalRequest({
+        page: activePage,
+        limit: 10,
+        columnAccessor: columnAccessor,
+        isAscendingSort: isAscendingSort,
+        search: referenceId,
+        userFilter,
+        statusFilter: statusFilter,
+        dateFilter: {
+          start:
+            startDate && !isNaN(startDate.getTime())
+              ? startDate.toISOString()
+              : undefined,
+          end:
+            endDate && !isNaN(endDate.getTime())
+              ? new Date(endDate.setHours(23, 59, 59, 999)).toISOString()
+              : undefined,
+        },
+      });
 
+      for (const status of statuses) {
         updatedData.data[status] = requestData?.data?.[status] || {
           data: [],
           count: 0,
@@ -251,6 +243,14 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
     }
   };
 
+  const {
+    columns,
+    isOpenModal,
+    isLoading,
+    setIsOpenModal,
+    handleUpdateStatus,
+  } = WithdrawalColumn(handleRefresh, setRequestData);
+
   const { register, handleSubmit, watch, getValues, control, reset, setValue } =
     useForm<FilterFormValues>({
       defaultValues: {
@@ -264,14 +264,6 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
         rejectNote: "",
       },
     });
-
-  const {
-    columns,
-    isOpenModal,
-    isLoading,
-    setIsOpenModal,
-    handleUpdateStatus,
-  } = WithdrawalColumn(handleRefresh, reset);
 
   const status = watch("statusFilter") as "PENDING" | "APPROVED" | "REJECTED";
 
@@ -303,10 +295,9 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
         let allUserOptions: user_table[] = [];
 
         while (true) {
-          const userData = await getUserOptions(supabaseClient, {
+          const userData = await getUserOptions({
             page: currentUserPage,
             limit: pageLimit,
-            teamMemberId: teamMemberProfile.alliance_member_id,
           });
 
           if (!userData?.length) {
@@ -333,10 +324,7 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
     fetchRequest();
   }, [supabaseClient, teamMemberProfile, activePage, sorting]);
 
-  const pageCount = Math.ceil(
-    (requestData?.data?.[status as "PENDING" | "APPROVED" | "REJECTED"]
-      ?.count ?? 0) / 10
-  );
+  const pageCount = Math.ceil(requestData?.data?.[status]?.count || 0 / 10);
 
   const handleSwitchChange = (checked: boolean) => {
     setShowFilters(checked);
@@ -355,7 +343,7 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
       return;
     }
 
-    await fetchRequest();
+    await handleRefresh();
   };
 
   const rejectNote = watch("rejectNote");
@@ -431,18 +419,11 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
               type="submit"
               disabled={isFetchingList}
               size="sm"
-              variant="card"
-              className=" rounded-md"
+              variant="outline"
             >
               <Search />
             </Button>
-            <Button
-              variant="card"
-              className="rounded-md"
-              onClick={handleRefresh}
-              disabled={isFetchingList}
-              size="sm"
-            >
+            <Button onClick={handleRefresh} disabled={isFetchingList} size="sm">
               <RefreshCw />
               Refresh
             </Button>
@@ -514,13 +495,7 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
                 )}
               />
 
-              <Button
-                variant="card"
-                className=" md:w-auto rounded-md"
-                onClick={handleRefresh}
-              >
-                Submit
-              </Button>
+              <Button onClick={handleRefresh}>Submit</Button>
             </div>
           )}
         </form>
@@ -571,7 +546,7 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
 
-      <div className="flex items-center justify-end gap-x-4 py-4 ">
+      <div className="flex items-center justify-end gap-x-4 py-4">
         {activePage > 1 && (
           <Button
             variant="outline"
@@ -620,7 +595,7 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
               typeof page === "number" ? (
                 <Button
                   key={page}
-                  variant={activePage === page ? "card" : "outline"}
+                  variant={activePage === page ? "default" : "outline"}
                   size="sm"
                   onClick={() => setActivePage(page)}
                 >
@@ -636,8 +611,7 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
         </div>
         {activePage < pageCount && (
           <Button
-            variant="card"
-            className="rounded-md"
+            variant="outline"
             size="sm"
             onClick={() =>
               setActivePage((prev) => Math.min(prev + 1, pageCount))

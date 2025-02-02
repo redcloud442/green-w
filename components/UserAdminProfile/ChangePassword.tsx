@@ -1,6 +1,6 @@
-import { changeUserPassword } from "@/app/actions/auth/authAction";
 import { useToast } from "@/hooks/use-toast";
 import { logError } from "@/services/Error/ErrorLogs";
+import { changeUserPassword } from "@/services/User/User";
 import { ROLE } from "@/utils/constant";
 import { useRole } from "@/utils/context/roleContext";
 import { createClientSide } from "@/utils/supabase/client";
@@ -91,6 +91,7 @@ const ChangePassword = ({ userProfile, setUserProfile }: Props) => {
       });
 
       reset();
+
       if (setUserProfile) {
         setUserProfile((prev) => ({
           ...prev,

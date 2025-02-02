@@ -4,10 +4,10 @@ import { logError } from "@/services/Error/ErrorLogs";
 import { updateTopUpStatus } from "@/services/TopUp/Admin";
 import { formatDateToYYYYMMDD } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
-import { MerchantTopUpRequestData, TopUpRequestData } from "@/utils/types";
+import { AdminTopUpRequestData, TopUpRequestData } from "@/utils/types";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
-import { Dispatch, SetStateAction, useCallback, useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { Badge } from "../ui/badge";
 import {
   Dialog,
@@ -26,8 +26,7 @@ const statusColorMap: Record<string, string> = {
 };
 
 export const TopUpColumn = (
-  handleFetch: () => void,
-  setRequestData: Dispatch<SetStateAction<MerchantTopUpRequestData | null>>,
+  setRequestData: Dispatch<SetStateAction<AdminTopUpRequestData | null>>,
   reset: () => void
 ) => {
   const { toast } = useToast();
@@ -40,46 +39,98 @@ export const TopUpColumn = (
     amount: 0,
   });
 
-  const handleUpdateStatus = useCallback(
-    async (status: string, requestId: string, note?: string) => {
-      try {
-        setIsLoading(true);
-        await updateTopUpStatus({
+  const handleUpdateStatus = async (
+    status: string,
+    requestId: string,
+    note?: string
+  ) => {
+    try {
+      setIsLoading(true);
+
+      await updateTopUpStatus(
+        {
           status,
           requestId,
           note,
-        });
+        },
+        supabaseClient
+      );
 
+      setRequestData((prev) => {
+        if (!prev) return prev;
+
+        const pendingData = prev.data["PENDING"]?.data ?? [];
+        const updatedItem = pendingData.find(
+          (item) => item.alliance_top_up_request_id === requestId
+        );
+        const newPendingList = pendingData.filter(
+          (item) => item.alliance_top_up_request_id !== requestId
+        );
+        const currentStatusData = prev.data[status as keyof typeof prev.data];
+        const hasExistingData = currentStatusData?.data?.length > 0;
+
+        const merchantBalance =
+          status === "APPROVED"
+            ? (prev.merchantBalance || 0) -
+              (updatedItem?.alliance_top_up_request_amount ?? 0)
+            : prev.merchantBalance;
+
+        if (!updatedItem) return prev;
+
+        return {
+          ...prev,
+          data: {
+            ...prev.data,
+            PENDING: {
+              ...prev.data["PENDING"],
+              data: newPendingList,
+              count: Number(prev.data["PENDING"]?.count) - 1,
+            },
+            [status as keyof typeof prev.data]: {
+              ...currentStatusData,
+              data: hasExistingData
+                ? [
+                    {
+                      ...updatedItem,
+                      alliance_top_up_request_status: status,
+                      alliance_top_up_request_date_updated: new Date(),
+                    },
+                    ...currentStatusData.data,
+                  ]
+                : [],
+              count: Number(currentStatusData?.count || 0) + 1,
+            },
+          },
+          merchantBalance: merchantBalance,
+        };
+      });
+      toast({
+        title: `Status Update`,
+        description: `${status} Request Successfully`,
+        variant: "success",
+      });
+
+      setIsOpenModal({ open: false, requestId: "", status: "", amount: 0 });
+      reset();
+    } catch (e) {
+      if (e instanceof Error) {
+        await logError(supabaseClient, {
+          errorMessage: e.message,
+          stackTrace: e.stack,
+          stackPath:
+            "components/AdminTopUpApprovalPage/AdminTopUpApprovalColumn.tsx",
+        });
         toast({
-          title: `Status Update`,
-          description: `${status} Request Successfully`,
-          variant: "success",
+          title: `Invalid Request`,
+          description: `${e.message}`,
+          variant: "destructive",
         });
-        handleFetch();
-
-        setIsOpenModal({ open: false, requestId: "", status: "", amount: 0 });
-        reset();
-      } catch (e) {
-        if (e instanceof Error) {
-          await logError(supabaseClient, {
-            errorMessage: e.message,
-            stackTrace: e.stack,
-            stackPath:
-              "components/AdminTopUpApprovalPage/AdminTopUpApprovalColumn.tsx",
-          });
-          toast({
-            title: `Invalid Request`,
-            description: `${e.message}`,
-            variant: "destructive",
-          });
-        }
-      } finally {
-        setIsLoading(false);
       }
-    },
-    [handleFetch, toast]
-  );
-
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
   const columns: ColumnDef<TopUpRequestData>[] = [
     {
       accessorKey: "user_username",
