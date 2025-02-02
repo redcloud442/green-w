@@ -1,6 +1,5 @@
 "use client";
 
-import { handleSigninAdmin } from "@/app/actions/auth/authAction";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -10,6 +9,7 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { useToast } from "@/hooks/use-toast";
+import { handleSignInAdmin } from "@/services/auth/auth";
 import { escapeFormData, userNameToEmail } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -82,9 +82,9 @@ const LoginPageSecured = () => {
 
       const { userName, password } = sanitizedData;
 
-      const result = await handleSigninAdmin({ userName, password });
+      const result = await handleSignInAdmin({ userName, password });
 
-      if (!result.success) {
+      if (!result.ok) {
         toast({
           title: "Not Allowed",
           variant: "destructive",
@@ -159,7 +159,13 @@ const LoginPageSecured = () => {
   return (
     <div className="flex w-full flex-col items-center justify-start min-h-screen h-full p-2">
       <div className="">
-        <Image src="/app-logo.png" alt="logo" width={400} height={250} />
+        <Image
+          src="/app-logo.png"
+          alt="logo"
+          width={400}
+          height={250}
+          priority
+        />
       </div>
       <Card className="w-full max-w-lg z-40 relative p-6">
         {step === "login" ? (

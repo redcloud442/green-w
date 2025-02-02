@@ -1,6 +1,5 @@
 "use client";
 
-import { claimPackage } from "@/app/actions/package/packageAction";
 import {
   Card,
   CardContent,
@@ -10,6 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { ClaimPackageHandler } from "@/services/Package/Member";
 import { usePackageChartData } from "@/store/usePackageChartData";
 import { useUserTransactionHistoryStore } from "@/store/userTransactionHistoryStore";
 import { useUserDashboardEarningsStore } from "@/store/useUserDashboardEarnings";
@@ -53,14 +53,13 @@ const DashboardPackages = ({ chartData, teamMemberProfile }: Props) => {
 
     try {
       setIsLoading(package_connection_id); // Indicate the specific package is being claimed
-      const response = await claimPackage({
+      const response = await ClaimPackageHandler({
         packageConnectionId: package_connection_id,
         amount,
         earnings: profit_amount,
-        packageName: packageData.package,
       });
 
-      if (response.success) {
+      if (response.ok) {
         const transactionHistory = {
           transaction_id: uuidv4(),
           transaction_date: new Date(),

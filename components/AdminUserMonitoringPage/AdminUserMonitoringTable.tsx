@@ -66,17 +66,14 @@ const AdminUserMonitoringTable = ({ teamMemberProfile }: DataTableProps) => {
 
       const { usernameFilter } = sanitizedData;
 
-      const { data, totalCount } = await getUserWithActiveBalance(
-        supabaseClient,
-        {
-          teamMemberId: teamMemberProfile.alliance_member_id,
-          page: activePage,
-          limit: 10,
-          columnAccessor: columnAccessor,
-          isAscendingSort: isAscendingSort,
-          search: usernameFilter,
-        }
-      );
+      const { data, totalCount } = await getUserWithActiveBalance({
+        teamMemberId: teamMemberProfile.alliance_member_id,
+        page: activePage,
+        limit: 10,
+        columnAccessor: columnAccessor,
+        isAscendingSort: isAscendingSort,
+        search: usernameFilter,
+      });
 
       setRequestData(data || []);
       setRequestCount(totalCount || 0);

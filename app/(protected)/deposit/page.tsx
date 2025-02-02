@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 const Page = async () => {
   const { teamMemberProfile } = await protectionMerchantUser();
 
-  if (!teamMemberProfile) return redirect("/auth/login");
+  if (!teamMemberProfile) return redirect("/login");
 
   return <TopUpPage teamMemberProfile={teamMemberProfile} />;
 };

@@ -19,8 +19,11 @@ export type TopUpRequestData = alliance_top_up_request_table & {
   user_last_name: string;
   user_email: string;
   user_id: string;
+  user_profile_picture: string;
   approver_username: string;
+  approver_profile_picture: string;
   alliance_member_id: string;
+  approver_id: string;
   count: number;
 };
 
@@ -38,8 +41,12 @@ export type WithdrawalRequestData = alliance_withdrawal_request_table & {
   user_last_name: string;
   user_id: string;
   user_email: string;
+  user_username: string;
   alliance_member_id: string;
   approver_username?: string;
+  user_profile_picture: string;
+  approver_profile_picture: string;
+  approver_id: string;
 };
 
 export type UserRequestdata = user_table &
@@ -108,6 +115,7 @@ export type AdminTopUpRequestData = {
     REJECTED: StatusData;
     PENDING: StatusData;
   };
+  merchantBalance?: number;
 };
 
 export type MerchantTopUpRequestData = {

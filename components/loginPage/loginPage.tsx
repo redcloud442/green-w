@@ -54,7 +54,7 @@ const LoginPage = () => {
 
       const { userName, password } = sanitizedData;
 
-      const result = await loginValidation(supabase, {
+      await loginValidation(supabase, {
         userName,
         password,
       });
@@ -64,7 +64,7 @@ const LoginPage = () => {
       });
 
       setIsSuccess(true);
-      router.push(result);
+      router.push("/");
     } catch (e) {
       if (e instanceof Error) {
         toast({
@@ -82,7 +82,13 @@ const LoginPage = () => {
       <NavigationLoader visible={isSubmitting || isLoading || isSuccess} />
 
       <div className="">
-        <Image src="/app-logo.png" alt="logo" width={400} height={250} />
+        <Image
+          src="/app-logo.png"
+          alt="logo"
+          width={400}
+          height={250}
+          priority
+        />
       </div>
       <Card className="w-full max-w-lg z-40 relative p-6">
         <form

@@ -9,17 +9,17 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollBar } from "@/components/ui/scroll-area";
 import { useUserNotificationStore } from "@/store/userNotificationStore";
-import { alliance_member_table } from "@prisma/client";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { BellIcon } from "lucide-react";
 import { useState } from "react";
 
 type Props = {
-  teamMemberProfile: alliance_member_table | null;
+  teamMemberId: string | null;
+  handleOpen: () => void;
 };
 
-const DashboardNotification = ({ teamMemberProfile }: Props) => {
+const DashboardNotification = ({ teamMemberId, handleOpen }: Props) => {
   const [open, setOpen] = useState(false);
   const { userNotification } = useUserNotificationStore();
 
@@ -28,6 +28,7 @@ const DashboardNotification = ({ teamMemberProfile }: Props) => {
       open={open}
       onOpenChange={(isOpen) => {
         setOpen(isOpen);
+        handleOpen();
       }}
     >
       <DialogTrigger asChild>
@@ -57,7 +58,7 @@ const DashboardNotification = ({ teamMemberProfile }: Props) => {
             Notification
           </DialogTitle>
           <DialogDescription></DialogDescription>
-          <NotificationTable teamMemberProfile={teamMemberProfile} />
+          <NotificationTable teamMemberId={teamMemberId} />
           <DialogFooter className="flex justify-center"></DialogFooter>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>

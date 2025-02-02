@@ -12,14 +12,16 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { logError } from "@/services/Error/ErrorLogs";
 import { updateTopUpStatus } from "@/services/TopUp/Admin";
-import { formatDateToYYYYMMDD } from "@/utils/function";
+import { formatDateToYYYYMMDD, formatTime } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
-import { TopUpRequestData } from "@/utils/types";
+import { AdminTopUpRequestData, TopUpRequestData } from "@/utils/types";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { Dispatch, SetStateAction, useCallback, useState } from "react";
 import { AspectRatio } from "../ui/aspect-ratio";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import TableLoading from "../ui/tableLoading";
 import { Textarea } from "../ui/textarea";
 const statusColorMap: Record<string, string> = {
@@ -30,7 +32,7 @@ const statusColorMap: Record<string, string> = {
 
 export const useAdminTopUpApprovalColumns = (
   handleFetch: () => void,
-  reset: () => void
+  setRequestData: Dispatch<SetStateAction<AdminTopUpRequestData | null>>
 ) => {
   const { toast } = useToast();
   const router = useRouter();
@@ -46,13 +48,54 @@ export const useAdminTopUpApprovalColumns = (
     async (status: string, requestId: string, note?: string) => {
       try {
         setIsLoading(true);
-        await updateTopUpStatus({ status, requestId, note });
-        handleFetch();
-        reset();
+        await updateTopUpStatus({ status, requestId, note }, supabaseClient);
+
+        setRequestData((prev) => {
+          if (!prev) return prev;
+
+          // Extract PENDING data and filter out the item being updated
+          const pendingData = prev.data["PENDING"]?.data ?? [];
+          const updatedItem = pendingData.find(
+            (item) => item.alliance_top_up_request_id === requestId
+          );
+          const newPendingList = pendingData.filter(
+            (item) => item.alliance_top_up_request_id !== requestId
+          );
+          const currentStatusData = prev.data[status as keyof typeof prev.data];
+          const hasExistingData = currentStatusData?.data?.length > 0;
+
+          if (!updatedItem) return prev;
+
+          return {
+            ...prev,
+            data: {
+              ...prev.data,
+              PENDING: {
+                ...prev.data["PENDING"],
+                data: newPendingList,
+                count: Number(prev.data["PENDING"]?.count) - 1,
+              },
+              [status as keyof typeof prev.data]: {
+                ...currentStatusData,
+                data: hasExistingData
+                  ? [
+                      {
+                        ...updatedItem,
+                        alliance_top_up_request_status: status,
+                        alliance_top_up_request_date_updated: new Date(),
+                      },
+                      ...currentStatusData.data,
+                    ]
+                  : [],
+                count: Number(currentStatusData?.count || 0) + 1,
+              },
+            },
+          };
+        });
+
         toast({
           title: `Status Update`,
           description: `${status} Request Successfully`,
-          variant: "success",
         });
         setIsOpenModal({ open: false, requestId: "", status: "" });
       } catch (e) {
@@ -77,44 +120,6 @@ export const useAdminTopUpApprovalColumns = (
   );
 
   const columns: ColumnDef<TopUpRequestData>[] = [
-    // {
-    //   accessorKey: "alliance_top_up_request_id",
-
-    //   header: ({ column }) => (
-    //     <Button
-    //       variant="ghost"
-    //       onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-    //     >
-    //       Reference ID <ArrowUpDown />
-    //     </Button>
-    //   ),
-    //   cell: ({ row }) => {
-    //     const id = row.getValue("alliance_top_up_request_id") as string;
-    //     const maxLength = 15;
-
-    //     const handleCopy = async () => {
-    //       if (id) {
-    //         await navigator.clipboard.writeText(id);
-    //       }
-    //     };
-
-    //     return (
-    //       <div className="flex items-center space-x-2">
-    //         <div
-    //           className="truncate"
-    //           title={id.length > maxLength ? id : undefined}
-    //         >
-    //           {id.length > maxLength ? `${id.slice(0, maxLength)}...` : id}
-    //         </div>
-    //         {id && (
-    //           <Button variant="ghost" size="sm" onClick={handleCopy}>
-    //             <Copy />
-    //           </Button>
-    //         )}
-    //       </div>
-    //     );
-    //   },
-    // },
     {
       accessorKey: "user_username",
 
@@ -129,9 +134,17 @@ export const useAdminTopUpApprovalColumns = (
       cell: ({ row }) => (
         <div
           onClick={() => router.push(`/admin/users/${row.original.user_id}`)}
-          className="text-wrap cursor-pointer hover:underline text-blue-500"
+          className="flex items-center gap-2 text-wrap cursor-pointer hover:underline"
         >
-          {row.getValue("user_username")}
+          <Avatar>
+            <AvatarImage src={row.original.user_profile_picture ?? ""} />
+            <AvatarFallback>
+              {row.original.user_username?.charAt(0)}
+            </AvatarFallback>
+          </Avatar>
+          <p className="text-wrap text-blue-500">
+            {row.getValue("user_username")}
+          </p>
         </div>
       ),
     },
@@ -222,7 +235,8 @@ export const useAdminTopUpApprovalColumns = (
       ),
       cell: ({ row }) => (
         <div className="text-center">
-          {formatDateToYYYYMMDD(row.getValue("alliance_top_up_request_date"))}
+          {formatDateToYYYYMMDD(row.getValue("alliance_top_up_request_date"))},
+          {formatTime(row.getValue("alliance_top_up_request_date"))}
         </div>
       ),
     },
@@ -238,12 +252,55 @@ export const useAdminTopUpApprovalColumns = (
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="text-center">{row.getValue("approver_username")}</div>
+        <div className="flex items-center gap-2 text-wrap cursor-pointer hover:underline">
+          {row.original.approver_username ? (
+            <>
+              <Avatar>
+                <AvatarImage
+                  src={row.original.approver_profile_picture ?? ""}
+                />
+                <AvatarFallback>
+                  {row.original.approver_username?.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+              <p
+                onClick={() =>
+                  router.push(`/admin/users/${row.original.approver_id}`)
+                }
+                className="text-wrap text-blue-500 underline"
+              >
+                {row.getValue("approver_username")}
+              </p>
+            </>
+          ) : null}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "alliance_top_up_request_date_updated",
+
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Date Updated <ArrowUpDown />
+        </Button>
+      ),
+      cell: ({ row }) => (
+        <div className="text-center">
+          {row.getValue("alliance_top_up_request_date_updated")
+            ? formatDateToYYYYMMDD(
+                row.getValue("alliance_top_up_request_date_updated")
+              ) +
+              ", " +
+              formatTime(row.getValue("alliance_top_up_request_date_updated"))
+            : ""}
+        </div>
       ),
     },
     {
       accessorKey: "alliance_top_up_request_attachment",
-
       header: () => <div>Attachment</div>,
       cell: ({ row }) => {
         const attachmentUrl = row.getValue(
@@ -262,10 +319,11 @@ export const useAdminTopUpApprovalColumns = (
               </DialogHeader>
               <div className="flex justify-center items-center border-2">
                 <AspectRatio ratio={16 / 9} className="w-full">
-                  <img
+                  <Image
                     src={attachmentUrl || ""}
                     alt="Attachment Preview"
-                    className="object-contain w-full h-full"
+                    width={100}
+                    height={100}
                   />
                 </AspectRatio>
               </div>
@@ -279,7 +337,6 @@ export const useAdminTopUpApprovalColumns = (
     },
     {
       accessorKey: "alliance_top_up_request_reject_note",
-
       header: () => <div>Rejection Note</div>,
       cell: ({ row }) => {
         const rejectionNote = row.getValue(

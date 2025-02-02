@@ -1,34 +1,31 @@
 import { AdminWithdrawaldata } from "@/utils/types";
-import { SupabaseClient } from "@supabase/supabase-js";
 
-export const getAdminWithdrawalRequest = async (
-  supabaseClient: SupabaseClient,
-  params: {
-    page: number;
-    limit: number;
-    search?: string;
-    teamMemberId: string;
-    teamId: string;
-    columnAccessor: string;
-    isAscendingSort: boolean;
-    userFilter?: string;
-    statusFilter?: string;
-    dateFilter?: {
-      start: string | undefined;
-      end: string | undefined;
-    };
-  }
-) => {
-  const { data, error } = await supabaseClient.rpc(
-    "get_admin_withdrawal_history",
-    {
-      input_data: params,
-    }
-  );
+export const getAdminWithdrawalRequest = async (params: {
+  page: number;
+  limit: number;
+  search?: string;
+  columnAccessor: string;
+  isAscendingSort: boolean;
+  userFilter?: string;
+  statusFilter?: string;
+  dateFilter?: {
+    start: string | undefined;
+    end: string | undefined;
+  };
+}) => {
+  const response = await fetch("/api/v1/withdraw/list", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(params),
+  });
 
-  if (error) throw error;
+  const result = await response.json();
 
-  return data as AdminWithdrawaldata;
+  if (!response.ok) throw new Error("Failed to fetch withdrawal list");
+
+  return result as AdminWithdrawaldata;
 };
 
 export const updateWithdrawalStatus = async (params: {
@@ -38,13 +35,13 @@ export const updateWithdrawalStatus = async (params: {
 }) => {
   const { requestId } = params;
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/withdraw/` + requestId,
-    {
-      method: "PUT",
-      body: JSON.stringify(params),
-    }
-  );
+  const response = await fetch(`/api/v1/withdraw/` + requestId, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(params),
+  });
 
   const result = await response.json();
 
@@ -53,54 +50,6 @@ export const updateWithdrawalStatus = async (params: {
       result.error || "An error occurred while creating the top-up request."
     );
   }
-  // const { data } = result;
-
-  // if (data.updatedRequest.alliance_withdrawal_request_email) {
-  //   await sendWithdrawalEmail({
-  //     to: data.updatedRequest.alliance_withdrawal_request_email,
-  //     from: "Elevate Team",
-  //     subject: `Withdrawal Request ${data.updatedRequest.alliance_withdrawal_request_status.slice(0, 1) + data.updatedRequest.alliance_withdrawal_request_status.slice(1).toLowerCase()}.`,
-  //     accountHolderName:
-  //       data.updatedRequest.alliance_withdrawal_request_bank_name ?? "",
-  //     accountType:
-  //       data.updatedRequest.alliance_withdrawal_request_bank_name ?? "",
-  //     accountBank: data.updatedRequest.alliance_withdrawal_request_type ?? "",
-  //     accountNumber:
-  //       data.updatedRequest.alliance_withdrawal_request_account ?? "",
-  //     transactionDetails: {
-  //       balance: "",
-  //       date:
-  //         formatMonthDateYear(
-  //           data.updatedRequest.alliance_withdrawal_request_date_updated
-  //         ) +
-  //         ", " +
-  //         formatTime(
-  //           data.updatedRequest.alliance_withdrawal_request_date_updated
-  //         ),
-  //       description: `Withdrawal ${data.updatedRequest.alliance_withdrawal_request_status.slice(0, 1) + data.updatedRequest.alliance_withdrawal_request_status.slice(1).toLowerCase()} ${data.updatedRequest.alliance_withdrawal_request_reject_note ? `(${data.updatedRequest.alliance_withdrawal_request_reject_note})` : ""} !`,
-  //       amount:
-  //         "₱" +
-  //         Number(
-  //           data.updatedRequest.alliance_withdrawal_request_amount -
-  //             data.updatedRequest.alliance_withdrawal_request_fee || 0
-  //         ).toLocaleString("en-US", {
-  //           minimumFractionDigits: 2,
-  //           maximumFractionDigits: 2,
-  //         }),
-  //     },
-  //     message: `Your withdrawal request has been ${data.updatedRequest.alliance_withdrawal_request_status.slice(0, 1) + data.updatedRequest.alliance_withdrawal_request_status.slice(1).toLowerCase()} !`,
-  //     greetingPhrase: "Hello!",
-  //     closingPhrase: "Thank you for continuously Elevating with us.",
-  //     signature: "The Elevate Team",
-  //   });
-  // }
-
-  // if (data.updatedRequest.alliance_withdrawal_request_cellphone_number) {
-  //   await sendWithdrawalSMS({
-  //     number: data.updatedRequest.alliance_withdrawal_request_cellphone_number,
-  //     message: `${data.updatedRequest.alliance_withdrawal_request_status === "APPROVED" ? "Congratulations! Withdrawal sent" : `We're sorry, your withdrawal request has been rejected, ${data.updatedRequest.alliance_withdrawal_request_reject_note}`} `,
-  //   });
-  // }
 
   return response;
 };

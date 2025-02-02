@@ -60,7 +60,7 @@ const AdminLeaderBoardsPage = ({ teamMemberProfile }: Props) => {
           return;
         }
 
-        const { totalCount, data } = await getLeaderBoardData(supabaseClient, {
+        const { totalCount, data } = await getLeaderBoardData({
           leaderBoardType,
           teamMemberId: teamMemberProfile.alliance_member_id,
           limit: 10,

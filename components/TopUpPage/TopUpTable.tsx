@@ -2,10 +2,10 @@
 
 import { logError } from "@/services/Error/ErrorLogs";
 import { getUserOptions } from "@/services/Options/Options";
-import { getMerchantTopUpRequest } from "@/services/TopUp/Member";
+import { getAdminTopUpRequest } from "@/services/TopUp/Admin";
 import { escapeFormData } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
-import { MerchantTopUpRequestData } from "@/utils/types";
+import { AdminTopUpRequestData } from "@/utils/types";
 import { alliance_member_table, user_table } from "@prisma/client";
 import { DialogDescription } from "@radix-ui/react-dialog";
 import {
@@ -75,8 +75,9 @@ const TopUpTable = ({ teamMemberProfile }: DataTableProps) => {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
-  const [requestData, setRequestData] =
-    useState<MerchantTopUpRequestData | null>(null);
+  const [requestData, setRequestData] = useState<AdminTopUpRequestData | null>(
+    null
+  );
   const [activePage, setActivePage] = useState(1);
   const [isFetchingList, setIsFetchingList] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
@@ -98,9 +99,7 @@ const TopUpTable = ({ teamMemberProfile }: DataTableProps) => {
         ? new Date(dateFilter.start)
         : undefined;
       const endDate = startDate ? new Date(startDate) : undefined;
-      const requestData = await getMerchantTopUpRequest(supabaseClient, {
-        teamId: teamMemberProfile.alliance_member_alliance_id,
-        teamMemberId: teamMemberProfile.alliance_member_id,
+      const requestData = await getAdminTopUpRequest({
         page: activePage,
         limit: 10,
         columnAccessor: columnAccessor,
@@ -120,7 +119,7 @@ const TopUpTable = ({ teamMemberProfile }: DataTableProps) => {
         },
       });
 
-      setRequestData((prev: MerchantTopUpRequestData | null) => {
+      setRequestData((prev: AdminTopUpRequestData | null) => {
         if (!prev) {
           return {
             data: {
@@ -189,14 +188,13 @@ const TopUpTable = ({ teamMemberProfile }: DataTableProps) => {
         "REJECTED",
       ];
 
-      const updatedData: MerchantTopUpRequestData = {
+      const updatedData: AdminTopUpRequestData = {
         data: {
           APPROVED: { data: [], count: 0 },
           REJECTED: { data: [], count: 0 },
           PENDING: { data: [], count: 0 },
         },
-        merchantBalance:
-          (requestData?.merchantBalance || 0) - (isOpenModal.amount || 0),
+        merchantBalance: 0,
       };
 
       const sanitizedData = escapeFormData(getValues());
@@ -208,33 +206,34 @@ const TopUpTable = ({ teamMemberProfile }: DataTableProps) => {
         : undefined;
       const endDate = startDate ? new Date(startDate) : undefined;
 
+      const requestData = await getAdminTopUpRequest({
+        page: activePage,
+        limit: 10,
+        columnAccessor: columnAccessor,
+        isAscendingSort: isAscendingSort,
+        search: referenceId,
+        userFilter,
+        statusFilter: statusFilter ?? "PENDING",
+        dateFilter: {
+          start:
+            startDate && !isNaN(startDate.getTime())
+              ? startDate.toISOString()
+              : undefined,
+          end:
+            endDate && !isNaN(endDate.getTime())
+              ? new Date(endDate.setHours(23, 59, 59, 999)).toISOString()
+              : undefined,
+        },
+      });
+
       for (const status of statuses) {
-        const requestData = await getMerchantTopUpRequest(supabaseClient, {
-          teamId: teamMemberProfile.alliance_member_alliance_id,
-          teamMemberId: teamMemberProfile.alliance_member_id,
-          page: activePage,
-          limit: 10,
-          columnAccessor: columnAccessor,
-          isAscendingSort: isAscendingSort,
-          search: referenceId,
-          userFilter,
-          statusFilter: statusFilter ?? "PENDING",
-          dateFilter: {
-            start:
-              startDate && !isNaN(startDate.getTime())
-                ? startDate.toISOString()
-                : undefined,
-            end:
-              endDate && !isNaN(endDate.getTime())
-                ? new Date(endDate.setHours(23, 59, 59, 999)).toISOString()
-                : undefined,
-          },
-        });
         updatedData.data[status] = requestData?.data?.[status] || {
           data: [],
           count: 0,
         };
       }
+
+      updatedData.merchantBalance = requestData?.merchantBalance || 0;
 
       setRequestData(updatedData);
     } catch (e) {
@@ -270,7 +269,7 @@ const TopUpTable = ({ teamMemberProfile }: DataTableProps) => {
     isLoading,
     setIsOpenModal,
     handleUpdateStatus,
-  } = TopUpColumn(handleRefresh, setRequestData, reset);
+  } = TopUpColumn(setRequestData, reset);
   const status = watch("statusFilter") as "PENDING" | "APPROVED" | "REJECTED";
 
   const table = useReactTable({
@@ -301,10 +300,9 @@ const TopUpTable = ({ teamMemberProfile }: DataTableProps) => {
         let allUserOptions: user_table[] = [];
 
         while (true) {
-          const userData = await getUserOptions(supabaseClient, {
+          const userData = await getUserOptions({
             page: currentUserPage,
             limit: pageLimit,
-            teamMemberId: teamMemberProfile.alliance_member_id,
           });
 
           if (!userData?.length) {
@@ -535,7 +533,7 @@ const TopUpTable = ({ teamMemberProfile }: DataTableProps) => {
         <div className="flex justify-start gap-2  w-full">
           <div className="flex text-lg font-bold gap-2 items-center">
             Merchant Balance: <PhilippinePeso size={16} />
-            {requestData?.merchantBalance.toLocaleString()}
+            {requestData?.merchantBalance?.toLocaleString()}
           </div>
         </div>
       </div>

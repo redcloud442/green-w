@@ -1,8 +1,16 @@
-import { alliance_earnings_table } from "@prisma/client";
+import { DashboardEarnings } from "@/utils/types";
+import {
+  alliance_earnings_table,
+  alliance_ranking_table,
+} from "@prisma/client";
 
-export const getEarnings = async () => {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/user`, {
-    method: "GET",
+export const getUserSponsor = async (params: { userId: string }) => {
+  const response = await fetch(`/api/v1/user/sponsor`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(params),
   });
 
   const result = await response.json();
@@ -13,22 +21,17 @@ export const getEarnings = async () => {
     );
   }
 
-  const { data, preferredWithdrawal } = result;
-
-  return {
-    earnings: data,
-    preferredWithdrawal: preferredWithdrawal,
-  };
+  return result as string;
 };
 
-export const getUserSponsor = async (params: { userId: string }) => {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/user/sponsor`,
-    {
-      method: "POST",
-      body: JSON.stringify(params),
-    }
-  );
+export const getUserEarnings = async (params: { memberId: string }) => {
+  const response = await fetch(`/api/v1/user`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(params),
+  });
 
   const result = await response.json();
 
@@ -38,93 +41,17 @@ export const getUserSponsor = async (params: { userId: string }) => {
     );
   }
 
-  const { data } = result;
-
-  return data as {
-    user_username: string;
+  return result as {
+    totalEarnings: DashboardEarnings;
+    userEarningsData: alliance_earnings_table;
+    userRanking: alliance_ranking_table;
   };
 };
 
-export const getReferralData = async () => {
-  try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/referrals`,
-      {
-        method: "GET",
-      }
-    );
-
-    const result = await response.json();
-
-    return result as {
-      direct: {
-        sum: number;
-        count: number;
-      };
-      indirect: {
-        sum: number;
-        count: number;
-      };
-    };
-  } catch (e) {
-    return { error: "Internal server error" };
-  }
-};
-
-export const getUserNotification = async () => {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/user/notification`,
-    {
-      method: "GET",
-    }
-  );
-
-  const result = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      result.error || "An error occurred while fetching the notification."
-    );
-  }
-
-  const { teamMemberProfile, userNotification, count } = result;
-
-  return {
-    teamMemberProfile,
-    userNotification,
-    count,
-  };
-};
-
-export const getUserEarnings = async (params: { userId: string }) => {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/user/${params.userId}`,
-    {
-      method: "POST",
-    }
-  );
-
-  const result = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      result.error || "An error occurred while fetching the earnings."
-    );
-  }
-
-  //fixed
-  const { userEarningsData } = result;
-
-  return userEarningsData as alliance_earnings_table;
-};
-
-export const getUserWithdrawalToday = async (params: { userId: string }) => {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/user/${params.userId}`,
-    {
-      method: "GET",
-    }
-  );
+export const getUserWithdrawalToday = async () => {
+  const response = await fetch(`/api/v1/user`, {
+    method: "GET",
+  });
 
   const result = await response.json();
 
@@ -134,16 +61,20 @@ export const getUserWithdrawalToday = async (params: { userId: string }) => {
     );
   }
 
-  const { isWithdrawalToday } = result;
+  const { isWithdrawalToday, canUserDeposit } = result;
 
-  return isWithdrawalToday;
+  return { isWithdrawalToday, canUserDeposit };
 };
 
-export const getuserTotalEarnings = async (params: { memberId: string }) => {
+export const changeUserPassword = async (params: {
+  userId: string;
+  email: string;
+  password: string;
+}) => {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/user/`,
+    `/api/v1/user/` + params.userId + `/change-password`,
     {
-      method: "POST",
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
@@ -155,37 +86,54 @@ export const getuserTotalEarnings = async (params: { memberId: string }) => {
 
   if (!response.ok) {
     throw new Error(
-      result.error || "An error occurred while fetching the earnings."
+      result.error || "An error occurred while changing the password."
     );
   }
 
-  const { totalEarnings, userEarningsData, userRanking } = result;
-
-  return { totalEarnings, userEarningsData, userRanking };
+  return result;
 };
 
-export const getUserNotificationWithLimit = async (params: {
-  page: number;
-  limit: number;
-  teamMemberId: string;
+export const updateUserProfile = async (params: {
+  userId: string;
+  profilePicture: string;
 }) => {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/user/notification`,
-    {
-      method: "POST",
-      body: JSON.stringify(params),
-    }
-  );
+  const response = await fetch(`/api/v1/user/` + params.userId, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(params),
+  });
 
   const result = await response.json();
 
   if (!response.ok) {
     throw new Error(
-      result.error || "An error occurred while fetching the notification."
+      result.error || "An error occurred while updating the profile."
     );
   }
 
-  const { data, count } = result;
+  return result;
+};
 
-  return { data, count };
+export const handleGenerateLink = async (params: {
+  formattedUserName: string;
+}) => {
+  const response = await fetch(`/api/v1/user/generate-link`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(params),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.error || "An error occurred while generating the link."
+    );
+  }
+
+  return result;
 };

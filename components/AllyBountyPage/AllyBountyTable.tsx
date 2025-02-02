@@ -48,7 +48,10 @@ const AllyBountyTable = ({ teamMemberProfile }: DataTableProps) => {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const [requestData, setRequestData] = useState<
-    (user_table & { total_bounty_earnings: string })[]
+    (user_table & {
+      total_bounty_earnings: string;
+      package_ally_bounty_log_date_created: string;
+    })[]
   >([]);
   const [requestCount, setRequestCount] = useState(0);
   const [activePage, setActivePage] = useState(1);

@@ -1,4 +1,3 @@
-import { depositWalletData } from "@/app/actions/deposit/depositAction";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,6 +10,11 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
@@ -23,6 +27,8 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { logError } from "@/services/Error/ErrorLogs";
 import { getMerchantOptions } from "@/services/Options/Options";
+import { handleDepositRequest } from "@/services/TopUp/Member";
+import { useUserHaveAlreadyWithdraw } from "@/store/userHaveAlreadyWithdraw";
 import { useUserTransactionHistoryStore } from "@/store/userTransactionHistoryStore";
 import { escapeFormData } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
@@ -53,6 +59,10 @@ const topUpFormSchema = z.object({
   topUpMode: z.string().min(1, "Top up mode is required"),
   accountName: z.string().min(1, "Field is required"),
   accountNumber: z.string().min(1, "Field is required"),
+  receipt: z
+    .string()
+    .min(1, "Receipt is required")
+    .max(5, "Receipt is required"),
   file: z
     .instanceof(File)
     .refine((file) => !!file, { message: "File is required" })
@@ -71,6 +81,7 @@ const DashboardDepositModalDeposit = ({
   teamMemberProfile,
 }: Props) => {
   const supabaseClient = createClientSide();
+  const { canUserDeposit, setCanUserDeposit } = useUserHaveAlreadyWithdraw();
   const [topUpOptions, setTopUpOptions] = useState<merchant_table[]>([]);
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
@@ -90,6 +101,7 @@ const DashboardDepositModalDeposit = ({
       accountName: "",
       accountNumber: "",
       file: undefined,
+      receipt: "",
     },
   });
 
@@ -138,7 +150,7 @@ const DashboardDepositModalDeposit = ({
         .from("REQUEST_ATTACHMENTS")
         .getPublicUrl(filePath);
 
-      await depositWalletData({
+      await handleDepositRequest({
         TopUpFormValues: sanitizedData,
         publicUrl,
       });
@@ -151,10 +163,12 @@ const DashboardDepositModalDeposit = ({
         transaction_member_id: teamMemberProfile?.alliance_member_id,
       };
       setAddTransactionHistory([transactionHistory]);
+      setCanUserDeposit(true);
 
       toast({
-        title: "Deposit Request Successfully",
-        description: "Please wait for your request to be approved.",
+        title: "Elevate Deposit is now on review",
+        description:
+          "Elevate team will review your request and approve it soon.",
       });
 
       setOpen(false);
@@ -199,13 +213,35 @@ const DashboardDepositModalDeposit = ({
       }}
     >
       <DialogTrigger asChild className={className}>
-        <Button
-          className="p-0 bg-transparent shadow-none h-full flex flex-col items-center justify-center"
-          onClick={() => setOpen(true)}
-        >
-          <Image src="/assets/deposit.ico" alt="plans" width={35} height={35} />
-          <p className="text-sm sm:text-lg font-thin ">DEPOSIT</p>
-        </Button>
+        {!canUserDeposit ? (
+          <Button
+            className="p-0 bg-transparent shadow-none h-full flex flex-col items-center justify-center"
+            onClick={() => setOpen(true)}
+          >
+            <Image
+              src="/assets/deposit.ico"
+              alt="plans"
+              width={35}
+              height={35}
+            />
+            <p className="text-sm sm:text-lg font-thin ">DEPOSIT</p>
+          </Button>
+        ) : (
+          <Popover>
+            <PopoverTrigger className="bg-transparent pt-0 shadow-none h-full flex flex-col items-center justify-center">
+              <Image
+                src="/assets/deposit.ico"
+                alt="plans"
+                width={35}
+                height={35}
+              />
+              <p className="text-sm sm:text-lg font-thin pt-2">DEPOSIT</p>
+            </PopoverTrigger>
+            <PopoverContent>
+              Elevate is currently reviewing your deposit request. Please
+            </PopoverContent>
+          </Popover>
+        )}
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-[440px]">
@@ -358,6 +394,49 @@ const DashboardDepositModalDeposit = ({
                       const numericValue = Number(inputValue);
 
                       setValue("amount", numericValue.toString());
+                    }}
+                  />
+                )}
+              />
+              {errors.amount && (
+                <p className="text-primaryRed text-sm mt-1">
+                  {errors.amount.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="receipt">Last 5 digits of your receipt</Label>
+              <Controller
+                name="receipt"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    variant="default"
+                    type="text"
+                    id="receipt"
+                    className=""
+                    placeholder="Ex. 12345"
+                    {...field}
+                    value={field.value}
+                    onChange={(e) => {
+                      let inputValue = e.target.value;
+
+                      // Allow clearing the value
+                      if (inputValue === "") {
+                        field.onChange("");
+                        return;
+                      }
+                      // Remove non-numeric characters
+                      inputValue = inputValue.replace(/[^0-9.]/g, "");
+
+                      if (inputValue.length > 5) {
+                        inputValue = inputValue.substring(0, 5);
+                      }
+
+                      field.onChange(inputValue);
+
+                      setValue("receipt", inputValue);
                     }}
                   />
                 )}

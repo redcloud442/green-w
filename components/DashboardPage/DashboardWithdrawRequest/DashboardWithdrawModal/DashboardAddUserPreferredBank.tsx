@@ -1,5 +1,5 @@
 "use client";
-import { handleAddPreferredWithdrawal } from "@/app/actions/withdrawal/withdrawalAction";
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,10 +13,14 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import { handleAddPreferredWithdrawal } from "@/services/preferred/preferred";
 import { FINANCIAL_SERVICES } from "@/utils/constant";
+import { escapeFormData } from "@/utils/function";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { alliance_preferred_withdrawal_table } from "@prisma/client";
 import { PlusIcon } from "lucide-react";
 import { Dispatch, SetStateAction, useState } from "react";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 type DashboardAddUserPreferredBankProps = {
@@ -36,6 +40,8 @@ export const preferredWithdrawalSchema = z.object({
   bankName: z.string().min(2, { message: "Bank Name is required" }),
 });
 
+type RegisterFormData = z.infer<typeof preferredWithdrawalSchema>;
+
 const DashboardAddUserPreferredBank = ({
   preferredWithdrawalList,
   setPreferredEarnings,
@@ -47,38 +53,36 @@ const DashboardAddUserPreferredBank = ({
   const [open, setOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (formData: FormData) => {
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(preferredWithdrawalSchema),
+  });
+
+  const onSubmit = async (formValues: RegisterFormData) => {
     setIsLoading(true);
-    const validation = preferredWithdrawalSchema.safeParse({
-      accountName: formData.get("accountName")?.toString(),
-      accountNumber: formData.get("accountNumber")?.toString(),
-      bankName: formData.get("bankName")?.toString(),
-    });
-
-    if (!validation.success) {
-      toast({
-        title: "Error",
-        description: validation.error.errors[0].message,
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
-      const data = await handleAddPreferredWithdrawal(formData);
+      const sanitizedData = escapeFormData(formValues);
+      const data = await handleAddPreferredWithdrawal(sanitizedData);
 
       toast({
         title: "Success",
         description: "Preferred withdrawal added successfully",
       });
+
       setPreferredWithdrawalList((prev) => {
         if (!prev) {
           return [data as alliance_preferred_withdrawal_table];
         }
         return [...prev, data as alliance_preferred_withdrawal_table];
       });
+
       setOpen(false);
     } catch (error) {
+      console.log(error);
       toast({
         title: "Error",
         description: "Failed to add preferred withdrawal",
@@ -104,42 +108,52 @@ const DashboardAddUserPreferredBank = ({
 
       {open && (
         <Card className="p-4 bg-sky-300 w-full max-w-[320px] sm:max-w-md">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              const formData = new FormData(e.currentTarget);
-              handleSubmit(formData);
-            }}
-            className="space-y-4"
-          >
-            <Input type="text" name="accountName" placeholder="Account Name" />
-            <Input
-              type="text"
-              name="accountNumber"
-              placeholder="Account Number"
-            />
-            <Select
-              onValueChange={(value) => {
-                const bankNameInput = document.getElementById(
-                  "bankName"
-                ) as HTMLInputElement;
-                bankNameInput.value = value;
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select Bank Or E-Wallets" />
-              </SelectTrigger>
-              <SelectContent>
-                {FINANCIAL_SERVICES.map((bank, index) => (
-                  <SelectItem key={index} value={bank}>
-                    {bank}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div>
+              <Input
+                type="text"
+                placeholder="Account Name"
+                {...register("accountName")}
+              />
+              {errors.accountName && (
+                <p className="text-red-500 text-sm">
+                  {errors.accountName.message}
+                </p>
+              )}
+            </div>
 
-            {/* Hidden input to store selected bankName */}
-            <Input type="hidden" id="bankName" name="bankName" />
+            <div>
+              <Input
+                type="text"
+                placeholder="Account Number"
+                {...register("accountNumber")}
+              />
+              {errors.accountNumber && (
+                <p className="text-red-500 text-sm">
+                  {errors.accountNumber.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <Select onValueChange={(value) => setValue("bankName", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Bank Or E-Wallets" />
+                </SelectTrigger>
+                <SelectContent>
+                  {FINANCIAL_SERVICES.map((bank, index) => (
+                    <SelectItem key={index} value={bank}>
+                      {bank}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.bankName && (
+                <p className="text-red-500 text-sm">
+                  {errors.bankName.message}
+                </p>
+              )}
+            </div>
 
             <Button
               disabled={isLoading}
@@ -150,11 +164,10 @@ const DashboardAddUserPreferredBank = ({
               {isLoading ? "Adding..." : "SET TO FAVORITES"}
             </Button>
             <Button
-              className=" w-full rounded-md"
+              className="w-full rounded-md"
               variant="outline"
               onClick={() => {
                 setOpen(false);
-                setSelectedOption("");
               }}
             >
               CLOSE

@@ -1,102 +1,97 @@
-import { updateUserNotification } from "@/app/actions/user/userAction";
-import { getUserNotificationWithLimit } from "@/services/User/User";
 import { useUserNotificationStore } from "@/store/userNotificationStore";
-import { alliance_member_table } from "@prisma/client";
+import initializeSocket from "@/utils/socket/socket";
+import { alliance_notification_table } from "@prisma/client";
 import { useEffect, useRef, useState } from "react";
+import { Socket } from "socket.io-client";
 import { Card, CardHeader, CardTitle } from "../ui/card";
 import { DialogContent, DialogFooter, DialogTitle } from "../ui/dialog";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { Separator } from "../ui/separator";
 
 type DataTableProps = {
-  teamMemberProfile: alliance_member_table | null;
+  teamMemberId: string | null;
 };
 
-const NotificationTable = ({ teamMemberProfile }: DataTableProps) => {
-  const [activePage, setActivePage] = useState(1);
+const NotificationTable = ({ teamMemberId }: DataTableProps) => {
+  const [take, setTake] = useState(10); // Start with 10 notifications
   const [isFetchingList, setIsFetchingList] = useState(false);
-  const fetchCalled = useRef(false);
+  const [noMoreData, setNoMoreData] = useState(false);
   const observerRef = useRef<HTMLDivElement | null>(null);
-  const { userNotification, setUserNotification, setAddUserNotification } =
+  const { userNotification, setAddUserNotification } =
     useUserNotificationStore();
-
-  const fetchRequest = async () => {
-    if (!teamMemberProfile) return;
-
-    try {
-      const { data, count } = await getUserNotificationWithLimit({
-        page: activePage,
-        limit: 10,
-        teamMemberId: teamMemberProfile.alliance_member_id,
-      });
-
-      if (
-        userNotification.notifications.some(
-          (n) => n.alliance_notification_is_read === false
-        )
-      ) {
-        await updateUserNotification(teamMemberProfile.alliance_member_id);
-      }
-
-      setUserNotification({
-        notifications: data,
-        count: count,
-      });
-    } catch (error) {
-    } finally {
-    }
-  };
-
-  const loadMoreNotifications = async () => {
-    if (!teamMemberProfile || isFetchingList) return;
-    const nextPage = activePage + 1;
-
-    try {
-      setIsFetchingList(true);
-      const { data, count } = await getUserNotificationWithLimit({
-        page: nextPage,
-        limit: 10,
-        teamMemberId: teamMemberProfile?.alliance_member_id,
-      });
-
-      setAddUserNotification({
-        notifications: data,
-        count,
-      });
-
-      setActivePage(nextPage);
-    } catch (error) {
-    } finally {
-      setIsFetchingList(false);
-    }
-  };
+  const [socketInstance, setSocketInstance] = useState<Socket | null>(null);
 
   useEffect(() => {
-    if (fetchCalled.current) return;
-    fetchCalled.current = true;
-    fetchRequest();
-  }, [teamMemberProfile]);
+    let isMounted = true;
+
+    async function connectSocket() {
+      if (!teamMemberId) return;
+
+      try {
+        if (socketInstance && isMounted) {
+          socketInstance?.on(
+            "notification-update",
+            (data: {
+              notifications: alliance_notification_table[];
+              count: number;
+            }) => {
+              if (data.notifications.length === 0) {
+                setNoMoreData(true);
+              } else {
+                setAddUserNotification({
+                  notifications: [...data.notifications],
+                  count: data.count,
+                });
+                setNoMoreData(false);
+              }
+            }
+          );
+
+          socketInstance.emit("get-notification", { teamMemberId, take });
+        } else {
+          const socketInstance = await initializeSocket();
+          setSocketInstance(socketInstance as Socket);
+        }
+      } catch (error) {
+        console.error("Error initializing socket:", error);
+      }
+    }
+
+    connectSocket();
+  }, [teamMemberId]);
+
+  const loadMoreNotifications = () => {
+    if (
+      isFetchingList ||
+      noMoreData ||
+      take > userNotification.notifications.length
+    )
+      return;
+
+    setIsFetchingList(true);
+    const newTake = take + 10;
+    setTake(newTake);
+
+    socketInstance?.emit("get-notification", { teamMemberId, take: newTake });
+
+    setIsFetchingList(false);
+  };
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && !isFetchingList) {
+      ([entry]) => {
+        if (entry.isIntersecting) {
           loadMoreNotifications();
         }
       },
-      { root: null, rootMargin: "0px", threshold: 1.0 }
+      { threshold: 1.0 }
     );
 
-    if (observerRef.current) {
-      observer.observe(observerRef.current);
-    }
-
+    if (observerRef.current) observer.observe(observerRef.current);
     return () => {
-      if (observerRef.current) {
-        observer.unobserve(observerRef.current);
-      }
+      if (observerRef.current) observer.unobserve(observerRef.current);
     };
-  }, [isFetchingList]);
+  }, [observerRef.current, isFetchingList, noMoreData]);
 
   return (
     <ScrollArea className="w-full overflow-x-auto">
@@ -153,6 +148,12 @@ const NotificationTable = ({ teamMemberProfile }: DataTableProps) => {
             {isFetchingList && (
               <p className="text-sm text-gray-500 text-center mt-2">
                 Loading more notifications...
+              </p>
+            )}
+
+            {noMoreData && (
+              <p className="text-sm text-gray-500 text-center mt-2">
+                No more notifications available.
               </p>
             )}
 

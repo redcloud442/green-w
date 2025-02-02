@@ -73,7 +73,6 @@ const LegionBountyTable = ({ teamMemberProfile }: DataTableProps) => {
         columnAccessor: columnAccessor,
         isAscendingSort: isAscendingSort,
         search: emailFilter,
-        userId: teamMemberProfile.alliance_member_user_id,
       });
 
       setRequestData(data || []);

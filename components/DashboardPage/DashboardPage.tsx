@@ -2,7 +2,7 @@
 
 import { toast } from "@/hooks/use-toast";
 import { logError } from "@/services/Error/ErrorLogs";
-import { getuserTotalEarnings } from "@/services/User/User";
+import { getUserEarnings } from "@/services/User/User";
 import { useUserLoadingStore } from "@/store/useLoadingState";
 import { usePackageChartData } from "@/store/usePackageChartData";
 import { useUserDashboardEarningsStore } from "@/store/useUserDashboardEarnings";
@@ -64,8 +64,9 @@ const DashboardPage = ({
   const handleRefresh = async () => {
     try {
       setRefresh(true);
+
       const { totalEarnings, userEarningsData, userRanking } =
-        await getuserTotalEarnings({
+        await getUserEarnings({
           memberId: teamMemberProfile.alliance_member_id,
         });
 

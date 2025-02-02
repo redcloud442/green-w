@@ -2,7 +2,6 @@ import { escapeFormData } from "@/utils/function";
 import { UserLog, UserRequestdata } from "@/utils/types";
 import { user_table } from "@prisma/client";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { loginValidation } from "../auth/auth";
 
 export const getAdminUserRequest = async (
   supabaseClient: SupabaseClient,
@@ -10,8 +9,6 @@ export const getAdminUserRequest = async (
     page: number;
     limit: number;
     search?: string;
-    teamMemberId: string;
-    teamId: string;
     columnAccessor: string;
     isAscendingSort: boolean;
     userRole?: string;
@@ -21,40 +18,49 @@ export const getAdminUserRequest = async (
 ) => {
   const sanitizedData = escapeFormData(params);
 
-  const { data, error } = await supabaseClient.rpc("get_admin_user_data", {
-    input_data: sanitizedData,
+  const response = await fetch(`/api/v1/user/list`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(sanitizedData),
   });
 
-  if (error) throw error;
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch user data");
+  }
 
   return data as {
     data: UserRequestdata[];
-
-    totalCount: 0;
+    totalCount: number;
   };
 };
 
-export const getUserWithActiveBalance = async (
-  supabaseClient: SupabaseClient,
-  params: {
-    teamMemberId: string;
-    page: number;
-    limit: number;
-    search?: string;
-    columnAccessor: string;
-    isAscendingSort: boolean;
-  }
-) => {
+export const getUserWithActiveBalance = async (params: {
+  teamMemberId: string;
+  page: number;
+  limit: number;
+  search?: string;
+  columnAccessor: string;
+  isAscendingSort: boolean;
+}) => {
   const sanitizedData = escapeFormData(params);
 
-  const { data, error } = await supabaseClient.rpc(
-    "get_user_with_active_balance",
-    {
-      input_data: sanitizedData,
-    }
-  );
+  const response = await fetch(`/api/v1/user/active-list`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(sanitizedData),
+  });
 
-  if (error) throw error;
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch user data");
+  }
 
   return data as {
     data: user_table[];
@@ -86,51 +92,25 @@ export const getHistoryLog = async (
   };
 };
 
-export const handleSignInUser = async (
-  supabaseClient: SupabaseClient,
-  params: {
-    userName: string;
-    password: string;
-    role: string;
-    iv: string;
-    userProfile?: UserRequestdata;
-  }
-) => {
-  if (params.userProfile?.alliance_member_restricted) {
-    throw new Error("User is banned.");
-  }
-  const sanitizedData = escapeFormData(params);
-
-  const response = await loginValidation(supabaseClient, {
-    userName: sanitizedData.userName,
-    password: sanitizedData.password,
-    role: sanitizedData.role,
-    iv: sanitizedData.iv,
-    userProfile: sanitizedData.userProfile,
-  });
-  return response;
-};
-
 export const handleUpdateRole = async (params: {
   role: string;
   userId: string;
 }) => {
   const sanitizedData = escapeFormData(params);
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/user/` + sanitizedData.userId,
-    {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "updateRole", role: sanitizedData.role }),
-    }
-  );
+  const response = await fetch(`/api/v1/user/` + sanitizedData.userId, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ action: "updateRole", role: sanitizedData.role }),
+  });
 
   const result = await response.json();
 
   if (!response.ok) {
     throw new Error(
-      result.error || "An error occurred while creating the top-up request."
+      result.error || "An error occurred while updating the role."
     );
   }
 
@@ -141,20 +121,19 @@ export const handleUpdateUserRestriction = async (params: {
   userId: string;
 }) => {
   const { userId } = params;
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/user/` + userId,
-    {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "banUser" }),
-    }
-  );
+  const response = await fetch(`/api/v1/user/` + userId, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ action: "banUser" }),
+  });
 
   const result = await response.json();
 
   if (!response.ok) {
     throw new Error(
-      result.error || "An error occurred while creating the top-up request."
+      result.error || "An error occurred while banning the user."
     );
   }
 

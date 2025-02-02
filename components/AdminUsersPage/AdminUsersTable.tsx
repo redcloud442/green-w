@@ -1,6 +1,5 @@
 "use client";
 
-import { handleSignInUser } from "@/app/actions/auth/authAction";
 import {
   Table,
   TableBody,
@@ -16,6 +15,7 @@ import {
   handleUpdateRole,
   handleUpdateUserRestriction,
 } from "@/services/User/Admin";
+import { handleGenerateLink } from "@/services/User/User";
 import { escapeFormData, userNameToEmail } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
 import { UserRequestdata } from "@/utils/types";
@@ -108,8 +108,6 @@ const AdminUsersTable = ({ teamMemberProfile }: DataTableProps) => {
 
       const startDate = dateCreated ? new Date(dateCreated) : undefined;
       const { data, totalCount } = await getAdminUserRequest(supabaseClient, {
-        teamId: teamMemberProfile.alliance_member_alliance_id,
-        teamMemberId: teamMemberProfile.alliance_member_id,
         page: activePage,
         limit: 10,
         columnAccessor: columnAccessor,
@@ -143,7 +141,7 @@ const AdminUsersTable = ({ teamMemberProfile }: DataTableProps) => {
 
   const handleCopyAccountUrl = async (userName: string) => {
     try {
-      const data = await handleSignInUser({
+      const data = await handleGenerateLink({
         formattedUserName: userNameToEmail(userName),
       });
 

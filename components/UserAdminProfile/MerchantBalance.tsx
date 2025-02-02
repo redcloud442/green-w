@@ -5,6 +5,7 @@ import { escapeFormData } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
 import { UserRequestdata } from "@/utils/types";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { user_table } from "@prisma/client";
 import { PhilippinePeso } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -16,6 +17,7 @@ import TableLoading from "../ui/tableLoading";
 
 type Props = {
   userProfile: UserRequestdata;
+  profile: user_table;
 };
 
 const schema = z.object({
@@ -27,7 +29,7 @@ const schema = z.object({
 });
 type Data = z.infer<typeof schema>;
 
-const MerchantBalance = ({ userProfile }: Props) => {
+const MerchantBalance = ({ userProfile, profile }: Props) => {
   const { toast } = useToast();
   const supabaseClient = createClientSide();
   const [isLoading, setIsLoading] = useState(false);
@@ -52,6 +54,7 @@ const MerchantBalance = ({ userProfile }: Props) => {
       await handleUpdateBalance({
         amount: Number(sanitizedData.balance),
         memberId: userProfile.merchant_member_id,
+        userName: profile.user_username || "",
       });
 
       setMerchantData((prev) => ({

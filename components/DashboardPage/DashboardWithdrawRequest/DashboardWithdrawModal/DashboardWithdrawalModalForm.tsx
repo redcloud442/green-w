@@ -229,8 +229,9 @@ const DashboardWithdrawalModalForm = ({
       // }
 
       toast({
-        title: "Withdrawal Request Successfully",
-        description: "Please wait for it to be approved",
+        title: "Elevate Withdrawal is now on review",
+        description:
+          "Elevate team will review your request and approve it soon.",
       });
 
       reset();

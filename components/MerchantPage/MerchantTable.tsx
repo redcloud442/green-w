@@ -87,10 +87,9 @@ const MerchantTable = ({ teamMemberProfile }: DataTableProps) => {
   const fetchMerchant = async () => {
     try {
       setIsFetchingList(true);
-      const { data, totalCount } = await getMerchantData(supabaseClient, {
+      const { data, totalCount } = await getMerchantData({
         page: activePage,
         limit: 10,
-        teamMemberId: teamMemberProfile.alliance_member_id,
       });
 
       setRequestData(data);

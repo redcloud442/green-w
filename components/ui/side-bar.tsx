@@ -59,7 +59,7 @@ const AppSidebar = ({ userData, teamMemberProfile }: Props) => {
   const handleSignOut = async () => {
     try {
       await supabase.auth.signOut();
-      router.push("/auth/login");
+      router.push("/login");
     } catch (e) {
     } finally {
     }

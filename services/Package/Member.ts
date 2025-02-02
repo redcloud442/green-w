@@ -1,4 +1,3 @@
-import { PackageHistoryData } from "@/utils/types";
 import { package_table } from "@prisma/client";
 
 export const createPackageConnection = async (params: {
@@ -12,16 +11,13 @@ export const createPackageConnection = async (params: {
     teamMemberId,
   };
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/package/`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(inputData),
-    }
-  );
+  const response = await fetch(`/api/v1/package`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(inputData),
+  });
 
   const result = await response.json();
 
@@ -35,12 +31,12 @@ export const createPackageConnection = async (params: {
 };
 
 export const getPackageModalData = async () => {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/package/modal`,
-    {
-      method: "GET",
-    }
-  );
+  const response = await fetch(`/api/v1/package`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
 
   const result = await response.json();
 
@@ -55,75 +51,82 @@ export const getPackageModalData = async () => {
   return data as package_table[];
 };
 
-export const getPackageHistory = async (params: {
-  search: string;
-  page: number;
-  limit: number;
-  sortBy: boolean;
-  columnAccessor: string;
-  teamMemberId: string;
-}) => {
-  const queryParams = {
-    search: params.search,
-    page: params.page.toString(),
-    limit: params.limit.toString(),
-    sortBy: params.sortBy.toString(),
-    columnAccessor: params.columnAccessor,
-    teamMemberId: params.teamMemberId,
-  };
-
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/package?${new URLSearchParams(queryParams)}`,
-    {
-      method: "GET",
-    }
-  );
-
-  const result = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      result.error || "An error occurred while fetching the package history."
-    );
-  }
-
-  const { data } = result;
-
-  return data as {
-    data: PackageHistoryData[];
-    totalCount: number;
-  };
-};
-
-export const claimPackage = async (params: {
-  packageId: string;
+export const ClaimPackageHandler = async (params: {
   packageConnectionId: string;
+  earnings: number;
   amount: number;
 }) => {
-  const { packageId, packageConnectionId, amount } = params;
-
-  const inputData = {
-    earnings: amount,
-    packageId,
-    packageConnectionId,
-  };
-
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/package/${packageId}`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ inputData }),
-    }
-  );
+  const response = await fetch(`/api/v1/package/claim`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(params),
+  });
 
   const result = await response.json();
 
   if (!response.ok) {
     throw new Error(
       result.error || "An error occurred while claiming the package."
+    );
+  }
+
+  return response;
+};
+
+export const handleBatchPackageNotification = async (
+  page: number,
+  limit: number
+) => {
+  const response = await fetch(`/api/v1/notification/batch`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ page, limit }),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.error || "An error occurred while fetching the package modal data."
+    );
+  }
+
+  return result as {
+    userCreds: {
+      user_email: string;
+      user_active_mobile: string;
+      team_member_id: string;
+      package_connection_id: string;
+      user_username: string;
+    }[];
+    totalCount: number;
+  };
+};
+
+export const handleUpdateManyPackageMemberConnection = async (params: {
+  batchData: {
+    packageConnectionId: string;
+    teamMemberId: string;
+  }[];
+}) => {
+  const response = await fetch(`/api/v1/notification/batch`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(params),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.error ||
+        "An error occurred while updating the package member connection."
     );
   }
 

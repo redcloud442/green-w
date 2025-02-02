@@ -1,13 +1,17 @@
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { updateWithdrawalStatus } from "@/services/Withdrawal/Admin";
-import { formatDateToYYYYMMDD } from "@/utils/function";
-import { WithdrawalRequestData } from "@/utils/types";
+import { formatDateToYYYYMMDD, formatTime } from "@/utils/function";
+import { createClientSide } from "@/utils/supabase/client";
+import { AdminWithdrawaldata, WithdrawalRequestData } from "@/utils/types";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { Dispatch, SetStateAction, useCallback, useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Badge } from "../ui/badge";
+
+import { user_table } from "@prisma/client";
 import {
   Dialog,
   DialogClose,
@@ -23,11 +27,12 @@ const statusColorMap: Record<string, string> = {
   PENDING: "bg-yellow-600 dark:bg-yellow-700 dark:text-white",
   REJECTED: "bg-red-600 dark:bg-red-700 dark:text-white",
 };
-
 export const AdminWithdrawalHistoryColumn = (
   handleFetch: () => void,
-  reset: () => void
+  profile: user_table,
+  setRequestData: Dispatch<SetStateAction<AdminWithdrawaldata | null>>
 ) => {
+  const supabaseClient = createClientSide();
   const { toast } = useToast();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -42,12 +47,54 @@ export const AdminWithdrawalHistoryColumn = (
       try {
         setIsLoading(true);
         await updateWithdrawalStatus({ status, requestId, note });
-        handleFetch();
-        reset();
+
+        setRequestData((prev) => {
+          if (!prev) return prev;
+
+          // Extract PENDING data and filter out the item being updated
+          const pendingData = prev.data["PENDING"]?.data ?? [];
+          const updatedItem = pendingData.find(
+            (item) => item.alliance_withdrawal_request_id === requestId
+          );
+          const newPendingList = pendingData.filter(
+            (item) => item.alliance_withdrawal_request_id !== requestId
+          );
+          const currentStatusData = prev.data[status as keyof typeof prev.data];
+          const hasExistingData = currentStatusData?.data?.length > 0;
+
+          if (!updatedItem) return prev;
+
+          return {
+            ...prev,
+            data: {
+              ...prev.data,
+              PENDING: {
+                ...prev.data["PENDING"],
+                data: newPendingList,
+                count: Number(prev.data["PENDING"]?.count) - 1,
+              },
+              [status as keyof typeof prev.data]: {
+                ...currentStatusData,
+                data: hasExistingData
+                  ? [
+                      {
+                        ...updatedItem,
+                        alliance_withdrawal_request_status: status,
+                        approver_username: profile.user_username,
+                        alliance_withdrawal_request_date_updated: new Date(),
+                      },
+                      ...currentStatusData.data,
+                    ]
+                  : [],
+                count: Number(currentStatusData?.count || 0) + 1,
+              },
+            },
+          };
+        });
+
         toast({
           title: `Status Update`,
           description: `${status} Request Successfully`,
-          variant: "success",
         });
         setIsOpenModal({ open: false, requestId: "", status: "" });
       } catch (e) {
@@ -64,44 +111,6 @@ export const AdminWithdrawalHistoryColumn = (
   );
 
   const columns: ColumnDef<WithdrawalRequestData>[] = [
-    // {
-    //   accessorKey: "alliance_withdrawal_request_id",
-
-    //   header: ({ column }) => (
-    //     <Button
-    //       variant="ghost"
-    //       onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-    //     >
-    //       Reference ID <ArrowUpDown />
-    //     </Button>
-    //   ),
-    //   cell: ({ row }) => {
-    //     const id = row.getValue("alliance_withdrawal_request_id") as string;
-    //     const maxLength = 15;
-
-    //     const handleCopy = async () => {
-    //       if (id) {
-    //         await navigator.clipboard.writeText(id);
-    //       }
-    //     };
-
-    //     return (
-    //       <div className="flex items-center space-x-2">
-    //         <div
-    //           className="truncate"
-    //           title={id.length > maxLength ? id : undefined}
-    //         >
-    //           {id.length > maxLength ? `${id.slice(0, maxLength)}...` : id}
-    //         </div>
-    //         {id && (
-    //           <Button variant="ghost" size="sm" onClick={handleCopy}>
-    //             <Copy />
-    //           </Button>
-    //         )}
-    //       </div>
-    //     );
-    //   },
-    // },
     {
       accessorKey: "user_username",
 
@@ -116,9 +125,18 @@ export const AdminWithdrawalHistoryColumn = (
       cell: ({ row }) => (
         <div
           onClick={() => router.push(`/admin/users/${row.original.user_id}`)}
-          className="text-wrap cursor-pointer hover:underline text-blue-500"
+          className="flex items-center gap-2 text-wrap cursor-pointer hover:underline"
         >
-          {row.getValue("user_username")}
+          <Avatar>
+            <AvatarImage src={row.original.user_profile_picture ?? ""} />
+            <AvatarFallback>
+              {row.original.user_username?.charAt(0)}
+            </AvatarFallback>
+          </Avatar>
+
+          <p className="text-wrap text-blue-500">
+            {row.getValue("user_username")}
+          </p>
         </div>
       ),
     },
@@ -217,7 +235,6 @@ export const AdminWithdrawalHistoryColumn = (
     },
     {
       accessorKey: "alliance_withdrawal_request_date",
-
       header: ({ column }) => (
         <Button
           variant="ghost"
@@ -231,6 +248,7 @@ export const AdminWithdrawalHistoryColumn = (
           {formatDateToYYYYMMDD(
             row.getValue("alliance_withdrawal_request_date")
           )}
+          , {formatTime(row.getValue("alliance_withdrawal_request_date"))}
         </div>
       ),
     },
@@ -246,7 +264,53 @@ export const AdminWithdrawalHistoryColumn = (
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="text-center">{row.getValue("approver_username")}</div>
+        <div className="flex items-center gap-2 text-wrap cursor-pointer hover:underline">
+          {row.original.approver_username ? (
+            <>
+              <Avatar>
+                <AvatarImage
+                  src={row.original.approver_profile_picture ?? ""}
+                />
+                <AvatarFallback>
+                  {row.original.approver_username?.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+
+              <p
+                onClick={() =>
+                  router.push(`/admin/users/${row.original.approver_id}`)
+                }
+                className="text-wrap text-blue-500 underline"
+              >
+                {row.getValue("approver_username")}
+              </p>
+            </>
+          ) : null}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "alliance_withdrawal_request_date_updated",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Date Updated <ArrowUpDown />
+        </Button>
+      ),
+      cell: ({ row }) => (
+        <div className="text-center">
+          {row.getValue("alliance_withdrawal_request_date_updated")
+            ? formatDateToYYYYMMDD(
+                row.getValue("alliance_withdrawal_request_date_updated")
+              ) +
+              ", " +
+              formatTime(
+                row.getValue("alliance_withdrawal_request_date_updated")
+              )
+            : ""}
+        </div>
       ),
     },
     {

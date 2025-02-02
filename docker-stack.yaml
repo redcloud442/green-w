@@ -6,7 +6,31 @@ services:
       NEXT_PUBLIC_SUPABASE_URL: /run/secrets/supabaseUrl
       NEXT_PUBLIC_SUPABASE_ANON_KEY: /run/secrets/anonKey
       NEXT_PUBLIC_BASE_URL: /run/secrets/baseUrl
+      DATABASE_URL: /run/secrets/databaseUrl
+      DIRECT_URL: /run/secrets/directUrl
+    secrets:
+      - databaseUrl
+      - directUrl
+      - supabaseUrl
+      - anonKey
+      - baseUrl
+    deploy:
+      mode: replicated
+      replicas: 3
+      update_config:
+        order: start-first
+      labels:
+        - shepherd.enable=true
+        - shepherd.auth.config=ghcr.io
+    ports:
+      - "8080:8080"
+  server:
+    image: ghcr.io/redcloud442/elevate:prod-server
+    environment:
+      SUPABASE_URL: /run/secrets/supabaseUrl
+      SUPABASE_ANON_KEY: /run/secrets/anonKey
       SUPABASE_SERVICE_ROLE_KEY: /run/secrets/serviceRoleKey
+      PORT: 3000
       DATABASE_URL: /run/secrets/databaseUrl
       DIRECT_URL: /run/secrets/directUrl
       UPSTASH_REDIS_REST_URL: /run/secrets/redisUrl
@@ -15,28 +39,26 @@ services:
       MOVIDER_API_KEY: /run/secrets/moviderKey
       MOVIDER_API_SECRET: /run/secrets/moviderSecret
     secrets:
+      - resendKey
+      - moviderKey
+      - moviderSecret
       - databaseUrl
       - directUrl
       - supabaseUrl
       - anonKey
       - serviceRoleKey
-      - baseUrl
       - redisUrl
       - redisToken
-      - resendKey
-      - moviderKey
-      - moviderSecret
     deploy:
       mode: replicated
-      replicas: 7
+      replicas: 3
       update_config:
         order: start-first
       labels:
         - shepherd.enable=true
         - shepherd.auth.config=ghcr.io
     ports:
-      - "8080:8080"
-
+      - "3000:3000"
   cloudflared:
     image: cloudflare/cloudflared:latest
     command: tunnel --no-autoupdate run
@@ -63,8 +85,8 @@ services:
       REGISTRIES_FILE: /run/secrets/shepherd-registries-auth
       SHEPHERD_LOG_LEVEL: info
       SHEPHERD_POLL_INTERVAL: 60
-      IMAGE_AUTO_CLEANUP: true
-      ROLLBACK_ON_FAILURE: true
+      IMAGE_AUTO_CLEANUP: "true"
+      ROLLBACK_ON_FAILURE: "true"
       IGNORELIST_SERVICES: shepherd cloudflared
       UPDATE_OPTIONS: "--update-delay=30s"
     volumes:

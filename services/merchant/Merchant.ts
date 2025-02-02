@@ -1,19 +1,17 @@
-import { merchant_table } from "@prisma/client";
-import { SupabaseClient } from "@supabase/supabase-js";
+import { merchant_balance_log, merchant_table } from "@prisma/client";
 
 export const handleUpdateBalance = async (params: {
   amount: number;
   memberId: string;
+  userName: string;
 }) => {
-  const { amount, memberId } = params;
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/merchant/`,
-    {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ amount: amount, memberId: memberId }),
-    }
-  );
+  const response = await fetch(`/api/v1/merchant`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(params),
+  });
 
   const result = await response.json();
 
@@ -26,21 +24,25 @@ export const handleUpdateBalance = async (params: {
   return response;
 };
 
-export const getMerchantData = async (
-  supabaseClient: SupabaseClient,
-  params: {
-    page: number;
-    limit: number;
-    teamMemberId: string;
-  }
-) => {
-  const { data, error } = await supabaseClient.rpc("get_merchant_data", {
-    input_data: params,
+export const getMerchantData = async (params: {
+  page: number;
+  limit: number;
+}) => {
+  const response = await fetch(`/api/v1/merchant/bank`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(params),
   });
 
-  if (error) {
-    throw error;
+  const responseData = await response.json();
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch merchant data");
   }
+
+  const { data } = responseData;
 
   return data as {
     data: merchant_table[];
@@ -53,21 +55,16 @@ export const handleCreateMerchantData = async (params: {
   accountType: string;
   accountName: string;
 }) => {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/merchant/`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(params),
-    }
-  );
-
-  const result = await response.json();
+  const response = await fetch(`/api/v1/merchant`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(params),
+  });
 
   if (!response.ok) {
-    throw new Error(
-      result.error || "An error occurred while creating the merchant."
-    );
+    throw new Error("An error occurred while creating the merchant.");
   }
 
   return response;
@@ -76,14 +73,13 @@ export const handleCreateMerchantData = async (params: {
 export const handleUpdateMerchantData = async (params: {
   merchantId: string;
 }) => {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/merchant/`,
-    {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(params),
-    }
-  );
+  const response = await fetch(`/api/v1/merchant`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(params),
+  });
 
   const result = await response.json();
 
@@ -94,4 +90,30 @@ export const handleUpdateMerchantData = async (params: {
   }
 
   return response;
+};
+
+export const getMerchantBalanceHistory = async (params: {
+  page: number;
+  limit: number;
+}) => {
+  const response = await fetch(`/api/v1/merchant/balance-history`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(params),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.error || "An error occurred while updating the merchant."
+    );
+  }
+
+  return result as {
+    data: merchant_balance_log[];
+    totalCount: number;
+  };
 };

@@ -10,6 +10,10 @@ export async function updateSession(request: NextRequest) {
     return addSecurityHeaders(NextResponse.next());
   }
 
+  if (request.nextUrl.pathname.startsWith("/api/v1/auth/register")) {
+    return NextResponse.next();
+  }
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -60,6 +64,7 @@ export async function updateSession(request: NextRequest) {
     "/register",
     "/api/auth",
     "/api/health",
+    "/api/v1/auth",
     "/auth/callback",
     "/loginSecured",
   ];

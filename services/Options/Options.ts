@@ -1,59 +1,54 @@
 import { merchant_table, user_table } from "@prisma/client";
-import { SupabaseClient } from "@supabase/supabase-js";
 
-export const getUserOptionsMerchant = async (
-  supabaseClient: SupabaseClient,
-  params: {
-    page: number;
-    limit: number;
-    teamMemberId: string;
-  }
-) => {
-  const { data, error } = await supabaseClient.rpc(
-    "get_user_options_merchant",
-    {
-      input_data: params,
-    }
-  );
-  if (error) {
-    throw error;
+export const getUserOptionsMerchant = async (params: {
+  page: number;
+  limit: number;
+}) => {
+  const response = await fetch(`/api/v1/options/merchant-options`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(params),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch user options");
   }
 
   return data as user_table[];
 };
 
-export const getUserOptions = async (
-  supabaseClient: SupabaseClient,
-  params: {
-    page: number;
-    limit: number;
-    teamMemberId: string;
-  }
-) => {
-  const { data, error } = await supabaseClient.rpc("get_user_options", {
-    input_data: params,
+export const getUserOptions = async (params: {
+  page: number;
+  limit: number;
+}) => {
+  const response = await fetch(`/api/v1/options/user-options`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(params),
   });
-  if (error) {
-    throw error;
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch user options");
   }
 
   return data as user_table[];
 };
 
 export const getMerchantOptions = async () => {
-  // const { data, error } = await supabaseClient.rpc("get_merchant_option", {
-  //   input_data: params,
-  // });
-  // if (error) {
-  //   throw error;
-  // }
-
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/merchant`,
-    {
-      method: "GET",
-    }
-  );
+  const response = await fetch(`/api/v1/merchant`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
 
   if (!response.ok) {
     throw new Error("Failed to fetch merchant options");

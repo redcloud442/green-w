@@ -9,28 +9,30 @@ export const getAllyBounty = async (params: {
   isAscendingSort: boolean;
 }) => {
   const urlParams = {
-    page: params.page.toString(),
-    limit: params.limit.toString(),
+    page: params.page,
+    limit: params.limit,
     search: params.search || "",
     columnAccessor: params.columnAccessor,
-    isAscendingSort: params.isAscendingSort.toString(),
+    isAscendingSort: params.isAscendingSort,
   };
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/referrals/direct?${new URLSearchParams(urlParams)}`,
-    {
-      method: "GET",
-    }
-  );
+  const response = await fetch(`/api/v1/referral/direct`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(urlParams),
+  });
 
   const result = await response.json();
 
   if (!response.ok) throw new Error(result.error);
 
-  const { data } = result;
-
-  return data as {
-    data: (user_table & { total_bounty_earnings: string })[];
+  return result as {
+    data: (user_table & {
+      total_bounty_earnings: string;
+      package_ally_bounty_log_date_created: string;
+    })[];
     totalCount: 0;
   };
 };
@@ -42,31 +44,28 @@ export const getLegionBounty = async (params: {
   teamMemberId: string;
   columnAccessor: string;
   isAscendingSort: boolean;
-  userId: string;
 }) => {
   const urlParams = {
-    page: params.page.toString(),
-    limit: params.limit.toString(),
+    page: params.page,
+    limit: params.limit,
     search: params.search || "",
     columnAccessor: params.columnAccessor,
-    isAscendingSort: params.isAscendingSort.toString(),
-    userId: params.userId,
+    isAscendingSort: params.isAscendingSort,
   };
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/referrals/indirect?${new URLSearchParams(urlParams)}`,
-    {
-      method: "GET",
-    }
-  );
+  const response = await fetch(`/api/v1/referral/indirect`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(urlParams),
+  });
 
   const result = await response.json();
 
   if (!response.ok) throw new Error(result.error);
 
-  const { data } = result;
-
-  return data as {
+  return result as {
     data: LegionRequestData[];
     totalCount: 0;
   };

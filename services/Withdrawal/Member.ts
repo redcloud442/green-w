@@ -1,6 +1,6 @@
 import { WithdrawalFormValues } from "@/components/DashboardPage/DashboardWithdrawRequest/DashboardWithdrawModal/DashboardWithdrawalModalForm";
-import { AdminWithdrawaldata, WithdrawalRequestData } from "@/utils/types";
-import { SupabaseClient } from "@supabase/supabase-js";
+import { WithdrawalRequestData } from "@/utils/types";
+import { alliance_preferred_withdrawal_table } from "@prisma/client";
 
 export const createWithdrawalRequest = async (params: {
   WithdrawFormValues: WithdrawalFormValues;
@@ -13,13 +13,13 @@ export const createWithdrawalRequest = async (params: {
     teamMemberId,
   };
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/withdraw`,
-    {
-      method: "POST",
-      body: JSON.stringify(data),
-    }
-  );
+  const response = await fetch(`/api/v1/withdraw`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
 
   const result = await response.json();
 
@@ -36,27 +36,17 @@ export const getMemberWithdrawalRequest = async (params: {
   page: number;
   limit: number;
   search?: string;
-  teamMemberId: string;
-  userId: string;
-  teamId: string;
   columnAccessor: string;
   isAscendingSort: boolean;
+  userId?: string;
 }) => {
-  const urlParams = {
-    page: params.page.toString(),
-    limit: params.limit.toString(),
-    search: params.search || "",
-    columnAccessor: params.columnAccessor,
-    isAscendingSort: params.isAscendingSort ? "true" : "false",
-    userId: params.userId,
-  };
-
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/withdraw?${new URLSearchParams(urlParams)}`,
-    {
-      method: "GET",
-    }
-  );
+  const response = await fetch(`/api/v1/withdraw/history`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(params),
+  });
 
   const result = await response.json();
 
@@ -70,36 +60,6 @@ export const getMemberWithdrawalRequest = async (params: {
     data: WithdrawalRequestData[];
     totalCount: 0;
   };
-};
-
-export const getWithdrawalRequestAccountant = async (
-  supabaseClient: SupabaseClient,
-  params: {
-    page: number;
-    limit: number;
-    search?: string;
-    teamMemberId: string;
-    teamId: string;
-    columnAccessor: string;
-    isAscendingSort: boolean;
-    userFilter?: string;
-    statusFilter?: string;
-    dateFilter?: {
-      start: string | undefined;
-      end: string | undefined;
-    };
-  }
-) => {
-  const { data, error } = await supabaseClient.rpc(
-    "get_accountant_withdrawal_history",
-    {
-      input_data: params,
-    }
-  );
-
-  if (error) throw error;
-
-  return data as AdminWithdrawaldata;
 };
 
 export const sendWithdrawalEmail = async (params: {
@@ -168,4 +128,24 @@ export const sendWithdrawalSMS = async (params: {
   if (!response.ok) {
     throw new Error(result.error || "An error occurred while sending the SMS.");
   }
+};
+
+export const getPreferredWithdrawal = async () => {
+  const response = await fetch(`/api/v1/withdraw`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.error ||
+        "An error occurred while fetching the preferred withdrawal."
+    );
+  }
+
+  return result as alliance_preferred_withdrawal_table[];
 };
