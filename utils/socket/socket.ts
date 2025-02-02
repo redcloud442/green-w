@@ -4,7 +4,7 @@ async function initializeSocket() {
   const socket = io(
     process.env.NODE_ENV === "development"
       ? "http://localhost:8000"
-      : "https://primepinas.com",
+      : "https://loadbalancer.elevateglobal.app",
     {
       transports: ["websocket"],
       reconnection: true,

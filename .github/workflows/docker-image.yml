@@ -35,14 +35,6 @@ jobs:
             --build-arg NEXT_PUBLIC_BASE_URL="${{ secrets.NEXT_PUBLIC_BASE_URL }}" \
             -t ghcr.io/redcloud442/elevateglobal:prod .
 
-      - name: Build Docker image for prod-mirror
-        run: |
-          docker build \
-            --build-arg NEXT_PUBLIC_SUPABASE_URL="${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" \
-            --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY="${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" \
-            --build-arg NEXT_PUBLIC_BASE_URL="${{ secrets.NEXT_PUBLIC_BASE_URL }}" \
-            -t ghcr.io/redcloud442/elevateglobal:prod-mirror .
-
       - name: Verify Docker login
         run: docker info
 
@@ -52,4 +44,3 @@ jobs:
       - name: Push Docker image
         run: |
           docker push ghcr.io/redcloud442/elevateglobal:prod
-          docker push ghcr.io/redcloud442/elevateglobal:prod-mirror
