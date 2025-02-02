@@ -16,9 +16,9 @@ export const metadata: Metadata = {
 const Page = async ({ params }: { params: Promise<{ userId: string }> }) => {
   const { userId } = await params;
 
-  const { teamMemberProfile } = await protectionAdminUser();
+  const { teamMemberProfile, profile } = await protectionAdminUser();
 
-  if (!teamMemberProfile) return redirect("/auth/login");
+  if (!teamMemberProfile) return redirect("/login");
 
   const [userData, allianceData] = await prisma.$transaction([
     prisma.user_table.findFirst({
@@ -45,9 +45,9 @@ const Page = async ({ params }: { params: Promise<{ userId: string }> }) => {
     ...merchantData,
   } as UserRequestdata;
 
-  if (!combinedData) return redirect("/auth/login");
+  if (!combinedData) return redirect("/login");
 
-  return <UserAdminProfile userProfile={combinedData} />;
+  return <UserAdminProfile profile={profile} userProfile={combinedData} />;
 };
 
 export default Page;

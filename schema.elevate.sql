@@ -1461,7 +1461,7 @@ plv8.subtransaction(function() {
   const currentRank = currentData.length ? currentData[0].alliance_rank : null;
   const currentIncomeTag = currentData.length ? currentData[0].alliance_total_income_tag : null;
 
-  // Update rank and tag if changes are detected
+
   if (currentRank !== applicableRank || currentIncomeTag !== applicableIncomeTag) {
     if (currentRank !== applicableRank) {
       plv8.execute(`

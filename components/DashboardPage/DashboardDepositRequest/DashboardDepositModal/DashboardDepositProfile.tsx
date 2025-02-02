@@ -1,4 +1,3 @@
-import { changeUserPassword } from "@/app/actions/auth/authAction";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import TableLoading from "@/components/ui/tableLoading";
 import { useToast } from "@/hooks/use-toast";
 import { logError } from "@/services/Error/ErrorLogs";
+import { changeUserPassword } from "@/services/User/User";
 import { MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_MB } from "@/utils/constant";
 import { useRole } from "@/utils/context/roleContext";
 import { escapeFormData, userNameToEmail } from "@/utils/function";

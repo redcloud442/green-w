@@ -19,7 +19,6 @@ export const AdminUserMonitoringColumn = (): ColumnDef<user_table>[] => {
       ),
       cell: ({ row }) => {
         const id = row.original.user_id;
-
         return (
           <div
             onClick={() => router.push(`/admin/users/${id}`)}
@@ -32,7 +31,9 @@ export const AdminUserMonitoringColumn = (): ColumnDef<user_table>[] => {
                 {row.original.user_username?.charAt(0)}
               </AvatarFallback>
             </Avatar>
-            <p className="text-wrap">{row.getValue("user_username")}</p>
+            <p className="text-wrap text-blue-500 underline">
+              {row.getValue("user_username")}
+            </p>
           </div>
         );
       },

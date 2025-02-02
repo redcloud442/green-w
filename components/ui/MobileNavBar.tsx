@@ -45,7 +45,8 @@ const MobileNavBar = () => {
   const { setTotalEarnings } = useUserDashboardEarningsStore();
   const { setChartData } = usePackageChartData();
   const { setLoading } = useUserLoadingStore();
-  const { setIsWithdrawalToday } = useUserHaveAlreadyWithdraw();
+  const { setIsWithdrawalToday, setCanUserDeposit } =
+    useUserHaveAlreadyWithdraw();
   const [socket, setSocket] = useState<Socket | null>(null);
 
   const handleSignOut = async () => {
@@ -133,7 +134,8 @@ const MobileNavBar = () => {
           }),
         ]);
 
-        setIsWithdrawalToday(isWithdrawalToday);
+        setIsWithdrawalToday(isWithdrawalToday.isWithdrawalToday);
+        setCanUserDeposit(isWithdrawalToday.canUserDeposit);
         setTotalEarnings(userEarningsData.totalEarnings);
         setEarnings(userEarningsData.userEarningsData);
 
@@ -156,12 +158,10 @@ const MobileNavBar = () => {
         setSocket(socketInstance);
 
         socketInstance.on("connect", () => {
-          console.log("Socket connected:", socketInstance.id);
           socketInstance.emit("join-room", { teamMemberId });
         });
 
         socketInstance.on("notification-update", (data) => {
-          console.log("Received notifications:", data);
           setUserNotification({
             notifications: data.notifications,
             count: data.count,
@@ -179,7 +179,6 @@ const MobileNavBar = () => {
     try {
       socket?.emit("update-notification", { teamMemberId });
       socket?.on("notification-update", (data) => {
-        console.log("Received notifications:", data);
         setUserNotification({
           notifications: data.notifications,
           count: 0,

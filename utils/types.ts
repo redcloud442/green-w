@@ -23,6 +23,7 @@ export type TopUpRequestData = alliance_top_up_request_table & {
   approver_username: string;
   approver_profile_picture: string;
   alliance_member_id: string;
+  approver_id: string;
   count: number;
 };
 
@@ -45,6 +46,7 @@ export type WithdrawalRequestData = alliance_withdrawal_request_table & {
   approver_username?: string;
   user_profile_picture: string;
   approver_profile_picture: string;
+  approver_id: string;
 };
 
 export type UserRequestdata = user_table &

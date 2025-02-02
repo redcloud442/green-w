@@ -19,7 +19,7 @@ const Page = async () => {
   }
 
   if (!teamMemberProfile) {
-    redirect("/auth/login");
+    redirect("/login");
   }
 
   if (teamMemberProfile.alliance_member_role !== "MERCHANT")

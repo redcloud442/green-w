@@ -1,7 +1,7 @@
 import DashboardPage from "@/components/DashboardPage/DashboardPage";
+import { getUserSponsor } from "@/services/User/User";
 import prisma from "@/utils/prisma";
 import { protectionMemberUser } from "@/utils/serversideProtection";
-import { createClientServerSide } from "@/utils/supabase/server";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 
@@ -14,11 +14,8 @@ export const metadata: Metadata = {
 };
 
 const Page = async () => {
-  const supabaseClient = await createClientServerSide();
-
   const {
     redirect: redirectTo,
-
     referal,
     teamMemberProfile,
     profile,
@@ -49,20 +46,11 @@ const Page = async () => {
   let sponsorData = null;
 
   try {
-    const { data: sponsor, error } = await supabaseClient.rpc(
-      "get_user_sponsor",
-      {
-        input_data: { userId: profile.user_id },
-      }
-    );
+    const sponsor = await getUserSponsor({
+      userId: profile.user_id,
+    });
 
-    const { data } = sponsor;
-
-    if (error) {
-      sponsorData = null;
-    } else {
-      sponsorData = data?.user_username || "";
-    }
+    sponsorData = sponsor;
   } catch (err) {
     sponsorData = null;
   }

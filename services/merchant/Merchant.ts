@@ -1,14 +1,10 @@
 import { merchant_balance_log, merchant_table } from "@prisma/client";
-import { SupabaseClient } from "@supabase/supabase-js";
 
-export const handleUpdateBalance = async (
-  params: {
-    amount: number;
-    memberId: string;
-    userName: string;
-  },
-  supabaseClient: SupabaseClient
-) => {
+export const handleUpdateBalance = async (params: {
+  amount: number;
+  memberId: string;
+  userName: string;
+}) => {
   const response = await fetch(`/api/v1/merchant`, {
     method: "PATCH",
     headers: {

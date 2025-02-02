@@ -12,7 +12,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { logError } from "@/services/Error/ErrorLogs";
 import { updateTopUpStatus } from "@/services/TopUp/Admin";
-import { formatDateToYYYYMMDD } from "@/utils/function";
+import { formatDateToYYYYMMDD, formatTime } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
 import { AdminTopUpRequestData, TopUpRequestData } from "@/utils/types";
 import { ColumnDef } from "@tanstack/react-table";
@@ -235,7 +235,8 @@ export const useAdminTopUpApprovalColumns = (
       ),
       cell: ({ row }) => (
         <div className="text-center">
-          {formatDateToYYYYMMDD(row.getValue("alliance_top_up_request_date"))}
+          {formatDateToYYYYMMDD(row.getValue("alliance_top_up_request_date"))},
+          {formatTime(row.getValue("alliance_top_up_request_date"))}
         </div>
       ),
     },
@@ -252,13 +253,49 @@ export const useAdminTopUpApprovalColumns = (
       ),
       cell: ({ row }) => (
         <div className="flex items-center gap-2 text-wrap cursor-pointer hover:underline">
-          <Avatar>
-            <AvatarImage src={row.original.approver_profile_picture ?? ""} />
-            <AvatarFallback>
-              {row.original.approver_username?.charAt(0)}
-            </AvatarFallback>
-          </Avatar>
-          <p className="text-wrap">{row.getValue("approver_username")}</p>
+          {row.original.approver_username ? (
+            <>
+              <Avatar>
+                <AvatarImage
+                  src={row.original.approver_profile_picture ?? ""}
+                />
+                <AvatarFallback>
+                  {row.original.approver_username?.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+              <p
+                onClick={() =>
+                  router.push(`/admin/users/${row.original.approver_id}`)
+                }
+                className="text-wrap text-blue-500 underline"
+              >
+                {row.getValue("approver_username")}
+              </p>
+            </>
+          ) : null}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "alliance_top_up_request_date_updated",
+
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Date Updated <ArrowUpDown />
+        </Button>
+      ),
+      cell: ({ row }) => (
+        <div className="text-center">
+          {row.getValue("alliance_top_up_request_date_updated")
+            ? formatDateToYYYYMMDD(
+                row.getValue("alliance_top_up_request_date_updated")
+              ) +
+              ", " +
+              formatTime(row.getValue("alliance_top_up_request_date_updated"))
+            : ""}
         </div>
       ),
     },
@@ -300,7 +337,6 @@ export const useAdminTopUpApprovalColumns = (
     },
     {
       accessorKey: "alliance_top_up_request_reject_note",
-
       header: () => <div>Rejection Note</div>,
       cell: ({ row }) => {
         const rejectionNote = row.getValue(

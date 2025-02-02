@@ -61,9 +61,9 @@ export const getUserWithdrawalToday = async () => {
     );
   }
 
-  const { isWithdrawalToday } = result;
+  const { isWithdrawalToday, canUserDeposit } = result;
 
-  return isWithdrawalToday;
+  return { isWithdrawalToday, canUserDeposit };
 };
 
 export const changeUserPassword = async (params: {

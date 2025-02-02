@@ -1,7 +1,3 @@
-import {
-  handleBatchPackageNotification,
-  handleUpdateManyPackageMemberConnection,
-} from "@/app/actions/package/packageAction";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,6 +8,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  handleBatchPackageNotification,
+  handleUpdateManyPackageMemberConnection,
+} from "@/services/Package/Member";
 import { package_notification_logs } from "@prisma/client";
 import { useState } from "react";
 import ReactDOMServer from "react-dom/server";
@@ -64,27 +64,41 @@ const AdminUserNotifyModal = ({ packageNotification }: Props) => {
       const number: string[] = [];
 
       do {
-        // Fetch paginated data from the server
         const response = await handleBatchPackageNotification(page, limit);
-        const { userCreds } = response;
-
-        totalCount = response.totalCount || totalCount;
+        let { userCreds } = response;
+        let currentTotalCount = response.totalCount || totalCount;
+        totalCount = currentTotalCount;
         if (userCreds && userCreds.length > 0) {
           const activeEmails = userCreds
             .filter(
-              (user) =>
+              (user: {
+                user_email: string;
+                user_active_mobile: string;
+                team_member_id: string;
+                package_connection_id: string;
+                user_username: string;
+              }) =>
                 user.user_email &&
                 user.user_active_mobile &&
                 user.team_member_id &&
                 user.package_connection_id
             )
-            .map((user) => ({
-              username: user.user_username,
-              email: user.user_email,
-              activeMobile: user.user_active_mobile,
-              packageConnectionId: user.package_connection_id,
-              teamMemberId: user.team_member_id,
-            }));
+
+            .map(
+              (user: {
+                user_email: string;
+                user_active_mobile: string;
+                team_member_id: string;
+                package_connection_id: string;
+                user_username: string;
+              }) => ({
+                username: user.user_username,
+                email: user.user_email,
+                activeMobile: user.user_active_mobile,
+                packageConnectionId: user.package_connection_id,
+                teamMemberId: user.team_member_id,
+              })
+            );
 
           if (activeEmails.length > 0) {
             for (const batch of chunkArray(activeEmails, 100)) {
@@ -137,7 +151,9 @@ const AdminUserNotifyModal = ({ packageNotification }: Props) => {
       // }
 
       if (batchUpdate.length > 0) {
-        await handleUpdateManyPackageMemberConnection(batchUpdate);
+        await handleUpdateManyPackageMemberConnection({
+          batchData: batchUpdate,
+        });
       }
     } catch (error) {
     } finally {

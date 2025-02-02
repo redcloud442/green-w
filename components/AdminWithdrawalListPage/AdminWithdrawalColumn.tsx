@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { updateWithdrawalStatus } from "@/services/Withdrawal/Admin";
-import { formatDateToYYYYMMDD } from "@/utils/function";
+import { formatDateToYYYYMMDD, formatTime } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
 import { AdminWithdrawaldata, WithdrawalRequestData } from "@/utils/types";
 import { ColumnDef } from "@tanstack/react-table";
@@ -124,11 +124,7 @@ export const AdminWithdrawalHistoryColumn = (
       ),
       cell: ({ row }) => (
         <div
-          onClick={() =>
-            router.push(
-              `/admin/users/${row.original.alliance_withdrawal_request_member_id}`
-            )
-          }
+          onClick={() => router.push(`/admin/users/${row.original.user_id}`)}
           className="flex items-center gap-2 text-wrap cursor-pointer hover:underline"
         >
           <Avatar>
@@ -252,9 +248,11 @@ export const AdminWithdrawalHistoryColumn = (
           {formatDateToYYYYMMDD(
             row.getValue("alliance_withdrawal_request_date")
           )}
+          , {formatTime(row.getValue("alliance_withdrawal_request_date"))}
         </div>
       ),
     },
+
     {
       accessorKey: "approver_username",
       header: ({ column }) => (
@@ -267,14 +265,27 @@ export const AdminWithdrawalHistoryColumn = (
       ),
       cell: ({ row }) => (
         <div className="flex items-center gap-2 text-wrap cursor-pointer hover:underline">
-          <Avatar>
-            <AvatarImage src={row.original.approver_profile_picture ?? ""} />
-            <AvatarFallback>
-              {row.original.approver_username?.charAt(0)}
-            </AvatarFallback>
-          </Avatar>
+          {row.original.approver_username ? (
+            <>
+              <Avatar>
+                <AvatarImage
+                  src={row.original.approver_profile_picture ?? ""}
+                />
+                <AvatarFallback>
+                  {row.original.approver_username?.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
 
-          <p className="text-wrap">{row.getValue("approver_username")}</p>
+              <p
+                onClick={() =>
+                  router.push(`/admin/users/${row.original.approver_id}`)
+                }
+                className="text-wrap text-blue-500 underline"
+              >
+                {row.getValue("approver_username")}
+              </p>
+            </>
+          ) : null}
         </div>
       ),
     },
@@ -292,6 +303,10 @@ export const AdminWithdrawalHistoryColumn = (
         <div className="text-center">
           {row.getValue("alliance_withdrawal_request_date_updated")
             ? formatDateToYYYYMMDD(
+                row.getValue("alliance_withdrawal_request_date_updated")
+              ) +
+              ", " +
+              formatTime(
                 row.getValue("alliance_withdrawal_request_date_updated")
               )
             : ""}

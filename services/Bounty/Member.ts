@@ -29,7 +29,10 @@ export const getAllyBounty = async (params: {
   if (!response.ok) throw new Error(result.error);
 
   return result as {
-    data: (user_table & { total_bounty_earnings: string })[];
+    data: (user_table & {
+      total_bounty_earnings: string;
+      package_ally_bounty_log_date_created: string;
+    })[];
     totalCount: 0;
   };
 };

@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { logError } from "@/services/Error/ErrorLogs";
 import { updateWithdrawalStatus } from "@/services/Withdrawal/Admin";
-import { formatDateToYYYYMMDD } from "@/utils/function";
+import { formatDateToYYYYMMDD, formatTime } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
 import { AdminWithdrawaldata, WithdrawalRequestData } from "@/utils/types";
 import { ColumnDef } from "@tanstack/react-table";
@@ -219,9 +219,11 @@ export const WithdrawalColumn = (
           {formatDateToYYYYMMDD(
             row.getValue("alliance_withdrawal_request_date")
           )}
+          , {formatTime(row.getValue("alliance_withdrawal_request_date"))}
         </div>
       ),
     },
+
     {
       accessorKey: "alliance_withdrawal_request_reject_note",
 

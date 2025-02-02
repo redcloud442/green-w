@@ -28,7 +28,7 @@ const Page = async () => {
     },
   });
 
-  if (!teamMemberProfile) return redirect("/auth/login");
+  if (!teamMemberProfile) return redirect("/login");
 
   return (
     <AdminDashboardPage

@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 const Page = async () => {
   const { teamMemberProfile, profile } = await protectionAdminUser();
 
-  if (!teamMemberProfile) return redirect("/auth/login");
+  if (!teamMemberProfile) return redirect("/login");
 
   return (
     <AdminWithdrawalHistoryPage

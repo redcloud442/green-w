@@ -23,7 +23,6 @@ const DashboardNotification = ({ teamMemberId, handleOpen }: Props) => {
   const [open, setOpen] = useState(false);
   const { userNotification } = useUserNotificationStore();
 
-  console.log(userNotification);
   return (
     <Dialog
       open={open}

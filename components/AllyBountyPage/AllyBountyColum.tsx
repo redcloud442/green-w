@@ -3,7 +3,10 @@ import { user_table } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 
 export const AllyBountyColumn = (): ColumnDef<
-  user_table & { total_bounty_earnings: string }
+  user_table & {
+    total_bounty_earnings: string;
+    package_ally_bounty_log_date_created: string;
+  }
 >[] => {
   return [
     {

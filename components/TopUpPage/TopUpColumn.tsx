@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { logError } from "@/services/Error/ErrorLogs";
 import { updateTopUpStatus } from "@/services/TopUp/Admin";
-import { formatDateToYYYYMMDD } from "@/utils/function";
+import { formatDateToYYYYMMDD, formatTime } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
 import { AdminTopUpRequestData, TopUpRequestData } from "@/utils/types";
 import { ColumnDef } from "@tanstack/react-table";
@@ -130,7 +130,7 @@ export const TopUpColumn = (
       setIsLoading(false);
     }
   };
-  
+
   const columns: ColumnDef<TopUpRequestData>[] = [
     {
       accessorKey: "user_username",
@@ -223,7 +223,6 @@ export const TopUpColumn = (
     },
     {
       accessorKey: "alliance_top_up_request_account",
-
       header: ({ column }) => (
         <Button
           variant="ghost"
@@ -251,13 +250,13 @@ export const TopUpColumn = (
       ),
       cell: ({ row }) => (
         <div className="text-center">
-          {formatDateToYYYYMMDD(row.getValue("alliance_top_up_request_date"))}
+          {formatDateToYYYYMMDD(row.getValue("alliance_top_up_request_date"))},
+          {formatTime(row.getValue("alliance_top_up_request_date"))}
         </div>
       ),
     },
     {
       accessorKey: "alliance_top_up_request_attachment",
-
       header: () => <div>Attachment</div>,
       cell: ({ row }) => {
         const attachmentUrl = row.getValue(
