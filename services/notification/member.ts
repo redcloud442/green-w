@@ -42,7 +42,5 @@ export const handleUpdateMemberNotification = async (params: {
 
   const data = responseData.data;
 
-  console.log(data);
-
   return data;
 };

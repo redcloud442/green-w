@@ -23,10 +23,6 @@ const nextConfig = {
         source: "/api/v1/:path*",
         destination: `${process.env.NODE_ENV === "development" ? "http://localhost:8000" : "https://loadbalancer.elevateglobal.app"}/api/v1/:path*`,
       },
-      {
-        source: "/socket.io/:path*",
-        destination: `${process.env.NODE_ENV === "development" ? "http://localhost:8000" : "https://loadbalancer.elevateglobal.app"}/socket.io/:path*`,
-      },
     ];
   },
   async headers() {

@@ -441,9 +441,9 @@ const DashboardDepositModalDeposit = ({
                   />
                 )}
               />
-              {errors.amount && (
+              {errors.receipt && (
                 <p className="text-primaryRed text-sm mt-1">
-                  {errors.amount.message}
+                  {errors.receipt.message}
                 </p>
               )}
             </div>

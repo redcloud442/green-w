@@ -65,10 +65,9 @@ const DashboardPage = ({
     try {
       setRefresh(true);
 
-      const { totalEarnings, userEarningsData, userRanking } =
-        await getUserEarnings({
-          memberId: teamMemberProfile.alliance_member_id,
-        });
+      const { totalEarnings, userEarningsData } = await getUserEarnings({
+        memberId: teamMemberProfile.alliance_member_id,
+      });
 
       if (!totalEarnings || !userEarningsData) return;
 
@@ -84,8 +83,8 @@ const DashboardPage = ({
         directReferralCount: 0,
         indirectReferralCount: 0,
         package_income: Number(totalEarnings.package_income ?? 0),
-        rank: userRanking?.alliance_rank ?? "",
-        tags: userRanking?.alliance_total_income_tag?.split(",") ?? [],
+        rank: totalEarnings.rank ?? "",
+        tags: totalEarnings.tags ?? [],
       });
 
       setEarnings(userEarningsData);

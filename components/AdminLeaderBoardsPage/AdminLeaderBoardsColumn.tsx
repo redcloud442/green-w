@@ -42,7 +42,6 @@ export const leaderBoardColumn = (
     },
     {
       accessorKey: "username",
-
       header: () => (
         <Button className="w-full " variant="ghost">
           Username

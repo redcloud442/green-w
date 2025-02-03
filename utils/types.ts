@@ -69,6 +69,8 @@ export type ChartDataMember = {
   completion: number;
   completion_date: string;
   amount: number;
+  current_amount: number;
+  currentPercentage: number;
   is_ready_to_claim: boolean;
   is_notified: boolean;
   package_connection_id: string;
