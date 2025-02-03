@@ -52,7 +52,12 @@ WITH
     )
 SELECT 
     m.alliance_member_id AS member_id,
-    COALESCE(e.total_earnings + e.total_amount + d.direct_referral_amount + i.indirect_referral_amount, 0) AS total_earnings,
+    COALESCE(
+    COALESCE(e.total_earnings, 0) + 
+    COALESCE(e.total_amount, 0) + 
+    COALESCE(d.direct_referral_amount, 0) + 
+    COALESCE(i.indirect_referral_amount, 0), 
+0) AS total_earnings,
     COALESCE(w.total_withdrawals - w.total_fee, 0) AS total_withdrawals,
     COALESCE(d.direct_referral_amount, 0) AS direct_referral_amount,
     COALESCE(i.indirect_referral_amount, 0) AS indirect_referral_amount,
