@@ -9,6 +9,7 @@ async function initializeSocket() {
       transports: ["websocket"],
       reconnection: true,
       upgrade: true,
+      path: "/socket.io",
     }
   );
 
