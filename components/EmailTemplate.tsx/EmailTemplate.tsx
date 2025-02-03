@@ -1,5 +1,3 @@
-import React from "react";
-
 export interface BankingEmailNotificationTemplateProps {
   accountHolderName?: string;
   accountNumber?: string;

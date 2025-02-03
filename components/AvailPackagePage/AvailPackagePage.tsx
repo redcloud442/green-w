@@ -169,6 +169,8 @@ const AvailPackagePage = ({
           is_notified: false,
           package_member_id: teamMemberProfile?.alliance_member_id,
           package_days: Number(selectedPackage?.packages_days || 0),
+          current_amount: Number(amount),
+          currentPercentage: 0,
         },
         ...chartData,
       ]);

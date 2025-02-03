@@ -500,34 +500,35 @@ const DashboardWithdrawalModalForm = ({
                     return;
                   }
 
-                  // Allow only numbers and a single decimal point
-                  value = value.replace(/[^0-9]/g, "");
+                  value = value.replace(/[^0-9.]/g, "");
 
-                  // Prevent multiple decimal points
                   const parts = value.split(".");
                   if (parts.length > 2) {
-                    value = parts[0] + "." + parts[1]; // Keep only the first decimal part
+                    value = `${parts[0]}.${parts[1]}`;
                   }
 
-                  // Ensure it doesn't start with multiple zeros (e.g., "00")
-                  if (value.startsWith("0") && !value.startsWith("0.")) {
-                    value = value.replace(/^0+/, "0");
+                  // Limit to 2 decimal places
+                  if (parts[1]?.length > 2) {
+                    value = `${parts[0]}.${parts[1].substring(0, 2)}`;
                   }
 
-                  // Limit decimal places to 2 (adjust as needed)
-                  if (value.includes(".")) {
-                    const [integerPart, decimalPart] = value.split(".");
-                    value = `${integerPart}.${decimalPart.slice(0, 2)}`;
+                  if (value.startsWith("0")) {
+                    value = value.replace(/^0+/, "");
                   }
 
-                  const maxAmount = getMaxAmount();
-
-                  // Enforce the maximum amount value
-                  const numericValue = parseFloat(value || "0");
-                  if (!isNaN(numericValue) && numericValue > maxAmount) {
-                    value = maxAmount.toFixed(2); // Adjust precision to match allowed decimals
+                  // Limit total length to 10 characters
+                  if (Math.floor(Number(value)).toString().length > 7) {
+                    value = value.substring(0, 7);
                   }
 
+                  if (Number(value) > getMaxAmount()) {
+                    value = getMaxAmount()
+                      .toLocaleString("en-US", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })
+                      .toString();
+                  }
                   field.onChange(value);
                 }}
               />

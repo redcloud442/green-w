@@ -19,7 +19,7 @@ import { ChartDataMember } from "@/utils/types";
 import { alliance_member_table } from "@prisma/client";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Button } from "../ui/button";
 import {
@@ -47,6 +47,60 @@ const DashboardPackages = ({ chartData, teamMemberProfile }: Props) => {
   const [openDialogId, setOpenDialogId] = useState<string | null>(null); // Track which dialog is open
   const [isLoading, setIsLoading] = useState<string | null>(null); // Track loading state for specific packages
   const { setAddTransactionHistory } = useUserTransactionHistoryStore();
+  const [liveData, setLiveData] = useState(() => {
+    return chartData.map((data) => ({
+      ...data,
+      currentPercentage: data.completion,
+      current_amount: data.current_amount,
+    }));
+  });
+
+  useEffect(() => {
+    const animationFrames: { [key: string]: number } = {};
+
+    chartData.forEach((data: ChartDataMember, index: number) => {
+      const startPercentage = data.completion;
+      const finalAmount = data.amount + data.profit_amount;
+      const startTime = performance.now();
+
+      const baseDuration =
+        new Date(data.completion_date).getTime() - new Date().getTime();
+
+      const animateProgress = (currentTime: number) => {
+        const elapsedTime = currentTime - startTime;
+        const progress = Math.min(elapsedTime / baseDuration, 1);
+
+        const newPercentage =
+          startPercentage + (100 - startPercentage) * progress;
+        const newAmount =
+          data.current_amount + (finalAmount - data.current_amount) * progress;
+
+        const currentPercentage = newPercentage.toFixed(2);
+
+        setLiveData((prev: ChartDataMember[]) => {
+          const updated = [...prev];
+          updated[index] = {
+            ...data,
+            currentPercentage: Number(currentPercentage),
+            current_amount: newAmount,
+          };
+          return updated;
+        });
+
+        if (progress < 1) {
+          animationFrames[data.package_connection_id] =
+            requestAnimationFrame(animateProgress);
+        }
+      };
+
+      animationFrames[data.package_connection_id] =
+        requestAnimationFrame(animateProgress);
+    });
+
+    return () => {
+      Object.values(animationFrames).forEach(cancelAnimationFrame);
+    };
+  }, [chartData]);
 
   const handleClaimPackage = async (packageData: ChartDataMember) => {
     const { amount, profit_amount, package_connection_id } = packageData;
@@ -112,8 +166,8 @@ const DashboardPackages = ({ chartData, teamMemberProfile }: Props) => {
 
   return (
     <ScrollArea className="w-full pb-0">
-      <div className="flex grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {chartData.map((data) => (
+      <div className="flex grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pb-2">
+        {liveData.map((data) => (
           <Card
             key={data.package_connection_id}
             className="min-w-[260px] max-w-[500px] h-auto dark:bg-cardColor transition-all duration-300 rounded-2xl shadow-2xl relative overflow-hidden"
@@ -166,13 +220,6 @@ const DashboardPackages = ({ chartData, teamMemberProfile }: Props) => {
                     maximumFractionDigits: 2,
                   })}
                 </span>
-                <span className="text-sm font-extrabold text-white">
-                  Amount to Claim: ₱{" "}
-                  {(data.profit_amount + data.amount).toLocaleString("en-US", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
-                </span>
               </div>
 
               <div className="flex flex-col items-center bg-white rounded-xl p-2">
@@ -180,13 +227,10 @@ const DashboardPackages = ({ chartData, teamMemberProfile }: Props) => {
                   Daily Income
                 </span>
                 ₱{" "}
-                {(data.profit_amount / (data.package_days || 1)).toLocaleString(
-                  "en-US",
-                  {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  }
-                )}
+                {data.current_amount.toLocaleString("en-US", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
               </div>
 
               <div className="flex flex-col items-center bg-white rounded-xl p-2">
@@ -194,7 +238,7 @@ const DashboardPackages = ({ chartData, teamMemberProfile }: Props) => {
                   Total Generated Income
                 </span>
                 ₱{" "}
-                {data.profit_amount.toLocaleString("en-US", {
+                {(data.profit_amount + data.amount).toLocaleString("en-US", {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                 })}

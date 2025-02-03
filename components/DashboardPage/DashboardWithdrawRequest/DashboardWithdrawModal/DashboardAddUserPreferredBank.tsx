@@ -82,7 +82,6 @@ const DashboardAddUserPreferredBank = ({
 
       setOpen(false);
     } catch (error) {
-      console.log(error);
       toast({
         title: "Error",
         description: "Failed to add preferred withdrawal",
