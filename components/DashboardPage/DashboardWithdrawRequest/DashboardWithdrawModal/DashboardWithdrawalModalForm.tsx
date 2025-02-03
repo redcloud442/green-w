@@ -11,6 +11,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { logError } from "@/services/Error/ErrorLogs";
 import { createWithdrawalRequest } from "@/services/Withdrawal/Member";
+import { useUserHaveAlreadyWithdraw } from "@/store/userHaveAlreadyWithdraw";
 import { useUserNotificationStore } from "@/store/userNotificationStore";
 import { useUserTransactionHistoryStore } from "@/store/userTransactionHistoryStore";
 import { useUserEarningsStore } from "@/store/useUserEarningsStore";
@@ -69,17 +70,20 @@ type Props = {
 
 const DashboardWithdrawalModalForm = ({
   teamMemberProfile,
-  earnings,
+  earnings: set,
   setOpen,
   preferredEarnings,
   preferredType,
   profile,
 }: Props) => {
   const { toast } = useToast();
-  const { setEarnings } = useUserEarningsStore();
+  const { setEarnings, earnings } = useUserEarningsStore();
   const { userNotification, setAddUserNotification } =
     useUserNotificationStore();
   const { setAddTransactionHistory } = useUserTransactionHistoryStore();
+  const { isWithdrawalToday, setIsWithdrawalToday } =
+    useUserHaveAlreadyWithdraw();
+
   const {
     control,
     handleSubmit,
@@ -91,7 +95,7 @@ const DashboardWithdrawalModalForm = ({
     mode: "onChange",
     resolver: zodResolver(withdrawalFormSchema),
     defaultValues: {
-      earnings: "TOTAL",
+      earnings: "",
       amount: "",
       bank: preferredEarnings?.alliance_preferred_withdrawal_bank_name ?? " ",
       accountName:
@@ -105,18 +109,17 @@ const DashboardWithdrawalModalForm = ({
   const selectedEarnings = watch("earnings");
   const amount = watch("amount");
 
-  const totalEarnings =
-    Number(earnings?.alliance_olympus_earnings ?? 0) +
-    Number(earnings?.alliance_referral_bounty ?? 0);
-
   const getMaxAmount = () => {
     switch (selectedEarnings) {
-      case "TOTAL":
-        return totalEarnings;
+      case "PACKAGE":
+        return earnings?.alliance_olympus_earnings ?? 0;
+      case "REFERRAL":
+        return earnings?.alliance_referral_bounty ?? 0;
       default:
         return 0;
     }
   };
+
   // test
   const handleWithdrawalRequest = async (data: WithdrawalFormValues) => {
     try {
@@ -128,6 +131,25 @@ const DashboardWithdrawalModalForm = ({
         throw new Error(validate.error.message);
       }
 
+      if (isWithdrawalToday.package) {
+        toast({
+          title: "You have already made a withdrawal today for package income",
+          description: "Please try again tomorrow",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (isWithdrawalToday.referral) {
+        toast({
+          title:
+            "You have already made a withdrawal today for network + referral income",
+          description: "Please try again tomorrow",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const email = sanitizedData.email;
       const cellphoneNumber = sanitizedData.cellphoneNumber;
 
@@ -137,48 +159,70 @@ const DashboardWithdrawalModalForm = ({
       });
 
       switch (selectedEarnings) {
-        case "TOTAL":
+        case "PACKAGE":
           if (earnings) {
-            // Remaining amount to be deducted
             let remainingAmount = Number(sanitizedData.amount);
 
-            // Calculate Olympus Earnings deduction
             const olympusDeduction = Math.min(
               remainingAmount,
-              Number(earnings.alliance_olympus_earnings)
+              earnings.alliance_olympus_earnings
             );
             remainingAmount -= olympusDeduction;
+
+            if (remainingAmount > 0) {
+              break;
+            }
+
+            // Update state with new earnings values
+            setEarnings({
+              ...earnings,
+              alliance_combined_earnings:
+                earnings.alliance_combined_earnings -
+                Number(sanitizedData.amount),
+              alliance_olympus_earnings:
+                earnings.alliance_olympus_earnings - olympusDeduction,
+            });
+          }
+
+          setIsWithdrawalToday({
+            ...isWithdrawalToday,
+            package: true,
+          });
+          break;
+        case "REFERRAL":
+          if (earnings) {
+            // Remaining amount to be deducted
+
+            let remainingAmount = Number(sanitizedData.amount);
 
             // Calculate Referral Bounty deduction
             const referralDeduction = Math.min(
               remainingAmount,
-              Number(earnings.alliance_referral_bounty)
+              earnings.alliance_referral_bounty
             );
+
             remainingAmount -= referralDeduction;
 
-            // Ensure no remaining amount (sanity check)
             if (remainingAmount > 0) {
-              toast({
-                title: "Insufficient funds to update state.",
-                description: "Please try again later.",
-                variant: "destructive",
-              });
               break;
             }
 
+            // Update state with new earnings values
             setEarnings({
               ...earnings,
               alliance_combined_earnings:
-                Number(earnings.alliance_combined_earnings) -
+                earnings.alliance_combined_earnings -
                 Number(sanitizedData.amount),
-              alliance_olympus_earnings:
-                Number(earnings.alliance_olympus_earnings) -
-                Number(olympusDeduction),
               alliance_referral_bounty:
-                Number(earnings.alliance_referral_bounty) -
-                Number(referralDeduction),
+                earnings.alliance_referral_bounty - referralDeduction,
             });
           }
+
+          setIsWithdrawalToday({
+            ...isWithdrawalToday,
+            referral: true,
+          });
+
           break;
         default:
           break;
@@ -186,8 +230,9 @@ const DashboardWithdrawalModalForm = ({
 
       const transactionAmount = calculateFinalAmount(
         Number(amount || 0),
-        "TOTAL"
+        sanitizedData.earnings
       );
+
       const transactionHistory: alliance_transaction_table = {
         transaction_member_id: teamMemberProfile.alliance_member_id,
         transaction_description: "Withdrawal Ongoing",
@@ -200,13 +245,13 @@ const DashboardWithdrawalModalForm = ({
         alliance_notification_user_id: teamMemberProfile.alliance_member_id,
         alliance_notification_message:
           "Withdrawal request is Ongoing amounting to ₱ " +
-          calculateFinalAmount(Number(amount || 0), "TOTAL").toLocaleString(
-            "en-US",
-            {
-              minimumFractionDigits: 0,
-              maximumFractionDigits: 0,
-            }
-          ) +
+          calculateFinalAmount(
+            Number(amount || 0),
+            selectedEarnings
+          ).toLocaleString("en-US", {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+          }) +
           " Please wait for approval.",
         alliance_notification_date_created: new Date(),
         alliance_notification_is_read: false,
@@ -331,13 +376,77 @@ const DashboardWithdrawalModalForm = ({
     >
       {/* Earnings Select */}
       <div>
-        <Label className="text-green-700" htmlFor="earnings">
-          Your Available Balance: ₱
-          {totalEarnings.toLocaleString("en-US", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}
-        </Label>
+        <Label htmlFor="earnings">Your Available Balance</Label>
+        <Controller
+          name="earnings"
+          control={control}
+          render={({ field }) => (
+            <Select
+              onValueChange={(value) => {
+                field.onChange(value);
+
+                // Set the withdrawal amount based on the selected type
+                if (value === "PACKAGE") {
+                  setValue(
+                    "amount",
+                    earnings?.alliance_olympus_earnings.toFixed(2) ?? "0"
+                  );
+                } else if (value === "REFERRAL") {
+                  setValue(
+                    "amount",
+                    earnings?.alliance_referral_bounty.toFixed(2) ?? "0"
+                  );
+                }
+              }}
+              value={field.value}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select Income Category">
+                  {field.value === "PACKAGE"
+                    ? `Package Income ₱ ${earnings?.alliance_olympus_earnings.toLocaleString(
+                        "en-US",
+
+                        {
+                          minimumFractionDigits: 2,
+
+                          maximumFractionDigits: 2,
+                        }
+                      )}`
+                    : `Network + Referral Income ₱ ${earnings?.alliance_referral_bounty.toLocaleString(
+                        "en-US",
+                        {
+                          minimumFractionDigits: 2,
+
+                          maximumFractionDigits: 2,
+                        }
+                      )}`}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem className="text-xs" value="PACKAGE">
+                  Package Earnings ₱{" "}
+                  {earnings?.alliance_olympus_earnings.toLocaleString("en-US", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </SelectItem>
+
+                <SelectItem className="text-xs" value="REFERRAL">
+                  Referral Earnings ₱{" "}
+                  {earnings?.alliance_referral_bounty.toLocaleString("en-US", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+        />
+        {errors.earnings && (
+          <p className="text-primaryRed text-sm mt-1">
+            {errors.earnings.message}
+          </p>
+        )}
       </div>
 
       {/* Bank Type Select */}

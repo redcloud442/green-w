@@ -66,7 +66,10 @@ const MobileNavBar = () => {
       }); // Reset earnings
       setTotalEarnings(null); // Reset dashboard earnings
       setChartData([]); // Clear chart data
-      setIsWithdrawalToday(false); // Reset withdrawal status
+      setIsWithdrawalToday({
+        referral: false,
+        package: false,
+      }); // Reset withdrawal status
 
       setLoading(false); // Reset loading state
     } catch (e) {
@@ -139,14 +142,18 @@ const MobileNavBar = () => {
             }),
           ]);
 
-        setIsWithdrawalToday(isWithdrawalToday.isWithdrawalToday);
+        setIsWithdrawalToday({
+          referral: isWithdrawalToday.canWithdrawReferral,
+          package: isWithdrawalToday.canWithdrawPackage,
+        });
         setCanUserDeposit(isWithdrawalToday.canUserDeposit);
         setTotalEarnings(userEarningsData.totalEarnings);
+
         setEarnings(userEarningsData.userEarningsData);
 
         setUserNotification({
           notifications: notifications.notifications,
-          count: notifications.total,
+          count: notifications.count,
         });
         setChartData(data);
 

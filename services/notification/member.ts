@@ -20,7 +20,7 @@ export const handleFetchMemberNotification = async (params: {
 
   return data as {
     notifications: alliance_notification_table[];
-    total: number;
+    count: number;
   };
 };
 
