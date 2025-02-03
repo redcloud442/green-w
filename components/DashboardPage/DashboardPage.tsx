@@ -108,12 +108,12 @@ const DashboardPage = ({
     });
   };
 
+  if (loading) return <NavigationLoader visible={loading} />;
+
   return (
     <div className="relative min-h-screen mx-auto space-y-4 py-2 sm:px-0 mt-20 sm:mt-20 sm:mb-20 overflow-x-hidden">
-      {loading && <NavigationLoader visible={loading} />}
-      <NewlyRegisteredModal isActive={isActive} setOpen={setOpen} />
       <div
-        className={`flex flex-row fixed sm:fixed w-full sm:min-w-fit sm:max-w-lg justify-between px-1 bg-cardColor/70 py-4 sm:px-2 items-center top-0 sm:top-2 sm:bg-cardColor sm:rounded-tr-lg sm:rounded-br-lg z-50 ${
+        className={`flex flex-row fixed sm:fixed w-full sm:min-w-fit sm:max-w-lg justify-between px-1 bg-cardColor/90 py-2 sm:px-2 items-center top-0 sm:top-2 sm:bg-cardColor sm:rounded-tr-lg sm:rounded-br-lg z-50 ${
           totalEarnings?.rank
             ? "sm:py-0 sm:rounded-tr-lg sm:rounded-br-lg"
             : "sm:py-2 sm:rounded-tr-lg sm:rounded-br-lg"
@@ -219,7 +219,7 @@ const DashboardPage = ({
           </div>
         )}
       </div>
-
+      <NewlyRegisteredModal isActive={isActive} setOpen={setOpen} />
       <div
         className="w-full px-2 space-y-4
        md:px-10"
