@@ -1,8 +1,6 @@
+import { handleFetchMemberNotification } from "@/services/notification/member";
 import { useUserNotificationStore } from "@/store/userNotificationStore";
-import initializeSocket from "@/utils/socket/socket";
-import { alliance_notification_table } from "@prisma/client";
 import { useEffect, useRef, useState } from "react";
-import { Socket } from "socket.io-client";
 import { Card, CardHeader, CardTitle } from "../ui/card";
 import { DialogContent, DialogFooter, DialogTitle } from "../ui/dialog";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
@@ -19,48 +17,8 @@ const NotificationTable = ({ teamMemberId }: DataTableProps) => {
   const observerRef = useRef<HTMLDivElement | null>(null);
   const { userNotification, setAddUserNotification } =
     useUserNotificationStore();
-  const [socketInstance, setSocketInstance] = useState<Socket | null>(null);
 
-  useEffect(() => {
-    let isMounted = true;
-
-    async function connectSocket() {
-      if (!teamMemberId) return;
-
-      try {
-        if (socketInstance && isMounted) {
-          socketInstance?.on(
-            "notification-update",
-            (data: {
-              notifications: alliance_notification_table[];
-              count: number;
-            }) => {
-              if (data.notifications.length === 0) {
-                setNoMoreData(true);
-              } else {
-                setAddUserNotification({
-                  notifications: [...data.notifications],
-                  count: data.count,
-                });
-                setNoMoreData(false);
-              }
-            }
-          );
-
-          socketInstance.emit("get-notification", { teamMemberId, take });
-        } else {
-          const socketInstance = await initializeSocket();
-          setSocketInstance(socketInstance as Socket);
-        }
-      } catch (error) {
-        console.error("Error initializing socket:", error);
-      }
-    }
-
-    connectSocket();
-  }, [teamMemberId]);
-
-  const loadMoreNotifications = () => {
+  const loadMoreNotifications = async () => {
     if (
       isFetchingList ||
       noMoreData ||
@@ -72,15 +30,21 @@ const NotificationTable = ({ teamMemberId }: DataTableProps) => {
     const newTake = take + 10;
     setTake(newTake);
 
-    socketInstance?.emit("get-notification", { teamMemberId, take: newTake });
+    const data = await handleFetchMemberNotification({
+      take: newTake,
+    });
 
+    setAddUserNotification({
+      notifications: data.notifications,
+      count: 0,
+    });
     setIsFetchingList(false);
   };
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
+        if (entry.isIntersecting && take !== 10) {
           loadMoreNotifications();
         }
       },
@@ -112,7 +76,7 @@ const NotificationTable = ({ teamMemberId }: DataTableProps) => {
               Notifications
             </DialogTitle>
 
-            {userNotification.notifications.length > 0 ? (
+            {userNotification?.notifications.length > 0 ? (
               <ul className="space-y-2">
                 {userNotification.notifications.map((notification) => (
                   <li
