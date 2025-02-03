@@ -8,6 +8,10 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { getDashboard } from "@/services/Dasboard/Member";
+import {
+  handleFetchMemberNotification,
+  handleUpdateMemberNotification,
+} from "@/services/notification/member";
 import { getUserEarnings, getUserWithdrawalToday } from "@/services/User/User";
 import { useUserLoadingStore } from "@/store/useLoadingState";
 import { usePackageChartData } from "@/store/usePackageChartData";
@@ -16,13 +20,11 @@ import { useUserNotificationStore } from "@/store/userNotificationStore";
 import { useUserDashboardEarningsStore } from "@/store/useUserDashboardEarnings";
 import { useUserEarningsStore } from "@/store/useUserEarningsStore";
 import { useRole } from "@/utils/context/roleContext";
-import initializeSocket from "@/utils/socket/socket";
 import { createClientSide } from "@/utils/supabase/client";
 import { BookOpenIcon, DoorOpen, HomeIcon, UserIcon } from "lucide-react";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Socket } from "socket.io-client";
 import DashboardNotification from "../DashboardPage/DashboardDepositRequest/DashboardDepositModal/DashboardNotification";
 import { Button } from "./button";
 import { DialogFooter, DialogHeader } from "./dialog";
@@ -47,7 +49,6 @@ const MobileNavBar = () => {
   const { setLoading } = useUserLoadingStore();
   const { setIsWithdrawalToday, setCanUserDeposit } =
     useUserHaveAlreadyWithdraw();
-  const [socket, setSocket] = useState<Socket | null>(null);
 
   const handleSignOut = async () => {
     try {
@@ -123,22 +124,30 @@ const MobileNavBar = () => {
         if (!teamMemberId) return;
         setLoading(true);
 
-        const [userEarningsData, isWithdrawalToday, data] = await Promise.all([
-          getUserEarnings({
-            memberId: teamMemberId,
-          }),
-          getUserWithdrawalToday(),
+        const [userEarningsData, isWithdrawalToday, data, notifications] =
+          await Promise.all([
+            getUserEarnings({
+              memberId: teamMemberId,
+            }),
+            getUserWithdrawalToday(),
 
-          getDashboard({
-            teamMemberId: teamMemberId,
-          }),
-        ]);
+            getDashboard({
+              teamMemberId: teamMemberId,
+            }),
+            handleFetchMemberNotification({
+              take: 10,
+            }),
+          ]);
 
         setIsWithdrawalToday(isWithdrawalToday.isWithdrawalToday);
         setCanUserDeposit(isWithdrawalToday.canUserDeposit);
         setTotalEarnings(userEarningsData.totalEarnings);
         setEarnings(userEarningsData.userEarningsData);
 
+        setUserNotification({
+          notifications: notifications.notifications,
+          count: notifications.total,
+        });
         setChartData(data);
 
         setLoading(false);
@@ -151,42 +160,17 @@ const MobileNavBar = () => {
     handleFetchUserInformation();
   }, [teamMemberId, role]);
 
-  useEffect(() => {
-    async function connectSocket() {
-      const socketInstance = await initializeSocket();
-      if (socketInstance) {
-        setSocket(socketInstance);
-
-        socketInstance.on("connect", () => {
-          socketInstance.emit("join-room", { teamMemberId });
-        });
-
-        socketInstance.on("notification-update", (data) => {
-          setUserNotification({
-            notifications: data.notifications,
-            count: data.count,
-          });
-        });
-
-        socketInstance.emit("get-notification", { teamMemberId });
-      }
-    }
-
-    connectSocket();
-  }, [teamMemberId]);
-
-  const handleOnOpen = () => {
+  const handleOnOpen = async () => {
     try {
-      socket?.emit("update-notification", { teamMemberId });
-      socket?.on("notification-update", (data) => {
-        setUserNotification({
-          notifications: data.notifications,
-          count: 0,
-        });
+      const data = await handleUpdateMemberNotification({
+        take: 10,
       });
-    } catch (e) {
-      console.error("Error in handleOnOpen:", e);
-    }
+
+      setUserNotification({
+        notifications: data,
+        count: 0,
+      });
+    } catch (e) {}
   };
 
   return (
