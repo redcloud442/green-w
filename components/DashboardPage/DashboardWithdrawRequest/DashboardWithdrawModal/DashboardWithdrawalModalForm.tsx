@@ -649,8 +649,8 @@ const DashboardWithdrawalModalForm = ({
             onClick={() => {
               if (!selectedEarnings) {
                 toast({
-                  title: "Select an earnings",
-                  description: "Please select an earnings",
+                  title: "Select an income category",
+                  description: "Please select an income category",
                   variant: "destructive",
                 });
                 return;

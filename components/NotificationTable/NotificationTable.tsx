@@ -1,6 +1,7 @@
 import { handleFetchMemberNotification } from "@/services/notification/member";
 import { useUserNotificationStore } from "@/store/userNotificationStore";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
+import { Button } from "../ui/button";
 import { Card, CardHeader, CardTitle } from "../ui/card";
 import { DialogContent, DialogFooter, DialogTitle } from "../ui/dialog";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
@@ -14,50 +15,32 @@ const NotificationTable = ({ teamMemberId }: DataTableProps) => {
   const [take, setTake] = useState(10); // Start with 10 notifications
   const [isFetchingList, setIsFetchingList] = useState(false);
   const [noMoreData, setNoMoreData] = useState(false);
-  const observerRef = useRef<HTMLDivElement | null>(null);
   const { userNotification, setAddUserNotification } =
     useUserNotificationStore();
 
   const loadMoreNotifications = async () => {
-    if (
-      isFetchingList ||
-      noMoreData ||
-      take > userNotification.notifications.length
-    )
-      return;
+    if (isFetchingList || noMoreData) return;
 
     setIsFetchingList(true);
-    const newTake = take + 10;
-    setTake(newTake);
-
-    console.log(newTake);
 
     const data = await handleFetchMemberNotification({
-      take: newTake,
+      take: 10, // Always fetch the next 10 items
+      skip: userNotification.notifications.length, // Skip already fetched items
+      teamMemberId: teamMemberId ?? "",
     });
 
-    setAddUserNotification({
-      notifications: data.notifications,
-      count: 0,
-    });
+    if (data.notifications.length === 0) {
+      setNoMoreData(true); // No more notifications to fetch
+    } else {
+      setAddUserNotification({
+        notifications: data.notifications,
+        count: data.count,
+      });
+      setTake((prev) => prev + 10); // Increment `take` by 10
+    }
+
     setIsFetchingList(false);
   };
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          loadMoreNotifications();
-        }
-      },
-      { threshold: 1.0 }
-    );
-
-    if (observerRef.current) observer.observe(observerRef.current);
-    return () => {
-      if (observerRef.current) observer.unobserve(observerRef.current);
-    };
-  }, [observerRef.current, isFetchingList, noMoreData]);
 
   return (
     <ScrollArea className="w-full overflow-x-auto">
@@ -108,13 +91,16 @@ const NotificationTable = ({ teamMemberId }: DataTableProps) => {
               </p>
             )}
 
-            {/* Observer for Infinite Scroll */}
-            <div ref={observerRef} className="h-1" />
-
-            {isFetchingList && (
-              <p className="text-sm text-gray-500 text-center mt-2">
-                Loading more notifications...
-              </p>
+            {userNotification?.notifications.length > 0 && !noMoreData && (
+              <div className="flex justify-center mt-4">
+                <Button
+                  variant="card"
+                  onClick={loadMoreNotifications}
+                  disabled={isFetchingList}
+                >
+                  {isFetchingList ? "Loading..." : "Load More"}
+                </Button>
+              </div>
             )}
 
             {noMoreData && (

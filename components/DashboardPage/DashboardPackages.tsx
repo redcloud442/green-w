@@ -224,7 +224,7 @@ const DashboardPackages = ({ chartData, teamMemberProfile }: Props) => {
 
               <div className="flex flex-col items-center bg-white rounded-xl p-2">
                 <span className="text-sm font-extrabold text-black">
-                  Daily Income
+                  Accumulating Income
                 </span>
                 ₱{" "}
                 {data.current_amount.toLocaleString("en-US", {

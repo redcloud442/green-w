@@ -2,6 +2,8 @@ import { alliance_notification_table } from "@prisma/client";
 
 export const handleFetchMemberNotification = async (params: {
   take: number;
+  skip: number;
+  teamMemberId: string;
 }) => {
   const response = await fetch(`/api/v1/notification`, {
     method: "POST",
@@ -25,6 +27,7 @@ export const handleFetchMemberNotification = async (params: {
 };
 
 export const handleUpdateMemberNotification = async (params: {
+  teamMemberId: string;
   take: number;
 }) => {
   const response = await fetch(`/api/v1/notification`, {

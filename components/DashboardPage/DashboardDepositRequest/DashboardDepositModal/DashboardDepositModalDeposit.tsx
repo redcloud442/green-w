@@ -238,7 +238,8 @@ const DashboardDepositModalDeposit = ({
               <p className="text-sm sm:text-lg font-thin pt-2">DEPOSIT</p>
             </PopoverTrigger>
             <PopoverContent>
-              Elevate is currently reviewing your deposit request. Please
+              Elevate is currently reviewing your deposit request. Please wait
+              for the approval.
             </PopoverContent>
           </Popover>
         )}

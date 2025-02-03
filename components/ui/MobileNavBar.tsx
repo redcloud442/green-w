@@ -139,6 +139,8 @@ const MobileNavBar = () => {
             }),
             handleFetchMemberNotification({
               take: 10,
+              skip: 0,
+              teamMemberId: teamMemberId,
             }),
           ]);
 
@@ -170,6 +172,7 @@ const MobileNavBar = () => {
   const handleOnOpen = async () => {
     try {
       const data = await handleUpdateMemberNotification({
+        teamMemberId: teamMemberId,
         take: 10,
       });
 
