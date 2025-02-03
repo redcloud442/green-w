@@ -406,7 +406,9 @@ const DashboardDepositModalDeposit = ({
             </div>
 
             <div>
-              <Label htmlFor="receipt">Last 5 digits of your receipt</Label>
+              <Label htmlFor="receipt">
+                Last 5 digits of your Receipt Reference No.
+              </Label>
               <Controller
                 name="receipt"
                 control={control}
