@@ -30,6 +30,8 @@ const NotificationTable = ({ teamMemberId }: DataTableProps) => {
     const newTake = take + 10;
     setTake(newTake);
 
+    console.log(newTake);
+
     const data = await handleFetchMemberNotification({
       take: newTake,
     });
@@ -44,7 +46,7 @@ const NotificationTable = ({ teamMemberId }: DataTableProps) => {
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && take !== 10) {
+        if (entry.isIntersecting) {
           loadMoreNotifications();
         }
       },

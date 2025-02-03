@@ -424,7 +424,7 @@ const DashboardWithdrawalModalForm = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem className="text-xs" value="PACKAGE">
-                  Package Earnings ₱{" "}
+                  Package Income ₱{" "}
                   {earnings?.alliance_olympus_earnings.toLocaleString("en-US", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
@@ -432,7 +432,7 @@ const DashboardWithdrawalModalForm = ({
                 </SelectItem>
 
                 <SelectItem className="text-xs" value="REFERRAL">
-                  Referral Earnings ₱{" "}
+                  Network + Referral Income ₱{" "}
                   {earnings?.alliance_referral_bounty.toLocaleString("en-US", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,

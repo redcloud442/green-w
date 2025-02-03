@@ -83,7 +83,7 @@ const MobileNavBar = () => {
     {
       href: "/",
       label: "Home",
-      icon: <HomeIcon />,
+      icon: <HomeIcon className="w-6 h-6" />,
     },
     {
       href: "/notification",
@@ -93,18 +93,18 @@ const MobileNavBar = () => {
     {
       href: "https://www.facebook.com/groups/100091218211888",
       label: "Facebook Group",
-      icon: <HomeIcon />,
+      icon: <HomeIcon className="w-6 h-6" />,
     },
     {
       href: "/tools-and-guides",
       label: "Tools & Guides",
-      icon: <BookOpenIcon />,
+      icon: <BookOpenIcon className="w-6 h-6" />,
     },
 
     {
       href: "/profile",
       label: "Profile",
-      icon: <UserIcon />,
+      icon: <UserIcon className="w-6 h-6" />,
     },
   ];
 
@@ -197,7 +197,7 @@ const MobileNavBar = () => {
                   onClick={() => handleNavigation(item.href, item.onClick)}
                   variant="ghost"
                   className={cn(
-                    "flex flex-col relative items-center font-medium hover:bg-transparent text-center p-2 w-min",
+                    "flex flex-col relative items-center font-medium hover:bg-transparent text-center p-0 w-min",
                     pathname === item.href
                       ? "text-blue-600 dark:text-blue-400"
                       : "text-gray-600 dark:text-gray-300"
