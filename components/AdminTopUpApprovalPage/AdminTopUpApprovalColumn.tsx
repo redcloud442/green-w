@@ -140,7 +140,7 @@ export const useAdminTopUpApprovalColumns = (
           <Avatar>
             <AvatarImage src={row.original.user_profile_picture ?? ""} />
             <AvatarFallback>
-              {row.original.user_username?.charAt(0)}
+              {row.original.user_username?.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <p className="text-wrap text-blue-500">
@@ -241,6 +241,7 @@ export const useAdminTopUpApprovalColumns = (
         </div>
       ),
     },
+
     {
       accessorKey: "approver_username",
       header: ({ column }) => (

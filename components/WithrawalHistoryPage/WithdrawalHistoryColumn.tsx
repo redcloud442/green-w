@@ -162,6 +162,25 @@ export const WithdrawalHistoryColumn =
         },
       },
       {
+        accessorKey: "alliance_withdrawal_request_withdraw_type",
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            className="p-1"
+            onClick={() =>
+              column.toggleSorting(column.getIsSorted() === "desc")
+            }
+          >
+            Type <ArrowUpDown />
+          </Button>
+        ),
+        cell: ({ row }) => (
+          <div className="text-wrap">
+            {row.getValue("alliance_withdrawal_request_withdraw_type")}
+          </div>
+        ),
+      },
+      {
         accessorKey: "alliance_withdrawal_request_date",
 
         header: ({ column }) => (

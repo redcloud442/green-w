@@ -285,7 +285,23 @@ export const AdminWithdrawalHistoryColumn = (
         </div>
       ),
     },
-
+    {
+      accessorKey: "alliance_withdrawal_request_withdraw_type",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          className="p-1"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "desc")}
+        >
+          Type <ArrowUpDown />
+        </Button>
+      ),
+      cell: ({ row }) => (
+        <div className="text-wrap">
+          {row.getValue("alliance_withdrawal_request_withdraw_type")}
+        </div>
+      ),
+    },
     {
       accessorKey: "approver_username",
       header: ({ column }) => (
@@ -306,7 +322,7 @@ export const AdminWithdrawalHistoryColumn = (
                   src={row.original.approver_profile_picture ?? ""}
                 />
                 <AvatarFallback>
-                  {row.original.approver_username?.charAt(0)}
+                  {row.original.approver_username?.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
 
