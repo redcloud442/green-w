@@ -55,7 +55,6 @@ const DashboardPage = ({
   const { chartData } = usePackageChartData();
   const { loading } = useUserLoadingStore();
   const [open, setOpen] = useState(false);
-
   const [isActive, setIsActive] = useState(
     teamMemberProfile.alliance_member_is_active
   );

@@ -4,6 +4,7 @@ import prisma from "@/utils/prisma";
 import { protectionMemberUser } from "@/utils/serversideProtection";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
+import InstallPrompt from "../install-prompt";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -60,13 +61,16 @@ const Page = async () => {
   }
 
   return (
-    <DashboardPage
-      profile={profile}
-      teamMemberProfile={teamMemberProfile}
-      referal={referal}
-      packages={packages}
-      sponsor={sponsorData || ""}
-    />
+    <>
+      <DashboardPage
+        profile={profile}
+        teamMemberProfile={teamMemberProfile}
+        referal={referal}
+        packages={packages}
+        sponsor={sponsorData || ""}
+      />
+      <InstallPrompt />
+    </>
   );
 };
 

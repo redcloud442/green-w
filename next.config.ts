@@ -21,7 +21,7 @@ const nextConfig = {
     return [
       {
         source: "/api/v1/:path*",
-        destination: `${process.env.NODE_ENV === "development" ? "http://localhost:8000" : "https://loadbalancer.elevateglobal.app"}/api/v1/:path*`,
+        destination: `${process.env.NODE_ENV === "development" ? "http://localhost:8000" : "http://localhost:8000"}/api/v1/:path*`,
       },
     ];
   },
@@ -69,6 +69,23 @@ const nextConfig = {
           {
             key: "X-Powered-By",
             value: "",
+          },
+        ],
+      },
+      {
+        source: "/sw.js",
+        headers: [
+          {
+            key: "Content-Type",
+            value: "application/javascript; charset=utf-8",
+          },
+          {
+            key: "Cache-Control",
+            value: "no-cache, no-store, must-revalidate",
+          },
+          {
+            key: "Content-Security-Policy",
+            value: "default-src 'self'; script-src 'self'",
           },
         ],
       },

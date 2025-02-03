@@ -8,7 +8,8 @@
     "start": "next start",
     "db": "npx prisma db push && npx prisma generate",
     "migrate-dev": "npx prisma migrate dev && npx tsx lib/seedTrigger.ts",
-    "lint": "next lint"
+    "lint": "next lint",
+    "exp": "next dev --experimental-https"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
@@ -46,6 +47,7 @@
     "lru-cache": "^11.0.2",
     "lucide-react": "^0.460.0",
     "next": "15.0.3",
+    "next-pwa": "^5.6.0",
     "next-themes": "^0.4.4",
     "postgres": "^3.4.5",
     "prisma": "^5.22.0",
@@ -71,6 +73,7 @@
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.7",
+    "@types/next-pwa": "^5.6.9",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

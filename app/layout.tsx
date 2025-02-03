@@ -5,6 +5,8 @@ import { Roboto } from "next/font/google";
 import Image from "next/image";
 import { Suspense } from "react";
 import "./globals.css";
+import InstallPrompt from "./install-prompt";
+import ServiceWorkerRegister from "./servicework";
 
 export const metadata: Metadata = {
   title: "Elevate Global App",
@@ -24,9 +26,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning className={roboto.className}>
+      <head>
+        <link rel="manifest" href="/manifest.webmanifest" />
+        <link rel="apple-touch-icon" href="/app-logo-192.png" />
+        <meta name="theme-color" content="#000000" />
+      </head>
       <body className="h-screen overflow-x-hidden">
         <main className="relative min-h-screen">
           <RouterTransition />
+
           <div className="absolute inset-0 -z-10 h-full w-full">
             {/* Background Image */}
             <Image
@@ -41,6 +49,8 @@ export default function RootLayout({
           <Suspense fallback={<RouterTransition />}>{children}</Suspense>
         </main>
         <Toaster />
+        <InstallPrompt />
+        <ServiceWorkerRegister />
       </body>
     </html>
   );
