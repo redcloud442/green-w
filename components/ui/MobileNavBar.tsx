@@ -91,7 +91,7 @@ const MobileNavBar = () => {
       icon: <></>,
     },
     {
-      href: "https://www.facebook.com/groups/100091218211888",
+      href: "https://www.facebook.com/groups/elevateexecutivecommunity",
       label: "Facebook Group",
       icon: <HomeIcon className="w-6 h-6" />,
     },
