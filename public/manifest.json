@@ -1,0 +1,26 @@
+{
+  "theme_color": "#38f2ff",
+  "background_color": "#2EC6FE",
+  "icons": [
+    {
+      "purpose": "maskable",
+      "sizes": "512x512",
+      "src": "icon512_maskable.png",
+      "type": "image/png"
+    },
+    {
+      "purpose": "any",
+      "sizes": "512x512",
+      "src": "icon512_rounded.png",
+      "type": "image/png"
+    }
+  ],
+  "orientation": "any",
+  "display": "standalone",
+  "dir": "auto",
+  "lang": "en-US",
+  "name": "Elevateglobal",
+  "short_name": "Elevate",
+  "start_url": "http://localhost:3000",
+  "scope": "http://localhost:3000"
+}

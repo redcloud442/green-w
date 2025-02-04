@@ -9,6 +9,17 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Elevate Global App",
   description: "Elevate Global App",
+  manifest: "/manifest.json",
+  keywords: [
+    "Elevate Global",
+    "Elevate",
+    "Global",
+    "App",
+    "Elevate Global App",
+  ],
+  themeColor: [{ color: "#38f2ff" }],
+  viewport:
+    "minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no, user-scalable=no, viewport-fit=cover",
 };
 
 const roboto = Roboto({
