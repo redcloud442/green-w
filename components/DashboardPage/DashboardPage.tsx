@@ -268,8 +268,9 @@ const DashboardPage = ({
                         <Info className="w-3 h-3 sm:w-5 sm:h-5 text-white bg-violet-600 rounded-full " />
                       </PopoverTrigger>
                       <PopoverContent>
-                        Ito ang kabuuang withdrawal balance mula sa iyong income
-                        sa package income, referral income at network income.
+                        Ito ang kabuuang withdrawal balance mula sa iyong
+                        income sa package income, referral income at network
+                        income.
                       </PopoverContent>
                     </Popover>
                   </div>
