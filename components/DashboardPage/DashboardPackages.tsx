@@ -83,7 +83,7 @@ const DashboardPackages = ({ chartData, teamMemberProfile }: Props) => {
             ...data,
             currentPercentage: Number(currentPercentage),
             current_amount: newAmount,
-            is_ready_to_claim: currentPercentage === 100,
+            is_ready_to_claim: Number(currentPercentage) === 100,
           };
           return updated;
         });
