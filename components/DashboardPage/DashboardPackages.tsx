@@ -83,6 +83,7 @@ const DashboardPackages = ({ chartData, teamMemberProfile }: Props) => {
             ...data,
             currentPercentage: Number(currentPercentage),
             current_amount: newAmount,
+            is_ready_to_claim: Number(currentPercentage) === 100,
           };
           return updated;
         });
@@ -106,7 +107,7 @@ const DashboardPackages = ({ chartData, teamMemberProfile }: Props) => {
     const { amount, profit_amount, package_connection_id } = packageData;
 
     try {
-      setIsLoading(package_connection_id); // Indicate the specific package is being claimed
+      setIsLoading(package_connection_id);
       const response = await ClaimPackageHandler({
         packageConnectionId: package_connection_id,
         amount,
@@ -130,9 +131,14 @@ const DashboardPackages = ({ chartData, teamMemberProfile }: Props) => {
           variant: "success",
         });
 
-        // Update chart data to remove the claimed package
         setChartData(
           chartData.filter(
+            (data) => data.package_connection_id !== package_connection_id
+          )
+        );
+
+        setLiveData(
+          liveData.filter(
             (data) => data.package_connection_id !== package_connection_id
           )
         );
@@ -153,6 +159,7 @@ const DashboardPackages = ({ chartData, teamMemberProfile }: Props) => {
           package_income: totalEarnings!.package_income + newEarnings,
         });
       }
+      setOpenDialogId(null);
     } catch (error) {
       toast({
         title: "Failed to claim package",
