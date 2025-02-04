@@ -166,7 +166,7 @@ const DashboardDepositModalDeposit = ({
       setCanUserDeposit(true);
 
       toast({
-        title: "Elevate Deposit is now on review",
+        title: "Elevate Deposit is now for review",
         description:
           "Elevate team will review your request and approve it soon.",
       });
