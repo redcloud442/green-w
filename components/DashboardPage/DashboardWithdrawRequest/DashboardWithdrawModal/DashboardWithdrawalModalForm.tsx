@@ -403,7 +403,9 @@ const DashboardWithdrawalModalForm = ({
               <SelectTrigger>
                 <SelectValue placeholder="Select Income Category">
                   {field.value === "PACKAGE"
-                    ? `Package Income ₱ ${earnings?.alliance_olympus_earnings.toLocaleString(
+                    ? `Package Income ₱ ${(
+                        earnings?.alliance_olympus_earnings ?? 0
+                      ).toLocaleString(
                         "en-US",
 
                         {
@@ -412,31 +414,40 @@ const DashboardWithdrawalModalForm = ({
                           maximumFractionDigits: 2,
                         }
                       )}`
-                    : `Network + Referral Income ₱ ${earnings?.alliance_referral_bounty.toLocaleString(
-                        "en-US",
-                        {
-                          minimumFractionDigits: 2,
+                    : `Network + Referral Income ₱ ${(
+                        earnings?.alliance_referral_bounty ?? 0
+                      ).toLocaleString("en-US", {
+                        minimumFractionDigits: 2,
 
-                          maximumFractionDigits: 2,
-                        }
-                      )}`}
+                        maximumFractionDigits: 2,
+                      })}`}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem className="text-xs" value="PACKAGE">
                   Package Income ₱{" "}
-                  {earnings?.alliance_olympus_earnings.toLocaleString("en-US", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
+                  {earnings?.alliance_olympus_earnings
+                    ? earnings?.alliance_olympus_earnings.toLocaleString(
+                        "en-US",
+                        {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        }
+                      )
+                    : 0}
                 </SelectItem>
 
                 <SelectItem className="text-xs" value="REFERRAL">
                   Network + Referral Income ₱{" "}
-                  {earnings?.alliance_referral_bounty.toLocaleString("en-US", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
+                  {earnings?.alliance_referral_bounty
+                    ? earnings?.alliance_referral_bounty.toLocaleString(
+                        "en-US",
+                        {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        }
+                      )
+                    : 0}
                 </SelectItem>
               </SelectContent>
             </Select>
