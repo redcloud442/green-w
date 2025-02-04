@@ -61,7 +61,7 @@ const topUpFormSchema = z.object({
   accountNumber: z.string().min(1, "Field is required"),
   receipt: z
     .string()
-    .min(1, "Receipt is required")
+    .min(5, "Receipt is required")
     .max(5, "Receipt is required"),
   file: z
     .instanceof(File)

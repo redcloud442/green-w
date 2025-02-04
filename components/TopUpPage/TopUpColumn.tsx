@@ -313,14 +313,16 @@ export const TopUpColumn = (
               <DialogHeader>
                 <DialogTitle>Attachment</DialogTitle>
               </DialogHeader>
-              <div className="flex justify-center items-center">
-                <Image
-                  width={400}
-                  height={400}
-                  src={attachmentUrl || ""}
-                  alt="Attachment Preview"
-                  className="object-contain w-full h-full"
-                />
+              <div className="flex justify-center items-center w-full h-full">
+                <div className="relative w-[400px] h-[400px] max-w-full max-h-full flex justify-center items-center">
+                  <Image
+                    src={attachmentUrl || ""}
+                    alt="Attachment Preview"
+                    layout="fill"
+                    objectFit="contain"
+                    className="max-w-full max-h-full"
+                  />
+                </div>
               </div>
               <DialogClose asChild>
                 <Button variant="secondary">Close</Button>
