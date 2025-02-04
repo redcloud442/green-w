@@ -7,10 +7,11 @@ import { cn } from "@/lib/utils";
 import { getAdminWithdrawalReport } from "@/services/Withdrawal/Admin";
 import { format } from "date-fns"; // If you're using date-fns
 import { CalendarIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { Calendar } from "../ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import TableLoading from "../ui/tableLoading";
 import AdminWithdrawalReportTable from "./AdminWithdrawalReportTable";
 
 type Props = {
@@ -26,6 +27,13 @@ type FormData = {
 
 const AdminWithdrawalReport = ({ teamMemberProfile }: Props) => {
   const [isFetchingList, setIsFetchingList] = useState(false);
+  const [withdrawalReportData, setWithdrawalReportData] = useState<{
+    total_amount: number;
+    total_request: number;
+  }>({
+    total_amount: 0,
+    total_request: 0,
+  });
 
   const { control, handleSubmit, setValue, watch } = useForm<FormData>({
     defaultValues: {
@@ -39,21 +47,40 @@ const AdminWithdrawalReport = ({ teamMemberProfile }: Props) => {
   const dateFilter = watch("dateFilter");
 
   const onSubmit = async (data: FormData) => {
-    const { startDate, endDate } = data.dateFilter;
+    try {
+      setIsFetchingList(true);
+      const { startDate, endDate } = data.dateFilter;
 
-    const {
-      data: requestData,
-      total_amount,
-      total_count,
-    } = await getAdminWithdrawalReport({
-      startDate: String(startDate || ""),
-      endDate: String(endDate || ""),
-      take: 10,
-      skip: 1,
-    });
+      const { total_amount, total_request } = await getAdminWithdrawalReport({
+        dateFilter: {
+          startDate: startDate?.toISOString() || "",
+          endDate: endDate?.toISOString() || "",
+        },
+      });
 
-    console.log(requestData);
+      setWithdrawalReportData({
+        total_amount,
+        total_request,
+      });
+    } catch (error) {
+      setIsFetchingList(false);
+    } finally {
+      setIsFetchingList(false);
+    }
   };
+
+  useEffect(() => {
+    const handleFetchTotalWithdrawalReport = async () => {
+      await onSubmit({
+        dateFilter: {
+          startDate: null,
+          endDate: null,
+        },
+      });
+    };
+
+    handleFetchTotalWithdrawalReport();
+  }, []);
 
   return (
     <div className="mx-auto md:p-10">
@@ -61,6 +88,8 @@ const AdminWithdrawalReport = ({ teamMemberProfile }: Props) => {
         <header className="mb-4">
           <h1 className="Title">Withdrawal Report Page</h1>
         </header>
+
+        {isFetchingList && <TableLoading />}
 
         {/* Table Section */}
 
@@ -71,14 +100,14 @@ const AdminWithdrawalReport = ({ teamMemberProfile }: Props) => {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit(onSubmit)}>
-                <div className="flex w-full items-end  gap-4">
+                <div className="flex flex-col sm:flex-row w-full items-end gap-4 flex-wrap">
                   {/* Date Picker */}
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
                         variant={"card"}
                         className={cn(
-                          "w-full justify-start text-left font-normal",
+                          "w-full md:max-w-xl: justify-start text-left font-normal flex-1",
                           !dateFilter.startDate && "text-muted-foreground"
                         )}
                       >
@@ -121,7 +150,7 @@ const AdminWithdrawalReport = ({ teamMemberProfile }: Props) => {
                       <Button
                         variant={"card"}
                         className={cn(
-                          "w-full justify-start text-left font-normal",
+                          "w-full md:max-w-sm: justify-start text-left font-normal flex-1",
                           !dateFilter.endDate && "text-muted-foreground"
                         )}
                       >
@@ -163,7 +192,7 @@ const AdminWithdrawalReport = ({ teamMemberProfile }: Props) => {
 
                   <Button
                     type="submit"
-                    className="mt-4 btn btn-primary"
+                    className=" w-full md:w-auto btn btn-primary"
                     variant={"card"}
                   >
                     Submit
@@ -172,7 +201,10 @@ const AdminWithdrawalReport = ({ teamMemberProfile }: Props) => {
               </form>
             </CardContent>
           </Card>
-          <AdminWithdrawalReportTable teamMemberProfile={teamMemberProfile} />
+          <AdminWithdrawalReportTable
+            withdrawalReportData={withdrawalReportData}
+            teamMemberProfile={teamMemberProfile}
+          />
         </section>
       </div>
     </div>

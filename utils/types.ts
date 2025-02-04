@@ -148,7 +148,16 @@ export type AdminWithdrawaldata = {
 };
 
 export type AdminWithdrawalReportData = {
-  data: any[];
   total_amount: number;
-  total_count: number;
+  total_request: number;
+};
+
+export type adminWithdrawalTotalReportData = {
+  interval_start: string;
+  interval_end: string;
+  total_accounting_approvals: string;
+  total_admin_approvals: string;
+  total_admin_approved_amount: number;
+  total_accounting_approved_amount: number;
+  total_net_approved_amount: number;
 };

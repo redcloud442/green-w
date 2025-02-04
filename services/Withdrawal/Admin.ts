@@ -55,10 +55,10 @@ export const updateWithdrawalStatus = async (params: {
 };
 
 export const getAdminWithdrawalReport = async (params: {
-  startDate: string;
-  endDate: string;
-  take: number;
-  skip: number;
+  dateFilter: {
+    startDate: string;
+    endDate: string;
+  };
 }) => {
   const response = await fetch("/api/v1/withdraw/report", {
     method: "POST",
@@ -74,4 +74,24 @@ export const getAdminWithdrawalReport = async (params: {
   if (!response.ok) throw new Error("Failed to fetch withdrawal report");
 
   return result as AdminWithdrawalReportData;
+};
+
+export const getAdminWithdrawalTotalReport = async (params: {
+  type: string;
+  take: number;
+  skip: number;
+}) => {
+  const response = await fetch("/api/v1/withdraw/total-report", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(params),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) throw new Error("Failed to fetch withdrawal total report");
+
+  return result;
 };

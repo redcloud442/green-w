@@ -244,8 +244,6 @@ export const AdminUsersColumn = (
       cell: ({ row }) => {
         const data = row.original;
 
-        console.log(data);
-
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

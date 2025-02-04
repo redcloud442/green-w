@@ -1,6 +1,13 @@
 "use client";
 
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -9,10 +16,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { logError } from "@/services/Error/ErrorLogs";
-import { getUserWithActiveBalance } from "@/services/User/Admin";
-import { escapeFormData } from "@/utils/function";
+import { getAdminWithdrawalTotalReport } from "@/services/Withdrawal/Admin";
 import { createClientSide } from "@/utils/supabase/client";
-import { alliance_member_table, user_table } from "@prisma/client";
+import { adminWithdrawalTotalReportData } from "@/utils/types";
+import { alliance_member_table } from "@prisma/client";
 import {
   ColumnFiltersState,
   flexRender,
@@ -23,7 +30,6 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "../ui/button";
@@ -35,60 +41,31 @@ import { AdminWithdrawalReportColumn } from "./AdminWithdrawalReportColumn";
 
 type DataTableProps = {
   teamMemberProfile: alliance_member_table;
+  withdrawalReportData: {
+    total_amount: number;
+    total_request: number;
+  };
 };
 
 type FilterFormValues = {
-  usernameFilter: string;
+  type: string;
+  take: number;
 };
 
-const AdminWithdrawalReportTable = ({ teamMemberProfile }: DataTableProps) => {
+const AdminWithdrawalReportTable = ({
+  teamMemberProfile,
+  withdrawalReportData,
+}: DataTableProps) => {
   const supabaseClient = createClientSide();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
 
-  const [requestData, setRequestData] = useState<user_table[]>([]);
-  const [requestCount, setRequestCount] = useState(0);
-  const [activePage, setActivePage] = useState(1);
+  const [requestData, setRequestData] = useState<
+    adminWithdrawalTotalReportData[]
+  >([]);
   const [isFetchingList, setIsFetchingList] = useState(false);
-
-  const columnAccessor = sorting?.[0]?.id || "user_date_created";
-  const isAscendingSort =
-    sorting?.[0]?.desc === undefined ? true : !sorting[0].desc;
-
-  const fetchAdminRequest = async () => {
-    try {
-      if (!teamMemberProfile) return;
-      setIsFetchingList(true);
-
-      const sanitizedData = escapeFormData(getValues());
-
-      const { usernameFilter } = sanitizedData;
-
-      const { data, totalCount } = await getUserWithActiveBalance({
-        teamMemberId: teamMemberProfile.alliance_member_id,
-        page: activePage,
-        limit: 10,
-        columnAccessor: columnAccessor,
-        isAscendingSort: isAscendingSort,
-        search: usernameFilter,
-      });
-
-      setRequestData(data || []);
-      setRequestCount(totalCount || 0);
-    } catch (e) {
-      if (e instanceof Error) {
-        await logError(supabaseClient, {
-          errorMessage: e.message,
-          stackTrace: e.stack,
-          stackPath: "components/AdminUsersPage/AdminUsersTable.tsx",
-        });
-      }
-    } finally {
-      setIsFetchingList(false);
-    }
-  };
 
   const columns = AdminWithdrawalReportColumn();
 
@@ -97,7 +74,6 @@ const AdminWithdrawalReportTable = ({ teamMemberProfile }: DataTableProps) => {
     columns: columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
-
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -111,52 +87,113 @@ const AdminWithdrawalReportTable = ({ teamMemberProfile }: DataTableProps) => {
     },
   });
 
-  const { register, handleSubmit, getValues } = useForm<FilterFormValues>({
-    defaultValues: {
-      usernameFilter: "",
-    },
-  });
+  const { register, handleSubmit, getValues, setValue } =
+    useForm<FilterFormValues>({
+      defaultValues: {
+        type: "WEEKLY",
+        take: 10,
+      },
+    });
+
+  const handleFetchTotalWithdrawalReport = async () => {
+    try {
+      const { take, type } = getValues();
+      setIsFetchingList(true);
+      let skip = 0;
+      const fetchedData: adminWithdrawalTotalReportData[] = [];
+
+      while (fetchedData.length < take) {
+        const batchSize = Math.min(10, take - fetchedData.length); // Adjust batch size to fit the remaining data
+
+        const data = await getAdminWithdrawalTotalReport({
+          type: type,
+          skip: skip,
+          take: batchSize,
+        });
+
+        if (data.length === 0) break; // Stop fetching if no more data is returned
+        fetchedData.push(...data);
+        skip += batchSize;
+      }
+
+      setRequestData(fetchedData);
+    } catch (e) {
+      if (e instanceof Error) {
+        await logError(supabaseClient, {
+          errorMessage: e.message,
+          stackTrace: e.stack,
+          stackPath: "components/AdminWithdrawalReportTable",
+        });
+      }
+    } finally {
+      setIsFetchingList(false);
+    }
+  };
 
   useEffect(() => {
-    fetchAdminRequest();
-  }, [supabaseClient, teamMemberProfile, activePage, sorting]);
-
-  const pageCount = Math.ceil(requestCount / 10);
+    handleFetchTotalWithdrawalReport();
+  }, []); // Fetch new data whenever the type or take value changes
 
   return (
     <Card className="w-full rounded-sm p-4">
-      <div className="flex flex-wrap items-start py-4">
-        {/* <form
-          className="flex flex-col gap-6 w-full max-w-3xl"
-          onSubmit={handleSubmit(handleFilter)}
-        >
-          <div className="flex flex-wrap gap-2 items-center">
-            <Input
-              {...register("usernameFilter")}
-              placeholder="Filter username..."
-              className="w-full sm:max-w-sm p-2 border rounded"
-            />
-            <Button
-              type="submit"
-              disabled={isFetchingList}
-              size="sm"
-              variant="card"
-              className="w-full md:w-auto rounded-md"
-            >
-              <Search />
-            </Button>
-            <Button
-              onClick={fetchAdminRequest}
-              disabled={isFetchingList}
-              size="sm"
-              variant="card"
-              className="w-full md:w-auto rounded-md"
-            >
-              <RefreshCw className="mr-2" />
-              Refresh
-            </Button>
+      <div className="flex flex-wrap items-start justify-between py-4 gap-2">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-bold">Total Request: </span>
+            <span className="text-sm font-bold text-green-500">
+              {withdrawalReportData.total_request}
+            </span>
           </div>
-        </form> */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-bold">Total Amount: </span>
+            <span className="text-sm font-bold text-green-500">
+              ₱{" "}
+              {withdrawalReportData.total_amount.toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </span>
+          </div>
+        </div>
+        <form
+          className="flex flex-wrap items-end gap-2"
+          onSubmit={handleSubmit(handleFetchTotalWithdrawalReport)}
+        >
+          <Select
+            onValueChange={(value) => {
+              setValue("type", value);
+            }}
+          >
+            <SelectTrigger className="w-[180px] flex-1">
+              <SelectValue placeholder={`${getValues("type")}`} />
+            </SelectTrigger>
+
+            <SelectContent {...register("type")}>
+              <SelectItem value="WEEKLY">WEEKLY</SelectItem>
+              {/* <SelectItem value="MONTHLY">MONTHLY</SelectItem>
+              <SelectItem value="DAILY">DAILY</SelectItem> */}
+            </SelectContent>
+          </Select>
+
+          <Select
+            onValueChange={(value) => {
+              setValue("take", Number(value));
+            }}
+          >
+            <SelectTrigger className="w-[100px] flex-1">
+              <SelectValue placeholder={`${getValues("take")}`} />
+            </SelectTrigger>
+
+            <SelectContent {...register("take")}>
+              <SelectItem value="10">10</SelectItem>
+              <SelectItem value="20">20</SelectItem>
+              <SelectItem value="30">30</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button className="flex-1" variant={"card"} type="submit">
+            Submit
+          </Button>
+        </form>
       </div>
 
       <ScrollArea className="w-full overflow-x-auto ">
@@ -208,100 +245,9 @@ const AdminWithdrawalReportTable = ({ teamMemberProfile }: DataTableProps) => {
               </TableRow>
             )}
           </TableBody>
-
-          <tfoot>
-            <TableRow>
-              <TableCell className="px-0" colSpan={columns.length}>
-                <div className="flex justify-between items-center border-t px-2 pt-2">
-                  <span className="text-sm text-gray-600 dark:text-white">
-                    Showing {Math.min(activePage * 10, requestCount)} out of{" "}
-                    {requestCount} entries
-                  </span>
-                </div>
-              </TableCell>
-            </TableRow>
-          </tfoot>
         </Table>
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
-
-      <div className="flex items-center justify-end gap-x-4 py-4">
-        {activePage > 1 && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setActivePage((prev) => Math.max(prev - 1, 1))}
-            disabled={activePage <= 1}
-          >
-            <ChevronLeft />
-          </Button>
-        )}
-
-        <div className="flex space-x-2">
-          {(() => {
-            const maxVisiblePages = 3;
-            const pages = Array.from({ length: pageCount }, (_, i) => i + 1);
-            let displayedPages = [];
-
-            if (pageCount <= maxVisiblePages) {
-              // Show all pages if there are 3 or fewer
-              displayedPages = pages;
-            } else {
-              if (activePage <= 2) {
-                // Show the first 3 pages and the last page
-                displayedPages = [1, 2, 3, "...", pageCount];
-              } else if (activePage >= pageCount - 1) {
-                // Show the first page and the last 3 pages
-                displayedPages = [
-                  1,
-                  "...",
-                  pageCount - 2,
-                  pageCount - 1,
-                  pageCount,
-                ];
-              } else {
-                displayedPages = [
-                  activePage - 1,
-                  activePage,
-                  activePage + 1,
-                  "...",
-                  pageCount,
-                ];
-              }
-            }
-
-            return displayedPages.map((page, index) =>
-              typeof page === "number" ? (
-                <Button
-                  key={page}
-                  variant={activePage === page ? "card" : "outline"}
-                  size="sm"
-                  onClick={() => setActivePage(page)}
-                >
-                  {page}
-                </Button>
-              ) : (
-                <span key={`ellipsis-${index}`} className="px-2 py-1">
-                  {page}
-                </span>
-              )
-            );
-          })()}
-        </div>
-        {activePage < pageCount && (
-          <Button
-            variant="card"
-            className="w-full md:w-auto rounded-md"
-            size="sm"
-            onClick={() =>
-              setActivePage((prev) => Math.min(prev + 1, pageCount))
-            }
-            disabled={activePage >= pageCount}
-          >
-            <ChevronRight />
-          </Button>
-        )}
-      </div>
     </Card>
   );
 };

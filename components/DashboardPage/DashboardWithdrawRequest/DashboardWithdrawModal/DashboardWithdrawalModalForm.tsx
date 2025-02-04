@@ -249,8 +249,8 @@ const DashboardWithdrawalModalForm = ({
             Number(amount || 0),
             selectedEarnings
           ).toLocaleString("en-US", {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
           }) +
           " Please wait for approval.",
         alliance_notification_date_created: new Date(),
