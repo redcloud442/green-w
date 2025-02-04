@@ -430,8 +430,6 @@ const DashboardDepositModalDeposit = ({
                         field.onChange("");
                         return;
                       }
-                      // Remove non-numeric characters
-                      inputValue = inputValue.replace(/[^0-9.]/g, "");
 
                       if (inputValue.length > 5) {
                         inputValue = inputValue.substring(0, 5);
