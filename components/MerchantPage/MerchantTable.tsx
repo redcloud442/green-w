@@ -258,39 +258,22 @@ const MerchantTable = ({ teamMemberProfile }: DataTableProps) => {
                       )}
                     </div>
                   )}
-                />
-                <Label htmlFor="bank">Bank Type</Label>
+                />{" "}
                 <Controller
                   name="accountType"
                   control={control}
                   render={({ field, fieldState }) => (
-                    <>
-                      <Select
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                        }}
-                        value={field.value}
-                      >
-                        <SelectTrigger {...field}>
-                          <SelectValue placeholder="SELECT BANK" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {bankData.map((bank, index) => (
-                            <SelectItem key={index} value={bank}>
-                              {bank}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                    <div className="flex flex-col gap-2">
+                      <Label>Bank Name</Label>
+                      <Input placeholder="Enter the bank name..." {...field} />
                       {fieldState.error && (
                         <span className="text-red-500 text-sm">
                           {fieldState.error.message}
                         </span>
                       )}
-                    </>
+                    </div>
                   )}
                 />
-
                 <Controller
                   name="bankName"
                   control={control}
