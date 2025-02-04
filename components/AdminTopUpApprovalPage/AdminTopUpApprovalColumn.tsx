@@ -20,7 +20,6 @@ import { ArrowUpDown } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Dispatch, SetStateAction, useCallback, useState } from "react";
-import { AspectRatio } from "../ui/aspect-ratio";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import TableLoading from "../ui/tableLoading";
 import { Textarea } from "../ui/textarea";
@@ -352,16 +351,18 @@ export const useAdminTopUpApprovalColumns = (
               <DialogHeader>
                 <DialogTitle>Attachment</DialogTitle>
               </DialogHeader>
-              <div className="flex justify-center items-center border-2">
-                <AspectRatio ratio={16 / 9} className="w-full">
+              <div className="flex justify-center items-center w-full h-full">
+                <div className="relative w-[400px] h-[400px] max-w-full max-h-full flex justify-center items-center">
                   <Image
                     src={attachmentUrl || ""}
                     alt="Attachment Preview"
-                    width={400}
-                    height={400}
+                    layout="fill"
+                    objectFit="contain"
+                    className="max-w-full max-h-full"
                   />
-                </AspectRatio>
+                </div>
               </div>
+
               <DialogClose asChild>
                 <Button variant="secondary">Close</Button>
               </DialogClose>
