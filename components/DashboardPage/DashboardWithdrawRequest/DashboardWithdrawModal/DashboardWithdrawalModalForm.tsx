@@ -131,7 +131,7 @@ const DashboardWithdrawalModalForm = ({
         throw new Error(validate.error.message);
       }
 
-      if (isWithdrawalToday.package) {
+      if (isWithdrawalToday.package && selectedEarnings === "PACKAGE") {
         toast({
           title: "You have already made a withdrawal today for package income",
           description: "Please try again tomorrow",
@@ -140,7 +140,7 @@ const DashboardWithdrawalModalForm = ({
         return;
       }
 
-      if (isWithdrawalToday.referral) {
+      if (isWithdrawalToday.referral && selectedEarnings === "REFERRAL") {
         toast({
           title:
             "You have already made a withdrawal today for network + referral income",
