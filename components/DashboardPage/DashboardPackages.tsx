@@ -159,6 +159,7 @@ const DashboardPackages = ({ chartData, teamMemberProfile }: Props) => {
           package_income: totalEarnings!.package_income + newEarnings,
         });
       }
+      setOpenDialogId(null);
     } catch (error) {
       toast({
         title: "Failed to claim package",
