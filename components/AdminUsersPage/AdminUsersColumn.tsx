@@ -55,13 +55,16 @@ export const AdminUsersColumn = (
     }
   };
 
-  const handleBanUser = async (alliance_member_alliance_id: string) => {
+  const handleBanUser = async (
+    alliance_member_alliance_id: string,
+    type: string
+  ) => {
     try {
       setIsOpenModal({
         open: true,
         role: "",
         memberId: alliance_member_alliance_id,
-        type: "BAN",
+        type,
       });
     } catch (e) {
     } finally {
@@ -80,6 +83,7 @@ export const AdminUsersColumn = (
       header: ({ column }) => (
         <Button
           variant="ghost"
+          className="p-1"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Username <ArrowUpDown />
@@ -110,6 +114,7 @@ export const AdminUsersColumn = (
       header: ({ column }) => (
         <Button
           variant="ghost"
+          className="p-1"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Access Account Link <ArrowUpDown />
@@ -133,6 +138,7 @@ export const AdminUsersColumn = (
       header: ({ column }) => (
         <Button
           variant="ghost"
+          className="p-1"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Role <ArrowUpDown />
@@ -287,11 +293,22 @@ export const AdminUsersColumn = (
                   Promote as Member
                 </DropdownMenuItem>
               )}
-              <DropdownMenuItem
-                onClick={() => handleBanUser(data.alliance_member_id)}
-              >
-                Ban User
-              </DropdownMenuItem>
+              {!data.alliance_member_restricted && (
+                <DropdownMenuItem
+                  onClick={() => handleBanUser(data.alliance_member_id, "BAN")}
+                >
+                  Ban User
+                </DropdownMenuItem>
+              )}
+              {data.alliance_member_restricted && (
+                <DropdownMenuItem
+                  onClick={() =>
+                    handleBanUser(data.alliance_member_id, "UNBAN")
+                  }
+                >
+                  Unban User
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         );

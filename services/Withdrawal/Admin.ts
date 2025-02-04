@@ -1,4 +1,4 @@
-import { AdminWithdrawaldata } from "@/utils/types";
+import { AdminWithdrawaldata, AdminWithdrawalReportData } from "@/utils/types";
 
 export const getAdminWithdrawalRequest = async (params: {
   page: number;
@@ -52,4 +52,46 @@ export const updateWithdrawalStatus = async (params: {
   }
 
   return response;
+};
+
+export const getAdminWithdrawalReport = async (params: {
+  dateFilter: {
+    startDate: string;
+    endDate: string;
+  };
+}) => {
+  const response = await fetch("/api/v1/withdraw/report", {
+    method: "POST",
+
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(params),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) throw new Error("Failed to fetch withdrawal report");
+
+  return result as AdminWithdrawalReportData;
+};
+
+export const getAdminWithdrawalTotalReport = async (params: {
+  type: string;
+  take: number;
+  skip: number;
+}) => {
+  const response = await fetch("/api/v1/withdraw/total-report", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(params),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) throw new Error("Failed to fetch withdrawal total report");
+
+  return result;
 };
