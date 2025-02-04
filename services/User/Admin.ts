@@ -119,14 +119,15 @@ export const handleUpdateRole = async (params: {
 
 export const handleUpdateUserRestriction = async (params: {
   userId: string;
+  type: string;
 }) => {
-  const { userId } = params;
+  const { userId, type } = params;
   const response = await fetch(`/api/v1/user/` + userId, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ action: "banUser" }),
+    body: JSON.stringify({ action: "banUser", type }),
   });
 
   const result = await response.json();

@@ -150,6 +150,23 @@ export const TopUpColumn = (
       ),
     },
     {
+      accessorKey: "user_first_name",
+
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          className="p-1"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Full Name <ArrowUpDown />
+        </Button>
+      ),
+      cell: ({ row }) => {
+        const fullName = `${row.original.user_first_name} ${row.original.user_last_name}`;
+        return <div className="text-wrap">{fullName}</div>;
+      },
+    },
+    {
       accessorKey: "alliance_top_up_request_status",
 
       header: ({ column }) => (

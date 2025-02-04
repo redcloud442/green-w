@@ -146,3 +146,9 @@ export type AdminWithdrawaldata = {
     PENDING: StatusDataWithdraw;
   };
 };
+
+export type AdminWithdrawalReportData = {
+  data: any[];
+  total_amount: number;
+  total_count: number;
+};

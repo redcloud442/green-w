@@ -32,9 +32,11 @@ import {
   Settings,
   Trophy,
   User2,
+  File,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -114,7 +116,19 @@ const AppSidebar = ({ userData, teamMemberProfile }: Props) => {
     { title: "Packages", url: "/admin/packages", icon: Package },
     { title: "Manage Users", url: "/admin/users", icon: User2 },
     { title: "Deposit History", url: "/admin/deposit", icon: HistoryIcon },
-    { title: "Withdrawal History", url: "/admin/withdrawal", icon: BeakerIcon },
+    {
+      title: "Withdrawal History",
+      url: "/admin/withdrawal",
+      icon: BeakerIcon,
+      subItems: [
+        {
+          icon: File,
+          title: "Withdrawal Report",
+          url: "/admin/withdrawal/report",
+        },
+      ],
+    },
+
     {
       title: "User Monitoring",
       url: "/admin/monitoring",
