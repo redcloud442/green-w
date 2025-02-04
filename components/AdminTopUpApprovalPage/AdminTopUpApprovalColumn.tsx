@@ -357,8 +357,8 @@ export const useAdminTopUpApprovalColumns = (
                   <Image
                     src={attachmentUrl || ""}
                     alt="Attachment Preview"
-                    width={100}
-                    height={100}
+                    width={400}
+                    height={400}
                   />
                 </AspectRatio>
               </div>

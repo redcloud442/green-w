@@ -315,8 +315,8 @@ export const TopUpColumn = (
               </DialogHeader>
               <div className="flex justify-center items-center">
                 <Image
-                  width={100}
-                  height={100}
+                  width={400}
+                  height={400}
                   src={attachmentUrl || ""}
                   alt="Attachment Preview"
                   className="object-contain w-full h-full"
