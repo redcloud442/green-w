@@ -317,8 +317,9 @@ export const TopUpColumn = (
                 <Image
                   src={attachmentUrl || ""}
                   alt="Attachment Preview"
-                  layout="fill"
-                  objectFit="contain"
+                  width={230}
+                  height={230}
+                  className="object-contain"
                 />
               </div>
 
