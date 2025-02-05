@@ -139,3 +139,30 @@ export const handleGenerateLink = async (params: {
 
   return result;
 };
+
+export const handleUpdateUserField = async (params: {
+  userId: string;
+  type: string;
+  value: string;
+}) => {
+  const response = await fetch(
+    `/api/v1/user/` + params.userId + `/update-profile`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(params),
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.error || "An error occurred while updating the profile."
+    );
+  }
+
+  return result;
+};

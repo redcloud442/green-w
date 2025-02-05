@@ -5,10 +5,24 @@ import { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
-  title: "Register an account",
-  description: "Register an account",
+  title: "Create Your Account | Join Elevate Community",
+  description:
+    "Sign up and create your account to enjoy exclusive access to personalized features, services, and updates tailored just for you.",
   openGraph: {
+    title: "Register an Account | Join Now",
+    description:
+      "Create an account to gain access to personalized experiences, exclusive benefits, and the latest updates.",
     url: "/register",
+    type: "website",
+    images: [
+      {
+        url: "/app-logo.png",
+        alt: "Join Now - Register an Account",
+        width: 1200,
+        height: 630,
+      },
+    ],
+    siteName: "elevateglobal.app",
   },
 };
 
