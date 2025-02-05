@@ -59,10 +59,6 @@ const topUpFormSchema = z.object({
   topUpMode: z.string().min(1, "Top up mode is required"),
   accountName: z.string().min(1, "Field is required"),
   accountNumber: z.string().min(1, "Field is required"),
-  receipt: z
-    .string()
-    .min(5, "Receipt is required")
-    .max(5, "Receipt is required"),
   file: z
     .instanceof(File)
     .refine((file) => !!file, { message: "File is required" })
@@ -101,7 +97,6 @@ const DashboardDepositModalDeposit = ({
       accountName: "",
       accountNumber: "",
       file: undefined,
-      receipt: "",
     },
   });
 
@@ -406,7 +401,7 @@ const DashboardDepositModalDeposit = ({
               )}
             </div>
 
-            <div>
+            {/* <div>
               <Label htmlFor="receipt">
                 Last 5 digits of your Receipt Reference No.
               </Label>
@@ -447,7 +442,7 @@ const DashboardDepositModalDeposit = ({
                   {errors.receipt.message}
                 </p>
               )}
-            </div>
+            </div> */}
 
             <div className="">
               <Controller
