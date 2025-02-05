@@ -24,6 +24,7 @@ import {
   ColumnFiltersState,
   flexRender,
   getCoreRowModel,
+  getExpandedRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   SortingState,
@@ -79,6 +80,7 @@ const AdminWithdrawalReportTable = ({
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    getExpandedRowModel: getExpandedRowModel(),
     state: {
       sorting,
       columnFilters,
@@ -98,6 +100,7 @@ const AdminWithdrawalReportTable = ({
   const handleFetchTotalWithdrawalReport = async () => {
     try {
       const { take, type } = getValues();
+
       setIsFetchingList(true);
       let skip = 0;
       const fetchedData: adminWithdrawalTotalReportData[] = [];
@@ -170,8 +173,8 @@ const AdminWithdrawalReportTable = ({
 
             <SelectContent {...register("type")}>
               <SelectItem value="WEEKLY">WEEKLY</SelectItem>
-              {/* <SelectItem value="MONTHLY">MONTHLY</SelectItem>
-              <SelectItem value="DAILY">DAILY</SelectItem> */}
+              {/* <SelectItem value="MONTHLY">MONTHLY</SelectItem> */}
+              <SelectItem value="DAILY">DAILY</SelectItem>
             </SelectContent>
           </Select>
 
@@ -218,8 +221,8 @@ const AdminWithdrawalReportTable = ({
           </TableHeader>
 
           <TableBody>
-            {table.getRowModel().rows.length ? (
-              table.getRowModel().rows.map((row) => (
+            {table.getExpandedRowModel().rows.length ? (
+              table.getExpandedRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
