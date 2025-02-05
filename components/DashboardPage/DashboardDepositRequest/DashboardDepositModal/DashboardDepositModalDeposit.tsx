@@ -183,7 +183,7 @@ const DashboardDepositModalDeposit = ({
         });
         toast({
           title: "Error",
-          description: e.message,
+          description: "Something went wrong",
           variant: "destructive",
         });
       }

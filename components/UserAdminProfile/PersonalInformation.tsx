@@ -1,12 +1,18 @@
 import { useToast } from "@/hooks/use-toast";
 import { logError } from "@/services/Error/ErrorLogs";
-import { getUserSponsor, handleGenerateLink } from "@/services/User/User";
-import { MAX_FILE_SIZE_MB, ROLE } from "@/utils/constant";
+import {
+  getUserSponsor,
+  handleGenerateLink,
+  handleUpdateUserField,
+  updateUserProfile,
+} from "@/services/User/User";
+import { MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_MB, ROLE } from "@/utils/constant";
 import { userNameToEmail } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
 import { UserRequestdata } from "@/utils/types";
-import { Loader2 } from "lucide-react";
+import { PencilIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
@@ -34,6 +40,12 @@ const schema = z.object({
     ),
 });
 
+const changeEmailMobileSchema = z.object({
+  activeMobile: z.string().min(11),
+  activeEmail: z.string().email(),
+});
+
+type ChangeEmailMobileSchema = z.infer<typeof changeEmailMobileSchema>;
 export type PersonalInformationSchema = z.infer<typeof schema>;
 const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
   const supabaseClient = createClientSide();
@@ -49,6 +61,7 @@ const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
     userProfile.user_profile_picture || ""
   );
   const [isUploading, setIsUploading] = useState(false);
+  const [editingField, setEditingField] = useState<string | null>(null);
 
   const handleSignIn = async () => {
     try {
@@ -80,6 +93,47 @@ const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
     }
   };
 
+  const {
+    register,
+    handleSubmit,
+    getValues,
+    formState: { errors },
+  } = useForm<ChangeEmailMobileSchema>({
+    defaultValues: {
+      activeMobile: userProfile.user_active_mobile || "",
+      activeEmail: userProfile.user_email || "",
+    },
+  });
+
+  const handleEditClick = (field: "activeMobile" | "activeEmail") => {
+    setEditingField(field);
+  };
+
+  const handleSaveClick = async () => {
+    try {
+      setIsLoading(true);
+      await handleUpdateUserField({
+        userId: userProfile.user_id,
+        type: editingField ?? "",
+        value: getValues(editingField as "activeMobile" | "activeEmail"),
+      });
+
+      toast({
+        title: "Profile updated successfully",
+      });
+      setEditingField(null);
+      setIsLoading(false);
+    } catch (e) {
+      toast({
+        title: "Error",
+        description: "Something went wrong",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!userProfile.user_id) return;
     const fetchUserSponsor = async () => {
@@ -103,8 +157,7 @@ const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
   }, [userProfile.user_id]);
 
   const handleUploadProfilePicture = async (file: File) => {
-    const result = schema.safeParse({ file });
-    if (!result.success) {
+    if (file.size > MAX_FILE_SIZE_BYTES) {
       toast({
         title: "Error",
         description: `File size exceeds the ${MAX_FILE_SIZE_MB} MB limit.`,
@@ -133,16 +186,10 @@ const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
         );
       }
 
-      // Update user profile with new avatar URL
-      const { error: updateError } = await supabaseClient
-        .schema("user_schema")
-        .from("user_table")
-        .update({ user_profile_picture: publicUrlData.publicUrl })
-        .eq("user_id", userProfile.user_id);
-
-      if (updateError) {
-        throw new Error(`Failed to update profile: ${updateError.message}`);
-      }
+      await updateUserProfile({
+        userId: userProfile.user_id,
+        profilePicture: publicUrlData.publicUrl,
+      });
 
       setAvatarUrl(publicUrlData.publicUrl);
 
@@ -155,7 +202,8 @@ const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
         await logError(supabaseClient, {
           errorMessage: error.message,
           stackTrace: error.stack,
-          stackPath: "components/UserAdminProfile/PersonalInformation.tsx",
+          stackPath:
+            "components/DashboardPage/DashboardDepositRequest/DashboardDepositModal/DashboardDepositProfile.tsx",
         });
       }
       toast({
@@ -178,13 +226,6 @@ const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
           {/* Title Section */}
           <CardTitle className="text-lg font-semibold flex flex-wrap items-center gap-2">
             Personal Information
-            {userSponsor === null ? (
-              <Loader2 className="animate-spin text-primary" />
-            ) : (
-              <span className="text-md ">
-                (Sponsored by: {userSponsor.user_username})
-              </span>
-            )}
           </CardTitle>
 
           {/* Admin Button */}
@@ -235,70 +276,128 @@ const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
         )}
       </CardHeader>
 
-      <CardContent className="grid grid-cols-1 gap-6 sm:grid-cols-2 p-6">
-        <div>
-          <Label className="text-sm font-medium ">First Name</Label>
-          <Input
-            id="firstName"
-            type="text"
-            value={userProfile.user_first_name || ""}
-            readOnly
-            className="mt-1 border-gray-300"
-          />
-        </div>
-        <div>
-          <Label className="text-sm font-medium ">Last Name</Label>
-          <Input
-            id="lastName"
-            type="text"
-            value={userProfile.user_last_name || ""}
-            readOnly
-            className="mt-1 border-gray-300"
-          />
-        </div>
-        <div>
-          <Label className="text-sm font-medium ">Username</Label>
-          <Input
-            id="userName"
-            type="text"
-            value={userProfile.user_username || ""}
-            readOnly
-            className="mt-1 border-gray-300"
-          />
-        </div>
-        <div>
-          <Label className="text-sm font-medium ">Active Mobile Number</Label>
-          <Input
-            id="activeMobile"
-            type="text"
-            value={userProfile.user_active_mobile || ""}
-            readOnly
-            className="mt-1 border-gray-300"
-          />
-        </div>
-        <div>
-          <Label className="text-sm font-medium ">Email</Label>
-          <Input
-            id="email"
-            type="text"
-            value={userProfile.user_email || ""}
-            readOnly
-            className="mt-1 border-gray-300"
-          />
-        </div>
-        {type === ROLE.ADMIN && (
+      <form
+        className="flex flex-col gap-4"
+        onSubmit={handleSubmit(handleSaveClick)}
+      >
+        <CardContent className="grid grid-cols-1 gap-6 sm:grid-cols-2 p-6">
           <div>
-            <Label className="text-sm font-medium ">Role</Label>
+            <Label className="text-sm font-medium ">Sponsor</Label>
             <Input
-              id="role"
+              id="sponsor"
               type="text"
-              value={userProfile.alliance_member_role || "N/A"}
+              value={userSponsor?.user_username || ""}
               readOnly
               className="mt-1 border-gray-300"
             />
           </div>
-        )}
-      </CardContent>
+          <div>
+            <Label className="text-sm font-medium ">First Name</Label>
+            <Input
+              id="firstName"
+              type="text"
+              value={userProfile.user_first_name || ""}
+              readOnly
+              className="mt-1 border-gray-300"
+            />
+          </div>
+          <div>
+            <Label className="text-sm font-medium ">Last Name</Label>
+            <Input
+              id="lastName"
+              type="text"
+              value={userProfile.user_last_name || ""}
+              readOnly
+              className="mt-1 border-gray-300"
+            />
+          </div>
+          <div>
+            <Label className="text-sm font-medium ">Username</Label>
+            <Input
+              id="userName"
+              type="text"
+              value={userProfile.user_username || ""}
+              readOnly
+              className="mt-1 border-gray-300"
+            />
+          </div>
+
+          <div className="relative">
+            <Label className="text-sm font-medium">Active Mobile Number</Label>
+            <div className="flex items-center gap-2">
+              <Input
+                id="activeMobile"
+                type="text"
+                maxLength={11}
+                readOnly={editingField !== "activeMobile"}
+                {...register("activeMobile")}
+                className={`mt-1 border-gray-300 ${
+                  editingField === "activeMobile" ? "border-blue-500" : ""
+                }`}
+              />
+              {editingField !== "activeMobile" ? (
+                <PencilIcon
+                  className="w-5 h-5 cursor-pointer"
+                  onClick={() => handleEditClick("activeMobile")}
+                />
+              ) : (
+                <Button
+                  variant="card"
+                  size="sm"
+                  className="cursor-pointer"
+                  onClick={handleSaveClick}
+                >
+                  Save
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* Editable Email */}
+          <div className="relative">
+            <Label className="text-sm font-medium">Email</Label>
+            <div className="flex items-center gap-2">
+              <Input
+                id="email"
+                type="text"
+                readOnly={editingField !== "activeEmail"}
+                {...register("activeEmail")}
+                className={`mt-1 border-gray-300 ${
+                  editingField === "activeEmail" ? "border-blue-500" : ""
+                }`}
+              />
+              {editingField !== "activeEmail" ? (
+                <PencilIcon
+                  className="w-5 h-5 cursor-pointer"
+                  onClick={() => handleEditClick("activeEmail")}
+                />
+              ) : (
+                <Button
+                  variant="card"
+                  size="sm"
+                  className="cursor-pointer"
+                  onClick={handleSaveClick}
+                >
+                  Save
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {type === ROLE.ADMIN && (
+            <div>
+              <Label className="text-sm font-medium ">Role</Label>
+              <Input
+                id="role"
+                type="text"
+                value={userProfile.alliance_member_role || "N/A"}
+                readOnly
+                className="mt-1 border-gray-300"
+              />
+            </div>
+          )}
+        </CardContent>
+      </form>
     </Card>
   );
 };

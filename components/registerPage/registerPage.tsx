@@ -6,13 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { checkUserName, createTriggerUser } from "@/services/auth/auth";
-import { logError } from "@/services/Error/ErrorLogs";
 import { BASE_URL } from "@/utils/constant";
 import { escapeFormData } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckIcon } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useController, useForm } from "react-hook-form";
@@ -21,7 +19,6 @@ import NavigationLoader from "../ui/NavigationLoader";
 import { PasswordInput } from "../ui/passwordInput";
 import { ScrollArea } from "../ui/scroll-area";
 import { Separator } from "../ui/separator";
-import Text from "../ui/text";
 
 const RegisterSchema = z
   .object({
@@ -43,14 +40,24 @@ const RegisterSchema = z
       ),
     activeMobile: z
       .string()
-      .regex(
-        /^0\d{10}$/,
+      .optional()
+      .refine(
+        (val) => val === undefined || val === "" || /^0\d{10}$/.test(val),
         "Active Mobile must start with '0' and contain exactly 11 digits."
       ),
-    activeEmail: z.string().email("Invalid email address"),
+    activeEmail: z
+      .string()
+      .optional()
+      .nullable()
+      .transform((val) => (val?.trim() === "" ? null : val))
+      .refine(
+        (val) => val === null || z.string().email().safeParse(val).success,
+        "Invalid email address"
+      ),
     password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z
       .string()
+
       .min(6, "Confirm Password must be at least 6 characters"),
   })
   .superRefine(({ confirmPassword, password }, ctx) => {
@@ -84,13 +91,6 @@ const RegisterPage = ({ referralLink }: Props) => {
   });
 
   const lastNameSchema = z.string().min(4).max(50);
-  const activeMobileSchema = z
-    .string()
-    .regex(
-      /^0\d{10}$/,
-      "Active Mobile must start with '0' and contain exactly 11 digits."
-    );
-  const activeEmailSchema = z.string().email("Invalid email address");
 
   const supabase = createClientSide();
   const router = useRouter();
@@ -147,14 +147,14 @@ const RegisterPage = ({ referralLink }: Props) => {
 
     try {
       await createTriggerUser({
-        activeMobile: activeMobile,
+        activeMobile: activeMobile || "",
         userName: userName,
         password: password,
         firstName,
         lastName,
         referalLink: referralLink,
         url,
-        activeEmail,
+        activeEmail: activeEmail || "",
       });
       setIsSuccess(true);
 
@@ -165,13 +165,7 @@ const RegisterPage = ({ referralLink }: Props) => {
       router.push("/");
     } catch (e) {
       setIsSuccess(false);
-      if (e instanceof Error) {
-        await logError(supabase, {
-          errorMessage: e.message,
-          stackTrace: e.stack,
-          stackPath: "components/registerPage/registerPage.tsx",
-        });
-      }
+
       toast({
         title: "Error",
         description: "Check your account details and try again",
@@ -274,7 +268,7 @@ const RegisterPage = ({ referralLink }: Props) => {
             </div>
 
             <div className="relative">
-              <Label htmlFor="userName">Active Mobile Number</Label>
+              <Label htmlFor="userName">Active Mobile Number (Optional)</Label>
               <div className="flex items-center gap-2">
                 <Input
                   id="activeMobile"
@@ -283,13 +277,6 @@ const RegisterPage = ({ referralLink }: Props) => {
                   className="pr-10"
                   {...register("activeMobile")}
                 />
-
-                {touchedFields.activeMobile &&
-                  !errors.activeMobile &&
-                  activeMobileSchema.safeParse(watch("activeMobile"))
-                    .success && (
-                    <CheckIcon className="w-5 h-5 text-green-500 absolute right-3" />
-                  )}
 
                 {/* Show error icon if validation failed */}
               </div>
@@ -301,7 +288,7 @@ const RegisterPage = ({ referralLink }: Props) => {
             </div>
 
             <div className="relative">
-              <Label htmlFor="activeEmail">Active Email</Label>
+              <Label htmlFor="activeEmail">Active Email (Optional)</Label>
               <div className="flex items-center gap-2">
                 <Input
                   id="activeEmail"
@@ -309,14 +296,6 @@ const RegisterPage = ({ referralLink }: Props) => {
                   className="pr-10"
                   {...register("activeEmail")}
                 />
-
-                {touchedFields.activeEmail &&
-                  !errors.activeEmail &&
-                  activeEmailSchema.safeParse(watch("activeEmail")).success && (
-                    <CheckIcon className="w-5 h-5 text-green-500 absolute right-3" />
-                  )}
-
-                {/* Show error icon if validation failed */}
               </div>
               {errors.activeEmail && (
                 <p className="text-sm text-primaryRed">
@@ -395,14 +374,7 @@ const RegisterPage = ({ referralLink }: Props) => {
             </div>
           </form>
         </CardContent>
-        <CardFooter>
-          <Text>
-            Already have Elevate account?{" "}
-            <Link href="/login" className="text-blue-500">
-              Login
-            </Link>
-          </Text>
-        </CardFooter>
+        <CardFooter></CardFooter>
       </Card>
     </ScrollArea>
   );

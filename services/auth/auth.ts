@@ -4,8 +4,22 @@ import bcryptjs from "bcryptjs";
 import { z } from "zod";
 
 const registerUserSchema = z.object({
-  activeMobile: z.string().min(11),
-  activeEmail: z.string().email(),
+  activeMobile: z
+    .string()
+    .optional()
+    .refine(
+      (val) => val === undefined || val === "" || /^0\d{10}$/.test(val),
+      "Active Mobile must start with '0' and contain exactly 11 digits."
+    ),
+  activeEmail: z
+    .string()
+    .optional()
+    .nullable()
+    .transform((val) => (val?.trim() === "" ? null : val))
+    .refine(
+      (val) => val === null || z.string().email().safeParse(val).success,
+      "Invalid email address"
+    ),
   userName: z.string().min(6),
   password: z.string().min(6),
   firstName: z.string().min(2),
