@@ -1,13 +1,17 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { logError } from "@/services/Error/ErrorLogs";
 import { updateWithdrawalStatus } from "@/services/Withdrawal/Admin";
 import { formatDateToYYYYMMDD, formatTime } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
+
 import { AdminWithdrawaldata, WithdrawalRequestData } from "@/utils/types";
 import { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, ClipboardCopy } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Dispatch, SetStateAction, useCallback, useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Badge } from "../ui/badge";
 import {
   Dialog,
@@ -29,6 +33,7 @@ export const WithdrawalColumn = (
   handleFetch: () => void,
   setRequestData: Dispatch<SetStateAction<AdminWithdrawaldata | null>>
 ) => {
+  const router = useRouter();
   const { toast } = useToast();
   const supabaseClient = createClientSide();
   const [isLoading, setIsLoading] = useState(false);
@@ -37,6 +42,14 @@ export const WithdrawalColumn = (
     requestId: "",
     status: "",
   });
+
+  const handleCopyToClipboard = (text: string, variant: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: `Copied to clipboard`,
+      description: `${variant} copied to clipboard`,
+    });
+  };
 
   const handleUpdateStatus = useCallback(
     async (status: string, requestId: string, note?: string) => {
@@ -116,17 +129,31 @@ export const WithdrawalColumn = (
   const columns: ColumnDef<WithdrawalRequestData>[] = [
     {
       accessorKey: "user_username",
-
       header: ({ column }) => (
         <Button
           variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="p-1"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "desc")}
         >
-          Requestor Username <ArrowUpDown />
+          Requestor Name <ArrowUpDown />
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="text-wrap">{row.getValue("user_username")}</div>
+        <div
+          onClick={() => router.push(`/admin/users/${row.original.user_id}`)}
+          className="flex items-center gap-2 text-wrap cursor-pointer hover:underline"
+        >
+          <Avatar>
+            <AvatarImage src={row.original.user_profile_picture ?? ""} />
+            <AvatarFallback>
+              {row.original.user_username?.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+
+          <p className="text-wrap text-blue-500">
+            {row.getValue("user_username")}
+          </p>
+        </div>
       ),
     },
     {
@@ -134,6 +161,7 @@ export const WithdrawalColumn = (
       header: ({ column }) => (
         <Button
           variant="ghost"
+          className="p-1"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Status <ArrowUpDown />
@@ -148,68 +176,88 @@ export const WithdrawalColumn = (
       },
     },
     {
-      accessorKey: "alliance_withdrawal_request_amount",
-
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Amount <ArrowUpDown />
-        </Button>
-      ),
-      cell: ({ row }) => {
-        const amount = parseFloat(
-          row.getValue("alliance_withdrawal_request_amount")
-        );
-        const fee = row.original.alliance_withdrawal_request_fee;
-        const formatted = new Intl.NumberFormat("en-PH", {
-          style: "currency",
-          currency: "PHP",
-        }).format(amount - fee);
-        return <div className="font-medium text-wrap">{formatted}</div>;
-      },
-    },
-    {
       accessorKey: "alliance_withdrawal_request_type",
-
       header: ({ column }) => (
         <Button
           variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="p-1"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "desc")}
         >
-          Bank Name <ArrowUpDown />
+          Bank Type <ArrowUpDown />
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="text-center">
+        <div className="text-wrap">
           {row.getValue("alliance_withdrawal_request_type")}
         </div>
       ),
     },
     {
-      accessorKey: "alliance_withdrawal_request_account",
-
+      accessorKey: "alliance_withdrawal_request_bank_name",
       header: ({ column }) => (
         <Button
           variant="ghost"
+          className="p-1"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Bank Name <ArrowUpDown />
+        </Button>
+      ),
+      cell: ({ row }) => {
+        const value = row.getValue(
+          "alliance_withdrawal_request_bank_name"
+        ) as string;
+        return (
+          <div className="flex items-center gap-2 text-wrap">
+            <span>{value}</span>
+            <Button
+              variant="card"
+              size="icon"
+              onClick={() => handleCopyToClipboard(value, "Bank Name")}
+              className="p-1"
+            >
+              <ClipboardCopy className="w-3 h-3" />
+            </Button>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "alliance_withdrawal_request_account",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          className="p-1"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "desc")}
         >
           Bank Account <ArrowUpDown />
         </Button>
       ),
-      cell: ({ row }) => (
-        <div className="text-center">
-          {row.getValue("alliance_withdrawal_request_account")}
-        </div>
-      ),
+      cell: ({ row }) => {
+        const value = row.getValue(
+          "alliance_withdrawal_request_account"
+        ) as string;
+        return (
+          <div className="flex items-center gap-2 text-wrap">
+            <span>{value}</span>
+            <Button
+              variant="card"
+              size="icon"
+              onClick={() => handleCopyToClipboard(value, "Bank Account")}
+              className="p-1"
+            >
+              <ClipboardCopy className="w-3 h-3" />
+            </Button>
+          </div>
+        );
+      },
     },
     {
       accessorKey: "alliance_withdrawal_request_date",
-
       header: ({ column }) => (
         <Button
           variant="ghost"
+          className="p-1"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Date Created <ArrowUpDown />
@@ -221,6 +269,33 @@ export const WithdrawalColumn = (
             row.getValue("alliance_withdrawal_request_date")
           )}
           , {formatTime(row.getValue("alliance_withdrawal_request_date"))}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "alliance_withdrawal_request_date_updated",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          className="p-1"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Date Updated <ArrowUpDown />
+        </Button>
+      ),
+      cell: ({ row }) => (
+        <div className="text-center">
+          {row.getValue("alliance_withdrawal_request_date_updated") ? (
+            <>
+              {formatDateToYYYYMMDD(
+                row.getValue("alliance_withdrawal_request_date_updated")
+              )}
+              ,{" "}
+              {formatTime(
+                row.getValue("alliance_withdrawal_request_date_updated")
+              )}
+            </>
+          ) : null}
         </div>
       ),
     },
