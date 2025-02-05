@@ -157,6 +157,29 @@ export const WithdrawalColumn = (
       ),
     },
     {
+      accessorKey: "alliance_withdrawal_request_amount",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          className="p-1"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "desc")}
+        >
+          Amount <ArrowUpDown />
+        </Button>
+      ),
+      cell: ({ row }) => {
+        const amount = parseFloat(
+          row.getValue("alliance_withdrawal_request_amount")
+        );
+        const fee = row.original.alliance_withdrawal_request_fee;
+        const formatted = new Intl.NumberFormat("en-PH", {
+          style: "currency",
+          currency: "PHP",
+        }).format(amount - fee);
+        return <div className="font-medium text-wrap">{formatted}</div>;
+      },
+    },
+    {
       accessorKey: "alliance_withdrawal_request_status",
       header: ({ column }) => (
         <Button
