@@ -10,7 +10,7 @@ const nextConfig = {
         protocol: "https",
         hostname:
           process.env.NODE_ENV === "development"
-            ? "kvrvtcwffqhkzlpfjjoy.supabase.co"
+            ? "bfnevuiuzigykvlsnoea.supabase.co"
             : "kvrvtcwffqhkzlpfjjoy.supabase.co",
         port: "",
         pathname: "/storage/v1/object/public/**",
