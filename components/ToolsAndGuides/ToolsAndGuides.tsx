@@ -177,7 +177,7 @@ const ToolsAndGuides = () => {
                         className="rounded-lg w-full"
                         autoPlay={true}
                         playsInline={true}
-                        muted
+                        muted={true}
                         style={{ objectFit: "cover" }}
                       >
                         <source src={item.video} type="video/mp4" />

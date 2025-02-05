@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getAllyBounty } from "@/services/Bounty/Member";
+import { getReferralBounty } from "@/services/Bounty/Member";
 import { escapeFormData } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
 import { alliance_member_table, user_table } from "@prisma/client";
@@ -25,13 +25,12 @@ import {
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import ReferralModal from "../ReferralModal/ReferralModal";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Input } from "../ui/input";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { Separator } from "../ui/separator";
-import { AllyBountyColumn } from "./AllyBountyColum";
+import { ReferralColumn } from "./ReferralColumn";
 
 type DataTableProps = {
   teamMemberProfile: alliance_member_table;
@@ -39,28 +38,21 @@ type DataTableProps = {
 };
 
 type FilterFormValues = {
-  emailFilter: string;
+  userNameFilter: string;
 };
 
-const AllyBountyTable = ({ teamMemberProfile }: DataTableProps) => {
+const ReferalTable = ({ teamMemberProfile }: DataTableProps) => {
   const supabaseClient = createClientSide();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
-  const [requestData, setRequestData] = useState<
-    (user_table & {
-      total_bounty_earnings: string;
-      package_ally_bounty_log_date_created: string;
-    })[]
-  >([]);
+
+  const [requestData, setRequestData] = useState<user_table[]>([]);
   const [requestCount, setRequestCount] = useState(0);
   const [activePage, setActivePage] = useState(1);
-  const [isFetchingList, setIsFetchingList] = useState(false);
 
-  const columnAccessor = sorting?.[0]?.id || "user_date_created";
-  const isAscendingSort =
-    sorting?.[0]?.desc === undefined ? true : !sorting[0].desc;
+  const [isFetchingList, setIsFetchingList] = useState(false);
 
   const fetchAdminRequest = async () => {
     try {
@@ -69,14 +61,13 @@ const AllyBountyTable = ({ teamMemberProfile }: DataTableProps) => {
 
       const sanitizedData = escapeFormData(getValues());
 
-      const { emailFilter } = sanitizedData;
+      const { userNameFilter } = sanitizedData;
 
-      const { data, totalCount } = await getAllyBounty({
+      const { data, totalCount } = await getReferralBounty({
         page: activePage,
         limit: 10,
-        columnAccessor: columnAccessor,
-        isAscendingSort: isAscendingSort,
-        search: emailFilter,
+        search: userNameFilter,
+        teamMemberId: teamMemberProfile.alliance_member_id,
       });
 
       setRequestData(data || []);
@@ -87,7 +78,7 @@ const AllyBountyTable = ({ teamMemberProfile }: DataTableProps) => {
     }
   };
 
-  const columns = AllyBountyColumn();
+  const columns = ReferralColumn();
 
   const table = useReactTable({
     data: requestData,
@@ -109,7 +100,7 @@ const AllyBountyTable = ({ teamMemberProfile }: DataTableProps) => {
 
   const { getValues, handleSubmit, register } = useForm<FilterFormValues>({
     defaultValues: {
-      emailFilter: "",
+      userNameFilter: "",
     },
   });
 
@@ -127,34 +118,30 @@ const AllyBountyTable = ({ teamMemberProfile }: DataTableProps) => {
 
   return (
     <ScrollArea className="w-full overflow-x-auto ">
-      <Card className="w-full p-4">
+      <Card className="w-full">
         <CardHeader className="text-center text-[30px] sm:text-[60px] font-extrabold">
-          <CardTitle>REFERRAL INCOME</CardTitle>
+          <CardTitle>My Referrals</CardTitle>
         </CardHeader>
         <Separator />
         <CardContent className="space-y-4">
-          <div className="flex justify-between items-end">
-            <form
-              className="flex  gap-2 pt-4"
-              onSubmit={handleSubmit(handleFilter)}
+          <form
+            className="flex  gap-2 pt-4"
+            onSubmit={handleSubmit(handleFilter)}
+          >
+            <Input
+              {...register("userNameFilter")}
+              placeholder="Filter username..."
+              className="w-full sm:w-auto"
+            />
+            <Button
+              type="submit"
+              disabled={isFetchingList}
+              size="sm"
+              variant="card"
             >
-              <Input
-                {...register("emailFilter")}
-                placeholder="Filter username..."
-                className="w-full sm:w-auto"
-              />
-              <Button
-                type="submit"
-                disabled={isFetchingList}
-                size="sm"
-                variant="card"
-              >
-                <Search />
-              </Button>
-            </form>
-
-            <ReferralModal teamMemberProfile={teamMemberProfile} />
-          </div>
+              <Search />
+            </Button>
+          </form>
           <Table className="w-full border-collapse border border-white font-bold">
             <TableHeader className="border-b border-white text-white font-bold">
               {table.getHeaderGroups().map((headerGroup) => (
@@ -216,24 +203,6 @@ const AllyBountyTable = ({ teamMemberProfile }: DataTableProps) => {
           <ScrollBar orientation="horizontal" />
 
           <div className="flex items-center justify-between gap-x-4 py-4">
-            {/* <div className="flex justify-between items-center px-2 pt-2">
-        <span className="text-sm dark:text-pageColor font-bold ">
-          Rows per page
-        </span>
-        <Select
-          defaultValue="10"
-          onValueChange={(value) => setLimit(Number(value))}
-        >
-          <SelectTrigger className="w-[70px] h-8 dark:bg-transparent space-x-2 dark:text-pageColor font-bold border-none border-b-2 shadow-none border-black">
-            <SelectValue placeholder="10" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="10">10</SelectItem>
-            <SelectItem value="20">20</SelectItem>
-            <SelectItem value="30">30</SelectItem>
-          </SelectContent>
-        </Select>
-      </div> */}
             <div className="flex items-center justify-start gap-x-4">
               {/* Left Arrow */}
               <Button
@@ -271,4 +240,4 @@ const AllyBountyTable = ({ teamMemberProfile }: DataTableProps) => {
   );
 };
 
-export default AllyBountyTable;
+export default ReferalTable;
