@@ -296,6 +296,7 @@ export const TopUpColumn = (
         </div>
       ),
     },
+
     {
       accessorKey: "alliance_top_up_request_attachment",
       header: () => <div className="p-1">Attachment</div>,
