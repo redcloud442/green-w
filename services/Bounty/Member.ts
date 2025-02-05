@@ -70,3 +70,34 @@ export const getLegionBounty = async (params: {
     totalCount: 0;
   };
 };
+
+export const getReferralBounty = async (params: {
+  page: number;
+  limit: number;
+  search?: string;
+  teamMemberId: string;
+}) => {
+  const urlParams = {
+    page: params.page,
+    limit: params.limit,
+    search: params.search || "",
+    teamMemberId: params.teamMemberId,
+  };
+
+  const response = await fetch(`/api/v1/referral`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(urlParams),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) throw new Error(result.error);
+
+  return result as {
+    data: user_table[];
+    totalCount: 0;
+  };
+};
