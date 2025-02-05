@@ -5,14 +5,16 @@ export const ReferralColumn = (
   pageIndex: number,
   pageSize: number
 ): ColumnDef<user_table>[] => {
-  const column = pageIndex + 1 + (pageIndex - 1) * pageSize;
   return [
     {
       id: "index",
-
       header: () => <div className="text-center text-lg font-bold"></div>,
-      cell: ({ row }) => <div className="text-center">{column}.</div>,
+      cell: ({ row }) => {
+        const rowNumber = row.index + 1 + (pageIndex - 1) * pageSize;
+        return <div className="text-center">{rowNumber}</div>;
+      },
     },
+
     {
       accessorKey: "user_username",
       header: () => (
