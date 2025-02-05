@@ -78,13 +78,14 @@ const ReferalTable = ({ teamMemberProfile }: DataTableProps) => {
     }
   };
 
-  const columns = ReferralColumn();
+  const columns = ReferralColumn(activePage, 10);
 
   const table = useReactTable({
     data: requestData,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
