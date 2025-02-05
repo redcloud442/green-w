@@ -21,8 +21,6 @@ export const getUserSponsor = async (params: { userId: string }) => {
     );
   }
 
-  console.log(result);
-
   return result as string;
 };
 
