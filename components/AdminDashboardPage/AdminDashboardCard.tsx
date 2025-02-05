@@ -130,6 +130,17 @@ const AdminDashboardCard = ({ adminDashboardDataByDate }: Props) => {
         descriptionClassName="text-sm text-gray-500"
       />
       <CardAmountAdmin
+        title="Approved Receipts"
+        value={
+          <>
+            <CreditCard />
+            {adminDashboardDataByDate?.totalApprovedReceipts}
+          </>
+        }
+        description=""
+        descriptionClassName="text-sm text-gray-500"
+      />
+      <CardAmountAdmin
         title="Sales Difference"
         value={
           <>
