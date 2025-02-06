@@ -300,7 +300,7 @@ export const TopUpColumn = (
     },
 
     {
-      accessorKey: "alliance_top_up_request_attachment",
+      accessorKey: "attachment_url",
       header: () => <div className="p-1">Attachment</div>,
       cell: ({ row }) => {
         const attachmentUrl = row.getValue("attachment_url") as string[];

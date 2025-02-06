@@ -53,10 +53,11 @@ const AvailPackagePage = ({
   const formSchema = z.object({
     amount: z
       .string()
-      .min(2, "Minimum amount is 50 pesos")
-      .refine((val) => Number(val) >= 50, {
-        message: "Minimum amount is 50 pesos",
+      .min(3, "Minimum amount is 300 pesos")
+      .refine((val) => Number(val) >= 300, {
+        message: "Minimum amount is 300 pesos",
       })
+
       .refine((val) => Number(val) <= Number(maxAmount), {
         message: `Amount cannot exceed ${formattedMaxAmount}`,
       }),
