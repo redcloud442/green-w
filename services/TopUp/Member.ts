@@ -56,14 +56,13 @@ export const updateTopUpStatus = async (params: {
 
 export const handleDepositRequest = async (params: {
   TopUpFormValues: TopUpFormValues;
-  publicUrl: string;
+  publicUrls: string[];
 }) => {
   const response = await fetch(`/api/v1/deposit`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-
     body: JSON.stringify(params),
   });
 
