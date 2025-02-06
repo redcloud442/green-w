@@ -75,6 +75,7 @@ export async function updateSession(request: NextRequest) {
     "/admin/*",
     "/loginSecured",
     "/api/health",
+    "/chat-support",
   ];
   const currentPath = request.nextUrl.pathname;
 

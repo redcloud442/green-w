@@ -242,15 +242,16 @@ const MobileNavBar = () => {
           ))}
         </ul>
       </nav>
-
-      <Button
-        className="fixed bottom-20 right-6 h-14 w-14 rounded-md  p-4 z-50  border-none shadow-lg hover:shadow-xl transition-transform transform hover:scale-110 dark:from-gray-800 dark:to-gray-700"
-        variant="card"
-        onClick={() => setIsModalOpen(true)}
-        aria-label="Log Out"
-      >
-        <DoorOpen className="w-7 h-7 text-black" />
-      </Button>
+      {pathname !== "/chat-support" && (
+        <Button
+          className="fixed bottom-20 right-6 h-14 w-14 rounded-md  p-4 z-50  border-none shadow-lg hover:shadow-xl transition-transform transform hover:scale-110 dark:from-gray-800 dark:to-gray-700"
+          variant="card"
+          onClick={() => setIsModalOpen(true)}
+          aria-label="Log Out"
+        >
+          <DoorOpen className="w-7 h-7 text-black" />
+        </Button>
+      )}
 
       {/* Logout Confirmation Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
