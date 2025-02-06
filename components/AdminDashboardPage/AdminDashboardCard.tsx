@@ -123,7 +123,7 @@ const AdminDashboardCard = ({ adminDashboardDataByDate }: Props) => {
         value={
           <>
             <CreditCard />
-            {adminDashboardDataByDate?.totalApprovedWithdrawal}
+            {adminDashboardDataByDate?.totalApprovedWithdrawal ?? 0}
           </>
         }
         description=""
@@ -134,7 +134,7 @@ const AdminDashboardCard = ({ adminDashboardDataByDate }: Props) => {
         value={
           <>
             <CreditCard />
-            {adminDashboardDataByDate?.totalApprovedReceipts}
+            {adminDashboardDataByDate?.totalApprovedReceipts ?? 0}
           </>
         }
         description=""

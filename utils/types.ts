@@ -25,6 +25,7 @@ export type TopUpRequestData = alliance_top_up_request_table & {
   alliance_member_id: string;
   approver_id: string;
   count: number;
+  attachment_url: string[];
 };
 
 export type PackageHistoryData = {

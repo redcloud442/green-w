@@ -34,7 +34,7 @@ import { escapeFormData } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { alliance_member_table, merchant_table } from "@prisma/client";
-import { Loader2 } from "lucide-react";
+import { Loader2, XIcon } from "lucide-react";
 import Image from "next/image";
 import { NextResponse } from "next/server";
 import { useEffect, useState } from "react";
@@ -59,15 +59,18 @@ const topUpFormSchema = z.object({
   topUpMode: z.string().min(1, "Top up mode is required"),
   accountName: z.string().min(1, "Field is required"),
   accountNumber: z.string().min(1, "Field is required"),
-  file: z
-    .instanceof(File)
-    .refine((file) => !!file, { message: "File is required" })
-    .refine(
-      (file) =>
-        ["image/jpeg", "image/png", "image/jpg"].includes(file.type) &&
-        file.size <= 12 * 1024 * 1024, // 12MB limit
-      { message: "File must be a valid image and less than 12MB." }
-    ),
+  files: z
+    .array(
+      z
+        .instanceof(File)
+        .refine(
+          (file) =>
+            ["image/jpeg", "image/png", "image/jpg"].includes(file.type) &&
+            file.size <= 12 * 1024 * 1024,
+          { message: "Each file must be a valid image and less than 12MB." }
+        )
+    )
+    .max(3, "You can upload up to 3 files."),
 });
 
 export type TopUpFormValues = z.infer<typeof topUpFormSchema>;
@@ -81,6 +84,7 @@ const DashboardDepositModalDeposit = ({
   const [topUpOptions, setTopUpOptions] = useState<merchant_table[]>([]);
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
+  const [needMoreReceipts, setNeedMoreReceipts] = useState(1);
   const { setAddTransactionHistory } = useUserTransactionHistoryStore();
   const {
     control,
@@ -96,7 +100,7 @@ const DashboardDepositModalDeposit = ({
       topUpMode: "",
       accountName: "",
       accountNumber: "",
-      file: undefined,
+      files: [],
     },
   });
 
@@ -122,32 +126,57 @@ const DashboardDepositModalDeposit = ({
   }, [open]);
 
   const onSubmit = async (data: TopUpFormValues) => {
+    const filesArray = data.files.slice(0, needMoreReceipts).filter(Boolean);
+
+    if (filesArray.length === 0) {
+      toast({
+        title: "Error",
+        description: "Please upload at least one file.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const sanitizedData = escapeFormData(data);
+
+    const files = await Promise.all(
+      filesArray.map(async (file) => {
+        const filePath = `uploads/${Date.now()}_${file.name}`;
+
+        const { error: uploadError } = await supabaseClient.storage
+          .from("REQUEST_ATTACHMENTS")
+          .upload(filePath, file, { upsert: true });
+
+        if (uploadError) {
+          return NextResponse.json(
+            { error: "File upload failed.", details: uploadError.message },
+            { status: 500 }
+          );
+        }
+
+        const {
+          data: { publicUrl },
+        } = supabaseClient.storage
+          .from("REQUEST_ATTACHMENTS")
+          .getPublicUrl(filePath);
+
+        return { filePath, publicUrl };
+      })
+    );
+
+    const publicUrls = files
+      .map((file) => {
+        if ("publicUrl" in file) {
+          return file.publicUrl;
+        }
+        return null;
+      })
+      .filter(Boolean);
+
     try {
-      const sanitizedData = escapeFormData(data);
-      const file = data.file;
-
-      const filePath = `uploads/${Date.now()}_${file.name}`;
-
-      const { error: uploadError } = await supabaseClient.storage
-        .from("REQUEST_ATTACHMENTS")
-        .upload(filePath, file, { upsert: true });
-
-      if (uploadError) {
-        return NextResponse.json(
-          { error: "File upload failed.", details: uploadError.message },
-          { status: 500 }
-        );
-      }
-
-      const {
-        data: { publicUrl },
-      } = supabaseClient.storage
-        .from("REQUEST_ATTACHMENTS")
-        .getPublicUrl(filePath);
-
       await handleDepositRequest({
         TopUpFormValues: sanitizedData,
-        publicUrl,
+        publicUrls: publicUrls as string[],
       });
 
       const transactionHistory = {
@@ -172,10 +201,12 @@ const DashboardDepositModalDeposit = ({
       if (e instanceof Error) {
         await logError(supabaseClient, {
           errorMessage: e.message,
+
           stackTrace: e.stack,
           stackPath:
             "components/DashboardPage/DashboardDepositRequest/DashboardDepositModal/DashboardDepositModalDeposit.tsx",
         });
+
         toast({
           title: "Error",
           description: "Something went wrong",
@@ -195,7 +226,6 @@ const DashboardDepositModalDeposit = ({
       setValue("accountNumber", selectedOption.merchant_account_number || "");
     }
   };
-  const uploadedFile = watch("file");
 
   return (
     <Dialog
@@ -204,6 +234,7 @@ const DashboardDepositModalDeposit = ({
         setOpen(isOpen);
         if (!isOpen) {
           reset();
+          setNeedMoreReceipts(1);
         }
       }}
     >
@@ -443,59 +474,98 @@ const DashboardDepositModalDeposit = ({
                 </p>
               )}
             </div> */}
+            <div className="space-y-2 w-full max-w-xs sm:max-w-sm">
+              <Label htmlFor="file-input">
+                Upload Receipts or Proof of Payment
+              </Label>
 
-            <div className="">
-              <Controller
-                name="file"
-                control={control}
-                render={({ field: { value, onChange, ...field } }) => (
-                  <div className="space-y-2">
-                    <Label htmlFor="file-input">
-                      Upload Receipt or Proof of Payment
-                    </Label>
-                    <div className="flex justify-center font-bold">
-                      <p className="text-md">STATUS: </p>{" "}
-                      {uploadedFile ? (
-                        <p className="text-md font-thin text-green-700">
-                          RECEIPT UPLOADED SUCCESSFULLY
-                        </p>
-                      ) : (
-                        <p className="text-md font-thin text-red-700">
-                          NO RECEIPT UPLOADED
-                        </p>
+              {Array.from({ length: needMoreReceipts }, (_, index) => (
+                <Controller
+                  key={index}
+                  name={`files.${index}`}
+                  control={control}
+                  render={({ field: { value, onChange, ...field } }) => (
+                    <div className="space-y-2">
+                      <div className="flex justify-center font-bold">
+                        <p className="text-sm sm:text-md">STATUS: </p>
+                        {value ? (
+                          <p className="text-sm sm:text-md font-thin text-green-700">
+                            RECEIPT UPLOADED SUCCESSFULLY
+                          </p>
+                        ) : (
+                          <span className="text-sm sm:text-md font-thin text-red-700">
+                            NO RECEIPT UPLOADED
+                          </span>
+                        )}
+                      </div>
+                      <Input
+                        {...field}
+                        id={`file-input-${index}`}
+                        className="hidden"
+                        type="file"
+                        onChange={(e) => onChange(e.target.files?.[0] || null)}
+                      />
+
+                      <div className="flex justify-center gap-2 relative">
+                        <Button
+                          onClick={() => {
+                            document
+                              .getElementById(`file-input-${index}`)
+                              ?.click();
+                          }}
+                          type="button"
+                          variant="card"
+                          className={`rounded-md text-sm sm:text-md ${
+                            index > 0 ? "w-64 sm:w-full" : "w-full"
+                          }`}
+                        >
+                          CLICK HERE TO UPLOAD RECEIPT {index + 1}
+                        </Button>
+
+                        {index > 0 && (
+                          <Button
+                            variant="card"
+                            size="icon"
+                            type="button"
+                            className="text-sm sm:text-md p-0"
+                            onClick={() => {
+                              const currentFiles = watch("files");
+
+                              const updatedFiles = currentFiles.filter(
+                                (_, fileIndex) => fileIndex !== index
+                              );
+
+                              setValue("files", updatedFiles);
+
+                              setNeedMoreReceipts((prev) => prev - 1);
+                            }}
+                          >
+                            <XIcon className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </div>
+                      {index === needMoreReceipts - 1 && index < 2 && (
+                        <div className="flex justify-center">
+                          <Button
+                            onClick={() => {
+                              if (needMoreReceipts < 3) {
+                                setNeedMoreReceipts(needMoreReceipts + 1);
+                              }
+                            }}
+                            type="button"
+                            className="border-2 border-black rounded-md"
+                          >
+                            Add More Receipt
+                          </Button>
+                        </div>
                       )}
                     </div>
-                    {/* Hidden file input */}
-                    <Input
-                      {...field}
-                      id="file-input"
-                      className="hidden"
-                      type="file"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        onChange(file);
-                      }}
-                    />
-                    {/* Trigger button */}
-                    <Button
-                      onClick={() => {
-                        document.getElementById("file-input")?.click();
-                      }}
-                      type="button"
-                      variant="card"
-                      className="w-full rounded-md"
-                    >
-                      CLICK HERE TO UPLOAD RECEIPT
-                    </Button>
-                  </div>
-                )}
-              />
-              {/* Uploaded file status */}
-
-              {/* Error message */}
-              {errors.file && (
+                  )}
+                />
+              ))}
+              {errors.files && (
                 <p className="text-primaryRed text-sm mt-1">
-                  {errors.file?.message}
+                  {errors.files.message}
                 </p>
               )}
             </div>

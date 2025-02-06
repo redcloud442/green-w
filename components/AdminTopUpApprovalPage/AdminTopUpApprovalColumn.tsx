@@ -21,6 +21,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Dispatch, SetStateAction, useCallback, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { ScrollArea } from "../ui/scroll-area";
 import TableLoading from "../ui/tableLoading";
 import { Textarea } from "../ui/textarea";
 const statusColorMap: Record<string, string> = {
@@ -334,36 +335,36 @@ export const useAdminTopUpApprovalColumns = (
       ),
     },
     {
-      accessorKey: "alliance_top_up_request_attachment",
+      accessorKey: "attachment_url",
       header: () => <div className="p-1">Attachment</div>,
       cell: ({ row }) => {
-        const attachmentUrl = row.getValue(
-          "alliance_top_up_request_attachment"
-        ) as string;
+        const attachmentUrl = row.getValue("attachment_url") as string[];
 
         return (
           <Dialog>
             <DialogTrigger asChild>
               <Button variant="outline">View Attachment</Button>
             </DialogTrigger>
-            <DialogContent type="table">
-              <DialogDescription></DialogDescription>
-              <DialogHeader>
-                <DialogTitle>Attachment</DialogTitle>
-              </DialogHeader>
-              <div className="flex justify-center items-center">
-                <Image
-                  src={attachmentUrl || ""}
-                  alt="Attachment Preview"
-                  width={230}
-                  height={230}
-                  className="object-contain"
-                />
-              </div>
 
-              <DialogClose asChild>
-                <Button variant="secondary">Close</Button>
-              </DialogClose>
+            <DialogContent type="table">
+              <ScrollArea className="h-[600px]">
+                <DialogDescription></DialogDescription>
+                <DialogHeader>
+                  <DialogTitle>Attachment</DialogTitle>
+                </DialogHeader>
+                <div className="flex justify-center items-center flex-wrap gap-2">
+                  {attachmentUrl.map((url) => (
+                    <Image
+                      key={url}
+                      src={url || ""}
+                      alt="Attachment Preview"
+                      width={230}
+                      height={230}
+                      className="object-contain"
+                    />
+                  ))}
+                </div>
+              </ScrollArea>
             </DialogContent>
           </Dialog>
         );

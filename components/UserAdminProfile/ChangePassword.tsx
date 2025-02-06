@@ -86,7 +86,7 @@ const ChangePassword = ({ userProfile, setUserProfile }: Props) => {
     try {
       await changeUserPassword({
         userId: userProfile.user_id,
-        email: userProfile.user_email,
+        email: userProfile.user_email || "",
         password: data.password,
       });
 
