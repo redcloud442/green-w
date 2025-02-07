@@ -7,6 +7,7 @@ import { useUserLoadingStore } from "@/store/useLoadingState";
 import { usePackageChartData } from "@/store/usePackageChartData";
 import { useUserDashboardEarningsStore } from "@/store/useUserDashboardEarnings";
 import { useUserEarningsStore } from "@/store/useUserEarningsStore";
+import { RANK_COLORS } from "@/utils/constant";
 import { createClientSide } from "@/utils/supabase/client";
 import {
   alliance_member_table,
@@ -187,8 +188,14 @@ const DashboardPage = ({
                 quality={100}
                 className="w-20 h-20 object-contain"
               />
-              <p className="text-black/70 text-[9px] font-bold absolute bottom-1">
-                {totalEarnings?.rank.toUpperCase()}
+              <p
+                className={` text-[10px] sm:text-[12px] font-bold absolute bottom-1 `}
+                style={{
+                  textShadow: `1px 1px 0px white, -1px -1px 0px white, 1px -1px 0px white, -1px 1px 0px white`,
+                  color: `${RANK_COLORS[totalEarnings?.rank as keyof typeof RANK_COLORS]}`,
+                }}
+              >
+                {totalEarnings?.rank?.toUpperCase() || ""}
               </p>
             </div>
 
@@ -217,7 +224,7 @@ const DashboardPage = ({
                   <br />
                   Sapphire - 200 referrals
                   <br />
-                  Diamond -500 referrals
+                  Diamond - 500 referrals
                 </PopoverContent>
               </Popover>
             </div>
