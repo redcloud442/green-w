@@ -178,14 +178,19 @@ const DashboardPage = ({
         {totalEarnings?.rank && (
           <div className="relative">
             {/* Background Image */}
-            <Image
-              src={`/ranking/${totalEarnings?.rank}.png`}
-              alt="ranking"
-              width={800}
-              height={800}
-              quality={100}
-              className="w-20 h-20 object-contain"
-            />
+            <div className="relative flex flex-col items-center justify-center">
+              <Image
+                src={`/ranking/${totalEarnings?.rank}.png`}
+                alt="ranking"
+                width={800}
+                height={800}
+                quality={100}
+                className="w-20 h-20 object-contain"
+              />
+              <p className="text-black/70 text-[9px] font-bold absolute bottom-1">
+                {totalEarnings?.rank.toUpperCase()}
+              </p>
+            </div>
 
             {/* Overlay Content */}
             <div className="absolute left-10 sm:left-14 bottom-10 inset-0 flex items-center justify-center">
@@ -268,9 +273,8 @@ const DashboardPage = ({
                         <Info className="w-3 h-3 sm:w-5 sm:h-5 text-white bg-violet-600 rounded-full " />
                       </PopoverTrigger>
                       <PopoverContent>
-                        Ito ang kabuuang withdrawal balance mula sa iyong
-                        income sa package income, referral income at network
-                        income.
+                        Ito ang kabuuang withdrawal balance mula sa iyong income
+                        sa package income, referral income at network income.
                       </PopoverContent>
                     </Popover>
                   </div>
