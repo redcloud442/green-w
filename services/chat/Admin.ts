@@ -39,3 +39,20 @@ export const getChatSupportSession = async (sessionId: string) => {
 
   return data;
 };
+
+export const getChatSupportSessionAll = async () => {
+  const response = await fetch(`/api/v1/chat/`, {
+    method: "GET",
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch chat support sessions");
+  }
+
+  return data as {
+    totalCount: number;
+    data: (chat_session_table & { user_username: string })[];
+  };
+};

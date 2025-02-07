@@ -135,7 +135,7 @@ export const AdminChatSupportSessionPage = ({
         {/* Chat messages */}
 
         <div className="space-y-4">
-          <ScrollArea className="flex-1 h-[970px] p-4 bg-white space-y-4 border-2">
+          <ScrollArea className="flex-1 h-[970px] p-4 bg-gray-200 space-y-4 border-2">
             {messages.map((message, index) => (
               <div
                 key={

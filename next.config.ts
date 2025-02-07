@@ -21,11 +21,11 @@ const nextConfig = {
     return [
       {
         source: "/socket.io/:path*",
-        destination: `${process.env.NODE_ENV === "development" ? "http://localhost:9000" : "https://loadbalancer.elevateglobal.app"}/socket.io/:path*`,
+        destination: `${process.env.NODE_ENV === "development" ? "http://localhost:8000" : "https://loadbalancer.elevateglobal.app"}/socket.io/:path*`,
       },
       {
         source: "/api/v1/:path*",
-        destination: `${process.env.NODE_ENV === "development" ? "http://localhost:9000" : "https://loadbalancer.elevateglobal.app"}/api/v1/:path*`,
+        destination: `${process.env.NODE_ENV === "development" ? "http://localhost:8000" : "https://loadbalancer.elevateglobal.app"}/api/v1/:path*`,
       },
     ];
   },

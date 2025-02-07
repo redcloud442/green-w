@@ -22,17 +22,19 @@ import {
   BeakerIcon,
   Calendar,
   ChevronUp,
+  File,
   Group,
   HistoryIcon,
   Home,
   Inbox,
+  InboxIcon,
+  MessageCircle,
   MonitorCheck,
   Package,
   PiggyBankIcon,
   Settings,
   Trophy,
   User2,
-  File,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -128,11 +130,22 @@ const AppSidebar = ({ userData, teamMemberProfile }: Props) => {
         },
       ],
     },
-
     {
       title: "User Monitoring",
       url: "/admin/monitoring",
       icon: MonitorCheck,
+    },
+    {
+      title: "Chat Support",
+      url: "/admin/chat-support",
+      icon: MessageCircle,
+      subItems: [
+        {
+          icon: InboxIcon,
+          title: "Chat Inbox",
+          url: "/admin/chat-support/inbox",
+        },
+      ],
     },
   ];
 

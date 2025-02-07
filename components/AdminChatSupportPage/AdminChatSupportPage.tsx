@@ -15,13 +15,11 @@ type ChatSupportPageProps = {
 export const AdminChatSupportPage = ({
   teamMemberProfile,
 }: ChatSupportPageProps) => {
-  const socketIo = socket;
   const router = useRouter();
   const [sessions, setSessions] = useState<
     (chat_session_table & { user_username: string })[]
   >([]);
   const [isLoading, setIsLoading] = useState(false);
-
   const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(1);
 
@@ -30,7 +28,6 @@ export const AdminChatSupportPage = ({
     const roomName = teamMemberProfile.alliance_member_alliance_id;
 
     socket.emit("joinWaitingRoom", roomName);
-
     socket.emit("fetchWaitingList", page, 10, roomName);
 
     socket.on("waitingList", (data) => {
@@ -66,93 +63,100 @@ export const AdminChatSupportPage = ({
     try {
       setIsLoading(true);
       const data = await getChatSupportSession(sessionId);
-
       if (data) {
         socket.emit("acceptSupportSession", { sessionId });
-
         router.push(`/admin/chat-support/${sessionId}`);
       }
     } catch (e) {
+      console.error("Error starting support session", e);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex flex-col h-full border-2 p-4">
-      <h1 className="text-2xl font-bold mb-4">Active Chat Support Sessions</h1>
+    <div className="flex flex-col h-full p-4">
+      <h1 className="text-3xl font-bold mb-6 text-white">
+        Active Chat Support Sessions
+      </h1>
       {isLoading && <TableLoading />}
 
-      <table className="min-w-full border-collapse border border-gray-300">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="border border-gray-300 px-4 py-2 text-left">
-              Requesting User
-            </th>
-            <th className="border border-gray-300 px-4 py-2 text-left">
-              Status
-            </th>
-            <th className="border border-gray-300 px-4 py-2 text-left">
-              Created At
-            </th>
-            <th className="border border-gray-300 px-4 py-2 text-left">
-              Action
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {sessions.map((session) => (
-            <tr
-              key={session.chat_session_id}
-              className="odd:bg-white even:bg-gray-50"
-            >
-              <td className="border border-gray-300 px-4 py-2">
-                {session.user_username}
-              </td>
-              <td className="border border-gray-300 px-4 py-2">
-                {session.chat_session_status}
-              </td>
-              <td className="border border-gray-300 px-4 py-2">
-                {new Date(session.chat_session_date).toLocaleString()}
-              </td>
-              <td className="border border-gray-300 px-4 py-2">
-                <Button
-                  onClick={() => handleSupportChat(session.chat_session_id)}
-                  variant="card"
-                >
-                  Support Chat
-                </Button>
-              </td>
+      <div className="overflow-x-auto">
+        <table className="w-full border border-gray-300 rounded-lg overflow-hidden">
+          <thead>
+            <tr className="bg-blue-100">
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-800">
+                Requesting User
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-800">
+                Status
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-800">
+                Created At
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-800">
+                Action
+              </th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {sessions.map((session, index) => (
+              <tr
+                key={session.chat_session_id}
+                className={`${
+                  index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                } hover:bg-blue-50`}
+              >
+                <td className="px-6 py-4 text-sm text-gray-700">
+                  {session.user_username}
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-700">
+                  {session.chat_session_status}
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-700">
+                  {new Date(session.chat_session_date).toLocaleString()}
+                </td>
+                <td className="px-6 py-4">
+                  <Button
+                    onClick={() => handleSupportChat(session.chat_session_id)}
+                    className="bg-blue-500 text-white hover:bg-blue-600 rounded-md px-4 py-2"
+                  >
+                    Support Chat
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       {/* Pagination Controls */}
-      <div className="flex justify-between items-center mt-4">
-        <button
+      <div className="flex justify-between items-center mt-6">
+        <Button
           onClick={handlePrevPage}
           disabled={page === 1}
-          className={`px-4 py-2 border rounded ${
-            page === 1 ? "bg-gray-300 text-gray-500" : "bg-blue-500 text-white"
+          className={`px-4 py-2 rounded ${
+            page === 1
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-blue-500 text-white hover:bg-blue-600"
           }`}
         >
           Previous
-        </button>
-        <span>
+        </Button>
+        <span className="text-sm text-gray-600">
           Page {page} of {Math.ceil(totalCount / 10)}
         </span>
-        <button
+        <Button
           onClick={handleNextPage}
           disabled={page * 10 >= totalCount}
-          className={`px-4 py-2 border rounded ${
+          className={`px-4 py-2 rounded ${
             page * 10 >= totalCount
-              ? "bg-gray-300 text-gray-500"
-              : "bg-blue-500 text-white"
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-blue-500 text-white hover:bg-blue-600"
           }`}
         >
           Next
-        </button>
+        </Button>
       </div>
     </div>
   );

@@ -1,13 +1,16 @@
 import { io } from "socket.io-client";
 
-export const socket = io(
+// Set the URL dynamically based on the environment and testing needs
+const socketUrl =
   process.env.NODE_ENV === "development"
-    ? "ws://localhost:8000"
-    : "wss://elevateglobal.app",
-  {
-    withCredentials: true,
-    reconnectionDelayMax: 10000,
-    transports: ["websocket"],
-    path: "/socket.io/", // Ensure the path matches your backend
-  }
-);
+    ? window.location.hostname === "localhost"
+      ? "ws://localhost:8000"
+      : "ws://192.168.1.56:8000"
+    : "wss://elevateglobal.app";
+
+export const socket = io(socketUrl, {
+  withCredentials: true,
+  reconnectionDelayMax: 10000,
+  transports: ["websocket"],
+  path: "/socket.io/",
+});
