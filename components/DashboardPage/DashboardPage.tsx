@@ -7,6 +7,7 @@ import { useUserLoadingStore } from "@/store/useLoadingState";
 import { usePackageChartData } from "@/store/usePackageChartData";
 import { useUserDashboardEarningsStore } from "@/store/useUserDashboardEarnings";
 import { useUserEarningsStore } from "@/store/useUserEarningsStore";
+import { RANK_COLORS } from "@/utils/constant";
 import { createClientSide } from "@/utils/supabase/client";
 import {
   alliance_member_table,
@@ -178,14 +179,25 @@ const DashboardPage = ({
         {totalEarnings?.rank && (
           <div className="relative">
             {/* Background Image */}
-            <Image
-              src={`/ranking/${totalEarnings?.rank}.png`}
-              alt="ranking"
-              width={800}
-              height={800}
-              quality={100}
-              className="w-20 h-20 object-contain"
-            />
+            <div className="relative flex flex-col items-center justify-center">
+              <Image
+                src={`/ranking/${totalEarnings?.rank}.png`}
+                alt="ranking"
+                width={800}
+                height={800}
+                quality={100}
+                className="w-20 h-20 object-contain"
+              />
+              <p
+                className={` text-[10px] sm:text-[12px] font-bold absolute bottom-1 `}
+                style={{
+                  textShadow: `1px 1px 0px white, -1px -1px 0px white, 1px -1px 0px white, -1px 1px 0px white`,
+                  color: `${RANK_COLORS[totalEarnings?.rank as keyof typeof RANK_COLORS]}`,
+                }}
+              >
+                {totalEarnings?.rank?.toUpperCase() || ""}
+              </p>
+            </div>
 
             {/* Overlay Content */}
             <div className="absolute left-10 sm:left-14 bottom-10 inset-0 flex items-center justify-center">
@@ -212,7 +224,7 @@ const DashboardPage = ({
                   <br />
                   Sapphire - 200 referrals
                   <br />
-                  Diamond -500 referrals
+                  Diamond - 500 referrals
                 </PopoverContent>
               </Popover>
             </div>
@@ -268,9 +280,8 @@ const DashboardPage = ({
                         <Info className="w-3 h-3 sm:w-5 sm:h-5 text-white bg-violet-600 rounded-full " />
                       </PopoverTrigger>
                       <PopoverContent>
-                        Ito ang kabuuang withdrawal balance mula sa iyong
-                        income sa package income, referral income at network
-                        income.
+                        Ito ang kabuuang withdrawal balance mula sa iyong income
+                        sa package income, referral income at network income.
                       </PopoverContent>
                     </Popover>
                   </div>

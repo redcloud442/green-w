@@ -105,3 +105,15 @@ export const BANKS = [
   "SEABANK Philippines",
   "OwnBank",
 ];
+
+export const RANK_COLORS = {
+  iron: "#44403c", // stone-700
+  bronze: "#d97706", // amber-600
+  silver: "#737373", // neutral-500
+  gold: "#f59e0b", // yellow-500
+  platinum: "#a1a1aa", // zinc-400
+  emerald: "#10b981", // emerald-500
+  diamond: "#06b6d4", // cyan-500
+  ruby: "#ef4444", // red-500
+  sapphire: "#3b82f6", // blue-500
+};
