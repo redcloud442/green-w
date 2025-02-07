@@ -6,12 +6,23 @@ const page = async () => {
   const { teamMemberProfile, profile, session } =
     await protectionChatPageMemberUser();
 
+  console.log(session);
+
+  if (!session) {
+    redirect("/");
+  }
+
+  if (session.chat_session_status !== "SUPPORT ONGOING") {
+    redirect("/");
+  }
+
   if (!teamMemberProfile) {
     redirect("/500");
   }
 
   return (
     <ChatSupportPage
+      teamId={teamMemberProfile?.alliance_member_alliance_id}
       session={session}
       teamMemberId={teamMemberProfile?.alliance_member_id}
       profile={profile}

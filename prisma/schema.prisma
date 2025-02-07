@@ -413,7 +413,7 @@ model chat_message_table {
   chat_message_content String
   chat_message_session_id String @db.Uuid
   chat_message_alliance_member_id String @db.Uuid
-
+  chat_message_sender_user String
   chat_session_table chat_session_table @relation(fields: [chat_message_session_id], references: [chat_session_id], onDelete: Cascade, onUpdate: Cascade)
   alliance_member_table alliance_member_table @relation(fields: [chat_message_alliance_member_id], references: [alliance_member_id], onDelete: Cascade, onUpdate: Cascade)
 

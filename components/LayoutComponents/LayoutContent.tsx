@@ -46,6 +46,7 @@ export default function LayoutContent({
         </div>
 
         {role !== ROLE.ADMIN && <MobileNavBar />}
+        
       </div>
     </div>
   );

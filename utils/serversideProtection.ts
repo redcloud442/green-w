@@ -513,9 +513,11 @@ export const protectionChatPageMemberUser = async (ip?: string) => {
       return { redirect: "/500" };
     }
 
-    if (!teamMember.alliance_member_is_active) {
-      return { redirect: "/500" };
-    }
+    // if (!teamMember.alliance_member_is_active) {
+    //   return { redirect: "/500" };
+    // }
+
+    console.log(teamMember.alliance_member_id);
 
     const session = await prisma.chat_session_table.findFirst({
       where: {
