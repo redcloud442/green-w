@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { formatDateToYYYYMMDD, formatDay, formatTime } from "@/utils/function";
+import { formatDateToYYYYMMDD, formatDay } from "@/utils/function";
 import { adminWithdrawalTotalReportData } from "@/utils/types";
 import { ColumnDef } from "@tanstack/react-table";
 
@@ -21,8 +21,7 @@ export const AdminWithdrawalReportColumn =
           return (
             <div className="flex items-center gap-2 text-wrap ">
               {formatDay(row.original.interval_start)},{" "}
-              {formatDateToYYYYMMDD(row.original.interval_start)},{" "}
-              {formatTime(row.original.interval_start)}
+              {formatDateToYYYYMMDD(row.original.interval_start)}
             </div>
           );
         },
@@ -123,8 +122,7 @@ export const AdminWithdrawalReportColumn =
           return (
             <div className="flex items-center gap-2 text-wrap ">
               {formatDay(row.original.interval_end)},{" "}
-              {formatDateToYYYYMMDD(row.original.interval_end)},{" "}
-              {formatTime(row.original.interval_end)}
+              {formatDateToYYYYMMDD(row.original.interval_end)}
             </div>
           );
         },

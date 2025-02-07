@@ -298,18 +298,21 @@ export const TopUpColumn = (
         </div>
       ),
     },
-
     {
       accessorKey: "attachment_url",
       header: () => <div className="p-1">Attachment</div>,
       cell: ({ row }) => {
+        const publicUrls = row.original.attachment_url;
         const attachmentUrl = row.getValue("attachment_url") as string[];
 
         return (
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="outline">View Attachment</Button>
+              {publicUrls[0] !== null ? (
+                <Button variant="outline">View Attachment</Button>
+              ) : null}
             </DialogTrigger>
+
             <DialogContent type="table">
               <ScrollArea className="h-[600px]">
                 <DialogDescription></DialogDescription>
@@ -327,6 +330,46 @@ export const TopUpColumn = (
                       className="object-contain"
                     />
                   ))}
+                </div>
+              </ScrollArea>
+            </DialogContent>
+          </Dialog>
+        );
+      },
+    },
+    {
+      accessorKey: "alliance_top_up_request_attachment",
+      header: () => <div className="p-1">Old Attachment</div>,
+      cell: ({ row }) => {
+        const publicUrls = row.original.attachment_url;
+
+        const attachmentUrl = row.getValue(
+          "alliance_top_up_request_attachment"
+        ) as string;
+
+        return (
+          <Dialog>
+            <DialogTrigger asChild>
+              {publicUrls.length > 0 && publicUrls[0] !== null ? null : (
+                <Button variant="outline">View Old Attachment</Button>
+              )}
+            </DialogTrigger>
+
+            <DialogContent type="table">
+              <ScrollArea className="h-[600px]">
+                <DialogDescription></DialogDescription>
+                <DialogHeader>
+                  <DialogTitle>Attachment</DialogTitle>
+                </DialogHeader>
+                <div className="flex justify-center items-center flex-wrap gap-2">
+                  <Image
+                    key={attachmentUrl}
+                    src={attachmentUrl || ""}
+                    alt="Attachment Preview"
+                    width={230}
+                    height={230}
+                    className="object-contain"
+                  />
                 </div>
               </ScrollArea>
             </DialogContent>
