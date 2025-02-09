@@ -9,7 +9,7 @@ const page = async () => {
     redirect("/500");
   }
 
-  return <AdminChatSupportPage teamMemberProfile={teamMemberProfile} />;
+  return <AdminChatSupportPage />;
 };
 
 export default page;

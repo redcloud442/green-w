@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { escapeFormData } from "@/utils/function";
 import { socket } from "@/utils/socket";
 import {
   chat_message_table,
@@ -36,22 +37,16 @@ export const ChatSupportPage = ({
   const [isEnding, setIsEnding] = useState(false);
 
   useEffect(() => {
-    socket.emit("requestSupportSession", session.chat_session_id, teamId);
-
-    socket.on("waitingForAdmin", ({ message }) => {
-      setIsWaiting(true);
-    });
-
     socket.on("supportSessionAccepted", ({ sessionId }) => {
-      console.log(`Joined session room: ${sessionId}`);
       setIsWaiting(false);
-      socket.emit("joinRoom", sessionId);
     });
 
     socket.on("messages", (initialMessages: chat_message_table[]) => {
       setMessages(initialMessages);
       scrollToBottom();
     });
+
+    socket.emit("joinRoom", { roomId: session.chat_session_id });
 
     const handleNewMessage = (message: chat_message_table) => {
       setMessages((prev) => [...prev, message]);
@@ -69,9 +64,9 @@ export const ChatSupportPage = ({
     });
 
     return () => {
-      socket.off("waitingForAdmin");
-      socket.off("supportSessionAccepted");
       socket.off("messages");
+      socket.off("supportSessionAccepted");
+      socket.off("joinRoom");
       socket.off("newMessage", handleNewMessage);
       socket.off("endSupport");
     };
@@ -107,13 +102,33 @@ export const ChatSupportPage = ({
   };
 
   useEffect(() => {
-    window.addEventListener("beforeunload", () => {
+    const handleEndSupport = () => {
       socket.emit("endSupport", session.chat_session_id);
-    });
+
+      const message = {
+        chat_message_content: "Support session ended",
+        chat_message_session_id: session.chat_session_id,
+        chat_message_alliance_member_id: teamMemberId,
+        chat_message_date: new Date().toISOString(),
+        chat_message_sender_user: profile.user_username,
+      };
+
+      const data = escapeFormData(message);
+
+      socket.emit("sendMessage", data);
+    };
+
+    window.addEventListener("beforeunload", handleEndSupport);
+    window.addEventListener("pagehide", handleEndSupport);
 
     return () => {
-      window.removeEventListener("beforeunload", () => {});
+      window.removeEventListener("beforeunload", handleEndSupport);
+      window.removeEventListener("pagehide", handleEndSupport);
     };
+  }, [session.chat_session_id, teamMemberId, profile.user_username]);
+
+  useEffect(() => {
+    scrollToBottom();
   }, []);
 
   return (
@@ -140,12 +155,12 @@ export const ChatSupportPage = ({
       ) : (
         <>
           <div className="p-4 border-b bg-cyan-400 shadow">
-            <h2 className="text-2xl font-bold ">{`Chat - ${session.chat_session_status}`}</h2>
+            <h2 className="text-2xl font-bold ">{`Chat - SUPPORT ONGOING`}</h2>
           </div>
 
           {/* Chat messages */}
           <div className="space-y-4">
-            <ScrollArea className="flex-1 h-[970px] p-4 bg-white space-y-4 border-2">
+            <ScrollArea className="flex-1 h-[500px] sm:h-[970px] p-4 bg-gray-200 space-y-4 border-2">
               {messages.map((message, index) => (
                 <div
                   key={

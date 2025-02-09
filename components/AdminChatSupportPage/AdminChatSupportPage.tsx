@@ -2,48 +2,70 @@
 
 import { getChatSupportSession } from "@/services/chat/Admin";
 import { socket } from "@/utils/socket";
-import { alliance_member_table, chat_session_table } from "@prisma/client";
+import { chat_session_table } from "@prisma/client";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { RealtimeChannel } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import TableLoading from "../ui/tableLoading";
 
-type ChatSupportPageProps = {
-  teamMemberProfile: alliance_member_table;
-};
-
-export const AdminChatSupportPage = ({
-  teamMemberProfile,
-}: ChatSupportPageProps) => {
+export const AdminChatSupportPage = () => {
   const router = useRouter();
-  const [sessions, setSessions] = useState<
-    (chat_session_table & { user_username: string })[]
-  >([]);
+  const supabaseClient = createClientComponentClient();
+  const [sessions, setSessions] = useState<chat_session_table[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(1);
 
   useEffect(() => {
-    setIsLoading(true);
-    const roomName = teamMemberProfile.alliance_member_alliance_id;
+    const fetchSessions = async () => {
+      setIsLoading(true);
+      const { data, error, count } = await supabaseClient
+        .schema("chat_schema")
+        .from("chat_session_table")
+        .select("*", { count: "exact" })
+        .eq("chat_session_status", "WAITING FOR SUPPORT")
+        .range((page - 1) * 10, page * 10 - 1);
 
-    socket.emit("joinWaitingRoom", roomName);
-    socket.emit("fetchWaitingList", page, 10, roomName);
-
-    socket.on("waitingList", (data) => {
-      setSessions(data.data);
-      setTotalCount(data.totalCount);
+      if (error) {
+        console.error("Error fetching sessions", error);
+      } else {
+        setSessions(data || []);
+        setTotalCount(count || 0);
+      }
       setIsLoading(false);
-    });
+    };
 
-    socket.on("newQueueSession", (newSession) => {
-      setSessions((prev) => [newSession, ...prev]);
-    });
+    fetchSessions();
+
+    const subscription: RealtimeChannel = supabaseClient
+      .channel("chat_sessions")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "chat_schema",
+          table: "chat_session_table",
+        },
+        (payload) => {
+          if (payload.eventType === "INSERT") {
+            setSessions((prev) => [...prev, payload.new as chat_session_table]);
+          } else if (payload.eventType === "UPDATE") {
+            setSessions((prev) =>
+              prev.map((session) =>
+                session.chat_session_id === payload.new.chat_session_id
+                  ? (payload.new as chat_session_table)
+                  : session
+              )
+            );
+          }
+        }
+      )
+      .subscribe();
 
     return () => {
-      setIsLoading(false);
-      socket.off("waitingList");
-      socket.off("newQueueSession");
+      supabaseClient.removeChannel(subscription);
     };
   }, [page]);
 
@@ -63,12 +85,13 @@ export const AdminChatSupportPage = ({
     try {
       setIsLoading(true);
       const data = await getChatSupportSession(sessionId);
+
       if (data) {
         socket.emit("acceptSupportSession", { sessionId });
+
         router.push(`/admin/chat-support/${sessionId}`);
       }
     } catch (e) {
-      console.error("Error starting support session", e);
     } finally {
       setIsLoading(false);
     }
@@ -108,7 +131,7 @@ export const AdminChatSupportPage = ({
                 } hover:bg-blue-50`}
               >
                 <td className="px-6 py-4 text-sm text-gray-700">
-                  {session.user_username}
+                  ID-{session.chat_session_alliance_member_id}
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-700">
                   {session.chat_session_status}

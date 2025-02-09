@@ -6,13 +6,11 @@ const page = async () => {
   const { teamMemberProfile, profile, session } =
     await protectionChatPageMemberUser();
 
-  console.log(session);
-
   if (!session) {
     redirect("/");
   }
 
-  if (session.chat_session_status !== "SUPPORT ONGOING") {
+  if (session.chat_session_status !== "WAITING FOR SUPPORT") {
     redirect("/");
   }
 

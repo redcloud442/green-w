@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getChatSupportSessionAll } from "@/services/chat/Admin";
-import { socket } from "@/utils/socket";
+import { getMemberChat } from "@/services/chat/Member";
 import {
   alliance_member_table,
   chat_message_table,
@@ -30,14 +30,16 @@ const AdminChatInboxPage = ({
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const [showChat, setShowChat] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isFetchingMessages, setIsFetchingMessages] = useState(false);
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
 
   const handleFetchSessions = async () => {
     try {
       setIsLoading(true);
       const data = await getChatSupportSessionAll();
+
       setSessions(data.data);
     } catch (e) {
+      console.error("Error fetching sessions", e);
     } finally {
       setIsLoading(false);
     }
@@ -47,17 +49,23 @@ const AdminChatInboxPage = ({
     handleFetchSessions();
   }, []);
 
-  const selectSession = (
-    session: chat_session_table & { user_username: string }
-  ) => {
-    setSelectedSession(session);
-    socket.emit("joinRoom", session.chat_session_id);
-    setIsFetchingMessages(true);
-    socket.on("messages", (initialMessages: chat_message_table[]) => {
-      setMessages(initialMessages);
-    });
-    setIsFetchingMessages(false);
-    setShowChat(true);
+  const selectSession = async (sessionId: string) => {
+    try {
+      setMessages([]);
+      setIsLoadingMessages(true);
+      setShowChat(true);
+      setSelectedSession(
+        sessions.find((session) => session.chat_session_id === sessionId) ??
+          null
+      );
+      const data = await getMemberChat({ id: sessionId });
+
+      setMessages(data);
+    } catch (e) {
+      console.error("Error fetching messages", e);
+    } finally {
+      setIsLoadingMessages(false);
+    }
   };
 
   const scrollToBottom = () => {
@@ -71,15 +79,14 @@ const AdminChatInboxPage = ({
   }, [messages]);
 
   return (
-    <div className="h-full grid grid-cols-1 md:grid-cols-3">
-      {/* Left Side - Sessions List */}
+    <div className=" grid grid-cols-1 md:grid-cols-3">
       <div
         className={`col-span-1 border-r border-gray-300 p-4 bg-white md:block ${
           showChat ? "hidden" : "block"
         }`}
       >
         <h2 className="text-xl font-bold mb-4">Chat Sessions</h2>
-        <ScrollArea className="h-[600px] sm:h-[1000px] space-y-2 p-2">
+        <ScrollArea className="h-[600px]  sm:h-[1200px] space-y-2 p-2">
           {isLoading && (
             <div className="space-y-2">
               <Skeleton className="h-[100px] w-full" />
@@ -89,11 +96,11 @@ const AdminChatInboxPage = ({
             </div>
           )}
 
-          {sessions.map((session) => (
+          {sessions.map((session, index) => (
             <div
-              key={session.chat_session_id}
-              onClick={() => selectSession(session)}
-              className={`p-3 rounded-lg cursor-pointer bg-gray-200 hover:bg-blue-100 ${
+              key={index}
+              onClick={() => selectSession(session.chat_session_id)}
+              className={`p-3 rounded-lg cursor-pointer my-2 bg-gray-200 hover:bg-blue-100 ${
                 selectedSession?.chat_session_id === session.chat_session_id
                   ? "bg-blue-200"
                   : ""
@@ -133,6 +140,13 @@ const AdminChatInboxPage = ({
 
             {/* Chat Messages */}
             <ScrollArea className="h-[600px] sm:h-[1230px] p-2 space-y-4 bg-gray-100">
+              {isLoadingMessages && (
+                <div className="space-y-2">
+                  <Skeleton className="h-[100px] w-full" />
+                  <Skeleton className="h-[100px] w-full" />
+                  <Skeleton className="h-[100px] w-full" />
+                </div>
+              )}
               {messages.map((message, index) => (
                 <div
                   key={index}
@@ -160,7 +174,7 @@ const AdminChatInboxPage = ({
                     </p>
                     <p>{message.chat_message_content}</p>
                     <p
-                      className={`text-xs  mt-1 ${
+                      className={`text-xs mt-1 ${
                         message.chat_message_alliance_member_id ===
                         teamMemberProfile.alliance_member_id
                           ? "text-gray-200"

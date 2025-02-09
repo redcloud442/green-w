@@ -7,6 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { handleMemberChat } from "@/services/chat/Member";
 import { getDashboard } from "@/services/Dasboard/Member";
 import {
   handleFetchMemberNotification,
@@ -19,9 +20,16 @@ import { useUserHaveAlreadyWithdraw } from "@/store/userHaveAlreadyWithdraw";
 import { useUserNotificationStore } from "@/store/userNotificationStore";
 import { useUserDashboardEarningsStore } from "@/store/useUserDashboardEarnings";
 import { useUserEarningsStore } from "@/store/useUserEarningsStore";
+import { ROLE } from "@/utils/constant";
 import { useRole } from "@/utils/context/roleContext";
 import { createClientSide } from "@/utils/supabase/client";
-import { BookOpenIcon, DoorOpen, HomeIcon, UserIcon } from "lucide-react";
+import {
+  BookOpenIcon,
+  DoorOpen,
+  HomeIcon,
+  Phone,
+  UserIcon,
+} from "lucide-react";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -41,6 +49,8 @@ const MobileNavBar = () => {
   const pathname = usePathname();
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isChatSupportOpen, setIsChatSupportOpen] = useState(false);
+  const [isChatSupportLoading, setIsChatSupportLoading] = useState(false);
 
   const { setUserNotification } = useUserNotificationStore();
   const { setEarnings } = useUserEarningsStore();
@@ -183,6 +193,23 @@ const MobileNavBar = () => {
     } catch (e) {}
   };
 
+  const handleMemberChatSupport = async () => {
+    try {
+      setIsChatSupportLoading(true);
+      const data = await handleMemberChat();
+
+      if (data) {
+        router.push("/chat-support");
+      }
+
+      setIsChatSupportOpen(false);
+      setIsChatSupportLoading(false);
+    } catch (e) {
+    } finally {
+      setIsChatSupportLoading(false);
+    }
+  };
+
   return (
     <>
       <nav
@@ -251,6 +278,45 @@ const MobileNavBar = () => {
         >
           <DoorOpen className="w-7 h-7 text-black" />
         </Button>
+      )}
+
+      {pathname !== "/chat-support" && (
+        <Button
+          className="fixed bottom-36 right-6 h-14 w-14 rounded-md  p-4 z-50  border-none shadow-lg hover:shadow-xl transition-transform transform hover:scale-110 dark:from-gray-800 dark:to-gray-700"
+          variant="card"
+          onClick={() => setIsChatSupportOpen(true)}
+          aria-label="Chat Support"
+        >
+          <Phone className="w-7 h-7 text-black" />
+        </Button>
+      )}
+      {role !== ROLE.MEMBER && (
+        <Dialog open={isChatSupportOpen} onOpenChange={setIsChatSupportOpen}>
+          <DialogContent className="z-50">
+            <DialogHeader>
+              <DialogTitle>
+                {" "}
+                Please select yes if you want to chat with support
+              </DialogTitle>
+              <DialogDescription>
+                You will be redirected to the chat support queueing system and
+                you will be able to chat with support. Do not close the page or
+                refresh the page.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogDescription></DialogDescription>
+            <DialogFooter>
+              <Button
+                disabled={isChatSupportLoading}
+                variant="card"
+                className="rounded-md w-full"
+                onClick={handleMemberChatSupport}
+              >
+                Yes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       )}
 
       {/* Logout Confirmation Modal */}

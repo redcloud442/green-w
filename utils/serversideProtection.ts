@@ -517,8 +517,6 @@ export const protectionChatPageMemberUser = async (ip?: string) => {
     //   return { redirect: "/500" };
     // }
 
-    console.log(teamMember.alliance_member_id);
-
     const session = await prisma.chat_session_table.findFirst({
       where: {
         chat_session_alliance_member_id: teamMember.alliance_member_id,
@@ -527,6 +525,9 @@ export const protectionChatPageMemberUser = async (ip?: string) => {
         chat_session_id: true,
         chat_session_status: true,
         chat_session_date: true,
+      },
+      orderBy: {
+        chat_session_date: "desc",
       },
     });
 

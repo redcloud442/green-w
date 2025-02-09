@@ -11,6 +11,7 @@ import {
 } from "@prisma/client";
 import { Send } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Textarea } from "../ui/textarea";
 
@@ -31,12 +32,10 @@ export const AdminChatSupportSessionPage = ({
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    socketWebsocket.emit(
-      "joinRoom",
-      session.chat_session_id,
-      profile.user_username,
-      teamMemberId
-    );
+    if (!profile) return;
+    socketWebsocket.emit("joinRoom", {
+      roomId: session.chat_session_id,
+    });
 
     socketWebsocket.on("messages", (initialMessages: chat_message_table[]) => {
       setMessages(initialMessages);
@@ -52,11 +51,12 @@ export const AdminChatSupportSessionPage = ({
 
     return () => {
       socketWebsocket.off("messages");
+      socketWebsocket.off("joinRoom");
+      socketWebsocket.off("supportSessionAccepted");
       socketWebsocket.off("newMessage", handleNewMessage);
     };
-  }, [session.chat_session_id]);
+  }, [session.chat_session_id, profile]);
 
-  // Automatically scroll to the bottom when messages are updated
   const scrollToBottom = () => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollIntoView({ behavior: "smooth" });
@@ -104,7 +104,7 @@ export const AdminChatSupportSessionPage = ({
       setMessages((prev) => [
         ...prev,
         {
-          chat_message_id: crypto.randomUUID(),
+          chat_message_id: uuidv4(),
           chat_message_content: "Session Support Ended",
           chat_message_date: new Date(),
           chat_message_session_id: session.chat_session_id,
@@ -119,7 +119,7 @@ export const AdminChatSupportSessionPage = ({
     <div className="flex flex-col h-full ">
       {/* Header */}
       <div>
-        <div className="p-4 border-b bg-white shadow flex justify-between">
+        <div className="p-4 border-b bg-white shadow flex justify-between flex-wrap space-y-2">
           <h2 className="text-2xl font-bold">
             {`Chat - ${session.chat_session_status}`}
           </h2>
@@ -135,7 +135,7 @@ export const AdminChatSupportSessionPage = ({
         {/* Chat messages */}
 
         <div className="space-y-4">
-          <ScrollArea className="flex-1 h-[970px] p-4 bg-gray-200 space-y-4 border-2">
+          <ScrollArea className="flex-1 h-[500px] sm:h-[970px] p-4 bg-gray-200 space-y-4 border-2">
             {messages.map((message, index) => (
               <div
                 key={
@@ -182,11 +182,6 @@ export const AdminChatSupportSessionPage = ({
                       {profile.user_username.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                )}
-                {message.chat_message_content === "Session Support Ended" && (
-                  <div className="text-red-500 text-center">
-                    <p>Session Support Ended</p>
-                  </div>
                 )}
               </div>
             ))}

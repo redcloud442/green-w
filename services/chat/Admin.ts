@@ -41,7 +41,7 @@ export const getChatSupportSession = async (sessionId: string) => {
 };
 
 export const getChatSupportSessionAll = async () => {
-  const response = await fetch(`/api/v1/chat/`, {
+  const response = await fetch(`/api/v1/chat`, {
     method: "GET",
   });
 
