@@ -41,52 +41,9 @@ export const ChatSupportPage = ({
   const [isEnding, setIsEnding] = useState(false);
 
   useEffect(() => {
-    const fetchSessions = async () => {
-      const { error } = await supabaseClient
-        .schema("chat_schema")
-        .from("chat_session_table")
-        .select("*")
-        .eq("chat_session_id", session.chat_session_id)
-        .limit(1)
-        .order("chat_session_date", { ascending: false });
-
-      if (error) {
-        console.error("Error fetching sessions", error);
-      } else {
-      }
-    };
-
-    fetchSessions();
-
-    const subscription: RealtimeChannel = supabaseClient
-      .channel("chat_sessions")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "chat_schema",
-          table: "chat_session_table",
-        },
-        (payload) => {
-          if (payload.eventType === "UPDATE") {
-            if (payload.new.chat_session_status === "SUPPORT ONGOING") {
-              setIsWaiting(false);
-            } else {
-              setIsWaiting(true);
-            }
-          }
-        }
-      )
-
-      .subscribe();
-
-    return () => {
-      supabaseClient.removeChannel(subscription);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!socket) return;
+    if (!socket.connected) {
+      socket.connect();
+    }
 
     socket.on("messages", (initialMessages: chat_message_table[]) => {
       setMessages(initialMessages);
@@ -175,8 +132,54 @@ export const ChatSupportPage = ({
       window.removeEventListener("pagehide", handleEndSupport);
     };
   }, [pathname, session.chat_session_id, teamMemberId, profile.user_username]);
+
   useEffect(() => {
     scrollToBottom();
+  }, []);
+
+  useEffect(() => {
+    const fetchSessions = async () => {
+      const { error } = await supabaseClient
+        .schema("chat_schema")
+        .from("chat_session_table")
+        .select("*")
+        .eq("chat_session_id", session.chat_session_id)
+        .limit(1)
+        .order("chat_session_date", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching sessions", error);
+      } else {
+      }
+    };
+
+    fetchSessions();
+
+    const subscription: RealtimeChannel = supabaseClient
+      .channel("chat_sessions")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "chat_schema",
+          table: "chat_session_table",
+        },
+        (payload) => {
+          if (payload.eventType === "UPDATE") {
+            if (payload.new.chat_session_status === "SUPPORT ONGOING") {
+              setIsWaiting(false);
+            } else {
+              setIsWaiting(true);
+            }
+          }
+        }
+      )
+
+      .subscribe();
+
+    return () => {
+      supabaseClient.removeChannel(subscription);
+    };
   }, []);
 
   return (
