@@ -109,7 +109,7 @@ export const ChatSupportPage = ({
 
   useEffect(() => {
     const handleEndSupport = () => {
-      socket.emit("endSupport", session.chat_session_id);
+      socket.emit("endSupport", session.chat_session_id, profile.user_username);
 
       const message = {
         chat_message_content: "Support session ended",
