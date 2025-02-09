@@ -5,13 +5,15 @@ import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { escapeFormData } from "@/utils/function";
 import { socket } from "@/utils/socket";
+import { createClientSide } from "@/utils/supabase/client";
 import {
   chat_message_table,
   chat_session_table,
   user_table,
 } from "@prisma/client";
+import { RealtimeChannel } from "@supabase/supabase-js";
 import { Send } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Textarea } from "../ui/textarea";
@@ -30,6 +32,8 @@ export const ChatSupportPage = ({
   teamId,
 }: ChatSupportPageProps) => {
   const router = useRouter();
+  const pathname = usePathname();
+  const supabaseClient = createClientSide();
   const [messages, setMessages] = useState<chat_message_table[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
@@ -37,15 +41,52 @@ export const ChatSupportPage = ({
   const [isEnding, setIsEnding] = useState(false);
 
   useEffect(() => {
-    if (!socket) return;
+    const fetchSessions = async () => {
+      const { error } = await supabaseClient
+        .schema("chat_schema")
+        .from("chat_session_table")
+        .select("*")
+        .eq("chat_session_id", session.chat_session_id)
+        .limit(1)
+        .order("chat_session_date", { ascending: false });
 
-    const handleSessionAccepted = ({ sessionId }: { sessionId: string }) => {
-      console.log("Session accepted for:", sessionId);
-      setIsWaiting(false);
+      if (error) {
+        console.error("Error fetching sessions", error);
+      } else {
+      }
     };
 
-    socket.off("supportSessionAccepted");
-    socket.on("supportSessionAccepted", handleSessionAccepted);
+    fetchSessions();
+
+    const subscription: RealtimeChannel = supabaseClient
+      .channel("chat_sessions")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "chat_schema",
+          table: "chat_session_table",
+        },
+        (payload) => {
+          if (payload.eventType === "UPDATE") {
+            if (payload.new.chat_session_status === "SUPPORT ONGOING") {
+              setIsWaiting(false);
+            } else {
+              setIsWaiting(true);
+            }
+          }
+        }
+      )
+
+      .subscribe();
+
+    return () => {
+      supabaseClient.removeChannel(subscription);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!socket) return;
 
     socket.on("messages", (initialMessages: chat_message_table[]) => {
       setMessages(initialMessages);
@@ -71,7 +112,6 @@ export const ChatSupportPage = ({
 
     return () => {
       socket.off("messages");
-      socket.off("supportSessionAccepted", handleSessionAccepted);
       socket.off("joinRoom");
       socket.off("newMessage", handleNewMessage);
       socket.off("endSupport");
@@ -109,8 +149,6 @@ export const ChatSupportPage = ({
 
   useEffect(() => {
     const handleEndSupport = () => {
-      socket.emit("endSupport", session.chat_session_id, profile.user_username);
-
       const message = {
         chat_message_content: "Support session ended",
         chat_message_session_id: session.chat_session_id,
@@ -120,20 +158,23 @@ export const ChatSupportPage = ({
       };
 
       const data = escapeFormData(message);
-
       socket.emit("sendMessage", data);
     };
 
+    // Handle page unload
     window.addEventListener("beforeunload", handleEndSupport);
     window.addEventListener("pagehide", handleEndSupport);
 
+    // Trigger end support if leaving the chat page
+    if (pathname && pathname !== "/chat-support") {
+      handleEndSupport();
+    }
+
     return () => {
-      socket.off("endSupport");
       window.removeEventListener("beforeunload", handleEndSupport);
       window.removeEventListener("pagehide", handleEndSupport);
     };
-  }, [session.chat_session_id, teamMemberId, profile.user_username]);
-
+  }, [pathname, session.chat_session_id, teamMemberId, profile.user_username]);
   useEffect(() => {
     scrollToBottom();
   }, []);
