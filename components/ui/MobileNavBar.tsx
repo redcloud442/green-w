@@ -279,6 +279,7 @@ const MobileNavBar = () => {
           <DoorOpen className="w-7 h-7 text-black" />
         </Button>
       )}
+      {/* fix logout */}
 
       {pathname !== "/chat-support" && role !== ROLE.MEMBER && (
         <Button
