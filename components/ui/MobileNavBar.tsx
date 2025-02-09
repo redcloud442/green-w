@@ -269,7 +269,7 @@ const MobileNavBar = () => {
           ))}
         </ul>
       </nav>
-      {pathname !== "/chat-support" && (
+      {pathname !== "/chat-support" && role !== ROLE.MEMBER && (
         <Button
           className="fixed bottom-20 right-6 h-14 w-14 rounded-md  p-4 z-50  border-none shadow-lg hover:shadow-xl transition-transform transform hover:scale-110 dark:from-gray-800 dark:to-gray-700"
           variant="card"
