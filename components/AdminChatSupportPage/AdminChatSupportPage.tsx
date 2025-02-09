@@ -1,7 +1,6 @@
 "use client";
 
 import { getChatSupportSession } from "@/services/chat/Admin";
-import { socket } from "@/utils/socket";
 import { chat_session_table } from "@prisma/client";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { RealtimeChannel } from "@supabase/supabase-js";
@@ -87,8 +86,6 @@ export const AdminChatSupportPage = () => {
       const data = await getChatSupportSession(sessionId);
 
       if (data) {
-        socket.emit("acceptSupportSession", { sessionId });
-
         router.push(`/admin/chat-support/${sessionId}`);
       }
     } catch (e) {
