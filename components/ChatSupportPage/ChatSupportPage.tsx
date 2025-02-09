@@ -128,6 +128,7 @@ export const ChatSupportPage = ({
     window.addEventListener("pagehide", handleEndSupport);
 
     return () => {
+      socket.off("endSupport");
       window.removeEventListener("beforeunload", handleEndSupport);
       window.removeEventListener("pagehide", handleEndSupport);
     };
