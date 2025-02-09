@@ -40,7 +40,6 @@ export const ChatSupportPage = ({
     socket.on("supportSessionAccepted", ({ sessionId }) => {
       setIsWaiting(false);
     });
-
     socket.on("messages", (initialMessages: chat_message_table[]) => {
       setMessages(initialMessages);
       scrollToBottom();
