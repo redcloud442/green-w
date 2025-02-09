@@ -151,9 +151,9 @@ export const AdminChatSupportSessionPage = ({
               >
                 {message.chat_message_alliance_member_id !== teamMemberId && (
                   <Avatar>
-                    <AvatarImage src={profile.user_profile_picture ?? ""} />
+                    <AvatarImage src={""} />
                     <AvatarFallback>
-                      {profile.user_username.charAt(0).toUpperCase()}
+                      {message.chat_message_sender_user.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                 )}

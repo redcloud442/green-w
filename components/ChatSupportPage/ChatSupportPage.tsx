@@ -37,9 +37,15 @@ export const ChatSupportPage = ({
   const [isEnding, setIsEnding] = useState(false);
 
   useEffect(() => {
-    socket.on("supportSessionAccepted", ({ sessionId }) => {
+    if (!socket) return;
+
+    const handleSessionAccepted = ({ sessionId }: { sessionId: string }) => {
+      console.log("Session accepted for:", sessionId);
       setIsWaiting(false);
-    });
+    };
+
+    socket.off("supportSessionAccepted");
+    socket.on("supportSessionAccepted", handleSessionAccepted);
 
     socket.on("messages", (initialMessages: chat_message_table[]) => {
       setMessages(initialMessages);
@@ -65,7 +71,7 @@ export const ChatSupportPage = ({
 
     return () => {
       socket.off("messages");
-      socket.off("supportSessionAccepted");
+      socket.off("supportSessionAccepted", handleSessionAccepted);
       socket.off("joinRoom");
       socket.off("newMessage", handleNewMessage);
       socket.off("endSupport");
@@ -178,7 +184,9 @@ export const ChatSupportPage = ({
                     <Avatar>
                       <AvatarImage src={profile.user_profile_picture ?? ""} />
                       <AvatarFallback>
-                        {profile.user_username.charAt(0).toUpperCase()}
+                        {message.chat_message_sender_user
+                          .charAt(0)
+                          .toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                   )}
