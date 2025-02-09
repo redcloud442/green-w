@@ -38,7 +38,7 @@ const withdrawalFormSchema = z.object({
   amount: z
     .string()
     .min(2, "Minimum amount is required atleast 30 pesos")
-    .refine((amount) => Number(amount) >= 30, {
+    .refine((amount) => Number(amount.replace(/,/g, "")) >= 30, {
       message: "Amount must be at least 30 pesos",
     }),
   bank: z.string().min(1, "Please select a bank"),
@@ -367,7 +367,6 @@ const DashboardWithdrawalModalForm = ({
   //       });
   //     }
   //   }
-  // };
 
   return (
     <form
