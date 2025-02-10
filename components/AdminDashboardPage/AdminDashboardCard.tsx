@@ -1,5 +1,6 @@
 import { AdminDashboardDataByDate } from "@/utils/types";
 import {
+  CoinsIcon,
   CreditCard,
   Package,
   PhilippinePeso,
@@ -152,6 +153,17 @@ const AdminDashboardCard = ({ adminDashboardDataByDate }: Props) => {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
             }) ?? 0}
+          </>
+        }
+        description=""
+        descriptionClassName="text-sm text-gray-500"
+      />
+      <CardAmountAdmin
+        title="User Reinvested"
+        value={
+          <>
+            <CoinsIcon />
+            {adminDashboardDataByDate?.reinvestorsCount ?? 0}
           </>
         }
         description=""
