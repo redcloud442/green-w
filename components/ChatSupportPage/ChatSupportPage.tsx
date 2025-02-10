@@ -41,12 +41,12 @@ export const ChatSupportPage = ({
   const [isEnding, setIsEnding] = useState(false);
 
   useEffect(() => {
+    socket.emit("joinRoom", { roomId: session.chat_session_id });
+
     socket.on("messages", (initialMessages: chat_message_table[]) => {
       setMessages(initialMessages);
       scrollToBottom();
     });
-
-    socket.emit("joinRoom", { roomId: session.chat_session_id });
 
     const handleNewMessage = (message: chat_message_table) => {
       setMessages((prev) => [...prev, message]);
