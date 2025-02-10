@@ -4,7 +4,7 @@ import { io } from "socket.io-client";
 const socketUrl =
   process.env.NODE_ENV === "development"
     ? "http://localhost:8000"
-    : "https://loadbalancer.elevateglobal.app";
+    : "http://localhost:8000";
 
 export const socket = io(socketUrl, {
   withCredentials: true,
