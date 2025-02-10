@@ -157,6 +157,17 @@ const AdminDashboardCard = ({ adminDashboardDataByDate }: Props) => {
         description=""
         descriptionClassName="text-sm text-gray-500"
       />
+      <CardAmountAdmin
+        title="User Reinvested"
+        value={
+          <>
+            <CreditCard />
+            {adminDashboardDataByDate?.reinvestorsCount ?? 0}
+          </>
+        }
+        description=""
+        descriptionClassName="text-sm text-gray-500"
+      />
     </div>
   );
 };
