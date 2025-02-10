@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { escapeFormData } from "@/utils/function";
-import { socket } from "@/utils/socket";
+import { getSocket } from "@/utils/socket";
 import { createClientSide } from "@/utils/supabase/client";
 import {
   chat_message_table,
@@ -32,6 +32,7 @@ export const ChatSupportPage = ({
   teamId,
 }: ChatSupportPageProps) => {
   const router = useRouter();
+  const socket = getSocket();
   const pathname = usePathname();
   const supabaseClient = createClientSide();
   const [messages, setMessages] = useState<chat_message_table[]>([]);

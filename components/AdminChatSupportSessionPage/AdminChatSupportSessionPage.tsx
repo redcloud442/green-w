@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { socket } from "@/utils/socket";
+import { getSocket } from "@/utils/socket";
 import {
   chat_message_table,
   chat_session_table,
@@ -26,18 +26,19 @@ export const AdminChatSupportSessionPage = ({
   teamMemberId,
   profile,
 }: ChatSupportPageProps) => {
-  const socketWebsocket = socket;
+  const socket = getSocket();
+
   const [messages, setMessages] = useState<chat_message_table[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!profile) return;
-    socketWebsocket.emit("joinRoom", {
+    socket.emit("joinRoom", {
       roomId: session.chat_session_id,
     });
 
-    socketWebsocket.on("messages", (initialMessages: chat_message_table[]) => {
+    socket.on("messages", (initialMessages: chat_message_table[]) => {
       setMessages(initialMessages);
       scrollToBottom();
     });
@@ -47,13 +48,13 @@ export const AdminChatSupportSessionPage = ({
       scrollToBottom();
     };
 
-    socketWebsocket.on("newMessage", handleNewMessage);
+    socket.on("newMessage", handleNewMessage);
 
     return () => {
-      socketWebsocket.off("messages");
-      socketWebsocket.off("joinRoom");
-      socketWebsocket.off("supportSessionAccepted");
-      socketWebsocket.off("newMessage", handleNewMessage);
+      socket.off("messages");
+      socket.off("joinRoom");
+      socket.off("supportSessionAccepted");
+      socket.off("newMessage", handleNewMessage);
     };
   }, [session.chat_session_id, profile]);
 
@@ -75,7 +76,7 @@ export const AdminChatSupportSessionPage = ({
       chat_message_sender_user: profile.user_username,
     };
 
-    socketWebsocket.emit("sendMessage", message);
+    socket.emit("sendMessage", message);
     setNewMessage("");
     scrollToBottom();
   };
@@ -95,11 +96,7 @@ export const AdminChatSupportSessionPage = ({
 
   const handleEndSupport = () => {
     try {
-      socketWebsocket.emit(
-        "endSupport",
-        session.chat_session_id,
-        profile.user_username
-      );
+      socket.emit("endSupport", session.chat_session_id, profile.user_username);
 
       setMessages((prev) => [
         ...prev,
