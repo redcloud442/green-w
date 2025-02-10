@@ -41,10 +41,6 @@ export const ChatSupportPage = ({
   const [isEnding, setIsEnding] = useState(false);
 
   useEffect(() => {
-    if (!socket.connected) {
-      socket.connect();
-    }
-
     socket.on("messages", (initialMessages: chat_message_table[]) => {
       setMessages(initialMessages);
       scrollToBottom();
