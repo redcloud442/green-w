@@ -10,5 +10,6 @@ export const socket = io(socketUrl, {
   withCredentials: true,
   reconnectionDelayMax: 10000,
   transports: ["websocket"],
+  upgrade: true,
   path: "/socket.io/",
 });
