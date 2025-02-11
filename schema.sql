@@ -3178,6 +3178,52 @@ WITH CHECK (
     )
 );
 
+ALTER TABLE chat_schema.chat_session_table ENABLE ROW LEVEL SECURITY;
+
+
+DROP POLICY IF EXISTS "Allow READ for ADMIN users" ON chat_schema.chat_session_table;
+CREATE POLICY "Allow READ for ADMIN users" ON chat_schema.chat_session_table
+AS PERMISSIVE FOR SELECT
+TO authenticated
+
+USING (
+  EXISTS (
+    SELECT 1
+    FROM alliance_schema.alliance_member_table amt
+    WHERE amt.alliance_member_user_id = auth.uid()
+    AND amt.alliance_member_role IN ('ADMIN')
+  )
+);
+
+DROP POLICY IF EXISTS "Allow Insert for ADMIN users" ON chat_schema.chat_session_table;
+CREATE POLICY "Allow Insert for ADMIN users" ON chat_schema.chat_session_table
+AS PERMISSIVE FOR INSERT
+TO authenticated
+
+WITH CHECK (
+    EXISTS (
+        SELECT 1
+        FROM alliance_schema.alliance_member_table amt
+        WHERE amt.alliance_member_user_id = auth.uid()
+        AND amt.alliance_member_role IN ('ADMIN')
+    )
+);
+
+DROP POLICY IF EXISTS "Allow update for ADMIN users" ON chat_schema.chat_session_table;
+CREATE POLICY "Allow update for ADMIN users" ON chat_schema.chat_session_table
+AS PERMISSIVE FOR UPDATE
+TO authenticated
+USING (
+    EXISTS (
+        SELECT 1
+        FROM alliance_schema.alliance_member_table amt
+        WHERE amt.alliance_member_user_id = auth.uid()
+        AND amt.alliance_member_role IN ('ADMIN')
+    )
+);
+
+
+
 CREATE INDEX idx_alliance_top_up_request_member_id
 ON alliance_schema.alliance_top_up_request_table (alliance_top_up_request_member_id);
 
