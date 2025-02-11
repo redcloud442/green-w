@@ -169,6 +169,22 @@ const AdminDashboardCard = ({ adminDashboardDataByDate }: Props) => {
         description=""
         descriptionClassName="text-sm text-gray-500"
       />
+      <CardAmountAdmin
+        title="Amount Reinvested"
+        value={
+          <>
+            <PhilippinePeso />
+            {Number(
+              adminDashboardDataByDate?.totalReinvestmentAmount ?? 0
+            ).toLocaleString("en-US", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
+          </>
+        }
+        description=""
+        descriptionClassName="text-sm text-gray-500"
+      />
     </div>
   );
 };
