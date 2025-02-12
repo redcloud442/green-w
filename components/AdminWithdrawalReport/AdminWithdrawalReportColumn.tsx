@@ -18,10 +18,19 @@ export const AdminWithdrawalReportColumn =
           </Button>
         ),
         cell: ({ row }) => {
+          // Get the original date
+          const originalDate = new Date(row.original.interval_start);
+
+          // Add one day
+          const newDate = new Date(originalDate);
+          newDate.setDate(newDate.getDate() + 1);
+
+          // Format the new date as YYYY-MM-DD
+          const formattedDate = newDate.toISOString().split("T")[0];
+
           return (
-            <div className="flex items-center gap-2 text-wrap ">
-              {formatDay(row.original.interval_start)},{" "}
-              {formatDateToYYYYMMDD(row.original.interval_start)}
+            <div className="flex items-center gap-2 text-wrap">
+              {formatDay(originalDate)}, {formattedDate}
             </div>
           );
         },
