@@ -58,5 +58,16 @@ export const AdminUserReinvestedColumn =
           return <div>{row.original.user_username}</div>;
         },
       },
+      {
+        accessorKey: "user_first_name",
+        header: "Full Name",
+        cell: ({ row }) => {
+          return (
+            <div>
+              {row.original.user_first_name} {row.original.user_last_name}
+            </div>
+          );
+        },
+      },
     ];
   };

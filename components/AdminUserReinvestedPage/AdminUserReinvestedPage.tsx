@@ -61,8 +61,6 @@ const AdminUserReinvestedPage = ({ teamMemberProfile }: Props) => {
         skip: page,
       });
 
-      console.log(data);
-
       setReinvestedReportData(data.data);
       setTotalCount(data.totalCount);
     } catch (e) {
