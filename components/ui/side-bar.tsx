@@ -32,9 +32,11 @@ import {
   MonitorCheck,
   Package,
   PiggyBankIcon,
+  Receipt,
   Settings,
   Trophy,
   User2,
+  UserCheckIcon,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -116,8 +118,30 @@ const AppSidebar = ({ userData, teamMemberProfile }: Props) => {
     { title: "Admin Dashboard", url: "/admin", icon: Settings },
     { title: "Leaderboards", url: "/admin/leaderboards", icon: Trophy },
     { title: "Packages", url: "/admin/packages", icon: Package },
-    { title: "Manage Users", url: "/admin/users", icon: User2 },
-    { title: "Deposit History", url: "/admin/deposit", icon: HistoryIcon },
+    {
+      title: "Manage Users",
+      url: "/admin/users",
+      icon: User2,
+      subItems: [
+        {
+          icon: UserCheckIcon,
+          title: "User Reinvested",
+          url: "/admin/users/reinvested",
+        },
+      ],
+    },
+    {
+      title: "Deposit History",
+      url: "/admin/deposit",
+      icon: HistoryIcon,
+      subItems: [
+        {
+          icon: Receipt,
+          title: "Deposit Report",
+          url: "/admin/deposit/report",
+        },
+      ],
+    },
     {
       title: "Withdrawal History",
       url: "/admin/withdrawal",

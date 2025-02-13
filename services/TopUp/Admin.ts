@@ -1,4 +1,7 @@
-import { AdminTopUpRequestData } from "@/utils/types";
+import {
+  adminSalesTotalReportData,
+  AdminTopUpRequestData,
+} from "@/utils/types";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 export const getAdminTopUpRequest = async (params: {
@@ -61,4 +64,25 @@ export const updateTopUpStatus = async (
   }
 
   return response as unknown as { success: boolean; balance: number };
+};
+
+export const getAdminTopUpTotalReport = async (params: {
+  dateFilter: {
+    month: string;
+    year: string;
+  };
+}) => {
+  const response = await fetch("/api/v1/deposit/report", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(params),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) throw new Error("Failed to fetch withdrawal total report");
+
+  return result as adminSalesTotalReportData;
 };

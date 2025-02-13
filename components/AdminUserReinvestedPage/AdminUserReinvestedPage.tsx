@@ -4,89 +4,91 @@ import { Controller, useForm } from "react-hook-form";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 
 import { cn } from "@/lib/utils";
-import { getAdminWithdrawalReport } from "@/services/Withdrawal/Admin";
-import { format } from "date-fns"; // If you're using date-fns
+import { logError } from "@/services/Error/ErrorLogs";
+import { getAdminUserReinvestedReport } from "@/services/User/Admin";
+import { adminUserReinvestedReportData } from "@/utils/types";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { Calendar } from "../ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import TableLoading from "../ui/tableLoading";
-import AdminWithdrawalReportTable from "./AdminWithdrawalReportTable";
-
+import AdminUserReinvestedTable from "./AdminUserReinvestedTable";
 type Props = {
   teamMemberProfile: alliance_member_table;
 };
 
 type FormData = {
   dateFilter: {
-    startDate: Date | null;
-    endDate: Date | null;
+    start: Date | null;
+    end: Date | null;
   };
 };
 
-const AdminWithdrawalReport = ({ teamMemberProfile }: Props) => {
+const AdminUserReinvestedPage = ({ teamMemberProfile }: Props) => {
+  const supabaseClient = createClientComponentClient();
   const [isFetchingList, setIsFetchingList] = useState(false);
-  const [withdrawalReportData, setWithdrawalReportData] = useState<{
-    total_amount: number;
-    total_request: number;
-  }>({
-    total_amount: 0,
-    total_request: 0,
-  });
+  const [page, setPage] = useState(1);
+  const [reinvestedReportData, setReinvestedReportData] = useState<
+    adminUserReinvestedReportData[]
+  >([]);
+  const [totalCount, setTotalCount] = useState(0);
 
-  const { control, handleSubmit, setValue, watch } = useForm<FormData>({
-    defaultValues: {
-      dateFilter: {
-        startDate: null,
-        endDate: null,
-      },
-    },
-  });
-
-  const dateFilter = watch("dateFilter");
-
-  const onSubmit = async (data: FormData) => {
-    try {
-      setIsFetchingList(true);
-      const { startDate, endDate } = data.dateFilter;
-
-      const { total_amount, total_request } = await getAdminWithdrawalReport({
+  const { control, handleSubmit, getValues, setValue, watch } =
+    useForm<FormData>({
+      defaultValues: {
         dateFilter: {
-          startDate: startDate?.toISOString() || "",
-          endDate: endDate?.toISOString() || "",
+          start: null,
+          end: null,
         },
+      },
+    });
+
+  const handleFetchTotalWithdrawalReport = async () => {
+    try {
+      const { dateFilter } = getValues();
+
+      setIsFetchingList(true);
+
+      const data = await getAdminUserReinvestedReport({
+        dateFilter: {
+          start: dateFilter.start ?? null,
+          end: dateFilter.end ?? null,
+        },
+        take: 10,
+        skip: page,
       });
 
-      setWithdrawalReportData({
-        total_amount,
-        total_request,
-      });
-    } catch (error) {
-      setIsFetchingList(false);
+      console.log(data);
+
+      setReinvestedReportData(data.data);
+      setTotalCount(data.totalCount);
+    } catch (e) {
+      if (e instanceof Error) {
+        await logError(supabaseClient, {
+          errorMessage: e.message,
+          stackTrace: e.stack,
+          stackPath: "components/AdminWithdrawalReportTable",
+        });
+      }
     } finally {
       setIsFetchingList(false);
     }
   };
 
   useEffect(() => {
-    const handleFetchTotalWithdrawalReport = async () => {
-      await onSubmit({
-        dateFilter: {
-          startDate: null,
-          endDate: null,
-        },
-      });
-    };
-
     handleFetchTotalWithdrawalReport();
   }, []);
+
+  const dateFilter = watch("dateFilter");
 
   return (
     <div className="mx-auto md:p-10">
       <div>
         <header className="mb-4">
-          <h1 className="Title">Withdrawal Report Page</h1>
+          <h1 className="Title">User Reinvested Page</h1>
         </header>
 
         {isFetchingList && <TableLoading />}
@@ -96,24 +98,24 @@ const AdminWithdrawalReport = ({ teamMemberProfile }: Props) => {
         <section className="rounded-lg flex flex-col gap-4">
           <Card className="w-full rounded-sm ">
             <CardHeader>
-              <CardTitle>Withdrawal Report</CardTitle>
+              <CardTitle>User Reinvested</CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit(onSubmit)}>
+              <form onSubmit={handleSubmit(handleFetchTotalWithdrawalReport)}>
                 <div className="flex flex-col sm:flex-row w-full items-end gap-4 flex-wrap">
-                  {/* Date Picker */}
+                  {/* Month Selection */}
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
                         variant={"card"}
                         className={cn(
                           "w-full rounded-md md:max-w-xl: justify-start text-left font-normal flex-1",
-                          !dateFilter.startDate && "text-muted-foreground"
+                          !dateFilter.start && "text-muted-foreground"
                         )}
                       >
                         <CalendarIcon />
-                        {dateFilter.startDate ? (
-                          format(dateFilter.startDate, "PPP")
+                        {dateFilter.start ? (
+                          format(dateFilter.start, "PPP")
                         ) : (
                           <span>Start Date</span>
                         )}
@@ -122,19 +124,17 @@ const AdminWithdrawalReport = ({ teamMemberProfile }: Props) => {
                     <PopoverContent className="w-auto p-0" align="start">
                       <Controller
                         control={control}
-                        name="dateFilter.startDate"
+                        name="dateFilter.start"
                         render={({ field }) => (
                           <Calendar
                             mode="single"
                             selected={
-                              dateFilter.startDate
-                                ? dateFilter.startDate
-                                : undefined
+                              dateFilter.start ? dateFilter.start : undefined
                             }
                             onSelect={(newDate) => {
                               field.onChange(newDate); // Update the form field value
                               setValue(
-                                "dateFilter.startDate",
+                                "dateFilter.start",
                                 newDate ? newDate : null
                               ); // Manually set the value of the date field
                             }}
@@ -151,13 +151,13 @@ const AdminWithdrawalReport = ({ teamMemberProfile }: Props) => {
                         variant={"card"}
                         className={cn(
                           "w-full rounded-md md:max-w-sm: justify-start text-left font-normal flex-1",
-                          !dateFilter.endDate && "text-muted-foreground"
+                          !dateFilter.end && "text-muted-foreground"
                         )}
                       >
                         <CalendarIcon />
 
-                        {dateFilter.endDate ? (
-                          format(dateFilter.endDate, "PPP")
+                        {dateFilter.end ? (
+                          format(dateFilter.end, "PPP")
                         ) : (
                           <span>End Date</span>
                         )}
@@ -167,19 +167,17 @@ const AdminWithdrawalReport = ({ teamMemberProfile }: Props) => {
                     <PopoverContent className="w-auto p-0" align="start">
                       <Controller
                         control={control}
-                        name="dateFilter.endDate"
+                        name="dateFilter.end"
                         render={({ field }) => (
                           <Calendar
                             mode="single"
                             selected={
-                              dateFilter.endDate
-                                ? dateFilter.endDate
-                                : undefined
+                              dateFilter.end ? dateFilter.end : undefined
                             }
                             onSelect={(newDate) => {
                               field.onChange(newDate); // Update the form field value
                               setValue(
-                                "dateFilter.endDate",
+                                "dateFilter.end",
                                 newDate ? newDate : null
                               ); // Manually set the value of the date field
                             }}
@@ -190,10 +188,11 @@ const AdminWithdrawalReport = ({ teamMemberProfile }: Props) => {
                     </PopoverContent>
                   </Popover>
 
+                  {/* Submit Button */}
                   <Button
                     type="submit"
-                    className=" w-full md:w-auto rounded-md"
                     variant={"card"}
+                    className="w-full md:w-auto rounded-md"
                   >
                     Submit
                   </Button>
@@ -201,9 +200,11 @@ const AdminWithdrawalReport = ({ teamMemberProfile }: Props) => {
               </form>
             </CardContent>
           </Card>
-          <AdminWithdrawalReportTable
-            withdrawalReportData={withdrawalReportData}
-            teamMemberProfile={teamMemberProfile}
+          <AdminUserReinvestedTable
+            setActivePage={setPage}
+            activePage={page}
+            totalCount={totalCount}
+            reinvestedReportData={reinvestedReportData}
           />
         </section>
       </div>
@@ -211,4 +212,4 @@ const AdminWithdrawalReport = ({ teamMemberProfile }: Props) => {
   );
 };
 
-export default AdminWithdrawalReport;
+export default AdminUserReinvestedPage;
