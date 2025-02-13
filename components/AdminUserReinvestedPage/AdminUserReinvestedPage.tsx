@@ -68,7 +68,7 @@ const AdminUserReinvestedPage = ({ teamMemberProfile }: Props) => {
         await logError(supabaseClient, {
           errorMessage: e.message,
           stackTrace: e.stack,
-          stackPath: "components/AdminWithdrawalReportTable",
+          stackPath: "components/AdminUserReinvestedPage",
         });
       }
     } finally {
@@ -78,7 +78,7 @@ const AdminUserReinvestedPage = ({ teamMemberProfile }: Props) => {
 
   useEffect(() => {
     handleFetchTotalWithdrawalReport();
-  }, []);
+  }, [page]);
 
   const dateFilter = watch("dateFilter");
 
