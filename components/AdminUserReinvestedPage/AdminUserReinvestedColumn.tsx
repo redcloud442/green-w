@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { formatDateToYYYYMMDD, formatDay } from "@/utils/function";
+import { formatDateToYYYYMMDD, formatDay, formatTime } from "@/utils/function";
 import { adminUserReinvestedReportData } from "@/utils/types";
 import { ColumnDef } from "@tanstack/react-table";
 
@@ -24,6 +24,7 @@ export const AdminUserReinvestedColumn =
               {formatDateToYYYYMMDD(
                 row.original.package_member_connection_created
               )}
+              , {formatTime(row.original.package_member_connection_created)}
             </div>
           );
         },
