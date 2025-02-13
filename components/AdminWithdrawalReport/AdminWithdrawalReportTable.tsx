@@ -193,7 +193,7 @@ const AdminWithdrawalReportTable = ({
               <SelectItem value="30">30</SelectItem>
             </SelectContent>
           </Select>
-          <Button className="flex-1" variant={"card"} type="submit">
+          <Button className="flex-1 rounded-md" variant={"card"} type="submit">
             Submit
           </Button>
         </form>

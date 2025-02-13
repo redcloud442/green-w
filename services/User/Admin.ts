@@ -1,5 +1,9 @@
 import { escapeFormData } from "@/utils/function";
-import { UserLog, UserRequestdata } from "@/utils/types";
+import {
+  adminUserReinvestedReportData,
+  UserLog,
+  UserRequestdata,
+} from "@/utils/types";
 import { user_table } from "@prisma/client";
 import { SupabaseClient } from "@supabase/supabase-js";
 
@@ -139,4 +143,30 @@ export const handleUpdateUserRestriction = async (params: {
   }
 
   return response;
+};
+
+export const getAdminUserReinvestedReport = async (params: {
+  dateFilter: {
+    start: Date | null;
+    end: Date | null;
+  };
+  take: number;
+  skip: number;
+}) => {
+  const response = await fetch("/api/v1/user/list/reinvested", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(params),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) throw new Error("Failed to fetch withdrawal total report");
+
+  return result as {
+    data: adminUserReinvestedReportData[];
+    totalCount: number;
+  };
 };
