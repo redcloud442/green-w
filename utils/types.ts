@@ -184,4 +184,6 @@ export type adminUserReinvestedReportData = {
   user_username: string;
   user_id: string;
   user_profile_picture: string;
+  user_first_name: string;
+  user_last_name: string;
 };
