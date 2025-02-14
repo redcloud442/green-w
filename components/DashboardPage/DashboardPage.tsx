@@ -176,9 +176,10 @@ const DashboardPage = ({
         </div>
 
         {/* Image */}
-        {totalEarnings?.rank && (
-          <div className="relative">
-            {/* Background Image */}
+
+        <div className="relative ">
+          {/* Background Image */}
+          {totalEarnings?.rank && (
             <div className="relative flex flex-col items-center justify-center">
               <Image
                 src={`/ranking/${totalEarnings?.rank}.png`}
@@ -189,7 +190,7 @@ const DashboardPage = ({
                 className="w-20 h-20 object-contain"
               />
               <p
-                className={` text-[10px] sm:text-[12px] font-bold absolute bottom-1 `}
+                className="text-[8px] sm:text-[10px] font-bold absolute bottom-1"
                 style={{
                   textShadow: `1px 1px 0px white, -1px -1px 0px white, 1px -1px 0px white, -1px 1px 0px white`,
                   color: `${RANK_COLORS[totalEarnings?.rank as keyof typeof RANK_COLORS]}`,
@@ -198,38 +199,219 @@ const DashboardPage = ({
                 {totalEarnings?.rank?.toUpperCase() || ""}
               </p>
             </div>
-
-            {/* Overlay Content */}
-            <div className="absolute left-10 sm:left-14 bottom-10 inset-0 flex items-center justify-center">
-              <Popover>
-                <PopoverTrigger>
-                  <Info className="w-3 h-3 sm:w-5 sm:h-5 text-white bg-violet-600 rounded-full cursor-pointer" />
-                </PopoverTrigger>
-                <PopoverContent>
-                  By Referrals
-                  <br />
-                  Iron - 3 referrals
-                  <br />
-                  Bronze - 6 referrals
-                  <br />
-                  Silver - 10 referrals
-                  <br />
-                  Gold - 20 referrals
-                  <br />
-                  Platinum - 50 referrals
-                  <br />
-                  Emerald - 100 referrals
-                  <br />
-                  Ruby - 150 referrals
-                  <br />
-                  Sapphire - 200 referrals
-                  <br />
-                  Diamond - 500 referrals
-                </PopoverContent>
-              </Popover>
-            </div>
+          )}
+          <div
+            className={`${totalEarnings?.rank ? "absolute left-10 sm:left-14 bottom-10 inset-0 flex items-center justify-center" : "block"}`}
+          >
+            <Popover>
+              <PopoverTrigger>
+                <Info className="w-3 h-3 sm:w-5 sm:h-5 text-white bg-violet-600 rounded-full cursor-pointer" />
+              </PopoverTrigger>
+              <PopoverContent className="text-[10px] sm:text-[11px] p-2">
+                <p className="font-bold text-center mb-2">By Referrals</p>
+                <div className="overflow-x-auto">
+                  <table className="w-full border border-gray-300 text-left">
+                    <thead>
+                      <tr className="bg-gray-200">
+                        <th className="border border-gray-300 px-2 py-1">
+                          Rank
+                        </th>
+                        <th className="border border-gray-300 px-2 py-1">
+                          Requirement
+                        </th>
+                        <th className="border border-gray-300 px-2 py-1">
+                          Badge
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="border border-gray-300 px-2 py-1 font-semibold">
+                          Iron
+                        </td>
+                        <td className="border text-justify border-gray-300 px-2 py-1">
+                          Makakakuha ka ng badge sa pamamagitan ng pag-refer ng
+                          hindi bababa sa 3 tao
+                        </td>
+                        <td className="border border-gray-300 px-2 py-1">
+                          {" "}
+                          <Image
+                            src={`/ranking/iron.png`}
+                            alt="ranking"
+                            width={800}
+                            height={800}
+                            quality={100}
+                            className="w-12 h-12 object-cover"
+                          />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="border border-gray-300 px-2 py-1 font-semibold">
+                          Bronze
+                        </td>
+                        <td className="border text-justify border-gray-300 px-2 py-1">
+                          Makakakuha ka ng badge sa pamamagitan ng pag-refer ng
+                          hindi bababa sa 7 tao
+                        </td>
+                        <td className="border border-gray-300 px-2 py-1">
+                          {" "}
+                          <Image
+                            src={`/ranking/bronze.png`}
+                            alt="ranking"
+                            width={800}
+                            height={800}
+                            quality={100}
+                            className="w-12 h-12 object-cover"
+                          />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="border border-gray-300 px-2 py-1 font-semibold">
+                          Silver
+                        </td>
+                        <td className="border text-justify border-gray-300 px-2 py-1">
+                          Makakakuha ka ng badge sa pamamagitan ng pag-refer ng
+                          hindi bababa sa 10 tao
+                        </td>
+                        <td className="border border-gray-300 px-2 py-1">
+                          {" "}
+                          <Image
+                            src={`/ranking/silver.png`}
+                            alt="ranking"
+                            width={800}
+                            height={800}
+                            quality={100}
+                            className="w-12 h-12 object-cover"
+                          />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="border border-gray-300 px-2 py-1 font-semibold">
+                          Gold
+                        </td>
+                        <td className="border text-justify border-gray-300 px-2 py-1">
+                          Makakakuha ka ng badge sa pamamagitan ng pag-refer ng
+                          hindi bababa sa 20 tao
+                        </td>
+                        <td className="border border-gray-300 px-2 py-1">
+                          {" "}
+                          <Image
+                            src={`/ranking/gold.png`}
+                            alt="ranking"
+                            width={800}
+                            height={800}
+                            quality={100}
+                            className="w-12 h-12 object-cover"
+                          />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="border border-gray-300 px-2 py-1 font-semibold">
+                          Platinum
+                        </td>
+                        <td className="border  text-justify border-gray-300 px-2 py-1">
+                          Makakakuha ka ng badge sa pamamagitan ng pag-refer ng
+                          hindi bababa sa 50 tao
+                        </td>
+                        <td className="border border-gray-300 px-2 py-1">
+                          {" "}
+                          <Image
+                            src={`/ranking/platinum.png`}
+                            alt="ranking"
+                            width={800}
+                            height={800}
+                            quality={100}
+                            className="w-12 h-12 object-cover"
+                          />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="border text-justify border-gray-300 px-2 py-1 font-semibold">
+                          Emerald
+                        </td>
+                        <td className="border border-gray-300 px-2 py-1">
+                          Makakakuha ka ng badge sa pamamagitan ng pag-refer ng
+                          hindi bababa sa 100 tao
+                        </td>
+                        <td className="border border-gray-300 px-2 py-1">
+                          {" "}
+                          <Image
+                            src={`/ranking/emerald.png`}
+                            alt="ranking"
+                            width={800}
+                            height={800}
+                            quality={100}
+                            className="w-12 h-12 object-cover"
+                          />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="border border-gray-300 px-2 py-1 font-semibold">
+                          Ruby
+                        </td>
+                        <td className="border text-justify border-gray-300 px-2 py-1">
+                          Makakakuha ka ng badge sa pamamagitan ng pag-refer ng
+                          hindi bababa sa 150 tao
+                        </td>
+                        <td className="border border-gray-300 px-2 py-1">
+                          {" "}
+                          <Image
+                            src={`/ranking/ruby.png`}
+                            alt="ranking"
+                            width={800}
+                            height={800}
+                            quality={100}
+                            className="w-12 h-12 object-cover"
+                          />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="border border-gray-300 px-2 py-1 font-semibold">
+                          Sapphire
+                        </td>
+                        <td className="border text-justify border-gray-300 px-2 py-1">
+                          Makakakuha ka ng badge sa pamamagitan ng pag-refer ng
+                          hindi bababa sa 200 tao
+                        </td>
+                        <td className="border border-gray-300 px-2 py-1">
+                          {" "}
+                          <Image
+                            src={`/ranking/sapphire.png`}
+                            alt="ranking"
+                            width={800}
+                            height={800}
+                            quality={100}
+                            className="w-12 h-12 object-cover"
+                          />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="border border-gray-300 px-2 py-1 font-semibold">
+                          Diamond
+                        </td>
+                        <td className="border text-justify border-gray-300 px-2 py-1">
+                          Makakakuha ka ng badge sa pamamagitan ng pag-refer ng
+                          hindi bababa sa 500 tao
+                        </td>
+                        <td className="border border-gray-300 px-2 py-1">
+                          {" "}
+                          <Image
+                            src={`/ranking/diamond.png`}
+                            alt="ranking"
+                            width={800}
+                            height={800}
+                            quality={100}
+                            className="w-12 h-12  object-cover"
+                          />
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
-        )}
+        </div>
       </div>
       <NewlyRegisteredModal isActive={isActive} setOpen={setOpen} />
       <div
