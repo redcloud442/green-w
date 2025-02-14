@@ -1,7 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
-import { ensureValidSession } from "../serversideProtection";
 
 export async function updateSession(request: NextRequest) {
   const cookieStore = await cookies();
@@ -13,6 +12,10 @@ export async function updateSession(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith("/api/v1/auth/register")) {
     return NextResponse.next();
   }
+
+  const supabaseResponse = NextResponse.next({
+    request,
+  });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -50,13 +53,6 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   // Validate the session
-  const result = await ensureValidSession();
-
-  if (!result && user) {
-    const response = NextResponse.redirect(new URL("/login", request.url));
-    response.headers.set("x-session-checked", "true");
-    return addSecurityHeaders(response);
-  }
 
   // Define public and private routes
   const publicRoutes = [
@@ -105,9 +101,8 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Set session validation header
-  const response = NextResponse.next();
-  response.headers.set("x-session-checked", "true");
-  return addSecurityHeaders(response);
+  supabaseResponse.headers.set("x-session-checked", "true");
+  return addSecurityHeaders(supabaseResponse);
 }
 
 function addSecurityHeaders(response: NextResponse) {
