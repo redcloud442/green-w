@@ -31,6 +31,7 @@ import { Skeleton } from "../ui/skeleton";
 import DashboardDepositModalDeposit from "./DashboardDepositRequest/DashboardDepositModal/DashboardDepositModalDeposit";
 import DashboardDepositModalPackages from "./DashboardDepositRequest/DashboardDepositModal/DashboardDepositPackagesModal";
 import DashboardGenerateQrCode from "./DashboardDepositRequest/DashboardDepositModal/DashboardGenerateQrCode";
+import DashboardMissionModal from "./DashboardMissionModal/DashboardMissionModal";
 import DashboardPackages from "./DashboardPackages";
 import DashboardWithdrawModalWithdraw from "./DashboardWithdrawRequest/DashboardWithdrawModal/DashboardWithdrawModalWithdraw";
 import NewlyRegisteredModal from "./NewlyRegisteredModal/NewlyRegisteredModal";
@@ -646,6 +647,11 @@ const DashboardPage = ({
               earnings={earnings}
               profile={profile}
             />
+          </div>
+
+          {/* Mission Modal */}
+          <div className="flex-shrink-0 relative ">
+            <DashboardMissionModal />
           </div>
 
           {/* Packages */}
