@@ -180,7 +180,7 @@ const DashboardPage = ({
         <div className="relative ">
           {/* Background Image */}
           <div
-            className={`${totalEarnings?.rank ? "absolute right-10 sm:right-14 bottom-10 inset-0 flex items-center justify-center" : "block mr-8"}`}
+            className={`${totalEarnings?.rank ? "absolute right-10 sm:right-14 bottom-10 inset-0 flex items-center justify-center z-50" : "block mr-8 z-50"}`}
           >
             <Popover>
               <PopoverTrigger>
