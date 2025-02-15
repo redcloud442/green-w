@@ -11,58 +11,31 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { handleGetMission } from "@/services/mission/Member";
+import { MissionData } from "@/utils/types";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-
-type MissionTask = {
-  task_id: string;
-  name: string;
-  target: number;
-  progress: number;
-};
 
 type Props = {
   className?: string;
 };
 
-const mission1Tasks: MissionTask[] = [
-  {
-    task_id: "1",
-    name: "Mag-refer ng 3 tao upang sumali sa Elevate at mag-avail ng package",
-    target: 3,
-    progress: 2,
-  },
-  {
-    task_id: "2",
-    name: "Mag-avail ng package na may minimum na 300 pesos sa iyong account",
-    target: 1,
-    progress: 1,
-  },
-  { task_id: "3", name: "Dapat makuha ang Iron Badge", target: 1, progress: 0 },
-  {
-    task_id: "4",
-    name: "Mag-withdraw mula sa Package, Referral, o Network Income",
-    target: 1,
-    progress: 1,
-  },
-];
-
 const DashboardMissionModal = ({ className }: Props) => {
   const [open, setOpen] = useState(false);
-
-  const isMissionCompleted = mission1Tasks.every(
-    (task) => task.progress >= task.target
-  );
+  const [mission, setMission] = useState<MissionData | null>(null);
 
   useEffect(() => {
     const checkMissionCompletion = async () => {
       try {
+        const mission = await handleGetMission();
+
+        setMission(mission);
       } catch (error) {
         console.error("Error checking mission completion:", error);
       }
     };
     checkMissionCompletion();
-  }, []);
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -80,7 +53,7 @@ const DashboardMissionModal = ({ className }: Props) => {
         <ScrollArea className="h-[500px] sm:h-full p-4">
           <DialogHeader className="text-center">
             <DialogTitle className="text-xl sm:text-2xl font-bold">
-              Mission 1: Ang Simula ng Pag-Asenso
+              {mission?.mission_name}
             </DialogTitle>
             <Separator className="my-2" />
             <DialogDescription className="text-center text-sm text-gray-600">
@@ -90,12 +63,17 @@ const DashboardMissionModal = ({ className }: Props) => {
           </DialogHeader>
 
           <div className="space-y-4 mt-4">
-            {mission1Tasks.map((task) => (
+            {mission?.tasks.map((task) => (
               <div key={task.task_id} className="space-y-2">
-                <p className="text-sm font-semibold">{task.name}</p>
-                <Progress value={(task.progress / task.target) * 100} />
+                <Separator className="bg-gray-300" />
+                <p className="text-sm font-semibold">{task.task_name}</p>
+
+                <Progress
+                  className="p-2 rounded-sm bg-gradient-to-t"
+                  value={(task.progress / task.progress) * 100}
+                />
                 <p className="text-xs text-gray-500">
-                  {task.progress}/{task.target} completed
+                  {task.progress}/{task.task_target} completed
                 </p>
               </div>
             ))}
@@ -103,13 +81,16 @@ const DashboardMissionModal = ({ className }: Props) => {
 
           <div className="mt-6 text-center">
             <p className="text-lg font-bold">
-              🎁 Reward: 50 Pesos Peak Package
+              Reward: {mission?.reward} Pesos Peak Package
             </p>
           </div>
 
           <DialogFooter className="mt-6">
-            <Button disabled={!isMissionCompleted} className="w-full">
-              {isMissionCompleted
+            <Button
+              disabled={!mission?.is_mission_completed}
+              className="w-full"
+            >
+              {mission?.is_mission_completed
                 ? "Claim Reward"
                 : "Complete All Tasks to Claim"}
             </Button>

@@ -187,3 +187,21 @@ export type adminUserReinvestedReportData = {
   user_first_name: string;
   user_last_name: string;
 };
+
+export type MissionTask = {
+  task_id: string;
+  task_name: string;
+  task_target: string;
+  task_type: string;
+  progress: number;
+  is_completed: boolean;
+};
+
+export type MissionData = {
+  mission_id: string;
+  mission_name: string;
+  mission_order: string;
+  reward: number;
+  tasks: MissionTask[];
+  is_mission_completed: boolean;
+};
