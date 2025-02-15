@@ -9,8 +9,9 @@ import { createClientSide } from "@/utils/supabase/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
+import Turnstile, { BoundTurnstileObject } from "react-turnstile";
 import { z } from "zod";
 import { Card } from "../ui/card";
 import { Label } from "../ui/label";
@@ -46,9 +47,18 @@ const LoginPage = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captcha = useRef<BoundTurnstileObject>(null);
 
   const handleSignIn = async (data: LoginFormValues) => {
     try {
+      if (!captchaToken) {
+        return toast({
+          title: "Please wait",
+          description: "Captcha is required.",
+          variant: "destructive",
+        });
+      }
       setIsLoading(true);
       const sanitizedData = escapeFormData(data);
 
@@ -57,7 +67,12 @@ const LoginPage = () => {
       await loginValidation(supabase, {
         userName,
         password,
+        captchaToken,
       });
+
+      if (captcha.current) {
+        captcha.current.reset();
+      }
 
       toast({
         title: "Logging in to Elevate",
@@ -116,6 +131,16 @@ const LoginPage = () => {
                 {errors.password.message}
               </p>
             )}
+          </div>
+
+          <div className="w-full flex flex-1 justify-center">
+            <Turnstile
+              size="flexible"
+              sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY || ""}
+              onVerify={(token) => {
+                setCaptchaToken(token);
+              }}
+            />
           </div>
 
           <Button

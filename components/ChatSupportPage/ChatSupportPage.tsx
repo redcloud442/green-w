@@ -58,6 +58,7 @@ export const ChatSupportPage = ({
 
     return () => {
       socket.off("messages");
+      socket.off("joinRoom");
       socket.off("newMessage", handleNewMessage);
     };
   }, [session.chat_session_id]);
