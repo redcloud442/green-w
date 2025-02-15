@@ -179,33 +179,12 @@ const DashboardPage = ({
 
         <div className="relative ">
           {/* Background Image */}
-          {totalEarnings?.rank && (
-            <div className="relative flex flex-col items-center justify-center">
-              <Image
-                src={`/ranking/${totalEarnings?.rank}.png`}
-                alt="ranking"
-                width={800}
-                height={800}
-                quality={100}
-                className="w-20 h-20 object-contain"
-              />
-              <p
-                className="text-[8px] sm:text-[10px] font-bold absolute bottom-1"
-                style={{
-                  textShadow: `1px 1px 0px white, -1px -1px 0px white, 1px -1px 0px white, -1px 1px 0px white`,
-                  color: `${RANK_COLORS[totalEarnings?.rank as keyof typeof RANK_COLORS]}`,
-                }}
-              >
-                {totalEarnings?.rank?.toUpperCase() || ""}
-              </p>
-            </div>
-          )}
           <div
-            className={`${totalEarnings?.rank ? "absolute left-10 sm:left-14 bottom-10 inset-0 flex items-center justify-center" : "block"}`}
+            className={`${totalEarnings?.rank ? "absolute right-10 sm:right-14 bottom-10 inset-0 flex items-center justify-center" : "block mr-8"}`}
           >
             <Popover>
               <PopoverTrigger>
-                <Info className="w-3 h-3 sm:w-5 sm:h-5 text-white bg-violet-600 rounded-full cursor-pointer" />
+                <Info className="w-5 h-5 sm:w-5 sm:h-5 text-white bg-violet-600 rounded-full cursor-pointer" />
               </PopoverTrigger>
               <PopoverContent className="text-[10px] sm:text-[11px] p-2">
                 <p className="font-bold text-center mb-2">By Referrals</p>
@@ -411,6 +390,27 @@ const DashboardPage = ({
               </PopoverContent>
             </Popover>
           </div>
+          {totalEarnings?.rank && (
+            <div className="relative flex flex-col items-center justify-center">
+              <Image
+                src={`/ranking/${totalEarnings?.rank}.png`}
+                alt="ranking"
+                width={800}
+                height={800}
+                quality={100}
+                className="w-20 h-20 object-contain"
+              />
+              <p
+                className="text-[8px] sm:text-[10px] font-bold absolute bottom-1"
+                style={{
+                  textShadow: `1px 1px 0px white, -1px -1px 0px white, 1px -1px 0px white, -1px 1px 0px white`,
+                  color: `${RANK_COLORS[totalEarnings?.rank as keyof typeof RANK_COLORS]}`,
+                }}
+              >
+                {totalEarnings?.rank?.toUpperCase() || ""}
+              </p>
+            </div>
+          )}
         </div>
       </div>
       <NewlyRegisteredModal isActive={isActive} setOpen={setOpen} />
