@@ -107,14 +107,13 @@ export const TopUpColumn = (
           merchantBalance: merchantBalance,
         };
       });
+      setIsOpenModal({ open: false, requestId: "", status: "", amount: 0 });
+      reset();
       toast({
         title: `Status Update`,
         description: `${status} Request Successfully`,
         variant: "success",
       });
-
-      setIsOpenModal({ open: false, requestId: "", status: "", amount: 0 });
-      reset();
     } catch (e) {
       if (e instanceof Error) {
         await logError(supabaseClient, {

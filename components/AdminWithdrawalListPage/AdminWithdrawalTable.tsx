@@ -1,7 +1,6 @@
 "use client";
 
 import { logError } from "@/services/Error/ErrorLogs";
-import { getUserOptions } from "@/services/Options/Options";
 import { getAdminWithdrawalRequest } from "@/services/Withdrawal/Admin";
 import { escapeFormData } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
@@ -250,14 +249,6 @@ const AdminWithdrawalHistoryTable = ({
     }
   };
 
-  const {
-    columns,
-    isOpenModal,
-    isLoading,
-    setIsOpenModal,
-    handleUpdateStatus,
-  } = AdminWithdrawalHistoryColumn(fetchRequest, profile, setRequestData);
-
   const { register, handleSubmit, watch, getValues, control, reset, setValue } =
     useForm<FilterFormValues>({
       defaultValues: {
@@ -271,6 +262,14 @@ const AdminWithdrawalHistoryTable = ({
         rejectNote: "",
       },
     });
+
+  const {
+    columns,
+    isOpenModal,
+    isLoading,
+    setIsOpenModal,
+    handleUpdateStatus,
+  } = AdminWithdrawalHistoryColumn(reset, profile, setRequestData);
 
   const status = watch("statusFilter") as "PENDING" | "APPROVED" | "REJECTED";
 
@@ -291,41 +290,6 @@ const AdminWithdrawalHistoryTable = ({
       rowSelection,
     },
   });
-
-  useEffect(() => {
-    const fetchOptions = async () => {
-      try {
-        const pageLimit = 500;
-
-        let currentUserPage = 1;
-
-        let allUserOptions: user_table[] = [];
-
-        while (true) {
-          const userData = await getUserOptions({
-            page: currentUserPage,
-            limit: pageLimit,
-          });
-
-          if (!userData?.length) {
-            break;
-          }
-
-          allUserOptions = [...allUserOptions, ...userData];
-
-          if (userData.length < pageLimit) {
-            break;
-          }
-
-          currentUserPage += 1;
-        }
-
-        setUserOptions(allUserOptions);
-      } catch (e) {}
-    };
-
-    fetchOptions();
-  }, [supabaseClient, teamMemberProfile.alliance_member_id]);
 
   useEffect(() => {
     fetchRequest();
@@ -400,13 +364,13 @@ const AdminWithdrawalHistoryTable = ({
                   </DialogClose>
                   <Button
                     disabled={isLoading}
-                    onClick={() =>
+                    onClick={() => {
                       handleUpdateStatus(
                         isOpenModal.status,
                         isOpenModal.requestId,
                         rejectNote
-                      )
-                    }
+                      );
+                    }}
                   >
                     {isLoading ? (
                       <>
