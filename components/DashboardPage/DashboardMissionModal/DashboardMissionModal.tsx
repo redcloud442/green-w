@@ -10,7 +10,12 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { handleGetMission } from "@/services/mission/Member";
+import { toast } from "@/hooks/use-toast";
+import {
+  handleGetMission,
+  handlePostClaimMission,
+} from "@/services/mission/Member";
+import { usePackageChartData } from "@/store/usePackageChartData";
 import { MissionData } from "@/utils/types";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -22,6 +27,8 @@ type Props = {
 const DashboardMissionModal = ({ className }: Props) => {
   const [open, setOpen] = useState(false);
   const [mission, setMission] = useState<MissionData | null>(null);
+  const [isClaiming, setIsClaiming] = useState(false);
+  const { addChartData } = usePackageChartData();
 
   useEffect(() => {
     const checkMissionCompletion = async () => {
@@ -29,12 +36,50 @@ const DashboardMissionModal = ({ className }: Props) => {
         const mission = await handleGetMission();
 
         setMission(mission);
-      } catch (error) {
-        console.error("Error checking mission completion:", error);
-      }
+      } catch (error) {}
     };
     checkMissionCompletion();
   }, [open]);
+
+  const handlClaimMission = async () => {
+    try {
+      setIsClaiming(true);
+      const response = await handlePostClaimMission();
+
+      setMission(response.missionData);
+
+      addChartData({
+        package: "Peak",
+        completion: 0,
+        completion_date:
+          String(response.packageData.package_member_completion_date) || "",
+        amount: Number(response.packageData.package_member_amount),
+        is_ready_to_claim: false,
+        package_connection_id:
+          response.packageData.package_member_connection_id,
+        profit_amount: Number(response.packageData.package_amount_earnings),
+        package_color: response.packageData.package_color || "",
+        package_date_created:
+          String(response.packageData.package_member_connection_created) || "",
+        is_notified: false,
+        package_member_id: response.packageData.package_member_member_id,
+        package_days: Number(response.packageData.package_member_status || 0),
+        current_amount: Number(response.packageData.package_member_amount),
+        currentPercentage: 0,
+      });
+
+      setIsClaiming(false);
+      setOpen(false);
+      toast({
+        title: "Mission Claimed",
+        description: "You have successfully claimed the mission",
+      });
+    } catch (error) {
+      setIsClaiming(false);
+    } finally {
+      setIsClaiming(false);
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -94,12 +139,15 @@ const DashboardMissionModal = ({ className }: Props) => {
           <DialogFooter className="mt-6">
             <Button
               variant={"card"}
-              disabled={!mission?.isMissionCompleted}
+              disabled={!mission?.isMissionCompleted || isClaiming}
+              onClick={handlClaimMission}
               className="w-full rounded-md"
             >
-              {mission?.isMissionCompleted
-                ? "Claim Reward"
-                : "Complete All Tasks to Claim"}
+              {isClaiming
+                ? "Claiming..."
+                : mission?.isMissionCompleted
+                  ? "Claim Reward"
+                  : "Complete All Tasks to Claim"}
             </Button>
           </DialogFooter>
         </ScrollArea>

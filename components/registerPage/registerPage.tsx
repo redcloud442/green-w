@@ -19,6 +19,7 @@ import NavigationLoader from "../ui/NavigationLoader";
 import { PasswordInput } from "../ui/passwordInput";
 import { ScrollArea } from "../ui/scroll-area";
 import { Separator } from "../ui/separator";
+
 const RegisterSchema = z
   .object({
     firstName: z
