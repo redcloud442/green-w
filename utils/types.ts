@@ -194,6 +194,7 @@ export type MissionTask = {
   task_target: string;
   task_type: string;
   progress: number;
+  task_to_achieve: number;
   is_completed: boolean;
 };
 
@@ -203,5 +204,5 @@ export type MissionData = {
   mission_order: string;
   reward: number;
   tasks: MissionTask[];
-  is_mission_completed: boolean;
+  isMissionCompleted: boolean;
 };

@@ -8,7 +8,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { handleGetMission } from "@/services/mission/Member";
@@ -63,20 +62,27 @@ const DashboardMissionModal = ({ className }: Props) => {
           </DialogHeader>
 
           <div className="space-y-4 mt-4">
-            {mission?.tasks.map((task) => (
-              <div key={task.task_id} className="space-y-2">
-                <Separator className="bg-gray-300" />
-                <p className="text-sm font-semibold">{task.task_name}</p>
+            {mission?.tasks.map((task) => {
+              const isCompleted = task.is_completed;
 
-                <Progress
-                  className="p-2 rounded-sm bg-gradient-to-t"
-                  value={(task.progress / task.progress) * 100}
-                />
-                <p className="text-xs text-gray-500">
-                  {task.progress}/{task.task_target} completed
-                </p>
-              </div>
-            ))}
+              return (
+                <div key={task.task_id} className="space-y-2">
+                  <Separator className="bg-gray-300" />
+                  <div className="flex justify-between items-center">
+                    <p className="text-sm font-semibold">{task.task_name}</p>
+                    {isCompleted ? (
+                      <span className="text-green-600 font-bold">✔</span>
+                    ) : (
+                      <span className="text-gray-400 font-bold">•</span>
+                    )}
+                  </div>
+
+                  <p className="text-xs text-gray-500">
+                    {task.progress}/{task.task_target} completed
+                  </p>
+                </div>
+              );
+            })}
           </div>
 
           <div className="mt-6 text-center">
@@ -87,10 +93,11 @@ const DashboardMissionModal = ({ className }: Props) => {
 
           <DialogFooter className="mt-6">
             <Button
-              disabled={!mission?.is_mission_completed}
-              className="w-full"
+              variant={"card"}
+              disabled={!mission?.isMissionCompleted}
+              className="w-full rounded-md"
             >
-              {mission?.is_mission_completed
+              {mission?.isMissionCompleted
                 ? "Claim Reward"
                 : "Complete All Tasks to Claim"}
             </Button>
