@@ -11,18 +11,18 @@ export const metadata: Metadata = {
     title: "Log In to Your Account | Stay Connected",
     description:
       "Sign in to your account and enjoy personalized access to features and updates",
-    url: "/login",
+    url: "https://elevateglobal.app/login",
     type: "website",
 
     images: [
       {
-        url: "/app-logo.png",
+        url: "https://elevateglobal.app/app-logo.png",
         alt: "Log In Now - Access Your Account",
         width: 1200,
         height: 630,
       },
     ],
-    siteName: "elevateglobal.app",
+    siteName: "Elevate Global",
   },
 };
 

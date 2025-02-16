@@ -12,20 +12,19 @@ export const metadata: Metadata = {
     title: "Register an Account | Join Now",
     description:
       "Create an account to gain access to personalized experiences, exclusive benefits, and the latest updates.",
-    url: "/register",
+    url: "https://elevateglobal.app/register",
     type: "website",
     images: [
       {
-        url: "/app-logo.png",
+        url: "https://elevateglobal.app/app-logo.png",
         alt: "Join Now - Register an Account",
         width: 1200,
         height: 630,
       },
     ],
-    siteName: "elevateglobal.app",
+    siteName: "Elevate Global",
   },
 };
-
 const Page = async ({
   params,
 }: {

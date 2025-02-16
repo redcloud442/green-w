@@ -8,18 +8,17 @@ import { useToast } from "@/hooks/use-toast";
 import { checkUserName, createTriggerUser } from "@/services/auth/auth";
 import { BASE_URL } from "@/utils/constant";
 import { escapeFormData } from "@/utils/function";
-import { createClientSide } from "@/utils/supabase/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useController, useForm } from "react-hook-form";
+import Turnstile, { BoundTurnstileObject } from "react-turnstile";
 import { z } from "zod";
 import NavigationLoader from "../ui/NavigationLoader";
 import { PasswordInput } from "../ui/passwordInput";
 import { ScrollArea } from "../ui/scroll-area";
 import { Separator } from "../ui/separator";
-
 const RegisterSchema = z
   .object({
     firstName: z
@@ -54,6 +53,7 @@ const RegisterSchema = z
         (val) => val === null || z.string().email().safeParse(val).success,
         "Invalid email address"
       ),
+    botField: z.string().optional(),
     password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z
       .string()
@@ -78,6 +78,7 @@ type Props = {
 const RegisterPage = ({ referralLink }: Props) => {
   const [isUsernameLoading, setIsUsernameLoading] = useState(false);
   const [isUsernameValidated, setIsUsernameValidated] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
@@ -91,8 +92,8 @@ const RegisterPage = ({ referralLink }: Props) => {
   });
 
   const lastNameSchema = z.string().min(4).max(50);
+  const captcha = useRef<BoundTurnstileObject>(null);
 
-  const supabase = createClientSide();
   const router = useRouter();
   const { toast } = useToast();
 
@@ -134,6 +135,15 @@ const RegisterPage = ({ referralLink }: Props) => {
         variant: "destructive",
       });
     }
+
+    if (!captchaToken) {
+      return toast({
+        title: "Please wait",
+        description: "Captcha is required.",
+        variant: "destructive",
+      });
+    }
+
     const sanitizedData = escapeFormData(data);
 
     const {
@@ -143,6 +153,7 @@ const RegisterPage = ({ referralLink }: Props) => {
       lastName,
       activeMobile,
       activeEmail,
+      botField,
     } = sanitizedData;
 
     try {
@@ -155,7 +166,14 @@ const RegisterPage = ({ referralLink }: Props) => {
         referalLink: referralLink,
         url,
         activeEmail: activeEmail || "",
+        botField: botField || "",
+        captchaToken,
       });
+
+      if (captcha.current) {
+        captcha.current.reset();
+      }
+
       setIsSuccess(true);
 
       toast({
@@ -190,6 +208,14 @@ const RegisterPage = ({ referralLink }: Props) => {
             {/* Username Field */}
 
             {/* First Name Field */}
+
+            <input
+              type="text"
+              {...register("botField")}
+              style={{ display: "none" }} // Hide from normal users
+              tabIndex={-1} // Skip focus when tabbing
+              autoComplete="off"
+            />
             <div className="relative">
               <Label htmlFor="firstName">First Name</Label>
               <div className="flex items-center">
@@ -360,6 +386,16 @@ const RegisterPage = ({ referralLink }: Props) => {
                   className="pr-10"
                 />
               </div>
+            </div>
+
+            <div className="w-full flex flex-1 justify-center">
+              <Turnstile
+                size="flexible"
+                sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY || ""}
+                onVerify={(token) => {
+                  setCaptchaToken(token);
+                }}
+              />
             </div>
 
             <div className="w-full flex ">

@@ -58,6 +58,7 @@ export const ChatSupportPage = ({
 
     return () => {
       socket.off("messages");
+      socket.off("joinRoom");
       socket.off("newMessage", handleNewMessage);
     };
   }, [session.chat_session_id]);
@@ -134,8 +135,6 @@ export const ChatSupportPage = ({
           table: "chat_session_table",
         },
         (payload) => {
-          console.log("Session update received:", payload);
-
           // Handle only status changes
           if (payload.new.chat_session_status === "SUPPORT ONGOING") {
             setIsWaiting(false);

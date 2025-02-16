@@ -14,8 +14,9 @@ import { escapeFormData, userNameToEmail } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { FieldErrors, SubmitHandler, useForm } from "react-hook-form";
+import Turnstile, { BoundTurnstileObject } from "react-turnstile";
 import { z } from "zod";
 import { Card } from "../ui/card";
 import { Label } from "../ui/label";
@@ -49,6 +50,8 @@ const LoginPageSecured = () => {
   const [step, setStep] = useState<"login" | "verify">("login");
   const [email, setEmail] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captcha = useRef<BoundTurnstileObject>(null);
 
   const {
     register,
@@ -66,6 +69,13 @@ const LoginPageSecured = () => {
 
   const handleSignIn = async (data: LoginFormValues) => {
     try {
+      if (!captchaToken) {
+        return toast({
+          title: "Please wait",
+          description: "Captcha is required.",
+          variant: "destructive",
+        });
+      }
       setIsLoading(true);
 
       const sanitizedData = escapeFormData(data);
@@ -82,7 +92,10 @@ const LoginPageSecured = () => {
 
       const { userName, password } = sanitizedData;
 
-      const result = await handleSignInAdmin({ userName, password });
+      const result = await handleSignInAdmin({
+        userName,
+        password,
+      });
 
       if (!result.ok) {
         toast({
@@ -98,9 +111,16 @@ const LoginPageSecured = () => {
 
       const { error } = await supabase.auth.signInWithOtp({
         email: userEmail,
+        options: {
+          captchaToken,
+        },
       });
 
       if (error) throw new Error("Invalid username or password");
+
+      if (captcha.current) {
+        captcha.current.reset();
+      }
 
       toast({
         title: "OTP sent to your email",
@@ -203,6 +223,15 @@ const LoginPageSecured = () => {
                   {(errors as FieldErrors<LoginFormValues>).password?.message}
                 </p>
               )}
+            </div>
+            <div className="w-full flex flex-1 justify-center">
+              <Turnstile
+                size="flexible"
+                sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY || ""}
+                onVerify={(token) => {
+                  setCaptchaToken(token);
+                }}
+              />
             </div>
             <Button
               variant="card"
