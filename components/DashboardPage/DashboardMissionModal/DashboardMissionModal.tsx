@@ -111,7 +111,7 @@ const DashboardMissionModal = ({ className }: Props) => {
           className="p-0 bg-transparent shadow-none h-full flex flex-col items-center justify-center"
           onClick={() => setOpen(true)}
         >
-          <Image src="/assets/deposit.ico" alt="plans" width={35} height={35} />
+          <Image src="/assets/mission.ico" alt="plans" width={35} height={35} />
           <p className="text-sm sm:text-lg font-thin">MISSION</p>
         </Button>
       </DialogTrigger>
@@ -120,7 +120,7 @@ const DashboardMissionModal = ({ className }: Props) => {
         {mission && mission.allMissionCompleted ? (
           <div className="flex flex-col items-center justify-center h-full">
             <Image
-              src="/app-logo.svg"
+              src="/app-logo.png"
               alt="mission-completed"
               width={100}
               height={100}
@@ -130,11 +130,13 @@ const DashboardMissionModal = ({ className }: Props) => {
         ) : (
           <ScrollArea className="h-[500px] sm:h-full p-4">
             <DialogHeader className="text-center">
-              <DialogTitle className="text-xl text-center sm:text-2xl font-bold">
+              <DialogTitle className="text-xl sm:text-2xl font-bold">
                 {isLoading ? (
                   <Skeleton className="w-full h-10" />
                 ) : (
-                  mission?.mission_name
+                  <>
+                    Mission {mission?.mission_order}: {mission?.mission_name}
+                  </>
                 )}
               </DialogTitle>
               <Separator className="my-2" />
@@ -161,7 +163,8 @@ const DashboardMissionModal = ({ className }: Props) => {
                     <div key={task.task_id} className="space-y-2">
                       <Separator className="bg-gray-300" />
                       <div className="flex justify-between items-center">
-                        <p className="text-sm font-semibold">
+                        <p className="text-sm font-semibold flex items-center">
+                          <span className="mr-2">•</span> {/* Bullet point */}
                           {task.task_name}
                         </p>
                         {isCompleted ? (

@@ -11,7 +11,7 @@ const nextConfig = {
         hostname:
           process.env.NODE_ENV === "development"
             ? "bfnevuiuzigykvlsnoea.supabase.co"
-            : "kvrvtcwffqhkzlpfjjoy.supabase.co",
+            : "bfnevuiuzigykvlsnoea.supabase.co",
         port: "",
         pathname: "/storage/v1/object/public/**",
       },
@@ -21,7 +21,7 @@ const nextConfig = {
     return [
       {
         source: "/api/v1/:path*",
-        destination: `${process.env.NODE_ENV === "development" ? "http://localhost:8000" : "https://loadbalancer.elevateglobal.app"}/api/v1/:path*`,
+        destination: `${process.env.NODE_ENV === "development" ? "http://localhost:9000" : "https://server.pinkful.website"}/api/v1/:path*`,
       },
     ];
   },
