@@ -80,6 +80,7 @@ const MobileNavBar = () => {
         referral: false,
         package: false,
       }); // Reset withdrawal status
+      localStorage.removeItem("isLoggedIn");
 
       setLoading(false); // Reset loading state
     } catch (e) {

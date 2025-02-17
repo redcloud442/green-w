@@ -50,7 +50,6 @@ export const useAdminTopUpApprovalColumns = (
     note?: string
   ) => {
     try {
-      console.log(note);
       setIsLoading(true);
       await updateTopUpStatus({ status, requestId, note }, supabaseClient);
 

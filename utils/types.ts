@@ -205,4 +205,5 @@ export type MissionData = {
   reward: number;
   tasks: MissionTask[];
   isMissionCompleted: boolean;
+  allMissionCompleted: boolean;
 };
