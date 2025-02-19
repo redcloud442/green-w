@@ -85,7 +85,7 @@ const DashboardPage = ({
         indirectReferralCount: 0,
         package_income: Number(totalEarnings.package_income ?? 0),
         rank: totalEarnings.rank ?? "",
-        tags: totalEarnings.tags ?? [],
+        totalIncomeTag: totalEarnings.totalIncomeTag ?? [],
       });
 
       setEarnings(userEarningsData);
@@ -141,9 +141,9 @@ const DashboardPage = ({
                 <p className="text-[12px] sm:text-sm font-semibold">
                   {profile.user_first_name} {profile.user_last_name}
                 </p>
-                {totalEarnings?.tags &&
-                  totalEarnings.tags.length > 0 &&
-                  totalEarnings.tags.map((tag, index) => (
+                {totalEarnings?.totalIncomeTag &&
+                  totalEarnings.totalIncomeTag.length > 0 &&
+                  totalEarnings.totalIncomeTag.map((tag, index) => (
                     <Badge
                       key={index}
                       className="h-4 sm:h-5 text-[9px] sm:text-xs bg-green-500 text-white cursor-pointer rounded-sm px-2"

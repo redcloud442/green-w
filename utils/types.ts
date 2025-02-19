@@ -91,7 +91,7 @@ export type DashboardEarnings = {
   indirectReferralCount: number;
   package_income: number;
   rank: string;
-  tags: string[];
+  totalIncomeTag: string[];
 };
 
 export type AdminDashboardDataByDate = {
