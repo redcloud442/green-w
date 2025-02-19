@@ -198,7 +198,7 @@ const DashboardMissionModal = ({ className }: Props) => {
                     variant={"card"}
                     disabled={!mission?.isMissionCompleted || isClaiming}
                     onClick={handleClaimMission}
-                    className="w-full rounded-md"
+                    className="w-full text-sm h-12 rounded-md text-wrap"
                   >
                     {isClaiming ? (
                       <>
@@ -206,13 +206,21 @@ const DashboardMissionModal = ({ className }: Props) => {
                         Claiming...
                       </>
                     ) : mission?.isMissionCompleted ? (
-                      "Claim Reward"
+                      `Mission ${mission?.mission_order} Complete! Claim Your Reward Here`
                     ) : (
-                      "Complete All Tasks to Claim"
+                      `Complete All Tasks for Mission ${mission?.mission_order} to Claim Your Reward`
                     )}
                   </Button>
                 </DialogFooter>
               </>
+            )}
+            {mission?.mission_name !== "5" && !isLoading && (
+              <div className="mt-6 text-center">
+                <p className="text-lg font-bold">
+                  Kumpletuhin ang Mission {mission?.mission_order} upang
+                  magpatuloy sa Mission {Number(mission?.mission_order) + 1}
+                </p>
+              </div>
             )}
           </ScrollArea>
         )}

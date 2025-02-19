@@ -21,7 +21,7 @@ const nextConfig = {
     return [
       {
         source: "/api/v1/:path*",
-        destination: `${process.env.NODE_ENV === "development" ? "http://localhost:9000" : "https://server.pinkful.website"}/api/v1/:path*`,
+        destination: `${process.env.NODE_ENV === "development" ? "http://localhost:8000" : "https://server.pinkful.website"}/api/v1/:path*`,
       },
     ];
   },
