@@ -1,5 +1,5 @@
 import UserAdminProfile from "@/components/UserAdminProfile/UserAdminProfile";
-import { prisma } from "@/lib/db";
+import prisma from "@/utils/prisma";
 import { protectionAdminUser } from "@/utils/serversideProtection";
 import { UserRequestdata } from "@/utils/types";
 import { Metadata } from "next";
@@ -21,7 +21,7 @@ const Page = async ({ params }: { params: Promise<{ userId: string }> }) => {
   if (!teamMemberProfile) return redirect("/login");
 
   const [userData, allianceData] = await prisma.$transaction([
-    prisma.user_table.findFirst({
+    prisma.user_table.findUnique({
       where: {
         user_id: userId,
       },

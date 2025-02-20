@@ -1,5 +1,5 @@
 import AdminDashboardPage from "@/components/AdminDashboardPage/AdminDashboardPage";
-import { prisma } from "@/lib/db";
+import prisma from "@/utils/prisma";
 import { protectionAdminUser } from "@/utils/serversideProtection";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
