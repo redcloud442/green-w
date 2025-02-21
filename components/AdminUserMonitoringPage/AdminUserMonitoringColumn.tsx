@@ -4,7 +4,9 @@ import { ColumnDef } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
-export const AdminUserMonitoringColumn = (): ColumnDef<user_table>[] => {
+export const AdminUserMonitoringColumn = (): ColumnDef<
+  user_table & { alliance_olympus_wallet: number }
+>[] => {
   const router = useRouter();
   return [
     {
@@ -67,6 +69,26 @@ export const AdminUserMonitoringColumn = (): ColumnDef<user_table>[] => {
       cell: ({ row }) => (
         <div className="text-center">{row.getValue("user_last_name")}</div>
       ),
+    },
+    {
+      accessorKey: "alliance_olympus_wallet",
+      header: ({ column }) => (
+        <Button
+          className="w-full"
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Wallet Balance
+        </Button>
+      ),
+      cell: ({ row }) => {
+        const amount = parseFloat(row.getValue("alliance_olympus_wallet"));
+        const formatted = new Intl.NumberFormat("en-PH", {
+          style: "currency",
+          currency: "PHP",
+        }).format(amount);
+        return <div className="font-medium text-center">{formatted}</div>;
+      },
     },
   ];
 };
