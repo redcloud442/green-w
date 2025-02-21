@@ -67,7 +67,9 @@ export const getUserWithActiveBalance = async (params: {
   }
 
   return data as {
-    data: user_table[];
+    data: (user_table & {
+      alliance_olympus_wallet: number;
+    })[];
     totalCount: 0;
   };
 };
