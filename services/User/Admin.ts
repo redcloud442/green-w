@@ -49,6 +49,7 @@ export const getUserWithActiveBalance = async (params: {
   search?: string;
   columnAccessor: string;
   isAscendingSort: boolean;
+  type: string;
 }) => {
   const sanitizedData = escapeFormData(params);
 
