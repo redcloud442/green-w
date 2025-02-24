@@ -154,11 +154,7 @@ const DashboardDepositModalDeposit = ({
           );
         }
 
-        const {
-          data: { publicUrl },
-        } = supabaseClient.storage
-          .from("REQUEST_ATTACHMENTS")
-          .getPublicUrl(filePath);
+        const publicUrl = `https://content.elevateglobal.app/storage/v1/object/public/${filePath}`;
 
         return { filePath, publicUrl };
       })
