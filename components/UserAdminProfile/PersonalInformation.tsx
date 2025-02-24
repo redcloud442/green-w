@@ -176,22 +176,14 @@ const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
         throw new Error(`File upload failed: ${uploadError.message}`);
       }
 
-      const { data: publicUrlData } = supabaseClient.storage
-        .from("USER_PROFILE")
-        .getPublicUrl(filePath);
-
-      if (!publicUrlData?.publicUrl) {
-        throw new Error(
-          "Failed to retrieve the public URL of the uploaded file."
-        );
-      }
+      const publicUrl = `https://content.elevateglobal.app/storage/v1/object/public/${filePath}`;
 
       await updateUserProfile({
         userId: userProfile.user_id,
-        profilePicture: publicUrlData.publicUrl,
+        profilePicture: publicUrl,
       });
 
-      setAvatarUrl(publicUrlData.publicUrl);
+      setAvatarUrl(publicUrl);
 
       toast({
         title: "Profile Picture Updated Successfully",
