@@ -106,7 +106,7 @@ const CreatePackageModal = ({ setPackages, closeModal }: Props) => {
             throw new Error(`Failed to upload file: ${file.name}`);
           }
 
-          const publicUrl = `https://content.elevateglobal.app/storage/v1/object/public/${path}`;
+          const publicUrl = `https://content.elevateglobal.app/storage/v1/object/public/PACKAGE_IMAGES/${path}`;
 
           return { path, publicUrl };
         })

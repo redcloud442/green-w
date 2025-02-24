@@ -176,7 +176,7 @@ const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
         throw new Error(`File upload failed: ${uploadError.message}`);
       }
 
-      const publicUrl = `https://content.elevateglobal.app/storage/v1/object/public/${filePath}`;
+      const publicUrl = `https://content.elevateglobal.app/storage/v1/object/public/USER_PROFILE/${filePath}`;
 
       await updateUserProfile({
         userId: userProfile.user_id,

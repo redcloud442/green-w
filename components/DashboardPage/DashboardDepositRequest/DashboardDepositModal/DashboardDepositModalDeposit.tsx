@@ -154,7 +154,7 @@ const DashboardDepositModalDeposit = ({
           );
         }
 
-        const publicUrl = `https://content.elevateglobal.app/storage/v1/object/public/${filePath}`;
+        const publicUrl = `https://content.elevateglobal.app/storage/v1/object/public/REQUEST_ATTACHMENTS/${filePath}`;
 
         return { filePath, publicUrl };
       })
