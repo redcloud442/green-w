@@ -74,7 +74,6 @@ const DashboardWithdrawalModalForm = ({
   setOpen,
   preferredEarnings,
   preferredType,
-  profile,
 }: Props) => {
   const { toast } = useToast();
   const { setEarnings, earnings } = useUserEarningsStore();
@@ -102,6 +101,8 @@ const DashboardWithdrawalModalForm = ({
         preferredEarnings?.alliance_preferred_withdrawal_account_name ?? "",
       accountNumber:
         preferredEarnings?.alliance_preferred_withdrawal_account_number ?? "",
+      email: "",
+      cellphoneNumber: "",
     },
   });
 
@@ -120,7 +121,6 @@ const DashboardWithdrawalModalForm = ({
     }
   };
 
-  // test
   const handleWithdrawalRequest = async (data: WithdrawalFormValues) => {
     try {
       const sanitizedData = escapeFormData(data);
