@@ -340,16 +340,25 @@ export const useAdminTopUpApprovalColumns = (
                   <DialogTitle>Attachment</DialogTitle>
                 </DialogHeader>
                 <div className="flex justify-center items-center flex-wrap gap-2">
-                  {attachmentUrl.map((url) => (
-                    <Image
-                      key={url}
-                      src={url || ""}
-                      alt="Attachment Preview"
-                      width={230}
-                      height={230}
-                      className="object-contain"
-                    />
-                  ))}
+                  {attachmentUrl.map((url) =>
+                    url.endsWith(".jfif") ? (
+                      <img
+                        key={url}
+                        src={url}
+                        alt="Attachment Preview"
+                        className="object-contain w-[600px] h-[600px]"
+                      />
+                    ) : (
+                      <Image
+                        key={url}
+                        src={url || ""}
+                        alt="Attachment Preview"
+                        width={230}
+                        height={230}
+                        className="object-contain"
+                      />
+                    )
+                  )}
                 </div>
               </ScrollArea>
             </DialogContent>
