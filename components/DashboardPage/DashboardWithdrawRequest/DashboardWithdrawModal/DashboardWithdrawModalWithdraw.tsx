@@ -25,7 +25,7 @@ import {
   user_table,
 } from "@prisma/client";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import DashboardAddUserPreferredBank from "./DashboardAddUserPreferredBank";
 import DashboardWithdrawalModalForm from "./DashboardWithdrawalModalForm";
 
@@ -48,12 +48,14 @@ const DashboardWithdrawModalWithdraw = ({
     alliance_preferred_withdrawal_table[]
   >([]);
   const [isFetching, setIsFetching] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { isWithdrawalToday } = useUserHaveAlreadyWithdraw();
 
   const fetchEarnings = async () => {
     try {
-      if (!open) return;
+      if (!open || preferredWithdrawalList.length > 0 || modalRef.current)
+        return;
       setIsFetching(true);
 
       const preferredWithdrawal = await getPreferredWithdrawal();
@@ -120,7 +122,7 @@ const DashboardWithdrawModalWithdraw = ({
         )}
       </DialogTrigger>
 
-      <DialogContent className="">
+      <DialogContent ref={modalRef}>
         <ScrollArea className=" w-full  sm:max-w-full h-[600px] sm:h-full">
           <DialogHeader className="text-start text-2xl font-bold">
             <DialogTitle className="text-3xl font-bold text-center">
