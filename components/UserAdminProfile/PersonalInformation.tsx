@@ -224,7 +224,7 @@ const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
           {type === ROLE.ADMIN && (
             <Button
               variant="card"
-              className="lg:ml-auto"
+              className="lg:ml-auto rounded-md"
               onClick={async () => {
                 await handleSignIn();
               }}

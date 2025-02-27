@@ -16,7 +16,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import TableLoading from "../ui/tableLoading";
-
+import ActiveTreeModal from "../UserAdminProfile/ActiveTreeModal/ActiveTreeModal";
 export const AdminUsersColumn = (
   handleCopyAccountUrl: (userName: string) => void
 ) => {
@@ -122,14 +122,18 @@ export const AdminUsersColumn = (
       ),
       cell: ({ row }) => {
         const userName = row.original.user_username as string;
+        const allianceMemberId = row.getValue("alliance_member_id") as string;
         return (
-          <Button
-            variant="card"
-            className="p-1 rounded-md"
-            onClick={() => handleCopyAccountUrl(userName)}
-          >
-            Access Account Link
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="card"
+              className="p-1 rounded-md"
+              onClick={() => handleCopyAccountUrl(userName)}
+            >
+              Access Account Link
+            </Button>
+            <ActiveTreeModal teamMemberProfile={allianceMemberId} />
+          </div>
         );
       },
     },

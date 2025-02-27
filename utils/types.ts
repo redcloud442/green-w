@@ -187,3 +187,9 @@ export type adminUserReinvestedReportData = {
   user_first_name: string;
   user_last_name: string;
 };
+
+export type HeirarchyData = {
+  alliance_member_id: string;
+  user_username: string;
+  user_id: string;
+};
