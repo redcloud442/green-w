@@ -42,11 +42,27 @@ const withdrawalFormSchema = z.object({
       message: "Amount must be at least 30 pesos",
     }),
   bank: z.string().min(1, "Please select a bank"),
-  email: z.string().email("Invalid email address").optional(),
+  email: z
+    .string()
+    .optional()
+    .refine(
+      (email) => email === "" || z.string().email().safeParse(email).success,
+      {
+        message: "Invalid email address",
+      }
+    ),
   cellphoneNumber: z
     .string()
-    .min(11, "Please enter your cellphone number")
-    .optional(),
+    .optional()
+    .refine(
+      (number) => {
+        if (number === undefined) return true;
+        return number === "" || /^\d{11}$/.test(number);
+      },
+      {
+        message: "Please enter a valid 11-digit cellphone number",
+      }
+    ),
   accountName: z
     .string()
     .min(6, "Account name is required")
