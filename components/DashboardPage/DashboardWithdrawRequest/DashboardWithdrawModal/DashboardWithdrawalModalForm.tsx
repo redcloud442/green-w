@@ -584,6 +584,7 @@ const DashboardWithdrawalModalForm = ({
               id="email"
               placeholder="Active Email"
               {...field}
+              onChange={(e) => field.onChange(e.target.value || "")}
             />
           )}
         />
@@ -603,6 +604,7 @@ const DashboardWithdrawalModalForm = ({
               id="cellphoneNumber"
               placeholder="Cellphone Number"
               {...field}
+              onChange={(e) => field.onChange(e.target.value || "")}
             />
           )}
         />
