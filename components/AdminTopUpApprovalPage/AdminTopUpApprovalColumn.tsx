@@ -346,6 +346,7 @@ export const useAdminTopUpApprovalColumns = (
                       src={url}
                       alt="Attachment Preview"
                       className="object-contain w-[600px] h-[600px]"
+                      loading="lazy"
                     />
                   ))}
                 </div>
