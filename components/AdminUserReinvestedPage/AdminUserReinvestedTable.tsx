@@ -20,6 +20,7 @@ type DataTableProps = {
   setActivePage: Dispatch<SetStateAction<number>>;
   activePage: number;
   totalCount: number;
+  isFetchingList: boolean;
 };
 
 const AdminUserReinvestedTable = ({
@@ -27,6 +28,7 @@ const AdminUserReinvestedTable = ({
   setActivePage,
   totalCount,
   activePage,
+  isFetchingList,
 }: DataTableProps) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -63,7 +65,7 @@ const AdminUserReinvestedTable = ({
         columns={columns}
         activePage={activePage}
         totalCount={totalCount}
-        isFetchingList={false}
+        isFetchingList={isFetchingList}
         setActivePage={setActivePage}
         pageCount={pageCount}
       />

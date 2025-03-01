@@ -14,7 +14,6 @@ import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { Calendar } from "../ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import TableLoading from "../ui/tableLoading";
 import AdminUserReinvestedTable from "./AdminUserReinvestedTable";
 type Props = {
   teamMemberProfile: alliance_member_table;
@@ -88,8 +87,6 @@ const AdminUserReinvestedPage = ({ teamMemberProfile }: Props) => {
         <header className="mb-4">
           <h1 className="Title">User Reinvested Page</h1>
         </header>
-
-        {isFetchingList && <TableLoading />}
 
         {/* Table Section */}
 
@@ -203,6 +200,7 @@ const AdminUserReinvestedPage = ({ teamMemberProfile }: Props) => {
             activePage={page}
             totalCount={totalCount}
             reinvestedReportData={reinvestedReportData}
+            isFetchingList={isFetchingList}
           />
         </section>
       </div>

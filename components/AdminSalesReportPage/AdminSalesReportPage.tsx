@@ -16,7 +16,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import TableLoading from "../ui/tableLoading";
 import AdminSalesReportTable from "./AdminSalesReportTable";
 type Props = {
   teamMemberProfile: alliance_member_table;
@@ -110,8 +109,6 @@ const AdminSalesReportPage = ({ teamMemberProfile }: Props) => {
           <h1 className="Title">Sales Report Page</h1>
         </header>
 
-        {isFetchingList && <TableLoading />}
-
         {/* Table Section */}
 
         <section className="rounded-lg flex flex-col gap-4">
@@ -180,7 +177,10 @@ const AdminSalesReportPage = ({ teamMemberProfile }: Props) => {
               </form>
             </CardContent>
           </Card>
-          <AdminSalesReportTable salesReportData={salesReportData} />
+          <AdminSalesReportTable
+            salesReportData={salesReportData}
+            isFetchingList={isFetchingList}
+          />
         </section>
       </div>
     </div>

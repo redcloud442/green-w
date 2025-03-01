@@ -11,7 +11,6 @@ import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { Calendar } from "../ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import TableLoading from "../ui/tableLoading";
 import AdminWithdrawalReportTable from "./AdminWithdrawalReportTable";
 
 type Props = {
@@ -88,8 +87,6 @@ const AdminWithdrawalReport = ({ teamMemberProfile }: Props) => {
         <header className="mb-4">
           <h1 className="Title">Withdrawal Report Page</h1>
         </header>
-
-        {isFetchingList && <TableLoading />}
 
         {/* Table Section */}
 

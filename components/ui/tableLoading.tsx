@@ -1,7 +1,7 @@
 const TableLoading = () => {
   return (
     <div
-      className={`bloc absolute inset-0 bg-cardColor/70 dark:bg-zinc-800/70 z-50 transition-opacity duration-300`}
+      className={`block absolute inset-0 bg-cardColor/70 dark:bg-zinc-800/70 z-50 transition-opacity duration-300`}
     >
       <div className="absolute top-1/2 left-1/2">
         <div className="relative flex items-center justify-center">
