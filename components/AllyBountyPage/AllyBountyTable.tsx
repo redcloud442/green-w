@@ -31,6 +31,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Input } from "../ui/input";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { Separator } from "../ui/separator";
+import TableLoading from "../ui/tableLoading";
 import { AllyBountyColumn } from "./AllyBountyColum";
 
 type DataTableProps = {
@@ -130,6 +131,7 @@ const AllyBountyTable = ({ teamMemberProfile }: DataTableProps) => {
 
   return (
     <ScrollArea className="w-full overflow-x-auto ">
+      {isFetchingList && <TableLoading />}
       <Card className="w-full p-4">
         <CardHeader className="text-center text-[30px] sm:text-[60px] font-extrabold">
           <CardTitle>REFERRAL INCOME</CardTitle>
@@ -223,37 +225,33 @@ const AllyBountyTable = ({ teamMemberProfile }: DataTableProps) => {
 
           <ScrollBar orientation="horizontal" />
 
-          <div className="flex items-center justify-between gap-x-4 py-4">
-            <div className="flex items-center justify-start gap-x-4">
-              {/* Left Arrow */}
-              <Button
-                variant="card"
-                className="shadow-none"
-                size="sm"
-                onClick={() => setActivePage((prev) => Math.max(prev - 1, 1))}
-                disabled={activePage <= 1}
-              >
-                <ChevronLeft />
-              </Button>
+          <div className="flex items-center justify-start gap-x-4">
+            {/* Left Arrow */}
+            <Button
+              variant="card"
+              className="shadow-none"
+              size="sm"
+              onClick={() => setActivePage((prev) => Math.max(prev - 1, 1))}
+              disabled={activePage <= 1}
+            >
+              <ChevronLeft />
+            </Button>
 
-              {/* Active Page */}
-              <span className="text-lg font-semibold text-white">
-                {activePage}
-              </span>
+            {/* Active Page */}
+            <span className="text-lg font-semibold">{activePage}</span>
 
-              {/* Right Arrow */}
-              <Button
-                variant="card"
-                className="shadow-none"
-                size="sm"
-                onClick={() =>
-                  setActivePage((prev) => Math.min(prev + 1, pageCount))
-                }
-                disabled={activePage >= pageCount}
-              >
-                <ChevronRight />
-              </Button>
-            </div>
+            {/* Right Arrow */}
+            <Button
+              variant="card"
+              className="shadow-none"
+              size="sm"
+              onClick={() =>
+                setActivePage((prev) => Math.min(prev + 1, pageCount))
+              }
+              disabled={activePage >= pageCount}
+            >
+              <ChevronRight />
+            </Button>
           </div>
         </CardContent>
       </Card>
