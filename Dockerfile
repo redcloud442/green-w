@@ -1,8 +1,9 @@
 FROM node:20.10-alpine
 
-# Install required dependencies
-RUN apk add --no-cache openssl bash libc6-compat
 
+RUN apk add --no-cache curl bash openssl libc6-compat && \
+    curl -fsSL https://bun.sh/install | bash && \
+    mv /root/.bun/bin/bun /usr/local/bin/
 # Set the working directory
 WORKDIR /usr/src/app
 
@@ -11,11 +12,11 @@ COPY package*.json ./
 COPY prisma ./prisma/
 
 # Install dependencies
-RUN npm install --production
-RUN npm install prisma --save-dev
+RUN bun install --production
+RUN bun install prisma --save-dev
 
 # Generate Prisma client
-RUN npx prisma generate --schema ./prisma/schema.prisma
+RUN bun prisma generate --schema ./prisma/schema.prisma
 
 # Copy the rest of the application files
 COPY . .
@@ -42,7 +43,7 @@ ENV NEXT_PUBLIC_HCAPTCHA_SITE_KEY=$NEXT_PUBLIC_HCAPTCHA_SITE_KEY
 ENV NEXT_PUBLIC_BASE_URL=$NEXT_PUBLIC_BASE_URL
 ENV DATABASE_URL=$DATABASE_URL
 ENV DIRECT_URL=$DIRECT_URL
-RUN npm run build
+RUN bun run build
 
 
 ENV PORT=8080
@@ -51,4 +52,4 @@ EXPOSE 8080
 ENTRYPOINT ["/bin/bash", "/usr/src/app/entrypoint.sh"]
 
 # # Default command to run the app
-CMD ["npm", "start"]
+CMD ["bun", "start"]

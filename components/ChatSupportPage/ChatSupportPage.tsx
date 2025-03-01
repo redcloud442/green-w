@@ -59,9 +59,10 @@ export const ChatSupportPage = ({
     return () => {
       socket.off("messages");
       socket.off("joinRoom");
+
       socket.off("newMessage", handleNewMessage);
     };
-  }, [session.chat_session_id]);
+  }, [session.chat_session_id, isWaiting]);
 
   const scrollToBottom = () => {
     if (chatContainerRef.current) {

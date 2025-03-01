@@ -31,6 +31,7 @@ import { Skeleton } from "../ui/skeleton";
 import DashboardDepositModalDeposit from "./DashboardDepositRequest/DashboardDepositModal/DashboardDepositModalDeposit";
 import DashboardDepositModalPackages from "./DashboardDepositRequest/DashboardDepositModal/DashboardDepositPackagesModal";
 import DashboardGenerateQrCode from "./DashboardDepositRequest/DashboardDepositModal/DashboardGenerateQrCode";
+import DashboardMissionModal from "./DashboardMissionModal/DashboardMissionModal";
 import DashboardPackages from "./DashboardPackages";
 import DashboardWithdrawModalWithdraw from "./DashboardWithdrawRequest/DashboardWithdrawModal/DashboardWithdrawModalWithdraw";
 import NewlyRegisteredModal from "./NewlyRegisteredModal/NewlyRegisteredModal";
@@ -630,17 +631,17 @@ const DashboardPage = ({
           </Card>
         </div>
 
-        <div className="flex justify-around items-center bg-white rounded-2xl shadow-2xl gap-4 border-2 h-auto pt-2 overflow-y-hidden">
-          {/* Deposit Modal */}
-          <div className="flex-shrink-0 relative ">
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-4 bg-white p-4 rounded-lg shadow-md">
+          {/* NETWORK (Top Left) */}
+          <div className="flex flex-col items-center">
             <DashboardDepositModalDeposit
               teamMemberProfile={teamMemberProfile}
               className="w-full"
             />
           </div>
 
-          {/* Withdraw Modal */}
-          <div className="flex-shrink-0 relative ">
+          {/* WITHDRAW */}
+          <div className="flex flex-col items-center">
             <DashboardWithdrawModalWithdraw
               teamMemberProfile={teamMemberProfile}
               earnings={earnings}
@@ -648,8 +649,8 @@ const DashboardPage = ({
             />
           </div>
 
-          {/* Packages */}
-          <div className="flex-shrink-0 relative ">
+          {/* PACKAGES */}
+          <div className="flex flex-col items-center">
             <DashboardDepositModalPackages
               packages={packages}
               setIsActive={setIsActive}
@@ -661,32 +662,35 @@ const DashboardPage = ({
             />
           </div>
 
-          {/* Direct Referrals */}
           <div
             onClick={() => router.push("/referral")}
-            className="flex-shrink-0 relative gap-2 flex flex-col items-center cursor-pointer"
+            className="flex flex-col items-center cursor-pointer"
           >
             <Image
               src="/assets/referral.ico"
-              alt="plans"
+              alt="referral"
               width={35}
               height={35}
             />
-            <p className="text-sm sm:text-lg font-thin">REFERRAL</p>
+            <p className="text-sm sm:text-lg font-thin mt-2">REFERRAL</p>
           </div>
 
-          {/* Indirect Referrals */}
+          {/* NETWORK (Bottom Left) */}
           <div
             onClick={() => router.push("/network")}
-            className="flex-shrink-0 relative gap-2  flex flex-col items-center cursor-pointer"
+            className="flex flex-col items-center cursor-pointer"
           >
             <Image
               src="/assets/network.ico"
-              alt="plans"
+              alt="network"
               width={35}
               height={35}
             />
-            <p className="text-sm sm:text-lg font-thin ">NETWORK</p>
+            <p className="text-sm sm:text-lg font-thin mt-2">NETWORK</p>
+          </div>
+
+          <div className="flex flex-col items-center">
+            <DashboardMissionModal />
           </div>
         </div>
 

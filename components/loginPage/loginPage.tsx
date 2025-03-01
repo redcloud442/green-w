@@ -79,6 +79,7 @@ const LoginPage = () => {
       });
 
       setIsSuccess(true);
+      localStorage.setItem("hasOpenedMissionModal", "false");
       router.push("/");
     } catch (e) {
       if (e instanceof Error) {
