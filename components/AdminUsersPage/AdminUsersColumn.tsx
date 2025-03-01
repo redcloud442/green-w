@@ -79,7 +79,6 @@ export const AdminUsersColumn = (
   const columns: ColumnDef<UserRequestdata, any>[] = [
     {
       accessorKey: "user_username",
-
       header: ({ column }) => (
         <Button
           variant="ghost"
@@ -196,7 +195,7 @@ export const AdminUsersColumn = (
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="text-wrap">
+        <div className="text-center">
           {formatDateToYYYYMMDD(row.getValue("user_date_created"))}
         </div>
       ),
@@ -214,7 +213,7 @@ export const AdminUsersColumn = (
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="text-balance">
+        <div className="text-center">
           {row.getValue("alliance_member_restricted") ? "YES" : "NO"}
         </div>
       ),
@@ -236,7 +235,7 @@ export const AdminUsersColumn = (
         const isActive = row.getValue("alliance_member_is_active");
         return (
           <div
-            className={`${isActive ? "text-green-500" : "text-red-500"} text-wrap`}
+            className={`${isActive ? "text-green-500" : "text-red-500"} text-center`}
           >
             {isActive ? "YES" : "NO"}
           </div>
@@ -251,11 +250,11 @@ export const AdminUsersColumn = (
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
+              <Button variant="ghost" className="w-full text-center p-0">
                 <MoreHorizontal />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="center">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               {data.alliance_member_role !== "MERCHANT" && (
                 <DropdownMenuItem

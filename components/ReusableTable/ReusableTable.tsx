@@ -39,8 +39,7 @@ const ReusableTable = <T extends object>({
     <>
       <ScrollArea className="relative w-full overflow-x-auto">
         {isFetchingList && <TableLoading />}
-
-        <Table className="min-w-full table-auto border-separate border-spacing-0 dark:bg-blue-600 border-white">
+        <Table className="min-w-full relative table-auto border-separate border-spacing-0 dark:bg-blue-600 border-white">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow
@@ -102,7 +101,8 @@ const ReusableTable = <T extends object>({
               <TableCell className="px-0" colSpan={columns.length}>
                 <div className="flex justify-between items-center py-2 px-4 border-t border-white bg-blue-500 dark:border-zinc-500">
                   <span className="text-sm text-white">
-                    Showing {totalCount} out of {totalCount} entries
+                    Showing {Math.min(activePage * 10, totalCount)} out of{" "}
+                    {totalCount} entries
                   </span>
                 </div>
               </TableCell>

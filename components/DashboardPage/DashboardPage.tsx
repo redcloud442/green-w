@@ -24,7 +24,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Badge } from "../ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import CardAmount from "../ui/cardAmount";
-import NavigationLoader from "../ui/NavigationLoader";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Separator } from "../ui/separator";
 import { Skeleton } from "../ui/skeleton";
@@ -109,8 +108,6 @@ const DashboardPage = ({
       variant: "success",
     });
   };
-
-  if (loading) return <NavigationLoader visible={loading} />;
 
   return (
     <div className="relative min-h-screen mx-auto space-y-4 py-2 sm:px-0 mt-20 sm:mt-20 sm:mb-20 overflow-x-hidden">
