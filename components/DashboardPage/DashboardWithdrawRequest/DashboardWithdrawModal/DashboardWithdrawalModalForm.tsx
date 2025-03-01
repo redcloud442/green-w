@@ -42,11 +42,27 @@ const withdrawalFormSchema = z.object({
       message: "Amount must be at least 30 pesos",
     }),
   bank: z.string().min(1, "Please select a bank"),
-  email: z.string().email("Invalid email address").optional(),
+  email: z
+    .string()
+    .optional()
+    .refine(
+      (email) => email === "" || z.string().email().safeParse(email).success,
+      {
+        message: "Invalid email address",
+      }
+    ),
   cellphoneNumber: z
     .string()
-    .min(11, "Please enter your cellphone number")
-    .optional(),
+    .optional()
+    .refine(
+      (number) => {
+        if (number === undefined) return true;
+        return number === "" || /^\d{11}$/.test(number);
+      },
+      {
+        message: "Please enter a valid 11-digit cellphone number",
+      }
+    ),
   accountName: z
     .string()
     .min(6, "Account name is required")
@@ -74,7 +90,6 @@ const DashboardWithdrawalModalForm = ({
   setOpen,
   preferredEarnings,
   preferredType,
-  profile,
 }: Props) => {
   const { toast } = useToast();
   const { setEarnings, earnings } = useUserEarningsStore();
@@ -102,6 +117,8 @@ const DashboardWithdrawalModalForm = ({
         preferredEarnings?.alliance_preferred_withdrawal_account_name ?? "",
       accountNumber:
         preferredEarnings?.alliance_preferred_withdrawal_account_number ?? "",
+      email: "",
+      cellphoneNumber: "",
     },
   });
 
@@ -120,7 +137,6 @@ const DashboardWithdrawalModalForm = ({
     }
   };
 
-  // test
   const handleWithdrawalRequest = async (data: WithdrawalFormValues) => {
     try {
       const sanitizedData = escapeFormData(data);
@@ -568,6 +584,7 @@ const DashboardWithdrawalModalForm = ({
               id="email"
               placeholder="Active Email"
               {...field}
+              onChange={(e) => field.onChange(e.target.value || "")}
             />
           )}
         />
@@ -587,6 +604,7 @@ const DashboardWithdrawalModalForm = ({
               id="cellphoneNumber"
               placeholder="Cellphone Number"
               {...field}
+              onChange={(e) => field.onChange(e.target.value || "")}
             />
           )}
         />

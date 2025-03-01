@@ -1,30 +1,38 @@
 import RegisterPage from "@/components/registerPage/registerPage";
 import prisma from "@/utils/prisma";
 import { protectionRegisteredUser } from "@/utils/serversideProtection";
-import { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: "Create Your Account | Join Elevate Community",
-  description:
-    "Sign up and create your account to enjoy exclusive access to personalized features, services, and updates tailored just for you.",
-  openGraph: {
-    title: "Register an Account | Join Now",
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ registerName: string }>;
+}) {
+  const { registerName } = await params;
+
+  return {
+    title: "Create Your Account | Join Elevate Community",
     description:
-      "Create an account to gain access to personalized experiences, exclusive benefits, and the latest updates.",
-    url: "https://elevateglobal.app/register",
-    type: "website",
-    images: [
-      {
-        url: "https://elevateglobal.app/app-logo.png",
-        alt: "Join Now - Register an Account",
-        width: 1200,
-        height: 630,
-      },
-    ],
-    siteName: "Elevate Global",
-  },
-};
+      "Sign up and create your account to enjoy exclusive access to personalized features, services, and updates tailored just for you.",
+    openGraph: {
+      title: "Register an Account | Join Now",
+      description:
+        "Create an account to gain access to personalized experiences, exclusive benefits, and the latest updates.",
+      url: `https://elevateglobal.app/register/${registerName}`,
+      type: "website",
+      images: [
+        {
+          url: "https://elevateglobal.app/app-logo.png",
+          alt: "Join Now - Register an Account",
+          width: 1200,
+          height: 630,
+        },
+      ],
+      siteName: "Elevate Global",
+    },
+  };
+}
+
 const Page = async ({
   params,
 }: {

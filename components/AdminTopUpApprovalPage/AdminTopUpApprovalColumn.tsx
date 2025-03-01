@@ -260,23 +260,6 @@ export const useAdminTopUpApprovalColumns = (
       ),
     },
     {
-      accessorKey: "alliance_top_up_request_receipt",
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          className="p-1"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Reference Number <ArrowUpDown />
-        </Button>
-      ),
-      cell: ({ row }) => (
-        <div className="text-wrap">
-          {row.getValue("alliance_top_up_request_receipt")}
-        </div>
-      ),
-    },
-    {
       accessorKey: "approver_username",
       header: ({ column }) => (
         <Button
@@ -358,13 +341,12 @@ export const useAdminTopUpApprovalColumns = (
                 </DialogHeader>
                 <div className="flex justify-center items-center flex-wrap gap-2">
                   {attachmentUrl.map((url) => (
-                    <Image
+                    <img
                       key={url}
-                      src={url || ""}
+                      src={url}
                       alt="Attachment Preview"
-                      width={230}
-                      height={230}
-                      className="object-contain"
+                      className="object-contain w-[600px] h-[600px]"
+                      loading="lazy"
                     />
                   ))}
                 </div>

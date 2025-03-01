@@ -36,7 +36,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { alliance_member_table, merchant_table } from "@prisma/client";
 import { Loader2, XIcon } from "lucide-react";
 import Image from "next/image";
-import { NextResponse } from "next/server";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
@@ -148,30 +147,31 @@ const DashboardDepositModalDeposit = ({
           .upload(filePath, file, { upsert: true });
 
         if (uploadError) {
-          return NextResponse.json(
-            { error: "File upload failed.", details: uploadError.message },
-            { status: 500 }
-          );
+          return toast({
+            title: "Error",
+            description: "Some files failed to upload. Please try again.",
+            variant: "destructive",
+          });
         }
 
-        const {
-          data: { publicUrl },
-        } = supabaseClient.storage
-          .from("REQUEST_ATTACHMENTS")
-          .getPublicUrl(filePath);
+        const publicUrl = `https://content.elevateglobal.app/storage/v1/object/public/REQUEST_ATTACHMENTS/${filePath}`;
 
         return { filePath, publicUrl };
       })
     );
 
     const publicUrls = files
-      .map((file) => {
-        if ("publicUrl" in file) {
-          return file.publicUrl;
-        }
-        return null;
-      })
-      .filter(Boolean);
+      .map((file) => ("publicUrl" in file ? file.publicUrl : null))
+      .filter(Boolean) as string[];
+
+    if (publicUrls.length !== filesArray.length) {
+      toast({
+        title: "Error",
+        description: "Some files failed to upload. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
       await handleDepositRequest({

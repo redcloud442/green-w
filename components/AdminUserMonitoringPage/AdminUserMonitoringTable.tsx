@@ -30,6 +30,13 @@ import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { Input } from "../ui/input";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 import { Separator } from "../ui/separator";
 import TableLoading from "../ui/tableLoading";
 import { AdminUserMonitoringColumn } from "./AdminUserMonitoringColumn";
@@ -40,6 +47,7 @@ type DataTableProps = {
 
 type FilterFormValues = {
   usernameFilter: string;
+  type: string;
 };
 
 const AdminUserMonitoringTable = ({ teamMemberProfile }: DataTableProps) => {
@@ -48,7 +56,11 @@ const AdminUserMonitoringTable = ({ teamMemberProfile }: DataTableProps) => {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
-  const [requestData, setRequestData] = useState<user_table[]>([]);
+  const [requestData, setRequestData] = useState<
+    (user_table & {
+      alliance_olympus_wallet: number;
+    })[]
+  >([]);
   const [requestCount, setRequestCount] = useState(0);
   const [activePage, setActivePage] = useState(1);
   const [isFetchingList, setIsFetchingList] = useState(false);
@@ -73,6 +85,7 @@ const AdminUserMonitoringTable = ({ teamMemberProfile }: DataTableProps) => {
         columnAccessor: columnAccessor,
         isAscendingSort: isAscendingSort,
         search: usernameFilter,
+        type: type,
       });
 
       setRequestData(data || []);
@@ -116,15 +129,19 @@ const AdminUserMonitoringTable = ({ teamMemberProfile }: DataTableProps) => {
     },
   });
 
-  const { register, handleSubmit, getValues } = useForm<FilterFormValues>({
-    defaultValues: {
-      usernameFilter: "",
-    },
-  });
+  const { register, handleSubmit, getValues, setValue, watch } =
+    useForm<FilterFormValues>({
+      defaultValues: {
+        usernameFilter: "",
+        type: "DAILY",
+      },
+    });
+
+  const type = watch("type");
 
   useEffect(() => {
     fetchAdminRequest();
-  }, [supabaseClient, teamMemberProfile, activePage, sorting]);
+  }, [supabaseClient, teamMemberProfile, activePage, sorting, type]);
 
   const pageCount = Math.ceil(requestCount / 10);
 
@@ -141,6 +158,21 @@ const AdminUserMonitoringTable = ({ teamMemberProfile }: DataTableProps) => {
               placeholder="Filter username..."
               className="w-full sm:max-w-sm p-2 border rounded"
             />
+            <Select
+              onValueChange={(value) => {
+                setValue("type", value);
+              }}
+            >
+              <SelectTrigger className="w-[180px] flex-1">
+                <SelectValue placeholder={`${getValues("type")}`} />
+              </SelectTrigger>
+
+              <SelectContent {...register("type")}>
+                <SelectItem value="WEEKLY">WEEKLY</SelectItem>
+                {/* <SelectItem value="MONTHLY">MONTHLY</SelectItem> */}
+                <SelectItem value="DAILY">DAILY</SelectItem>
+              </SelectContent>
+            </Select>
             <Button
               type="submit"
               disabled={isFetchingList}
@@ -150,6 +182,7 @@ const AdminUserMonitoringTable = ({ teamMemberProfile }: DataTableProps) => {
             >
               <Search />
             </Button>
+
             <Button
               onClick={fetchAdminRequest}
               disabled={isFetchingList}

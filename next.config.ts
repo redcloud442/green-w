@@ -1,9 +1,4 @@
 const nextConfig = {
-  experimental: {
-    serverActions: {
-      bodySizeLimit: "12mb",
-    },
-  },
   images: {
     remotePatterns: [
       {
@@ -11,7 +6,7 @@ const nextConfig = {
         hostname:
           process.env.NODE_ENV === "development"
             ? "bfnevuiuzigykvlsnoea.supabase.co"
-            : "bfnevuiuzigykvlsnoea.supabase.co",
+            : "content.elevateglobal.app",
         port: "",
         pathname: "/storage/v1/object/public/**",
       },

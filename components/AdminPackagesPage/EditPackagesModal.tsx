@@ -135,9 +135,7 @@ const EditPackagesModal = ({
             throw new Error(`Failed to upload file: ${file.name}`);
           }
 
-          const {
-            data: { publicUrl },
-          } = supabaseClient.storage.from("PACKAGE_IMAGES").getPublicUrl(path);
+          const publicUrl = `https://content.elevateglobal.app/storage/v1/object/public/PACKAGE_IMAGES/${path}`;
 
           return { path, publicUrl };
         })

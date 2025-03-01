@@ -91,7 +91,7 @@ export type DashboardEarnings = {
   indirectReferralCount: number;
   package_income: number;
   rank: string;
-  tags: string[];
+  totalIncomeTag: string[];
 };
 
 export type AdminDashboardDataByDate = {
@@ -206,4 +206,10 @@ export type MissionData = {
   tasks: MissionTask[];
   isMissionCompleted: boolean;
   allMissionCompleted: boolean;
+};
+
+export type HeirarchyData = {
+  alliance_member_id: string;
+  user_username: string;
+  user_id: string;
 };
