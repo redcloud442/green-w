@@ -55,6 +55,7 @@ const AllyBountyTable = ({ teamMemberProfile }: DataTableProps) => {
     })[]
   >([]);
   const [requestCount, setRequestCount] = useState(0);
+  const [referralCount, setReferralCount] = useState(0);
   const [activePage, setActivePage] = useState(1);
   const [isFetchingList, setIsFetchingList] = useState(false);
 
@@ -71,16 +72,18 @@ const AllyBountyTable = ({ teamMemberProfile }: DataTableProps) => {
 
       const { emailFilter } = sanitizedData;
 
-      const { data, totalCount } = await getAllyBounty({
-        page: activePage,
-        limit: 10,
-        columnAccessor: columnAccessor,
-        isAscendingSort: isAscendingSort,
-        search: emailFilter,
-      });
+      const { data, totalCount, totalReferralCountDirect } =
+        await getAllyBounty({
+          page: activePage,
+          limit: 10,
+          columnAccessor: columnAccessor,
+          isAscendingSort: isAscendingSort,
+          search: emailFilter,
+        });
 
       setRequestData(data || []);
       setRequestCount(totalCount || 0);
+      setReferralCount(totalReferralCountDirect || 0);
     } catch (e) {
     } finally {
       setIsFetchingList(false);
@@ -133,9 +136,9 @@ const AllyBountyTable = ({ teamMemberProfile }: DataTableProps) => {
         </CardHeader>
         <Separator />
         <CardContent className="space-y-4">
-          <div className="flex justify-between items-end">
+          <div className="flex justify-between items-end flex-wrap gap-4">
             <form
-              className="flex  gap-2 pt-4"
+              className="flex gap-2 pt-4 w-full sm:w-auto"
               onSubmit={handleSubmit(handleFilter)}
             >
               <Input
@@ -153,7 +156,12 @@ const AllyBountyTable = ({ teamMemberProfile }: DataTableProps) => {
               </Button>
             </form>
 
-            <ReferralModal teamMemberProfile={teamMemberProfile} />
+            <div className="flex items-center gap-4 flex-wrap">
+              <span className="text-sm font-bold ">
+                Total Referral Count: {referralCount}
+              </span>
+              <ReferralModal teamMemberProfile={teamMemberProfile} />
+            </div>
           </div>
           <Table className="w-full border-collapse border border-white font-bold">
             <TableHeader className="border-b border-white text-white font-bold">
@@ -216,24 +224,6 @@ const AllyBountyTable = ({ teamMemberProfile }: DataTableProps) => {
           <ScrollBar orientation="horizontal" />
 
           <div className="flex items-center justify-between gap-x-4 py-4">
-            {/* <div className="flex justify-between items-center px-2 pt-2">
-        <span className="text-sm dark:text-pageColor font-bold ">
-          Rows per page
-        </span>
-        <Select
-          defaultValue="10"
-          onValueChange={(value) => setLimit(Number(value))}
-        >
-          <SelectTrigger className="w-[70px] h-8 dark:bg-transparent space-x-2 dark:text-pageColor font-bold border-none border-b-2 shadow-none border-black">
-            <SelectValue placeholder="10" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="10">10</SelectItem>
-            <SelectItem value="20">20</SelectItem>
-            <SelectItem value="30">30</SelectItem>
-          </SelectContent>
-        </Select>
-      </div> */}
             <div className="flex items-center justify-start gap-x-4">
               {/* Left Arrow */}
               <Button

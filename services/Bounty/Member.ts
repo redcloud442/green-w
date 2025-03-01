@@ -34,6 +34,7 @@ export const getAllyBounty = async (params: {
       package_ally_bounty_log_date_created: string;
     })[];
     totalCount: 0;
+    totalReferralCountDirect: number;
   };
 };
 

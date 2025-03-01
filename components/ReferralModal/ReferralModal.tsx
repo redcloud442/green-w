@@ -29,7 +29,7 @@ const ReferralModal = ({ teamMemberProfile }: Props) => {
       <DialogTrigger asChild>
         <Button
           variant="card"
-          className="dark:bg-pageColor dark:text-white h-8 rounded-sm"
+          className="dark:bg-pageColor dark:text-white h-8 rounded-sm w-full sm:w-auto"
           onClick={() => setOpen(true)}
         >
           My Referrals
