@@ -76,7 +76,9 @@ export const useMerchantColumn = (handleFetch: () => void) => {
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="text-wrap">{row.getValue("merchant_account_name")}</div>
+        <div className="text-center">
+          {row.getValue("merchant_account_name")}
+        </div>
       ),
     },
     {
@@ -92,7 +94,7 @@ export const useMerchantColumn = (handleFetch: () => void) => {
       ),
       cell: ({ row }) => {
         return (
-          <div className="font-medium text-wrap">
+          <div className="font-medium text-center">
             {row.getValue("merchant_account_number")}
           </div>
         );
@@ -100,7 +102,6 @@ export const useMerchantColumn = (handleFetch: () => void) => {
     },
     {
       accessorKey: "merchant_account_type",
-
       header: ({ column }) => (
         <Button
           variant="ghost"
@@ -110,7 +111,9 @@ export const useMerchantColumn = (handleFetch: () => void) => {
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="text-wrap">{row.getValue("merchant_account_type")}</div>
+        <div className="text-center">
+          {row.getValue("merchant_account_type")}
+        </div>
       ),
     },
     {
@@ -119,26 +122,27 @@ export const useMerchantColumn = (handleFetch: () => void) => {
         const data = row.original;
         return (
           <DropdownMenu>
-            <>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0">
-                  <MoreHorizontal />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem
-                  onClick={() =>
-                    setIsDeleteModal({
-                      merchantId: data.merchant_id,
-                      isOpen: true,
-                    })
-                  }
-                >
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                className="w-full p-0 text-center flex justify-center items-center"
+              >
+                <MoreHorizontal />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="center">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem
+                onClick={() =>
+                  setIsDeleteModal({
+                    merchantId: data.merchant_id,
+                    isOpen: true,
+                  })
+                }
+              >
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
           </DropdownMenu>
         );
       },

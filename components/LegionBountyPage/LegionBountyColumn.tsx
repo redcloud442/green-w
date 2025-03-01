@@ -9,7 +9,7 @@ export const LegionBountyColumn = (): ColumnDef<LegionRequestData>[] => {
       header: () => <div className="text-center text-lg font-bold">Date</div>,
       cell: ({ row }) => {
         return (
-          <div>
+          <div className="text-center">
             {formateMonthDateYear(
               row.getValue("package_ally_bounty_log_date_created")
             )}

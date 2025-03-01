@@ -1,13 +1,5 @@
 "use client";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { logError } from "@/services/Error/ErrorLogs";
 import {
@@ -21,7 +13,6 @@ import { alliance_member_table, merchant_table } from "@prisma/client";
 import { DialogDescription } from "@radix-ui/react-dialog";
 import {
   ColumnFiltersState,
-  flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
@@ -29,10 +20,11 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
-import { ChevronLeft, ChevronRight, Loader2, RefreshCw } from "lucide-react";
+import { Loader2, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
+import ReusableTable from "../ReusableTable/ReusableTable";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import {
@@ -45,16 +37,6 @@ import {
 } from "../ui/dialog";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { ScrollArea, ScrollBar } from "../ui/scroll-area";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
-import { Separator } from "../ui/separator";
-import TableLoading from "../ui/tableLoading";
 import { useMerchantColumn } from "./MerchantColumn";
 
 type DataTableProps = {
@@ -68,8 +50,6 @@ const filterFormValuesSchema = z.object({
 });
 
 type FilterFormValues = z.infer<typeof filterFormValuesSchema>;
-
-const bankData = ["GCASH", "MAYA", "GOTYME", "UNIONBANK", "BDO", "BPI"];
 
 const MerchantTable = ({ teamMemberProfile }: DataTableProps) => {
   const supabaseClient = createClientSide();
@@ -328,147 +308,15 @@ const MerchantTable = ({ teamMemberProfile }: DataTableProps) => {
         </div>
       </div>
 
-      <ScrollArea className="w-full overflow-x-auto ">
-        {isFetchingList && <TableLoading />}
-        <Separator />
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-
-          <TableBody>
-            {table.getRowModel().rows.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-          <tfoot>
-            <TableRow>
-              <TableCell className="px-0" colSpan={columns.length}>
-                <div className="flex justify-between items-center border-t px-2 pt-2">
-                  <span className="text-sm text-gray-600 dark:text-white">
-                    Showing {Math.min(activePage * 10, requestCount)} out of{" "}
-                    {requestCount} entries
-                  </span>
-                </div>
-              </TableCell>
-            </TableRow>
-          </tfoot>
-        </Table>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
-
-      <div className="flex items-center justify-end gap-x-4 py-4">
-        {activePage > 1 && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setActivePage((prev) => Math.max(prev - 1, 1))}
-            disabled={activePage <= 1}
-          >
-            <ChevronLeft />
-          </Button>
-        )}
-
-        <div className="flex space-x-2">
-          {(() => {
-            const maxVisiblePages = 3;
-            const pages = Array.from({ length: pageCount }, (_, i) => i + 1);
-            let displayedPages = [];
-
-            if (pageCount <= maxVisiblePages) {
-              // Show all pages if there are 3 or fewer
-              displayedPages = pages;
-            } else {
-              if (activePage <= 2) {
-                // Show the first 3 pages and the last page
-                displayedPages = [1, 2, 3, "...", pageCount];
-              } else if (activePage >= pageCount - 1) {
-                // Show the first page and the last 3 pages
-                displayedPages = [
-                  1,
-                  "...",
-                  pageCount - 2,
-                  pageCount - 1,
-                  pageCount,
-                ];
-              } else {
-                displayedPages = [
-                  activePage - 1,
-                  activePage,
-                  activePage + 1,
-                  "...",
-                  pageCount,
-                ];
-              }
-            }
-
-            return displayedPages.map((page, index) =>
-              typeof page === "number" ? (
-                <Button
-                  key={page}
-                  variant={activePage === page ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setActivePage(page)}
-                >
-                  {page}
-                </Button>
-              ) : (
-                <span key={`ellipsis-${index}`} className="px-2 py-1">
-                  {page}
-                </span>
-              )
-            );
-          })()}
-        </div>
-        {activePage < pageCount && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              setActivePage((prev) => Math.min(prev + 1, pageCount))
-            }
-            disabled={activePage >= pageCount}
-          >
-            <ChevronRight />
-          </Button>
-        )}
-      </div>
+      <ReusableTable
+        table={table}
+        columns={columns}
+        activePage={activePage}
+        totalCount={requestCount}
+        isFetchingList={isFetchingList}
+        setActivePage={setActivePage}
+        pageCount={pageCount}
+      />
     </Card>
   );
 };

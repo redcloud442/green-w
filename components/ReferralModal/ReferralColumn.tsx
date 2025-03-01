@@ -21,7 +21,7 @@ export const ReferralColumn = (
         <div className="text-center text-lg font-bold">Username</div>
       ),
       cell: ({ row }) => (
-        <div className="text-wrap">{row.getValue("user_username")}</div>
+        <div className="text-center">{row.getValue("user_username")}</div>
       ),
     },
   ];

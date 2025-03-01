@@ -180,10 +180,7 @@ const AdminSalesReportPage = ({ teamMemberProfile }: Props) => {
               </form>
             </CardContent>
           </Card>
-          <AdminSalesReportTable
-            teamMemberProfile={teamMemberProfile}
-            salesReportData={salesReportData}
-          />
+          <AdminSalesReportTable salesReportData={salesReportData} />
         </section>
       </div>
     </div>

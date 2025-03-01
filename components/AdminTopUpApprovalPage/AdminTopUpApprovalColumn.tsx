@@ -164,7 +164,7 @@ export const useAdminTopUpApprovalColumns = (
       ),
       cell: ({ row }) => {
         const fullName = `${row.original.user_first_name} ${row.original.user_last_name}`;
-        return <div className="text-wrap">{fullName}</div>;
+        return <div className="text-wrap w-40">{fullName}</div>;
       },
     },
     {
@@ -253,7 +253,7 @@ export const useAdminTopUpApprovalColumns = (
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="text-wrap">
+        <div className="text-wrap w-40">
           {formatDateToYYYYMMDD(row.getValue("alliance_top_up_request_date"))},
           {formatTime(row.getValue("alliance_top_up_request_date"))}
         </div>
@@ -307,7 +307,7 @@ export const useAdminTopUpApprovalColumns = (
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="text-wrap">
+        <div className="text-wrap w-40">
           {row.getValue("alliance_top_up_request_date_updated")
             ? formatDateToYYYYMMDD(
                 row.getValue("alliance_top_up_request_date_updated")

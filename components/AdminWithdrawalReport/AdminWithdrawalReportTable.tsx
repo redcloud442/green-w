@@ -7,14 +7,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { logError } from "@/services/Error/ErrorLogs";
 import { getAdminWithdrawalTotalReport } from "@/services/Withdrawal/Admin";
 import { createClientSide } from "@/utils/supabase/client";
@@ -22,7 +14,6 @@ import { adminWithdrawalTotalReportData } from "@/utils/types";
 import { alliance_member_table } from "@prisma/client";
 import {
   ColumnFiltersState,
-  flexRender,
   getCoreRowModel,
   getExpandedRowModel,
   getFilteredRowModel,
@@ -33,11 +24,9 @@ import {
 } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import ReusableTable from "../ReusableTable/ReusableTable";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
-import { ScrollArea, ScrollBar } from "../ui/scroll-area";
-import { Separator } from "../ui/separator";
-import TableLoading from "../ui/tableLoading";
 import { AdminWithdrawalReportColumn } from "./AdminWithdrawalReportColumn";
 
 type DataTableProps = {
@@ -199,58 +188,15 @@ const AdminWithdrawalReportTable = ({
         </form>
       </div>
 
-      <ScrollArea className="w-full overflow-x-auto ">
-        {isFetchingList && <TableLoading />}
-        <Separator />
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-
-          <TableBody>
-            {table.getExpandedRowModel().rows.length ? (
-              table.getExpandedRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+      <ReusableTable
+        table={table}
+        columns={columns}
+        activePage={1}
+        totalCount={1}
+        isFetchingList={isFetchingList}
+        setActivePage={() => {}}
+        pageCount={1}
+      />
     </Card>
   );
 };

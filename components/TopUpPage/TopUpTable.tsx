@@ -41,9 +41,7 @@ import {
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { Switch } from "../ui/switch";
-import TableLoading from "../ui/tableLoading";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Textarea } from "../ui/textarea";
 import { TopUpColumn } from "./TopUpColumn";
@@ -472,51 +470,56 @@ const TopUpTable = ({ teamMemberProfile }: DataTableProps) => {
           </div>
         </div>
       </div>
-      <ScrollArea className="w-full overflow-x-auto ">
-        {isFetchingList && <TableLoading />}
 
-        <Tabs defaultValue="PENDING" onValueChange={handleTabChange}>
-          <TabsList className="mb-4">
-            <TabsTrigger value="PENDING">
-              Pending ({requestData?.data?.PENDING?.count || 0})
-            </TabsTrigger>
-            <TabsTrigger value="APPROVED">
-              Approved ({requestData?.data?.APPROVED?.count || 0})
-            </TabsTrigger>
-            <TabsTrigger value="REJECTED">
-              Rejected ({requestData?.data?.REJECTED?.count || 0})
-            </TabsTrigger>
-          </TabsList>
+      <Tabs defaultValue="PENDING" onValueChange={handleTabChange}>
+        <TabsList className="mb-4">
+          <TabsTrigger value="PENDING">
+            Pending ({requestData?.data?.PENDING?.count || 0})
+          </TabsTrigger>
+          <TabsTrigger value="APPROVED">
+            Approved ({requestData?.data?.APPROVED?.count || 0})
+          </TabsTrigger>
+          <TabsTrigger value="REJECTED">
+            Rejected ({requestData?.data?.REJECTED?.count || 0})
+          </TabsTrigger>
+        </TabsList>
 
-          <TabsContent value="PENDING">
-            <TopUpTabs
-              table={table}
-              columns={columns}
-              activePage={activePage}
-              totalCount={requestData?.data?.PENDING?.count || 0}
-            />
-          </TabsContent>
+        <TabsContent value="PENDING">
+          <TopUpTabs
+            table={table}
+            columns={columns}
+            activePage={activePage}
+            totalCount={requestData?.data?.PENDING?.count || 0}
+            isFetchingList={isFetchingList}
+            setActivePage={setActivePage}
+            pageCount={pageCount}
+          />
+        </TabsContent>
 
-          <TabsContent value="APPROVED">
-            <TopUpTabs
-              table={table}
-              columns={columns}
-              activePage={activePage}
-              totalCount={requestData?.data?.APPROVED?.count || 0}
-            />
-          </TabsContent>
+        <TabsContent value="APPROVED">
+          <TopUpTabs
+            table={table}
+            columns={columns}
+            activePage={activePage}
+            totalCount={requestData?.data?.APPROVED?.count || 0}
+            isFetchingList={isFetchingList}
+            setActivePage={setActivePage}
+            pageCount={pageCount}
+          />
+        </TabsContent>
 
-          <TabsContent value="REJECTED">
-            <TopUpTabs
-              table={table}
-              columns={columns}
-              activePage={activePage}
-              totalCount={requestData?.data?.REJECTED?.count || 0}
-            />
-          </TabsContent>
-        </Tabs>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+        <TabsContent value="REJECTED">
+          <TopUpTabs
+            table={table}
+            columns={columns}
+            activePage={activePage}
+            totalCount={requestData?.data?.REJECTED?.count || 0}
+            isFetchingList={isFetchingList}
+            setActivePage={setActivePage}
+            pageCount={pageCount}
+          />
+        </TabsContent>
+      </Tabs>
 
       <div className="flex items-center justify-end gap-x-4 py-4">
         {activePage > 1 && (

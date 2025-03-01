@@ -13,7 +13,7 @@ export const AllyBountyColumn = (): ColumnDef<
       accessorKey: "package_ally_bounty_log_date_created",
       header: () => <div className="text-center text-lg font-bold">Date</div>,
       cell: ({ row }) => (
-        <div className="text-wrap">
+        <div className="text-center">
           {formateMonthDateYear(
             row.getValue("package_ally_bounty_log_date_created")
           )}
@@ -27,7 +27,7 @@ export const AllyBountyColumn = (): ColumnDef<
         <div className="text-center text-lg font-bold">Username</div>
       ),
       cell: ({ row }) => (
-        <div className="text-wrap">{row.getValue("user_username")}</div>
+        <div className="text-center">{row.getValue("user_username")}</div>
       ),
     },
 
@@ -35,7 +35,7 @@ export const AllyBountyColumn = (): ColumnDef<
       accessorKey: "total_bounty_earnings",
       header: () => <div className="text-center text-lg font-bold">Amount</div>,
       cell: ({ row }) => (
-        <div className="text-wrap">
+        <div className="text-center">
           ₱{" "}
           {Number(row.getValue("total_bounty_earnings")).toLocaleString(
             "en-US",

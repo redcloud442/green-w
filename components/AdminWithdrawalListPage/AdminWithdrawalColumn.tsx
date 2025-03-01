@@ -201,7 +201,7 @@ export const AdminWithdrawalHistoryColumn = (
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="text-wrap">
+        <div className="w-96 text-wrap">
           {row.getValue("alliance_withdrawal_request_type")}
         </div>
       ),
@@ -222,7 +222,7 @@ export const AdminWithdrawalHistoryColumn = (
           "alliance_withdrawal_request_bank_name"
         ) as string;
         return (
-          <div className="flex items-center gap-2 text-wrap">
+          <div className="flex items-center gap-2 text-wrap w-40">
             <span>{value}</span>
             <Button
               variant="card"
@@ -252,7 +252,7 @@ export const AdminWithdrawalHistoryColumn = (
           "alliance_withdrawal_request_account"
         ) as string;
         return (
-          <div className="flex items-center gap-2 text-wrap">
+          <div className="flex items-center gap-2 text-wrap w-24">
             <span>{value}</span>
             <Button
               variant="card"
@@ -278,7 +278,7 @@ export const AdminWithdrawalHistoryColumn = (
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="text-wrap">
+        <div className="text-wrap w-40">
           {formatDateToYYYYMMDD(
             row.getValue("alliance_withdrawal_request_date")
           )}
@@ -352,7 +352,7 @@ export const AdminWithdrawalHistoryColumn = (
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="text-wrap">
+        <div className="text-wrap w-40">
           {row.getValue("alliance_withdrawal_request_date_updated")
             ? formatDateToYYYYMMDD(
                 row.getValue("alliance_withdrawal_request_date_updated")

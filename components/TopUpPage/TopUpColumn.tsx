@@ -9,6 +9,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 import Image from "next/image";
 import { Dispatch, SetStateAction, useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Badge } from "../ui/badge";
 import {
   Dialog,
@@ -136,23 +137,32 @@ export const TopUpColumn = (
   const columns: ColumnDef<TopUpRequestData>[] = [
     {
       accessorKey: "user_username",
-
       header: ({ column }) => (
         <Button
           variant="ghost"
           className="p-1"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          onClick={() => column.toggleSorting(column.getIsSorted() === "desc")}
         >
-          Requestor Username <ArrowUpDown />
+          Requestor Name <ArrowUpDown />
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="text-wrap">{row.getValue("user_username")}</div>
+        <div className="flex items-center gap-2">
+          <Avatar>
+            <AvatarImage src={row.original.user_profile_picture ?? ""} />
+            <AvatarFallback>
+              {row.original.user_username?.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+
+          <p className="text-wrap text-blue-500">
+            {row.getValue("user_username")}
+          </p>
+        </div>
       ),
     },
     {
       accessorKey: "user_first_name",
-
       header: ({ column }) => (
         <Button
           variant="ghost"
@@ -164,7 +174,7 @@ export const TopUpColumn = (
       ),
       cell: ({ row }) => {
         const fullName = `${row.original.user_first_name} ${row.original.user_last_name}`;
-        return <div className="text-wrap">{fullName}</div>;
+        return <div className="text-wrap w-56">{fullName}</div>;
       },
     },
     {
@@ -217,11 +227,11 @@ export const TopUpColumn = (
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Name <ArrowUpDown />
+          Account Name <ArrowUpDown />
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="text-wrap">
+        <div className="text-wrap w-56">
           {row.getValue("alliance_top_up_request_name")}
         </div>
       ),
@@ -239,7 +249,7 @@ export const TopUpColumn = (
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="text-wrap">
+        <div className="text-wrap w-56">
           {row.getValue("alliance_top_up_request_type")}
         </div>
       ),
@@ -256,7 +266,7 @@ export const TopUpColumn = (
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="text-wrap">
+        <div className="text-wrap w-56">
           {row.getValue("alliance_top_up_request_account")}
         </div>
       ),
@@ -274,7 +284,7 @@ export const TopUpColumn = (
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="text-wrap">
+        <div className="text-wrap w-40">
           {formatDateToYYYYMMDD(row.getValue("alliance_top_up_request_date"))},
           {formatTime(row.getValue("alliance_top_up_request_date"))}
         </div>

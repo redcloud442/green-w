@@ -29,7 +29,7 @@ export const AdminWithdrawalReportColumn =
           const formattedDate = newDate.toISOString().split("T")[0];
 
           return (
-            <div className="flex items-center gap-2 text-wrap">
+            <div className="flex items-center gap-2 text-wrap w-40">
               {formatDay(originalDate)}, {formattedDate}
             </div>
           );
@@ -129,7 +129,7 @@ export const AdminWithdrawalReportColumn =
         ),
         cell: ({ row }) => {
           return (
-            <div className="flex items-center gap-2 text-wrap ">
+            <div className="flex items-center gap-2 text-wrap w-40">
               {formatDay(row.original.interval_end)},{" "}
               {formatDateToYYYYMMDD(row.original.interval_end)}
             </div>

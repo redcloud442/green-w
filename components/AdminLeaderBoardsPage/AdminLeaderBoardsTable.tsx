@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getLeaderBoardData } from "@/services/Dasboard/Admin";
 import { logError } from "@/services/Error/ErrorLogs";
@@ -14,12 +13,9 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
-import { ChevronLeft, ChevronRight, Trophy } from "lucide-react";
+import { Trophy } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Card } from "../ui/card";
-import { ScrollArea, ScrollBar } from "../ui/scroll-area";
-import { Separator } from "../ui/separator";
-import TableLoading from "../ui/tableLoading";
 import { leaderBoardColumn } from "./AdminLeaderBoardsColumn";
 import AdminLeaderBoardsTabTable from "./AdminLeaderBoardsTabTable";
 
@@ -134,6 +130,9 @@ const AdminLeaderBoardsPage = ({ teamMemberProfile }: Props) => {
             columns={columns}
             activePage={activePage}
             totalCount={totalCount}
+            isFetchingList={isFetchingList}
+            setActivePage={setActivePage}
+            pageCount={pageCount}
           />
         </TabsContent>
 
@@ -143,92 +142,12 @@ const AdminLeaderBoardsPage = ({ teamMemberProfile }: Props) => {
             columns={columns}
             activePage={activePage}
             totalCount={totalCount}
+            isFetchingList={isFetchingList}
+            setActivePage={setActivePage}
+            pageCount={pageCount}
           />
         </TabsContent>
       </Tabs>
-      <ScrollArea className="w-full overflow-x-auto ">
-        {isFetchingList && <TableLoading />}
-        <Separator />
-
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
-
-      <div className="flex items-center justify-end gap-x-4 py-4">
-        {activePage > 1 && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setActivePage((prev) => Math.max(prev - 1, 1))}
-            disabled={activePage <= 1}
-          >
-            <ChevronLeft />
-          </Button>
-        )}
-
-        <div className="flex space-x-2">
-          {(() => {
-            const maxVisiblePages = 3;
-            const pages = Array.from({ length: pageCount }, (_, i) => i + 1);
-            let displayedPages = [];
-
-            if (pageCount <= maxVisiblePages) {
-              // Show all pages if there are 3 or fewer
-              displayedPages = pages;
-            } else {
-              if (activePage <= 2) {
-                // Show the first 3 pages and the last page
-                displayedPages = [1, 2, 3, "...", pageCount];
-              } else if (activePage >= pageCount - 1) {
-                // Show the first page and the last 3 pages
-                displayedPages = [
-                  1,
-                  "...",
-                  pageCount - 2,
-                  pageCount - 1,
-                  pageCount,
-                ];
-              } else {
-                displayedPages = [
-                  activePage - 1,
-                  activePage,
-                  activePage + 1,
-                  "...",
-                  pageCount,
-                ];
-              }
-            }
-
-            return displayedPages.map((page, index) =>
-              typeof page === "number" ? (
-                <Button
-                  key={page}
-                  variant={activePage === page ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setActivePage(page)}
-                >
-                  {page}
-                </Button>
-              ) : (
-                <span key={`ellipsis-${index}`} className="px-2 py-1">
-                  {page}
-                </span>
-              )
-            );
-          })()}
-        </div>
-        {activePage < pageCount && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              setActivePage((prev) => Math.min(prev + 1, pageCount))
-            }
-            disabled={activePage >= pageCount}
-          >
-            <ChevronRight />
-          </Button>
-        )}
-      </div>
     </Card>
   );
 };

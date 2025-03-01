@@ -18,14 +18,13 @@ export const AdminSalesReportColumn = (): ColumnDef<adminSalesReportData>[] => {
       ),
       cell: ({ row }) => {
         return (
-          <div className="flex items-center gap-2 text-wrap ">
+          <div className="flex justify-center items-center gap-2 text-center ">
             {formatDay(row.original.date)},{" "}
             {formatDateToYYYYMMDD(row.original.date)}
           </div>
         );
       },
     },
-
     {
       accessorKey: "amount",
       header: ({ column }) => (
@@ -39,7 +38,7 @@ export const AdminSalesReportColumn = (): ColumnDef<adminSalesReportData>[] => {
       ),
       cell: ({ row }) => {
         return (
-          <div className="flex items-center gap-2 text-wrap ">
+          <div className="flex items-center gap-2 text-center ">
             ₱
             {row.original.amount.toLocaleString("en-US", {
               minimumFractionDigits: 2,

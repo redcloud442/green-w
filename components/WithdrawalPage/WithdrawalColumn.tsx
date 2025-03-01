@@ -212,7 +212,7 @@ export const WithdrawalColumn = (
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="text-wrap">
+        <div className="text-wrap w-96">
           {row.getValue("alliance_withdrawal_request_type")}
         </div>
       ),
@@ -233,7 +233,7 @@ export const WithdrawalColumn = (
           "alliance_withdrawal_request_bank_name"
         ) as string;
         return (
-          <div className="flex items-center gap-2 text-wrap">
+          <div className="flex items-center gap-2 text-wrap w-56">
             <span>{value}</span>
             <Button
               variant="card"
@@ -289,7 +289,7 @@ export const WithdrawalColumn = (
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="text-center">
+        <div className="text-center w-40">
           {formatDateToYYYYMMDD(
             row.getValue("alliance_withdrawal_request_date")
           )}
@@ -309,7 +309,7 @@ export const WithdrawalColumn = (
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="text-center">
+        <div className="text-center w-40">
           {row.getValue("alliance_withdrawal_request_date_updated") ? (
             <>
               {formatDateToYYYYMMDD(

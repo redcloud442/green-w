@@ -19,24 +19,34 @@ export const leaderBoardColumn = (
         switch (rank) {
           case 1:
             return (
-              <Badge className="bg-green-500 dark:bg-green-600 text-white dark:text-white">
-                Top 1
-              </Badge>
+              <div className="flex items-center justify-center">
+                <Badge className="bg-green-500 dark:bg-green-600 text-white dark:text-white">
+                  Top 1
+                </Badge>
+              </div>
             );
           case 2:
             return (
-              <Badge className="bg-green-500 dark:bg-green-600 text-white dark:text-white">
-                Top 2
-              </Badge>
+              <div className="flex items-center justify-center">
+                <Badge className="bg-green-500 dark:bg-green-600 text-white dark:text-white">
+                  Top 2
+                </Badge>
+              </div>
             );
           case 3:
             return (
-              <Badge className="bg-green-500 dark:bg-green-600 text-white dark:text-white">
-                Top 3
-              </Badge>
+              <div className="flex items-center justify-center">
+                <Badge className="bg-green-500 dark:bg-green-600 text-white dark:text-white">
+                  Top 3
+                </Badge>
+              </div>
             );
           default:
-            return <Badge className="bg-gray-500">Rank {rank}</Badge>;
+            return (
+              <div className="flex items-center justify-center">
+                <Badge className="bg-gray-500">Rank {rank}</Badge>
+              </div>
+            );
         }
       },
     },
