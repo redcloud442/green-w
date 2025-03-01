@@ -124,7 +124,7 @@ export const AdminUsersColumn = (
         const userName = row.original.user_username as string;
         const allianceMemberId = row.getValue("alliance_member_id") as string;
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex justify-center items-center gap-2">
             <Button
               variant="card"
               className="p-1 rounded-md"
