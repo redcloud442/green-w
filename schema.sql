@@ -3223,7 +3223,6 @@ USING (
 );
 
 
-
 CREATE INDEX idx_alliance_top_up_request_member_id
 ON alliance_schema.alliance_top_up_request_table (alliance_top_up_request_member_id);
 

@@ -48,7 +48,6 @@ const DashboardMissionModal = ({ className }: Props) => {
         const mission = await handleGetMission();
         setMission(mission);
       } catch (error) {
-        console.error("Error fetching mission:", error);
       } finally {
         setIsLoading(false);
       }
@@ -91,7 +90,10 @@ const DashboardMissionModal = ({ className }: Props) => {
         description: "You have successfully claimed the mission",
       });
     } catch (error) {
-      console.error("Error claiming mission:", error);
+      toast({
+        title: "Error claiming mission",
+        description: "Please try again",
+      });
       setIsClaiming(false);
     } finally {
       setIsClaiming(false);
@@ -206,9 +208,9 @@ const DashboardMissionModal = ({ className }: Props) => {
                         Claiming...
                       </>
                     ) : mission?.isMissionCompleted ? (
-                      `Mission ${mission?.mission_order} Complete! Claim Your Reward Here`
+                      `${isLoading ? "Loading..." : "Mission " + mission?.mission_order + " Complete! Claim Your Reward Here"}`
                     ) : (
-                      `Complete All Tasks for Mission ${mission?.mission_order} to Claim Your Reward`
+                      `${isLoading ? "Loading..." : "Complete All Tasks for Mission " + mission?.mission_order + " to Claim Your Reward"}`
                     )}
                   </Button>
                 </DialogFooter>
