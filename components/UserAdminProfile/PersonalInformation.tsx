@@ -70,14 +70,23 @@ const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
         formattedUserName: userNameToEmail(userProfile.user_username ?? ""),
       });
 
-      navigator.clipboard.writeText(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/auth/callback?hashed_token=${data.url.hashed_token}`
-      );
-
-      toast({
-        title: "Copied to clipboard",
-        description: `You may now access the user's account by accessing the link.`,
-      });
+      if (data.url.hashed_token) {
+        await navigator.clipboard.writeText(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/auth/callback?hashed_token=${data.url.hashed_token}`
+        );
+        setTimeout(() => {
+          toast({
+            title: "Copied to clipboard",
+            description: `You may now access the user's account by accessing the link.`,
+          });
+        }, 1000);
+      } else {
+        toast({
+          title: "Error",
+          description: "Something went wrong",
+          variant: "destructive",
+        });
+      }
 
       return data;
     } catch (e) {
