@@ -5,7 +5,7 @@ import { updateTopUpStatus } from "@/services/TopUp/Admin";
 import { formatDateToYYYYMMDD, formatTime } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
 import { AdminTopUpRequestData, TopUpRequestData } from "@/utils/types";
-import { ColumnDef } from "@tanstack/react-table";
+import { ColumnDef, Row } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 import Image from "next/image";
 import { Dispatch, SetStateAction, useState } from "react";
@@ -31,7 +31,8 @@ const statusColorMap: Record<string, string> = {
 
 export const TopUpColumn = (
   setRequestData: Dispatch<SetStateAction<AdminTopUpRequestData | null>>,
-  reset: () => void
+  reset: () => void,
+  status: string
 ) => {
   const { toast } = useToast();
   const supabaseClient = createClientSide();
@@ -273,7 +274,6 @@ export const TopUpColumn = (
     },
     {
       accessorKey: "alliance_top_up_request_date",
-
       header: ({ column }) => (
         <Button
           variant="ghost"
@@ -301,7 +301,9 @@ export const TopUpColumn = (
           <Dialog>
             <DialogTrigger asChild>
               {publicUrls[0] !== null ? (
-                <Button variant="outline">View Attachment</Button>
+                <Button className="w-full rounded-md" variant="outline">
+                  View Attachment
+                </Button>
               ) : null}
             </DialogTrigger>
 
@@ -328,117 +330,134 @@ export const TopUpColumn = (
         );
       },
     },
-    {
-      accessorKey: "alliance_top_up_request_attachment",
-      header: () => <div className="p-1">Old Attachment</div>,
-      cell: ({ row }) => {
-        const publicUrls = row.original.attachment_url;
+    ...(status !== "PENDING"
+      ? [
+          {
+            accessorKey: "alliance_top_up_request_attachment",
+            header: () => <div className="p-1">Old Attachment</div>,
+            cell: ({ row }: { row: Row<TopUpRequestData> }) => {
+              const publicUrls = row.original.attachment_url;
 
-        const attachmentUrl = row.getValue(
-          "alliance_top_up_request_attachment"
-        ) as string;
+              const attachmentUrl = row.getValue(
+                "alliance_top_up_request_attachment"
+              ) as string;
 
-        return (
-          <Dialog>
-            <DialogTrigger asChild>
-              {publicUrls.length > 0 && publicUrls[0] !== null ? null : (
-                <Button variant="outline">View Old Attachment</Button>
-              )}
-            </DialogTrigger>
+              return (
+                <Dialog>
+                  <DialogTrigger asChild>
+                    {publicUrls.length > 0 && publicUrls[0] !== null ? null : (
+                      <Button className="w-full rounded-md" variant="outline">
+                        View Old Attachment
+                      </Button>
+                    )}
+                  </DialogTrigger>
 
-            <DialogContent type="table">
-              <ScrollArea className="h-[600px]">
-                <DialogDescription></DialogDescription>
-                <DialogHeader>
-                  <DialogTitle>Attachment</DialogTitle>
-                </DialogHeader>
-                <div className="flex justify-center items-center flex-wrap gap-2">
-                  <Image
-                    key={attachmentUrl}
-                    src={attachmentUrl || ""}
-                    alt="Attachment Preview"
-                    width={230}
-                    height={230}
-                    className="object-contain"
-                  />
-                </div>
-              </ScrollArea>
-            </DialogContent>
-          </Dialog>
-        );
-      },
-    },
-    {
-      accessorKey: "alliance_top_up_request_reject_note",
+                  <DialogContent type="table">
+                    <ScrollArea className="h-[600px]">
+                      <DialogDescription></DialogDescription>
+                      <DialogHeader>
+                        <DialogTitle>Attachment</DialogTitle>
+                      </DialogHeader>
+                      <div className="flex justify-center items-center flex-wrap gap-2">
+                        <Image
+                          key={attachmentUrl}
+                          src={attachmentUrl || ""}
+                          alt="Attachment Preview"
+                          width={230}
+                          height={230}
+                          className="object-contain"
+                        />
+                      </div>
+                    </ScrollArea>
+                  </DialogContent>
+                </Dialog>
+              );
+            },
+          },
+        ]
+      : []),
+    ...(status === "REJECTED"
+      ? [
+          {
+            accessorKey: "alliance_top_up_request_reject_note",
 
-      header: () => <div>Rejection Note</div>,
-      cell: ({ row }) => {
-        const rejectionNote = row.getValue(
-          "alliance_top_up_request_reject_note"
-        ) as string;
+            header: () => <div>Rejection Note</div>,
+            cell: ({ row }: { row: Row<TopUpRequestData> }) => {
+              const rejectionNote = row.getValue(
+                "alliance_top_up_request_reject_note"
+              ) as string;
 
-        return rejectionNote ? (
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="destructive">View Rejection Note</Button>
-            </DialogTrigger>
-            <DialogContent type="table">
-              <DialogHeader>
-                <DialogTitle>Rejection Note</DialogTitle>
-              </DialogHeader>
-              <div className="flex justify-center items-center">
-                <Textarea value={rejectionNote} readOnly />
-              </div>
-              <DialogClose asChild>
-                <Button variant="secondary">Close</Button>
-              </DialogClose>
-            </DialogContent>
-          </Dialog>
-        ) : null;
-      },
-    },
-    {
-      header: "Actions",
-      cell: ({ row }) => {
-        const data = row.original;
+              return rejectionNote ? (
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button className="w-full rounded-md" variant="destructive">
+                      View Rejection Note
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent type="table">
+                    <DialogHeader>
+                      <DialogTitle>Rejection Note</DialogTitle>
+                    </DialogHeader>
+                    <div className="flex justify-center items-center">
+                      <Textarea value={rejectionNote} readOnly />
+                    </div>
+                    <DialogClose asChild>
+                      <Button variant="secondary">Close</Button>
+                    </DialogClose>
+                  </DialogContent>
+                </Dialog>
+              ) : null;
+            },
+          },
+        ]
+      : []),
+    ...(status === "PENDING"
+      ? [
+          {
+            header: "Actions",
+            cell: ({ row }: { row: Row<TopUpRequestData> }) => {
+              const data = row.original;
 
-        return (
-          <>
-            {data.alliance_top_up_request_status === "PENDING" && (
-              <div className="flex gap-2">
-                <Button
-                  className="bg-green-500 hover:bg-green-600 dark:bg-green-500 dark:text-white"
-                  onClick={() =>
-                    setIsOpenModal({
-                      open: true,
-                      requestId: data.alliance_top_up_request_id,
-                      status: "APPROVED",
-                      amount: Number(data.alliance_top_up_request_amount) || 0,
-                    })
-                  }
-                >
-                  Approve
-                </Button>
+              return (
+                <>
+                  {data.alliance_top_up_request_status === "PENDING" && (
+                    <div className="flex justify-center items-center gap-2">
+                      <Button
+                        className="bg-green-500 hover:bg-green-600 dark:bg-green-500 dark:text-white"
+                        onClick={() =>
+                          setIsOpenModal({
+                            open: true,
+                            requestId: data.alliance_top_up_request_id,
+                            status: "APPROVED",
+                            amount:
+                              Number(data.alliance_top_up_request_amount) || 0,
+                          })
+                        }
+                      >
+                        Approve
+                      </Button>
 
-                <Button
-                  variant="destructive"
-                  onClick={() =>
-                    setIsOpenModal({
-                      open: true,
-                      requestId: data.alliance_top_up_request_id,
-                      status: "REJECTED",
-                      amount: 0,
-                    })
-                  }
-                >
-                  Reject
-                </Button>
-              </div>
-            )}
-          </>
-        );
-      },
-    },
+                      <Button
+                        variant="destructive"
+                        onClick={() =>
+                          setIsOpenModal({
+                            open: true,
+                            requestId: data.alliance_top_up_request_id,
+                            status: "REJECTED",
+                            amount: 0,
+                          })
+                        }
+                      >
+                        Reject
+                      </Button>
+                    </div>
+                  )}
+                </>
+              );
+            },
+          },
+        ]
+      : []),
   ];
 
   return {

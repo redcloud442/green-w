@@ -38,7 +38,7 @@ export const AdminSalesReportColumn = (): ColumnDef<adminSalesReportData>[] => {
       ),
       cell: ({ row }) => {
         return (
-          <div className="flex items-center gap-2 text-center ">
+          <div className="flex items-center justify-center gap-2 text-center ">
             ₱
             {row.original.amount.toLocaleString("en-US", {
               minimumFractionDigits: 2,

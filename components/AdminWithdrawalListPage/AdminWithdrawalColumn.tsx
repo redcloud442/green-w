@@ -3,7 +3,7 @@ import { useToast } from "@/hooks/use-toast";
 import { updateWithdrawalStatus } from "@/services/Withdrawal/Admin";
 import { formatDateToYYYYMMDD, formatTime } from "@/utils/function";
 import { AdminWithdrawaldata, WithdrawalRequestData } from "@/utils/types";
-import { ColumnDef } from "@tanstack/react-table";
+import { Column, ColumnDef, Row } from "@tanstack/react-table";
 import { ArrowUpDown, ClipboardCopy } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Dispatch, SetStateAction, useState } from "react";
@@ -29,7 +29,8 @@ const statusColorMap: Record<string, string> = {
 export const AdminWithdrawalHistoryColumn = (
   reset: () => void,
   profile: user_table,
-  setRequestData: Dispatch<SetStateAction<AdminWithdrawaldata | null>>
+  setRequestData: Dispatch<SetStateAction<AdminWithdrawaldata | null>>,
+  status: "PENDING" | "APPROVED" | "REJECTED"
 ) => {
   const { toast } = useToast();
   const router = useRouter();
@@ -222,7 +223,7 @@ export const AdminWithdrawalHistoryColumn = (
           "alliance_withdrawal_request_bank_name"
         ) as string;
         return (
-          <div className="flex items-center gap-2 text-wrap w-40">
+          <div className="flex justify-between items-center gap-2 text-wrap w-full">
             <span>{value}</span>
             <Button
               variant="card"
@@ -252,7 +253,7 @@ export const AdminWithdrawalHistoryColumn = (
           "alliance_withdrawal_request_account"
         ) as string;
         return (
-          <div className="flex items-center gap-2 text-wrap w-24">
+          <div className="flex justify-between items-center gap-2 text-wrap w-full">
             <span>{value}</span>
             <Button
               variant="card"
@@ -303,136 +304,157 @@ export const AdminWithdrawalHistoryColumn = (
         </div>
       ),
     },
-    {
-      accessorKey: "approver_username",
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          className="p-1"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "desc")}
-        >
-          Approver <ArrowUpDown />
-        </Button>
-      ),
-      cell: ({ row }) => (
-        <div className="flex items-center gap-2 text-wrap cursor-pointer hover:underline">
-          {row.original.approver_username ? (
-            <>
-              <Avatar>
-                <AvatarImage
-                  src={row.original.approver_profile_picture ?? ""}
-                />
-                <AvatarFallback>
-                  {row.original.approver_username?.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-
-              <p
+    ...(status !== "PENDING"
+      ? [
+          {
+            accessorKey: "approver_username",
+            header: ({ column }: { column: Column<WithdrawalRequestData> }) => (
+              <Button
+                variant="ghost"
+                className="p-1"
                 onClick={() =>
-                  router.push(`/admin/users/${row.original.approver_id}`)
+                  column.toggleSorting(column.getIsSorted() === "desc")
                 }
-                className="text-wrap text-blue-500 underline"
               >
-                {row.getValue("approver_username")}
-              </p>
-            </>
-          ) : null}
-        </div>
-      ),
-    },
-    {
-      accessorKey: "alliance_withdrawal_request_date_updated",
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          className="p-1"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "desc")}
-        >
-          Date Updated <ArrowUpDown />
-        </Button>
-      ),
-      cell: ({ row }) => (
-        <div className="text-wrap w-40">
-          {row.getValue("alliance_withdrawal_request_date_updated")
-            ? formatDateToYYYYMMDD(
-                row.getValue("alliance_withdrawal_request_date_updated")
-              ) +
-              ", " +
-              formatTime(
-                row.getValue("alliance_withdrawal_request_date_updated")
-              )
-            : ""}
-        </div>
-      ),
-    },
-    {
-      accessorKey: "alliance_withdrawal_request_reject_note",
-      header: () => <div className="p-1">Rejection Note</div>,
-      cell: ({ row }) => {
-        const rejectionNote = row.getValue(
-          "alliance_withdrawal_request_reject_note"
-        ) as string;
+                Approver <ArrowUpDown />
+              </Button>
+            ),
+            cell: ({ row }: { row: Row<WithdrawalRequestData> }) => (
+              <div className="flex items-center gap-2 text-wrap cursor-pointer hover:underline">
+                {row.original.approver_username ? (
+                  <>
+                    <Avatar>
+                      <AvatarImage
+                        src={row.original.approver_profile_picture ?? ""}
+                      />
+                      <AvatarFallback>
+                        {row.original.approver_username
+                          ?.charAt(0)
+                          .toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
 
-        return rejectionNote ? (
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="destructive">View Rejection Note</Button>
-            </DialogTrigger>
-            <DialogContent type="table">
-              <DialogHeader>
-                <DialogTitle>Rejection Note</DialogTitle>
-              </DialogHeader>
-              <div className="flex justify-center items-center">
-                <Textarea value={rejectionNote} readOnly />
+                    <p
+                      onClick={() =>
+                        router.push(`/admin/users/${row.original.approver_id}`)
+                      }
+                      className="text-wrap text-blue-500 underline"
+                    >
+                      {row.getValue("approver_username")}
+                    </p>
+                  </>
+                ) : null}
               </div>
-              <DialogClose asChild>
-                <Button variant="secondary">Close</Button>
-              </DialogClose>
-            </DialogContent>
-          </Dialog>
-        ) : null;
-      },
-    },
-    {
-      header: "Actions",
-      cell: ({ row }) => {
-        const data = row.original;
-
-        return (
-          <>
-            {data.alliance_withdrawal_request_status === "PENDING" && (
-              <div className="flex gap-2">
-                <Button
-                  className="bg-green-500 hover:bg-green-600 dark:bg-green-500 dark:text-white "
-                  onClick={() =>
-                    setIsOpenModal({
-                      open: true,
-                      requestId: data.alliance_withdrawal_request_id,
-                      status: "APPROVED",
-                    })
-                  }
-                >
-                  Approve
-                </Button>
-
-                <Button
-                  variant="destructive"
-                  onClick={() =>
-                    setIsOpenModal({
-                      open: true,
-                      requestId: data.alliance_withdrawal_request_id,
-                      status: "REJECTED",
-                    })
-                  }
-                >
-                  Reject
-                </Button>
+            ),
+          },
+        ]
+      : []),
+    ...(status !== "PENDING"
+      ? [
+          {
+            accessorKey: "alliance_withdrawal_request_date_updated",
+            header: ({ column }: { column: Column<WithdrawalRequestData> }) => (
+              <Button
+                variant="ghost"
+                className="p-1"
+                onClick={() =>
+                  column.toggleSorting(column.getIsSorted() === "desc")
+                }
+              >
+                Date Updated <ArrowUpDown />
+              </Button>
+            ),
+            cell: ({ row }: { row: Row<WithdrawalRequestData> }) => (
+              <div className="text-wrap w-40">
+                {row.getValue("alliance_withdrawal_request_date_updated")
+                  ? formatDateToYYYYMMDD(
+                      row.getValue("alliance_withdrawal_request_date_updated")
+                    ) +
+                    ", " +
+                    formatTime(
+                      row.getValue("alliance_withdrawal_request_date_updated")
+                    )
+                  : ""}
               </div>
-            )}
-          </>
-        );
-      },
-    },
+            ),
+          },
+        ]
+      : []),
+    ...(status === "REJECTED"
+      ? [
+          {
+            accessorKey: "alliance_withdrawal_request_reject_note",
+            header: () => <div className="p-1">Rejection Note</div>,
+            cell: ({ row }: { row: Row<WithdrawalRequestData> }) => {
+              const rejectionNote = row.getValue(
+                "alliance_withdrawal_request_reject_note"
+              ) as string;
+
+              return rejectionNote ? (
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="destructive">View Rejection Note</Button>
+                  </DialogTrigger>
+                  <DialogContent type="table">
+                    <DialogHeader>
+                      <DialogTitle>Rejection Note</DialogTitle>
+                    </DialogHeader>
+                    <div className="flex justify-center items-center">
+                      <Textarea value={rejectionNote} readOnly />
+                    </div>
+                    <DialogClose asChild>
+                      <Button variant="secondary">Close</Button>
+                    </DialogClose>
+                  </DialogContent>
+                </Dialog>
+              ) : null;
+            },
+          },
+        ]
+      : []),
+    ...(status === "PENDING"
+      ? [
+          {
+            header: "Actions",
+            cell: ({ row }: { row: Row<WithdrawalRequestData> }) => {
+              const data = row.original;
+              return (
+                <>
+                  {data.alliance_withdrawal_request_status === "PENDING" && (
+                    <div className="flex justify-center gap-2">
+                      <Button
+                        className="bg-green-500 hover:bg-green-600 dark:bg-green-500 dark:text-white "
+                        onClick={() =>
+                          setIsOpenModal({
+                            open: true,
+                            requestId: data.alliance_withdrawal_request_id,
+                            status: "APPROVED",
+                          })
+                        }
+                      >
+                        Approve
+                      </Button>
+
+                      <Button
+                        variant="destructive"
+                        onClick={() =>
+                          setIsOpenModal({
+                            open: true,
+                            requestId: data.alliance_withdrawal_request_id,
+                            status: "REJECTED",
+                          })
+                        }
+                      >
+                        Reject
+                      </Button>
+                    </div>
+                  )}
+                </>
+              );
+            },
+          },
+        ]
+      : []),
   ];
 
   return {

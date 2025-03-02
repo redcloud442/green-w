@@ -254,15 +254,15 @@ const AdminWithdrawalHistoryTable = ({
       },
     });
 
+  const status = watch("statusFilter") as "PENDING" | "APPROVED" | "REJECTED";
+
   const {
     columns,
     isOpenModal,
     isLoading,
     setIsOpenModal,
     handleUpdateStatus,
-  } = AdminWithdrawalHistoryColumn(reset, profile, setRequestData);
-
-  const status = watch("statusFilter") as "PENDING" | "APPROVED" | "REJECTED";
+  } = AdminWithdrawalHistoryColumn(reset, profile, setRequestData, status);
 
   const table = useReactTable({
     data: requestData?.data?.[status]?.data || [],

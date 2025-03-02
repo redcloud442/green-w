@@ -19,8 +19,6 @@ import {
 import { format } from "date-fns";
 import {
   CalendarIcon,
-  ChevronLeft,
-  ChevronRight,
   Loader2,
   PhilippinePeso,
   RefreshCw,
@@ -252,14 +250,15 @@ const TopUpTable = ({ teamMemberProfile }: DataTableProps) => {
       },
     });
 
+  const status = watch("statusFilter") as "PENDING" | "APPROVED" | "REJECTED";
+
   const {
     columns,
     isOpenModal,
     isLoading,
     setIsOpenModal,
     handleUpdateStatus,
-  } = TopUpColumn(setRequestData, reset);
-  const status = watch("statusFilter") as "PENDING" | "APPROVED" | "REJECTED";
+  } = TopUpColumn(setRequestData, reset, status);
 
   const table = useReactTable({
     data: requestData?.data?.[status]?.data || [],
@@ -520,81 +519,6 @@ const TopUpTable = ({ teamMemberProfile }: DataTableProps) => {
           />
         </TabsContent>
       </Tabs>
-
-      <div className="flex items-center justify-end gap-x-4 py-4">
-        {activePage > 1 && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setActivePage((prev) => Math.max(prev - 1, 1))}
-            disabled={activePage <= 1}
-          >
-            <ChevronLeft />
-          </Button>
-        )}
-
-        <div className="flex space-x-2">
-          {(() => {
-            const maxVisiblePages = 3;
-            const pages = Array.from({ length: pageCount }, (_, i) => i + 1);
-            let displayedPages = [];
-
-            if (pageCount <= maxVisiblePages) {
-              displayedPages = pages;
-            } else {
-              if (activePage <= 2) {
-                displayedPages = [1, 2, 3, "...", pageCount];
-              } else if (activePage >= pageCount - 1) {
-                displayedPages = [
-                  1,
-                  "...",
-                  pageCount - 2,
-                  pageCount - 1,
-                  pageCount,
-                ];
-              } else {
-                displayedPages = [
-                  activePage - 1,
-                  activePage,
-                  activePage + 1,
-                  "...",
-                  pageCount,
-                ];
-              }
-            }
-
-            return displayedPages.map((page, index) =>
-              typeof page === "number" ? (
-                <Button
-                  key={page}
-                  variant={activePage === page ? "card" : "outline"}
-                  size="sm"
-                  onClick={() => setActivePage(page)}
-                >
-                  {page}
-                </Button>
-              ) : (
-                <span key={`ellipsis-${index}`} className="px-2 py-1">
-                  {page}
-                </span>
-              )
-            );
-          })()}
-        </div>
-        {activePage < pageCount && (
-          <Button
-            variant="card"
-            className="md:w-auto rounded-md"
-            size="sm"
-            onClick={() =>
-              setActivePage((prev) => Math.min(prev + 1, pageCount))
-            }
-            disabled={activePage >= pageCount}
-          >
-            <ChevronRight />
-          </Button>
-        )}
-      </div>
     </Card>
   );
 };

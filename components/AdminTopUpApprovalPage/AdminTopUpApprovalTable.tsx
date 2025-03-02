@@ -265,15 +265,16 @@ const AdminTopUpApprovalTable = ({ teamMemberProfile }: DataTableProps) => {
     }
   };
 
+  const status = watch("statusFilter") as "PENDING" | "APPROVED" | "REJECTED";
+
   const {
     columns,
     isOpenModal,
     isLoading,
     setIsOpenModal,
     handleUpdateStatus,
-  } = useAdminTopUpApprovalColumns(reset, setRequestData);
+  } = useAdminTopUpApprovalColumns(reset, setRequestData, status);
 
-  const status = watch("statusFilter") as "PENDING" | "APPROVED" | "REJECTED";
   const table = useReactTable({
     data: requestData?.data?.[status]?.data || [],
     columns,

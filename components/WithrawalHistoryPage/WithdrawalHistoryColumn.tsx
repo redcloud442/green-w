@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { formatDateToYYYYMMDD } from "@/utils/function";
+import { formatDateToYYYYMMDD, formatTime } from "@/utils/function";
 import { WithdrawalRequestData } from "@/utils/types";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { ColumnDef } from "@tanstack/react-table";
@@ -23,44 +23,6 @@ const statusColorMap: Record<string, string> = {
 export const WithdrawalHistoryColumn =
   (): ColumnDef<WithdrawalRequestData>[] => {
     return [
-      // {
-      //   accessorKey: "alliance_withdrawal_request_id",
-
-      //   header: ({ column }) => (
-      //     <Button
-      //       variant="ghost"
-      //       onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      //     >
-      //       Reference ID <ArrowUpDown />
-      //     </Button>
-      //   ),
-      //   cell: ({ row }) => {
-      //     const id = row.getValue("alliance_withdrawal_request_id") as string;
-      //     const maxLength = 15;
-
-      //     const handleCopy = async () => {
-      //       if (id) {
-      //         await navigator.clipboard.writeText(id);
-      //       }
-      //     };
-
-      //     return (
-      //       <div className="flex items-center space-x-2">
-      //         <div
-      //           className="truncate"
-      //           title={id.length > maxLength ? id : undefined}
-      //         >
-      //           {id.length > maxLength ? `${id.slice(0, maxLength)}...` : id}
-      //         </div>
-      //         {id && (
-      //           <Button variant="ghost" size="sm" onClick={handleCopy}>
-      //             <Copy />
-      //           </Button>
-      //         )}
-      //       </div>
-      //     );
-      //   },
-      // },
       {
         accessorKey: "alliance_withdrawal_request_status",
 
@@ -77,13 +39,16 @@ export const WithdrawalHistoryColumn =
             "alliance_withdrawal_request_status"
           ) as string;
           const color = statusColorMap[status.toUpperCase()] || "gray"; // Default to gray if status is undefined
-          return <Badge className={`${color} text-white`}>{status}</Badge>;
+          return (
+            <div className="flex justify-center items-center gap-2 text-wrap w-full">
+              <Badge className={`${color} text-white`}>{status}</Badge>
+            </div>
+          );
         },
       },
 
       {
         accessorKey: "alliance_withdrawal_request_amount",
-
         header: () => <Button variant="ghost">Amount</Button>,
         cell: ({ row }) => {
           const amount = parseFloat(
@@ -110,7 +75,7 @@ export const WithdrawalHistoryColumn =
           </Button>
         ),
         cell: ({ row }) => (
-          <div className="text-wrap">
+          <div className="text-center">
             {row.getValue("alliance_withdrawal_request_type")}
           </div>
         ),
@@ -131,7 +96,7 @@ export const WithdrawalHistoryColumn =
             "alliance_withdrawal_request_bank_name"
           ) as string;
           return (
-            <div className="flex items-center gap-2 text-wrap">
+            <div className="flex items-center gap-2 text-center">
               <span>{value}</span>
             </div>
           );
@@ -155,7 +120,7 @@ export const WithdrawalHistoryColumn =
             "alliance_withdrawal_request_account"
           ) as string;
           return (
-            <div className="flex items-center gap-2 text-wrap">
+            <div className="flex items-center gap-2 text-center">
               <span>{value}</span>
             </div>
           );
@@ -175,7 +140,7 @@ export const WithdrawalHistoryColumn =
           </Button>
         ),
         cell: ({ row }) => (
-          <div className="text-wrap">
+          <div className="text-center">
             {row.getValue("alliance_withdrawal_request_withdraw_type")}
           </div>
         ),
@@ -195,13 +160,38 @@ export const WithdrawalHistoryColumn =
           <div className="text-center">
             {formatDateToYYYYMMDD(
               row.getValue("alliance_withdrawal_request_date")
-            )}
+            ) +
+              ", " +
+              formatTime(row.getValue("alliance_withdrawal_request_date"))}
+          </div>
+        ),
+      },
+      {
+        accessorKey: "alliance_withdrawal_request_date_updated",
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Date Updated <ArrowUpDown />
+          </Button>
+        ),
+        cell: ({ row }) => (
+          <div className="text-center">
+            {row.getValue("alliance_withdrawal_request_date_updated")
+              ? formatDateToYYYYMMDD(
+                  row.getValue("alliance_withdrawal_request_date_updated")
+                ) +
+                ", " +
+                formatTime(
+                  row.getValue("alliance_withdrawal_request_date_updated")
+                )
+              : ""}
           </div>
         ),
       },
       {
         accessorKey: "alliance_withdrawal_request_reject_note",
-
         header: () => <div>Rejection Note</div>,
         cell: ({ row }) => {
           const rejectionNote = row.getValue(

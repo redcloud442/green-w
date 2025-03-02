@@ -36,9 +36,11 @@ export const TopUpHistoryColumn = (): ColumnDef<TopUpRequestData>[] => {
         const status = row.getValue("alliance_top_up_request_status") as string;
         const color = statusColorMap[status.toUpperCase()] || "gray"; // Default to gray if status is undefined
         return (
-          <Badge className={`${color} text-white dark:text-white`}>
-            {status}
-          </Badge>
+          <div className="flex justify-center items-center gap-2 text-wrap w-full">
+            <Badge className={`${color} text-white dark:text-white`}>
+              {status}
+            </Badge>
+          </div>
         );
       },
     },
@@ -58,8 +60,17 @@ export const TopUpHistoryColumn = (): ColumnDef<TopUpRequestData>[] => {
       },
     },
     {
-      accessorKey: "alliance_top_up_request_name",
+      accessorKey: "alliance_top_up_request_type",
       header: () => <Button variant="ghost">Bank Name</Button>,
+      cell: ({ row }) => (
+        <div className="text-center">
+          {row.getValue("alliance_top_up_request_type")}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "alliance_top_up_request_name",
+      header: () => <Button variant="ghost">Account Name</Button>,
       cell: ({ row }) => (
         <div className="text-center">
           {row.getValue("alliance_top_up_request_name")}
@@ -129,7 +140,9 @@ export const TopUpHistoryColumn = (): ColumnDef<TopUpRequestData>[] => {
         return rejectionNote ? (
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="destructive">View Rejection Note</Button>
+              <Button className="w-full rounded-md" variant="destructive">
+                View Rejection Note
+              </Button>
             </DialogTrigger>
             <DialogContent type="table">
               <DialogHeader>
