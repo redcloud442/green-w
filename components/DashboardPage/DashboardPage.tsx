@@ -628,7 +628,11 @@ const DashboardPage = ({
           </Card>
         </div>
 
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-4 bg-white p-4 rounded-lg shadow-md">
+        <div
+          className={`grid grid-cols-3  gap-4 bg-white p-4 rounded-lg shadow-md ${
+            isActive ? "sm:grid-cols-6" : "sm:grid-cols-5"
+          }`}
+        >
           {/* NETWORK (Top Left) */}
           <div className="flex flex-col items-center">
             <DashboardDepositModalDeposit
@@ -685,10 +689,11 @@ const DashboardPage = ({
             />
             <p className="text-sm sm:text-lg font-thin mt-2">NETWORK</p>
           </div>
-
-          <div className="flex flex-col items-center">
-            <DashboardMissionModal />
-          </div>
+          {isActive && (
+            <div className="flex flex-col items-center">
+              <DashboardMissionModal />
+            </div>
+          )}
         </div>
 
         {chartData.length > 0 && (
