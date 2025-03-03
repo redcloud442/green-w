@@ -26,6 +26,11 @@ const ToolsAndGuides = () => {
       video: "LOW MB INTRO.mp4",
     },
     {
+      title: "",
+      description: "",
+      video: "/GUIDES/video2.mp4",
+    },
+    {
       alt: "DTI",
       image: "/GUIDES/DTI.png",
     },
