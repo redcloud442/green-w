@@ -114,7 +114,8 @@ const TransactionHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
                   data.transaction_description.includes("Deposit Pending") ||
                   data.transaction_description.includes("Claimed") ||
                   data.transaction_description.includes("Withdrawal Failed") ||
-                  data.transaction_description.includes("Income") ? (
+                  data.transaction_description.includes("Income") ||
+                  data.transaction_description.includes("Mission") ? (
                     <Image
                       src="/assets/plus.png"
                       alt="success"
@@ -148,7 +149,8 @@ const TransactionHistoryTable = ({ teamMemberProfile }: DataTableProps) => {
                     data.transaction_description.includes("Success") ||
                     data.transaction_description.includes("Claimed") ||
                     data.transaction_description.includes("Income") ||
-                    data.transaction_description.includes("Deposit")
+                    data.transaction_description.includes("Deposit") ||
+                    data.transaction_description.includes("Mission")
                       ? "text-green-500"
                       : "text-red-500"
                   }`}
