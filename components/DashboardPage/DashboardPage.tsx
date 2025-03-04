@@ -3,7 +3,6 @@
 import { toast } from "@/hooks/use-toast";
 import { logError } from "@/services/Error/ErrorLogs";
 import { getUserEarnings } from "@/services/User/User";
-import { useUserLoadingStore } from "@/store/useLoadingState";
 import { usePackageChartData } from "@/store/usePackageChartData";
 import { useUserDashboardEarningsStore } from "@/store/useUserDashboardEarnings";
 import { useUserEarningsStore } from "@/store/useUserEarningsStore";
@@ -18,7 +17,7 @@ import {
 import { Info } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import TransactionHistoryTable from "../TransactionHistoryPage/TransactionHistoryTable";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Badge } from "../ui/badge";
@@ -54,8 +53,8 @@ const DashboardPage = ({
   const { earnings, setEarnings } = useUserEarningsStore();
   const { totalEarnings, setTotalEarnings } = useUserDashboardEarningsStore();
   const { chartData } = usePackageChartData();
-  const { loading } = useUserLoadingStore();
   const [open, setOpen] = useState(false);
+  const [notifications, setNotifications] = useState<string[]>([]);
 
   const [isActive, setIsActive] = useState(
     teamMemberProfile.alliance_member_is_active
@@ -109,6 +108,31 @@ const DashboardPage = ({
     });
   };
 
+  useEffect(() => {
+    const socket = new WebSocket("ws://localhost:8000/ws");
+
+    socket.onopen = () => {
+      console.log("✅ WebSocket connected");
+    };
+
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.type === "package-purchased") {
+        console.log("📩 Package Purchased:", data.message);
+        setNotifications((prev) => [...prev, data.message]);
+        toast({
+          title: "New Package Purchased",
+          description: `${data.message}`,
+        });
+      }
+    };
+
+    socket.onclose = () => {
+      console.log("❌ WebSocket disconnected");
+    };
+
+    return () => socket.close();
+  }, []);
   return (
     <div className="relative min-h-screen mx-auto space-y-4 py-2 sm:px-0 mt-20 sm:mt-20 sm:mb-20 overflow-x-hidden">
       <div
