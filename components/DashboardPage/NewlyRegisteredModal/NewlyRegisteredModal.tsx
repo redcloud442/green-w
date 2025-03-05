@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -5,15 +7,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useUserModalPackageStore } from "@/store/useModalPackageStore";
+
+import { useEffect, useState } from "react";
 
 type Props = {
   isActive: boolean;
-  setOpen: Dispatch<SetStateAction<boolean>>;
 };
 
-const NewlyRegisteredModal = ({ isActive, setOpen }: Props) => {
+const NewlyRegisteredModal = ({ isActive }: Props) => {
+  const { setModalPackage } = useUserModalPackageStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
+
   useEffect(() => {
     if (!isActive) {
       setIsModalOpen(true);
@@ -39,7 +44,7 @@ const NewlyRegisteredModal = ({ isActive, setOpen }: Props) => {
             className="w-full  rounded-md"
             onClick={() => {
               setIsModalOpen(false);
-              setOpen(true);
+              setModalPackage(true);
             }}
           >
             Explore Packages

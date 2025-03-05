@@ -26,7 +26,7 @@ type Props = {
   setIsActive: Dispatch<SetStateAction<boolean>>;
   open: boolean;
   active: boolean;
-  setOpen: Dispatch<SetStateAction<boolean>>;
+  setOpen: (open: boolean) => void;
 };
 
 const DashboardDepositModalPackages = ({

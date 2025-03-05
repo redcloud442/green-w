@@ -191,7 +191,7 @@ const DashboardPackages = ({ chartData, teamMemberProfile }: Props) => {
             {/* Overlay for better text visibility */}
             <CardHeader className="py-4 relative z-10">
               <CardTitle className="flex justify-center items-end">
-                <div className="text-2xl text-white font-extrabold rounded-full shadow-2xl">
+                <div className="text-xl text-white font-extrabold ">
                   {data.package} PACKAGE
                 </div>
               </CardTitle>

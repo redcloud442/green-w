@@ -20,7 +20,7 @@ import PackageCard from "../ui/packageCard";
 type Props = {
   pkg: package_table | [];
   teamMemberProfile: alliance_member_table;
-  setOpen: Dispatch<SetStateAction<boolean>>;
+  setOpen: (open: boolean) => void;
   setSelectedPackage: Dispatch<SetStateAction<package_table | null>>;
   selectedPackage: package_table | null;
   setActive: Dispatch<SetStateAction<boolean>>;
