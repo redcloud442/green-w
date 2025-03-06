@@ -76,7 +76,7 @@ const MobileNavBar = () => {
     } catch (e) {
     } finally {
       setIsModalOpen(false);
-      router.push("/auth/login");
+      router.push("/login");
     }
   };
 

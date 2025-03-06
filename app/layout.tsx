@@ -32,7 +32,7 @@ export default function RootLayout({
             <Image
               src="/assets/bg-primary.png"
               alt="Background"
-              quality={100}
+              quality={80}
               fill
               priority
               className="object-cover"
