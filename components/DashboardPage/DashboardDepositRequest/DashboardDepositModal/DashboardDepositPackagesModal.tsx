@@ -13,6 +13,7 @@ import PackageCard from "@/components/ui/packageCard";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { logError } from "@/services/Error/ErrorLogs";
 import { getPackageModalData } from "@/services/Package/Member";
+import { useUserModalPackageStore } from "@/store/useModalPackageStore";
 import { createClientSide } from "@/utils/supabase/client";
 import { alliance_member_table, package_table } from "@prisma/client";
 import Image from "next/image";
@@ -22,11 +23,8 @@ type Props = {
   className: string;
   teamMemberProfile: alliance_member_table;
   packages: package_table[];
-
   setIsActive: Dispatch<SetStateAction<boolean>>;
-  open: boolean;
   active: boolean;
-  setOpen: Dispatch<SetStateAction<boolean>>;
 };
 
 const DashboardDepositModalPackages = ({
@@ -34,14 +32,14 @@ const DashboardDepositModalPackages = ({
   packages: initialPackage,
   teamMemberProfile,
   setIsActive,
-  open,
   active,
-  setOpen,
 }: Props) => {
   const supabaseClient = createClientSide();
   const [selectedPackage, setSelectedPackage] = useState<package_table | null>(
     null
   );
+  const { setModalPackage: setOpen, modalPackage: open } =
+    useUserModalPackageStore();
   const [packages, setPackages] = useState<package_table[]>(initialPackage);
 
   const handlePackageSelect = (pkg: package_table) => {
@@ -123,7 +121,6 @@ const DashboardDepositModalPackages = ({
             <AvailPackagePage
               active={active}
               setActive={setIsActive}
-              setOpen={setOpen}
               setSelectedPackage={setSelectedPackage}
               pkg={selectedPackage}
               teamMemberProfile={teamMemberProfile}

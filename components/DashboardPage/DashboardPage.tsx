@@ -412,7 +412,7 @@ const DashboardPage = ({
           )}
         </div>
       </div>
-      <NewlyRegisteredModal isActive={isActive} setOpen={setOpen} />
+      <NewlyRegisteredModal isActive={isActive} />
       <div
         className="w-full px-2 space-y-4
        md:px-10"
@@ -667,8 +667,6 @@ const DashboardPage = ({
               setIsActive={setIsActive}
               teamMemberProfile={teamMemberProfile}
               className="w-full"
-              open={open}
-              setOpen={setOpen}
               active={isActive}
             />
           </div>
