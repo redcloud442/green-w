@@ -292,7 +292,7 @@ export const AdminUsersColumn = (
                     handlePromoteToMerchant(data.alliance_member_id, "CLIENT")
                   }
                 >
-                  Promote as CLIENT
+                  Promote as Client
                 </DropdownMenuItem>
               )}
 
