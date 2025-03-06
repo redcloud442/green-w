@@ -174,7 +174,7 @@ export const protectionMemberUser = async (ip?: string) => {
 
     if (
       !teamMember?.alliance_member_alliance_id ||
-      !["MEMBER", "MERCHANT", "ACCOUNTING", "ADMIN"].includes(
+      !["MEMBER", "MERCHANT", "ACCOUNTING", "ADMIN", "CLIENT"].includes(
         teamMember.alliance_member_role
       )
     ) {
@@ -535,6 +535,75 @@ export const protectionChatPageMemberUser = async (ip?: string) => {
       profile: profile as user_table,
       teamMemberProfile: teamMember as alliance_member_table,
       session: session as chat_session_table,
+    };
+  } catch (e) {
+    if (e instanceof Error) {
+      await logError(supabase, {
+        errorMessage: e.message,
+        stackTrace: e.stack,
+        stackPath: "utils/serversideProtection.ts",
+      });
+    }
+    return { redirect: "/500" };
+  }
+};
+
+export const protectionClientMonitoringUser = async (ip?: string) => {
+  const supabase = await createClientServerSide();
+
+  try {
+    const { data: authData, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !authData?.user) {
+      return { redirect: "/login" };
+    }
+
+    const userId = authData.user.id;
+
+    const [profile, teamMember] = await Promise.all([
+      prisma.user_table.findUnique({
+        where: { user_id: userId },
+        select: {
+          user_id: true,
+          user_first_name: true,
+          user_last_name: true,
+          user_profile_picture: true,
+          user_username: true,
+          user_active_mobile: true,
+          user_email: true,
+        },
+      }),
+      prisma.alliance_member_table.findFirst({
+        where: { alliance_member_user_id: userId },
+        select: {
+          alliance_member_id: true,
+          alliance_member_is_active: true,
+          alliance_member_role: true,
+          alliance_member_alliance_id: true,
+          alliance_member_restricted: true,
+          alliance_member_user_id: true,
+        },
+      }),
+    ]);
+
+    if (!profile) {
+      return { redirect: "/500" };
+    }
+
+    if (
+      !teamMember?.alliance_member_alliance_id ||
+      !["CLIENT"].includes(teamMember.alliance_member_role)
+    ) {
+      return { redirect: "/404" };
+    }
+
+    if (teamMember.alliance_member_restricted) {
+      return { redirect: "/500" };
+    }
+
+    return {
+      profile: profile as user_table,
+      teamMemberProfile: teamMember as alliance_member_table,
     };
   } catch (e) {
     if (e instanceof Error) {

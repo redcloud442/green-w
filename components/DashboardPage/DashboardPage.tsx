@@ -3,11 +3,11 @@
 import { toast } from "@/hooks/use-toast";
 import { logError } from "@/services/Error/ErrorLogs";
 import { getUserEarnings } from "@/services/User/User";
-import { useUserLoadingStore } from "@/store/useLoadingState";
 import { usePackageChartData } from "@/store/usePackageChartData";
 import { useUserDashboardEarningsStore } from "@/store/useUserDashboardEarnings";
 import { useUserEarningsStore } from "@/store/useUserEarningsStore";
-import { RANK_COLORS } from "@/utils/constant";
+import { RANK_COLORS, ROLE } from "@/utils/constant";
+import { useRole } from "@/utils/context/roleContext";
 import { createClientSide } from "@/utils/supabase/client";
 import {
   alliance_member_table,
@@ -22,6 +22,7 @@ import { useState } from "react";
 import TransactionHistoryTable from "../TransactionHistoryPage/TransactionHistoryTable";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import CardAmount from "../ui/cardAmount";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
@@ -54,7 +55,7 @@ const DashboardPage = ({
   const { earnings, setEarnings } = useUserEarningsStore();
   const { totalEarnings, setTotalEarnings } = useUserDashboardEarningsStore();
   const { chartData } = usePackageChartData();
-  const { loading } = useUserLoadingStore();
+  const { role } = useRole();
   const [open, setOpen] = useState(false);
 
   const [isActive, setIsActive] = useState(
@@ -628,6 +629,15 @@ const DashboardPage = ({
           </Card>
         </div>
 
+        {role === ROLE.CLIENT && (
+          <Button
+            className="w-full rounded-md"
+            variant="card"
+            onClick={() => router.push("/client")}
+          >
+            Client Monitoring
+          </Button>
+        )}
         <div
           className={`grid grid-cols-3  gap-4 bg-white p-4 rounded-lg shadow-md ${
             isActive ? "sm:grid-cols-6" : "sm:grid-cols-5"

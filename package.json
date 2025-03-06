@@ -33,6 +33,7 @@
     "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.46.1",
+    "@tanstack/react-query": "^5.67.1",
     "@tanstack/react-table": "^8.20.5",
     "bcryptjs": "^2.4.3",
     "class-variance-authority": "^0.7.0",

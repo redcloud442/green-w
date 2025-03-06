@@ -65,6 +65,11 @@ export type ChartData = {
   withdraw: number;
 };
 
+export type ChartDataClientMonitoring = {
+  date: string;
+  [key: string]: string | number;
+};
+
 export type ChartDataMember = {
   package: string;
   completion: number;

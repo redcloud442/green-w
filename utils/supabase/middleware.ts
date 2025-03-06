@@ -65,13 +65,13 @@ export async function updateSession(request: NextRequest) {
     "/loginSecured",
   ];
   const privateRoutes = [
-    "/",
+    "/*",
     "/dashboard",
     "/api/auth",
     "/admin/*",
     "/loginSecured",
     "/api/health",
-    "/chat-support",
+    "/client",
   ];
   const currentPath = request.nextUrl.pathname;
 
