@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { createPackageConnection } from "@/services/Package/Member";
+import { useUserModalPackageStore } from "@/store/useModalPackageStore";
 import { usePackageChartData } from "@/store/usePackageChartData";
 import { useUserTransactionHistoryStore } from "@/store/userTransactionHistoryStore";
 import { useUserEarningsStore } from "@/store/useUserEarningsStore";
@@ -20,7 +21,6 @@ import PackageCard from "../ui/packageCard";
 type Props = {
   pkg: package_table | [];
   teamMemberProfile: alliance_member_table;
-  setOpen: (open: boolean) => void;
   setSelectedPackage: Dispatch<SetStateAction<package_table | null>>;
   selectedPackage: package_table | null;
   setActive: Dispatch<SetStateAction<boolean>>;
@@ -30,7 +30,6 @@ type Props = {
 const AvailPackagePage = ({
   pkg,
   teamMemberProfile,
-  setOpen,
   setSelectedPackage,
   selectedPackage,
   setActive,
@@ -39,6 +38,7 @@ const AvailPackagePage = ({
   const { earnings, setEarnings } = useUserEarningsStore();
   const { chartData, setChartData } = usePackageChartData();
   const { toast } = useToast();
+  const { setModalPackage: setOpen } = useUserModalPackageStore();
   const [maxAmount, setMaxAmount] = useState(
     earnings?.alliance_combined_earnings ?? 0
   );

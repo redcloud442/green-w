@@ -2,7 +2,6 @@
 
 import { logError } from "@/services/Error/ErrorLogs";
 import { getUserEarnings } from "@/services/User/User";
-import { useUserModalPackageStore } from "@/store/useModalPackageStore";
 import { usePackageChartData } from "@/store/usePackageChartData";
 import { useUserDashboardEarningsStore } from "@/store/useUserDashboardEarnings";
 import { useUserEarningsStore } from "@/store/useUserEarningsStore";
@@ -44,7 +43,6 @@ const DashboardBody = ({
   const { chartData } = usePackageChartData();
   const { totalEarnings, setTotalEarnings } = useUserDashboardEarningsStore();
   const { earnings, setEarnings } = useUserEarningsStore();
-  const { modalPackage, setModalPackage } = useUserModalPackageStore();
 
   const [isActive, setIsActive] = useState(
     teamMemberProfile.alliance_member_is_active
@@ -333,8 +331,6 @@ const DashboardBody = ({
             setIsActive={setIsActive}
             teamMemberProfile={teamMemberProfile}
             className="w-full"
-            open={modalPackage}
-            setOpen={setModalPackage}
             active={isActive}
           />
         </div>

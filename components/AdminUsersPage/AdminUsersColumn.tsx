@@ -286,6 +286,15 @@ export const AdminUsersColumn = (
                   Promote as Accountant
                 </DropdownMenuItem>
               )}
+              {data.alliance_member_role !== "CLIENT" && (
+                <DropdownMenuItem
+                  onClick={() =>
+                    handlePromoteToMerchant(data.alliance_member_id, "CLIENT")
+                  }
+                >
+                  Promote as Client
+                </DropdownMenuItem>
+              )}
 
               {data.alliance_member_role !== "MEMBER" && (
                 <DropdownMenuItem

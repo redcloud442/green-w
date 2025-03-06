@@ -26,7 +26,7 @@ const DashboardNotification = () => {
   }, []);
 
   return (
-    <div className="mt-24 flex flex-col justify-center items-center gap-2 z-50">
+    <div className="mt-24 flex flex-col justify-center items-center gap-2 z-50 mx-2">
       <div className="border-2 lg:h-40 h-32 m-4 rounded-lg w-full max-w-lg lg:max-w-3xl flex flex-col justify-end items-center p-2">
         {notifications.map((notification, index) => (
           <div

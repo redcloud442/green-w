@@ -8,7 +8,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useUserModalPackageStore } from "@/store/useModalPackageStore";
-
 import { useEffect, useState } from "react";
 
 type Props = {
@@ -16,8 +15,8 @@ type Props = {
 };
 
 const NewlyRegisteredModal = ({ isActive }: Props) => {
-  const { setModalPackage } = useUserModalPackageStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { setModalPackage } = useUserModalPackageStore();
 
   useEffect(() => {
     if (!isActive) {

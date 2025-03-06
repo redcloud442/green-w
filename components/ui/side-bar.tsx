@@ -27,8 +27,6 @@ import {
   HistoryIcon,
   Home,
   Inbox,
-  InboxIcon,
-  MessageCircle,
   MonitorCheck,
   Package,
   PiggyBankIcon,
@@ -158,18 +156,6 @@ const AppSidebar = ({ userData, teamMemberProfile }: Props) => {
       title: "User Monitoring",
       url: "/admin/monitoring",
       icon: MonitorCheck,
-    },
-    {
-      title: "Chat Support",
-      url: "/admin/chat-support",
-      icon: MessageCircle,
-      subItems: [
-        {
-          icon: InboxIcon,
-          title: "Chat Inbox",
-          url: "/admin/chat-support/inbox",
-        },
-      ],
     },
   ];
 

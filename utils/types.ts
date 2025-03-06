@@ -65,6 +65,11 @@ export type ChartData = {
   withdraw: number;
 };
 
+export type ChartDataClientMonitoring = {
+  date: string;
+  [key: string]: string | number;
+};
+
 export type ChartDataMember = {
   package: string;
   completion: number;
@@ -212,4 +217,11 @@ export type HeirarchyData = {
   alliance_member_id: string;
   user_username: string;
   user_id: string;
+};
+
+export type ClientDashboard = {
+  dailyWithdraw: number;
+  monthlyWithdraw: number;
+  dailyEarnings: number;
+  monthlyEarnings: number;
 };

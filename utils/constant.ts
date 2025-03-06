@@ -23,6 +23,7 @@ export const WITHDRAWAL_STATUS = {
 export const ROLE = {
   MEMBER: "MEMBER",
   ADMIN: "ADMIN",
+  CLIENT: "CLIENT",
 };
 
 export const BASE_URL = "https://elevateglobal.app";
