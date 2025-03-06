@@ -2,15 +2,14 @@
 
 import { useClientDashboard } from "@/query/client/clientQuery";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { BanknoteIcon, CalendarIcon, Coins } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Button } from "../ui/button";
 import { Calendar } from "../ui/calendar";
-import { ChartConfig } from "../ui/chart";
+import CardAmountAdmin from "../ui/CardAmountAdmin";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import TableLoading from "../ui/tableLoading";
-import { ClientMonitoringChart } from "./ClientMonitoringChart";
 
 type FormContextType = {
   dateFilter: {
@@ -19,13 +18,8 @@ type FormContextType = {
   };
 };
 
-const chartConfig = {
-  dailyearnings: { label: "Daily Earnings", color: "hsl(var(--chart-1))" },
-  dailywithdraw: { label: "Daily Withdraw", color: "hsl(var(--chart-3))" },
-} satisfies ChartConfig;
-
 const ClientMonitoringSection = () => {
-  const { control, handleSubmit, watch } = useForm<FormContextType>({
+  const { control, handleSubmit, watch, reset } = useForm<FormContextType>({
     defaultValues: {
       dateFilter: {
         start: undefined,
@@ -54,7 +48,7 @@ const ClientMonitoringSection = () => {
     }
   };
 
-  const { data: chartData, isLoading } = useClientDashboard(queryParams);
+  const { data: clientDashboard, isLoading } = useClientDashboard(queryParams);
 
   return (
     <div className="space-y-4">
@@ -133,14 +127,81 @@ const ClientMonitoringSection = () => {
         >
           Submit
         </Button>
+        <Button
+          variant="card"
+          className="w-full rounded-md"
+          type="button"
+          onClick={() => {
+            setQueryParams({
+              startDate: "",
+              endDate: "",
+            });
+            reset();
+          }}
+        >
+          Reset
+        </Button>
       </form>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <CardAmountAdmin
+          title="Daily Earnings"
+          value={
+            <>
+              <Coins />
+              {clientDashboard?.dailyEarnings.toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </>
+          }
+          description=""
+          descriptionClassName="text-sm text-gray-500"
+        />
 
-      <ClientMonitoringChart
-        startDate={queryParams.startDate}
-        endDate={queryParams.endDate}
-        chartData={chartData || []}
-        chartConfig={chartConfig}
-      />
+        <CardAmountAdmin
+          title="Daily Withdraw"
+          value={
+            <>
+              <BanknoteIcon />
+              {clientDashboard?.dailyWithdraw.toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </>
+          }
+          description=""
+          descriptionClassName="text-sm text-gray-500"
+        />
+        <CardAmountAdmin
+          title={`${startDate && endDate ? format(new Date(startDate), "MMMM dd yyyy") + " - " + format(new Date(endDate), "MMMM dd yyyy") : "Monthly"} Earnings`}
+          value={
+            <>
+              <Coins />
+              {clientDashboard?.monthlyEarnings.toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </>
+          }
+          description=""
+          descriptionClassName="text-sm text-gray-500"
+        />
+
+        <CardAmountAdmin
+          title={`${startDate && endDate ? format(new Date(startDate), "MMMM") + " - " + format(new Date(endDate), "MMMM") : "Monthly"} Withdraw`}
+          value={
+            <>
+              <BanknoteIcon />
+              {clientDashboard?.monthlyWithdraw.toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </>
+          }
+          description=""
+          descriptionClassName="text-sm text-gray-500"
+        />
+      </div>
     </div>
   );
 };

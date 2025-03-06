@@ -1,4 +1,4 @@
-import { ChartDataClientMonitoring, ChartDataMember } from "@/utils/types";
+import { ChartDataMember, ClientDashboard } from "@/utils/types";
 
 export const getDashboard = async (params: { teamMemberId: string }) => {
   const response = await fetch(`/api/v1/package/list`, {
@@ -44,7 +44,5 @@ export const getDashboardClientMonitoring = async (params: {
     );
   }
 
-  const { clientData } = result;
-
-  return clientData as ChartDataClientMonitoring[];
+  return result as ClientDashboard;
 };

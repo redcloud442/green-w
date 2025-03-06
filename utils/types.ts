@@ -218,3 +218,10 @@ export type HeirarchyData = {
   user_username: string;
   user_id: string;
 };
+
+export type ClientDashboard = {
+  dailyWithdraw: number;
+  monthlyWithdraw: number;
+  dailyEarnings: number;
+  monthlyEarnings: number;
+};
