@@ -85,7 +85,7 @@ const CardAmount = ({
         className=" px-2 mr-4 rounded-md w-full"
         onClick={() => setModalPackage(true)}
       >
-        Reinvest Here
+        Click here to reinvest now
       </Button>
     </Card>
   );
