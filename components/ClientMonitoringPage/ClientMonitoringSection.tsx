@@ -188,7 +188,7 @@ const ClientMonitoringSection = () => {
         />
 
         <CardAmountAdmin
-          title={`${startDate && endDate ? format(new Date(startDate), "MMMM") + " - " + format(new Date(endDate), "MMMM") : "Monthly"} Withdraw`}
+          title={`${startDate && endDate ? format(new Date(startDate), "MMMM dd yyyy") + " - " + format(new Date(endDate), "MMMM dd yyyy") : "Monthly"} Withdraw`}
           value={
             <>
               <BanknoteIcon />
