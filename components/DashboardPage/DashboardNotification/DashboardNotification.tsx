@@ -88,7 +88,7 @@ const DashboardNotification = () => {
             <div
               key={index}
               className={cn(
-                "text-black text-center text-xs sm:text-sm rounded-lg w-full",
+                "text-black text-center text-[9px] sm:text-sm rounded-lg w-full",
                 "opacity-100 transition-opacity duration-10000 animate-fadeOut",
                 "flex flex-col space-y-2"
               )}
