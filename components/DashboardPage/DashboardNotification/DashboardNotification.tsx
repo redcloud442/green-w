@@ -29,11 +29,12 @@ const DashboardNotification = () => {
       socketRef.current.close();
     }
 
-    const socket = new WebSocket(`/ws`);
+    const socket = new WebSocket(
+      `${process.env.NODE_ENV === "development" ? "ws://localhost:3000" : "wss://elevateglobal.app"}/ws`
+    );
     socketRef.current = socket;
 
     socket.onopen = () => {
-      console.log("WebSocket connected");
       if (reconnectInterval.current) {
         clearInterval(reconnectInterval.current);
         reconnectInterval.current = null; // Stop reconnection attempts when connected
@@ -51,18 +52,14 @@ const DashboardNotification = () => {
     };
 
     socket.onclose = () => {
-      console.log("WebSocket disconnected. Attempting to reconnect...");
       if (!reconnectInterval.current) {
         reconnectInterval.current = setInterval(() => {
-          console.log("Reconnecting WebSocket...");
           connectWebSocket();
-        }, 5000); // Try reconnecting every 5 seconds
+        }, 5000);
       }
     };
 
-    socket.onerror = (error) => {
-      console.error("WebSocket error:", error);
-    };
+    socket.onerror = (error) => {};
   };
 
   useEffect(() => {
