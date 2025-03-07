@@ -16,7 +16,7 @@ const nextConfig = {
     return [
       {
         source: "/api/v1/:path*",
-        destination: `${process.env.NODE_ENV === "development" ? "http://localhost:8000" : "https://loadbalancer.elevateglobal.app"}/api/v1/:path*`,
+        destination: `${process.env.NODE_ENV === "development" ? "http://localhost:8000" : "https://server.pinkful.website"}/api/v1/:path*`,
       },
     ];
   },
@@ -24,7 +24,7 @@ const nextConfig = {
     return [
       {
         source: "/ws/:path*",
-        destination: `${process.env.NODE_ENV === "development" ? "ws://localhost:8000" : "wss://loadbalancer.elevateglobal.app"}/ws/:path*`,
+        destination: `${process.env.NODE_ENV === "development" ? "ws://localhost:8000" : "wss://server.pinkful.website"}/ws/:path*`,
         permanent: true,
       },
     ];

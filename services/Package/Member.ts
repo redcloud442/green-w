@@ -1,4 +1,4 @@
-import { package_table } from "@prisma/client";
+import { package_member_connection_table, package_table } from "@prisma/client";
 
 export const createPackageConnection = async (params: {
   packageData: { amount: number; packageId: string };
@@ -27,7 +27,7 @@ export const createPackageConnection = async (params: {
     );
   }
 
-  return response;
+  return response as unknown as package_member_connection_table;
 };
 
 export const getPackageModalData = async () => {
