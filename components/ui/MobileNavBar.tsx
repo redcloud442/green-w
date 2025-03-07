@@ -54,7 +54,6 @@ const MobileNavBar = () => {
     try {
       await supabase.auth.signOut();
 
-      // Clear all user-specific states
       setUserNotification({ notifications: [], count: 0 });
       setEarnings({
         alliance_earnings_id: "",
@@ -63,16 +62,16 @@ const MobileNavBar = () => {
         alliance_referral_bounty: 0,
         alliance_combined_earnings: 0,
         alliance_earnings_member_id: "",
-      }); // Reset earnings
-      setTotalEarnings(null); // Reset dashboard earnings
-      setChartData([]); // Clear chart data
+      });
+      setTotalEarnings(null);
+      setChartData([]);
       setIsWithdrawalToday({
         referral: false,
         package: false,
-      }); // Reset withdrawal status
+      });
       localStorage.removeItem("isLoggedIn");
 
-      setLoading(false); // Reset loading state
+      setLoading(false);
     } catch (e) {
     } finally {
       setIsModalOpen(false);
