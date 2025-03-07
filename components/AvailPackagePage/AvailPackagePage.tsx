@@ -96,7 +96,7 @@ const AvailPackagePage = ({
           Number(selectedPackage?.packages_days ?? 0) * 24 * 60 * 60 * 1000
       );
 
-      await createPackageConnection({
+      const packageConnection = await createPackageConnection({
         packageData: {
           amount: Number(result.amount),
           packageId: selectedPackage?.package_id || "",
@@ -121,7 +121,7 @@ const AvailPackagePage = ({
 
       toast({
         title: `Package Enrolled ${selectedPackage?.package_name}`,
-        description: "You have successfully enrolled in a package",
+        description: "You have successfully enrolled in   a package",
       });
 
       reset({ amount: "", packageId: selectedPackage?.package_id || "" });
@@ -163,7 +163,8 @@ const AvailPackagePage = ({
           completion_date: completionDate.toISOString(),
           amount: Number(amount),
           is_ready_to_claim: false,
-          package_connection_id: selectedPackage?.package_id || "",
+          package_connection_id:
+            packageConnection.package_member_connection_id || "",
           profit_amount: Number(computation),
           package_color: selectedPackage?.package_color || "",
           package_date_created: new Date().toISOString(),

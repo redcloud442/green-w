@@ -87,7 +87,7 @@ const AdminTopUpApprovalTable = ({ teamMemberProfile }: DataTableProps) => {
         ? new Date(dateFilter.start)
         : undefined;
 
-      const endDate = startDate ? new Date(startDate) : undefined;
+      const endDate = dateFilter.end ? new Date(dateFilter.end) : undefined;
       const requestData = await getAdminTopUpRequest({
         page: activePage,
         limit: 10,
@@ -218,7 +218,7 @@ const AdminTopUpApprovalTable = ({ teamMemberProfile }: DataTableProps) => {
         ? new Date(dateFilter.start)
         : undefined;
 
-      const endDate = startDate ? new Date(startDate) : undefined;
+      const endDate = dateFilter.end ? new Date(dateFilter.end) : undefined;
 
       const requestData = await getAdminTopUpRequest({
         page: 1,
@@ -447,6 +447,37 @@ const AdminTopUpApprovalTable = ({ teamMemberProfile }: DataTableProps) => {
                         {field.value
                           ? format(new Date(field.value), "PPP")
                           : "Select Start Date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={
+                          field.value ? new Date(field.value) : undefined
+                        }
+                        onSelect={(date: Date | undefined) =>
+                          field.onChange(date?.toISOString() || "")
+                        }
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                )}
+              />
+              <Controller
+                name="dateFilter.end"
+                control={control}
+                render={({ field }) => (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="card"
+                        className="font-normal justify-start"
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {field.value
+                          ? format(new Date(field.value), "PPP")
+                          : "Select End Date"}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
