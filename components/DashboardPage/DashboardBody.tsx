@@ -303,7 +303,7 @@ const DashboardBody = ({
           </CardContent>
         </Card>
       </div>
-      {role !== "CLIENT" && (
+      {role === "CLIENT" && (
         <Button
           onClick={() => router.push("/client")}
           variant="card"
