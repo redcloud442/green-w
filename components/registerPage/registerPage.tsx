@@ -122,7 +122,13 @@ const RegisterPage = ({ referralLink }: Props) => {
         setIsUsernameValidated(true);
       }
     } catch (e) {
-      setError("userName", { message: "Fetching username failed. Try again." });
+      if (e instanceof Error) {
+        setError("userName", { message: e.message });
+      } else {
+        setError("userName", {
+          message: "Fetching username failed. Try again.",
+        });
+      }
     } finally {
       setIsUsernameLoading(false);
     }
