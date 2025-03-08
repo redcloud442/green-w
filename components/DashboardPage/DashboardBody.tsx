@@ -5,6 +5,7 @@ import { getUserEarnings } from "@/services/User/User";
 import { usePackageChartData } from "@/store/usePackageChartData";
 import { useUserDashboardEarningsStore } from "@/store/useUserDashboardEarnings";
 import { useUserEarningsStore } from "@/store/useUserEarningsStore";
+import { useRole } from "@/utils/context/roleContext";
 import { createClientSide } from "@/utils/supabase/client";
 import {
   alliance_member_table,
@@ -40,7 +41,7 @@ const DashboardBody = ({
 }: DashboardBodyProps) => {
   const supabaseClient = createClientSide();
   const router = useRouter();
-
+  const { role } = useRole();
   const { chartData } = usePackageChartData();
   const { totalEarnings, setTotalEarnings } = useUserDashboardEarningsStore();
   const { earnings, setEarnings } = useUserEarningsStore();
@@ -302,10 +303,15 @@ const DashboardBody = ({
           </CardContent>
         </Card>
       </div>
-
-      <Button variant="card" className="w-full rounded-md">
-        Client Monitoing
-      </Button>
+      {role !== "CLIENT" && (
+        <Button
+          onClick={() => router.push("/client")}
+          variant="card"
+          className="w-full rounded-md"
+        >
+          Client Monitoing
+        </Button>
+      )}
       <div
         className={`grid grid-cols-3  gap-4 bg-white p-4 rounded-lg shadow-md ${
           isActive ? "sm:grid-cols-6" : "sm:grid-cols-5"
