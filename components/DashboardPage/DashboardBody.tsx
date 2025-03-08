@@ -16,6 +16,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import TransactionHistoryTable from "../TransactionHistoryPage/TransactionHistoryTable";
+import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import CardAmount from "../ui/cardAmount";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
@@ -302,6 +303,9 @@ const DashboardBody = ({
         </Card>
       </div>
 
+      <Button variant="card" className="w-full rounded-md">
+        Client Monitoing
+      </Button>
       <div
         className={`grid grid-cols-3  gap-4 bg-white p-4 rounded-lg shadow-md ${
           isActive ? "sm:grid-cols-6" : "sm:grid-cols-5"
