@@ -53,6 +53,11 @@ const LoginPage = () => {
   const handleSignIn = async (data: LoginFormValues) => {
     try {
       if (!captchaToken) {
+        if (captcha.current) {
+          captcha.current.reset();
+          captcha.current.execute();
+        }
+
         return toast({
           title: "Please wait",
           description: "Captcha is required.",
@@ -79,7 +84,10 @@ const LoginPage = () => {
       });
 
       setIsSuccess(true);
-      localStorage.setItem("hasOpenedMissionModal", "false");
+      if (typeof window !== "undefined" && window.localStorage) {
+        localStorage.setItem("hasOpenedMissionModal", "false");
+      }
+
       router.push("/");
     } catch (e) {
       if (e instanceof Error) {
