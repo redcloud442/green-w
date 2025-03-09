@@ -58,7 +58,7 @@ export const createTriggerUser = async (params: {
 
   const checkUserNameResult = await checkUserName({ userName });
 
-  if (!checkUserNameResult.ok) {
+  if (!checkUserNameResult.success) {
     throw new Error("Username already taken.");
   }
 
