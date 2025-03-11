@@ -5,7 +5,7 @@ import { ROLE } from "@/utils/constant";
 import { useRole } from "@/utils/context/roleContext";
 import { alliance_member_table, user_table } from "@prisma/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import DashboardNotification from "../DashboardPage/DashboardNotification/DashboardNotification";
+import { usePathname } from "next/navigation";
 import MobileNavBar from "../ui/MobileNavBar";
 import AppSidebar from "../ui/side-bar";
 
@@ -21,6 +21,7 @@ export default function LayoutContent({
   children,
 }: LayoutContentProps) {
   const { role } = useRole();
+  const pathname = usePathname();
   const queryClient = new QueryClient();
 
   return (
@@ -46,7 +47,9 @@ export default function LayoutContent({
               role === ROLE.ADMIN ? "p-4" : "p-0"
             } sm:pb-0`}
           >
-            {role !== ROLE.ADMIN && <DashboardNotification />}
+            {/* {role !== ROLE.ADMIN && pathname === "/" && (
+              <DashboardNotification />
+            )} */}
             {children}
           </div>
 
