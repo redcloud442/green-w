@@ -23,7 +23,7 @@ const DashboardPage = ({
   referal,
 }: Props) => {
   return (
-    <div className="relative min-h-screen mx-auto space-y-4 mt-24 sm:px-0 sm:mb-20 overflow-x-hidden">
+    <div className="relative min-h-screen mx-auto space-y-4 mt-0 sm:px-0 sm:mb-20 overflow-x-hidden">
       <DashboardHeader
         profile={profile}
         teamMemberProfile={teamMemberProfile}
