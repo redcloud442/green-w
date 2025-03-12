@@ -1,79 +1,50 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { createClientSide } from "@/utils/supabase/client";
 import { useEffect, useRef, useState } from "react";
 
 const DashboardNotification = () => {
   const [notifications, setNotifications] = useState<string[]>([]);
+  const supabase = createClientSide();
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
+  useEffect(() => {
     containerRef.current?.scrollTo({
       top: containerRef.current?.scrollHeight,
       behavior: "smooth",
     });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, []);
-
-  useEffect(() => {
-    scrollToBottom();
   }, [notifications]);
 
-  const socketRef = useRef<WebSocket | null>(null);
-  const reconnectInterval = useRef<NodeJS.Timeout | null>(null);
-
-  const connectWebSocket = () => {
-    if (socketRef.current) {
-      socketRef.current.close();
-    }
-
-    const socket = new WebSocket(
-      `${process.env.NODE_ENV === "development" ? "ws://localhost:3000" : "wss://elevateglobal.app"}/ws`
-    );
-    socketRef.current = socket;
-
-    socket.onopen = () => {
-      if (reconnectInterval.current) {
-        clearInterval(reconnectInterval.current);
-        reconnectInterval.current = null; // Stop reconnection attempts when connected
-      }
-    };
-
-    socket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.event === "package-purchased") {
-        setNotifications((prev) => [...prev, data.data]);
-        setTimeout(() => {
-          setNotifications((prev) => prev.slice(1)); // Remove oldest notification
-        }, 10000);
-      }
-    };
-
-    socket.onclose = () => {
-      if (!reconnectInterval.current) {
-        reconnectInterval.current = setInterval(() => {
-          connectWebSocket();
-        }, 5000);
-      }
-    };
-
-    socket.onerror = (error) => {};
-  };
-
   useEffect(() => {
-    connectWebSocket();
+    const channel = supabase
+      .channel("realtime:package_notification")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+
+          schema: "packages_schema",
+          table: "package_notification_table",
+        },
+        (payload) => {
+          console.log("📨 New Notification from Supabase:", payload);
+          setNotifications((prev) => [
+            ...prev,
+            payload.new.package_notification_message,
+          ]);
+
+          setTimeout(() => {
+            setNotifications((prev) => prev.slice(1));
+          }, 10000);
+        }
+      )
+      .subscribe();
 
     return () => {
-      if (socketRef.current) {
-        socketRef.current.close();
-      }
-      if (reconnectInterval.current) {
-        clearInterval(reconnectInterval.current);
-      }
+      channel.unsubscribe();
     };
   }, []);
+
   return (
     <div className="mt-24 flex flex-col justify-center items-center gap-2 z-50 mx-2">
       <ScrollArea

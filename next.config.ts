@@ -20,15 +20,7 @@ const nextConfig = {
       },
     ];
   },
-  async redirects() {
-    return [
-      {
-        source: "/ws/:path*",
-        destination: `${process.env.NODE_ENV === "development" ? "ws://localhost:8000" : "wss://loadbalancer.elevateglobal.app"}/ws/:path*`,
-        permanent: true,
-      },
-    ];
-  },
+
   async headers() {
     return [
       {
