@@ -66,17 +66,16 @@ const DashboardNotification = () => {
 
       return () => clearInterval(interval);
     }
-  }, [notifications.length >= 5]); // Re-run only when reaching 5 notifications
+  }, [notifications.length >= 5]);
 
   const scrollToBottom = () => {
-    containerRef.current?.scrollIntoView(false);
+    if (containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+    }
   };
-
   useEffect(() => {
     scrollToBottom();
   }, [notifications]);
-
-  console.log("Fading Notifications:", fading); // Debug log
 
   return (
     <div className="mt-24 flex flex-col justify-center items-center gap-2 z-50 mx-2">
