@@ -23,6 +23,10 @@ const DashboardNotification = () => {
             ...prev,
             payload.new.package_notification_message,
           ]);
+
+          setTimeout(() => {
+            setNotifications((prev) => prev.slice(1)); // Remove oldest notification
+          }, 4000);
         }
       )
       .subscribe();
@@ -61,13 +65,25 @@ const DashboardNotification = () => {
             <div
               key={index}
               className={cn(
-                "text-black text-center text-[12px] sm:text-sm rounded-lg w-full",
+                "text-black text-center text-[12px] sm:text-sm rounded-lg w-full ",
+                "opacity-100 transition-opacity duration-4000 animate-fadeOut",
                 "flex flex-col space-y-2"
               )}
             >
               📢 {notification} 📢
             </div>
           ))}
+          <style>
+            {`
+        @keyframes fadeOut {
+          0% { opacity: 1; }
+          100% { opacity: 0; }
+        }
+        .animate-fadeOut {
+          animation: fadeOut 3s ease-in-out forwards;
+        }
+      `}
+          </style>
         </div>
       </ScrollArea>
     </div>
