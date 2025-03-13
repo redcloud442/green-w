@@ -55,8 +55,8 @@ const DashboardNotification = () => {
         setTimeout(() => {
           setNotifications((prev) => prev.slice(1)); // Remove after fade-out
           setFading((prev) => prev.slice(1)); // Clear fade tracking
-        }, 1000); // Fade out before removal
-      }, 2000); // Remove one every 4 seconds
+        }, 9000); // Fade out before removal
+      }, 10000); // Remove one every 4 seconds
 
       return () => clearInterval(interval);
     }
