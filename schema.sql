@@ -3223,6 +3223,18 @@ USING (
 );
 
 
+DROP POLICY IF EXISTS "Allow READ for authenticated users" ON packages_schema.package_notification_table;
+CREATE POLICY "Allow READ for authenticated users" ON packages_schema.package_notification_table
+AS PERMISSIVE FOR SELECT
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1
+    FROM alliance_schema.alliance_member_table amt
+    WHERE amt.alliance_member_user_id = auth.uid()
+  )
+);
+
 CREATE INDEX idx_alliance_top_up_request_member_id
 ON alliance_schema.alliance_top_up_request_table (alliance_top_up_request_member_id);
 

@@ -20,6 +20,7 @@ import { alliance_member_table, user_table } from "@prisma/client";
 import {
   BanknoteIcon,
   BeakerIcon,
+  Bell,
   Calendar,
   ChevronUp,
   File,
@@ -156,6 +157,11 @@ const AppSidebar = ({ userData, teamMemberProfile }: Props) => {
       title: "User Monitoring",
       url: "/admin/monitoring",
       icon: MonitorCheck,
+    },
+    {
+      title: "Announcement Notification",
+      url: "/admin/package-notification",
+      icon: Bell,
     },
   ];
 

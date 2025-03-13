@@ -15,12 +15,10 @@ const DashboardNotification = () => {
         "postgres_changes",
         {
           event: "INSERT",
-
           schema: "packages_schema",
           table: "package_notification_table",
         },
         (payload) => {
-          console.log("📨 New Notification from Supabase:", payload);
           setNotifications((prev) => [
             ...prev,
             payload.new.package_notification_message,
@@ -54,14 +52,11 @@ const DashboardNotification = () => {
     <div className="mt-24 flex flex-col justify-center items-center gap-2 z-50 mx-2">
       <ScrollArea
         className={cn(
-          "border-2 lg:h-40 h-32 m-4 rounded-lg w-full max-w-lg lg:max-w-3xl",
-          "flex flex-col-reverse justify-start items-center p-2"
+          "border-2 lg:h-40 h-32 m-4 rounded-lg w-full max-w-xl lg:max-w-3xl",
+          "flex flex-col-reverse justify-start items-center"
         )}
       >
-        <div
-          className="flex flex-col justify-end p-2 h-auto"
-          ref={containerRef}
-        >
+        <div className="flex flex-col justify-end h-auto" ref={containerRef}>
           {notifications.map((notification, index) => (
             <div
               key={index}
