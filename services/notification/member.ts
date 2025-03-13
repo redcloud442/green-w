@@ -69,3 +69,43 @@ export const handleUpdatePackageNotification = async (params: {
 
   return data;
 };
+
+export const handleUpdateControlNotification = async (params: {
+  message: string;
+}) => {
+  const response = await fetch(`/api/v1/notification/package/control`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(params),
+  });
+  const responseData = await response.json();
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch member notification");
+  }
+
+  const data = responseData.data;
+
+  return data;
+};
+
+export const handleGetControlNotification = async () => {
+  const response = await fetch(`/api/v1/notification/package/control`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  const responseData = await response.json();
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch member notification");
+  }
+
+  const data = responseData.data;
+
+  return data;
+};

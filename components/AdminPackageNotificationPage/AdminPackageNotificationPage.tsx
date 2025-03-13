@@ -1,9 +1,15 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
-import { handleUpdatePackageNotification } from "@/services/notification/member";
-import { useState } from "react";
+import {
+  handleGetControlNotification,
+  handleUpdateControlNotification,
+  handleUpdatePackageNotification,
+} from "@/services/notification/member";
+import { Label } from "@radix-ui/react-label";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 type AdminNotificationForm = {
@@ -25,6 +31,8 @@ const AdminPackageNotificationPage = () => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isControlNotificationOn, setIsControlNotificationOn] =
+    useState<boolean>(false);
 
   const onSubmit = async (data: AdminNotificationForm) => {
     setIsSubmitting(true);
@@ -50,9 +58,53 @@ const AdminPackageNotificationPage = () => {
     }
   };
 
+  const handleTurnOffNotification = async (value: boolean) => {
+    try {
+      await handleUpdateControlNotification({
+        message: value ? "START" : "STOP",
+      });
+
+      setIsControlNotificationOn(value);
+
+      toast({
+        title: `Notification Turned ${value ? "ON" : "OFF"}`,
+        description: `Notification has been turned ${value ? "ON" : "OFF"} successfully`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error Turning Off Notification",
+      });
+    }
+  };
+
+  useEffect(() => {
+    const fetchControlNotification = async () => {
+      try {
+        const data = await handleGetControlNotification();
+        setIsControlNotificationOn(data === "START" ? true : false);
+      } catch (error) {
+        toast({
+          title: "Error Fetching Control Notification",
+        });
+      }
+    };
+    fetchControlNotification();
+  }, []);
+
   return (
-    <div className="p-4">
+    <div className="p-4 space-y-4">
       <h2 className="text-xl font-bold mb-4">Package Notification</h2>
+      <div className="flex gap-2 items-center">
+        <Label>Control Notification</Label>
+        <Switch
+          checked={isControlNotificationOn}
+          onCheckedChange={handleTurnOffNotification}
+        />
+        <span className="text-sm font-medium">
+          {isControlNotificationOn ? "ON" : "OFF"}
+        </span>
+      </div>
+
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="space-y-4 flex flex-col gap-4"
