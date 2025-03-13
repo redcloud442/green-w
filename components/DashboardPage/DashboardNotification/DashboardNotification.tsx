@@ -8,7 +8,7 @@ const DashboardNotification = () => {
     { id: string; message: string }[]
   >([]);
   const [isFull, setIsFull] = useState(false);
-  const [fading, setFading] = useState<string[]>([]);
+  const [fading, setFading] = useState<string[]>([]); // Track fading notifications
   const supabase = createClientSide();
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -33,10 +33,10 @@ const DashboardNotification = () => {
             ];
 
             if (newNotifications.length >= 5) {
-              setIsFull(true); // Mark that we reached 5 notifications
+              setIsFull(true);
             }
 
-            return newNotifications.slice(-5); // Always keep the latest 5
+            return newNotifications.slice(-5); // Keep the latest 5 notifications
           });
         }
       )
@@ -47,16 +47,25 @@ const DashboardNotification = () => {
     };
   }, []);
 
+  // Remove notifications one by one after 10 seconds (only when count reaches 5)
   useEffect(() => {
     if (isFull && notifications.length === 5) {
       const interval = setInterval(() => {
-        setFading((prev) => [...prev, notifications[0].id]); // Mark oldest as fading
+        const oldestNotification = notifications[0];
 
-        setTimeout(() => {
-          setNotifications((prev) => prev.slice(1)); // Remove after fade-out
-          setFading((prev) => prev.slice(1)); // Clear fade tracking
-        }, 9000); // Fade out before removal
-      }, 10000); // Remove one every 4 seconds
+        if (oldestNotification) {
+          setFading((prev) => [...prev, oldestNotification.id]); // Mark the oldest one to fade
+
+          setTimeout(() => {
+            setNotifications((prev) =>
+              prev.filter((n) => n.id !== oldestNotification.id)
+            ); // Remove it after fade
+            setFading((prev) =>
+              prev.filter((id) => id !== oldestNotification.id)
+            ); // Clear fade tracking
+          }, 10000); // 10-second fade duration
+        }
+      }, 5000); // Start fading a new notification every 5 seconds
 
       return () => clearInterval(interval);
     }
@@ -91,7 +100,7 @@ const DashboardNotification = () => {
             <div
               key={notification.id}
               className={cn(
-                "text-black text-center text-[12px] sm:text-sm rounded-lg w-full transition-opacity duration-2000",
+                "text-black text-center text-[12px] sm:text-sm rounded-lg w-full transition-opacity duration-5000",
                 fading.includes(notification.id)
                   ? "opacity-0 animate-fadeOut"
                   : "opacity-100",
@@ -108,7 +117,7 @@ const DashboardNotification = () => {
               100% { opacity: 0; }
             }
             .animate-fadeOut {
-              animation: fadeOut 2s ease-in-out forwards;
+              animation: fadeOut 5s ease-in-out forwards;
             }
           `}
           </style>
