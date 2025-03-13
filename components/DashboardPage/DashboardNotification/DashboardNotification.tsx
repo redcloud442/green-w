@@ -7,10 +7,15 @@ const DashboardNotification = () => {
   const [notifications, setNotifications] = useState<
     { id: string; message: string }[]
   >([]);
-  const [isFull, setIsFull] = useState(false);
   const [fading, setFading] = useState<string[]>([]); // Track fading notifications
   const supabase = createClientSide();
   const containerRef = useRef<HTMLDivElement>(null);
+  const notificationsRef = useRef(notifications);
+
+  // Update ref when notifications change
+  useEffect(() => {
+    notificationsRef.current = notifications;
+  }, [notifications]);
 
   useEffect(() => {
     const channel = supabase
@@ -23,21 +28,13 @@ const DashboardNotification = () => {
           table: "package_notification_table",
         },
         (payload) => {
-          setNotifications((prev) => {
-            const newNotifications = [
-              ...prev,
-              {
-                id: payload.new.package_notification_id,
-                message: payload.new.package_notification_message,
-              },
-            ];
-
-            if (newNotifications.length >= 5) {
-              setIsFull(true);
-            }
-
-            return newNotifications.slice(-5); // Keep the latest 5 notifications
-          });
+          setNotifications((prev) => [
+            ...prev,
+            {
+              id: payload.new.package_notification_id,
+              message: payload.new.package_notification_message,
+            },
+          ]);
         }
       )
       .subscribe();
@@ -47,45 +44,39 @@ const DashboardNotification = () => {
     };
   }, []);
 
-  // Remove notifications one by one after 10 seconds (only when count reaches 5)
+  // Start fading notifications after 10 seconds, remove after fade (5s)
   useEffect(() => {
-    if (isFull && notifications.length === 5) {
+    if (notificationsRef.current.length >= 5) {
       const interval = setInterval(() => {
-        const oldestNotification = notifications[0];
+        const oldestNotification = notificationsRef.current[0];
 
         if (oldestNotification) {
-          setFading((prev) => [...prev, oldestNotification.id]); // Mark the oldest one to fade
+          setFading((prev) => [...prev, oldestNotification.id]);
 
           setTimeout(() => {
             setNotifications((prev) =>
               prev.filter((n) => n.id !== oldestNotification.id)
-            ); // Remove it after fade
+            );
             setFading((prev) =>
               prev.filter((id) => id !== oldestNotification.id)
-            ); // Clear fade tracking
-          }, 10000); // 10-second fade duration
+            );
+          }, 5000);
         }
-      }, 5000); // Start fading a new notification every 5 seconds
+      }, 5000);
 
       return () => clearInterval(interval);
     }
-  }, [isFull, notifications]);
+  }, [notifications.length >= 5]); // Re-run only when reaching 5 notifications
 
-  const scrollToBottom = (container: HTMLElement | null, smooth = false) => {
-    if (container?.children.length) {
-      const lastElement = container?.lastChild as HTMLElement;
-
-      lastElement?.scrollIntoView({
-        behavior: smooth ? "smooth" : "auto",
-        block: "end",
-        inline: "nearest",
-      });
-    }
+  const scrollToBottom = () => {
+    containerRef.current?.scrollIntoView(false);
   };
 
   useEffect(() => {
-    scrollToBottom(containerRef.current, true);
+    scrollToBottom();
   }, [notifications]);
+
+  console.log("Fading Notifications:", fading); // Debug log
 
   return (
     <div className="mt-24 flex flex-col justify-center items-center gap-2 z-50 mx-2">
