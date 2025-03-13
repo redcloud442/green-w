@@ -66,7 +66,7 @@ const DashboardNotification = () => {
             <div
               key={index}
               className={cn(
-                "text-black text-center text-[9px] sm:text-sm rounded-lg w-full",
+                "text-black text-center text-[12px] sm:text-sm rounded-lg w-full",
                 "flex flex-col space-y-2"
               )}
             >
