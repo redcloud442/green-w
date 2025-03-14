@@ -60,9 +60,9 @@ const DashboardNotification = () => {
             setFading((prev) =>
               prev.filter((id) => id !== oldestNotification.id)
             );
-          }, 5000);
+          }, 3000);
         }
-      }, 5000);
+      }, 3000);
 
       return () => clearInterval(interval);
     }
@@ -90,7 +90,7 @@ const DashboardNotification = () => {
             <div
               key={notification.id}
               className={cn(
-                "text-black text-center text-[12px] sm:text-sm rounded-lg w-full transition-opacity duration-5000",
+                "text-black text-center text-[12px] sm:text-sm rounded-lg w-full transition-opacity duration-3000",
                 fading.includes(notification.id)
                   ? "opacity-0 animate-fadeOut"
                   : "opacity-100",
@@ -107,7 +107,7 @@ const DashboardNotification = () => {
               100% { opacity: 0; }
             }
             .animate-fadeOut {
-              animation: fadeOut 5s ease-in-out forwards;
+              animation: fadeOut 3s ease-in-out forwards;
             }
           `}
           </style>
