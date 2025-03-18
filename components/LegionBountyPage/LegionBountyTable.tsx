@@ -14,25 +14,36 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
-import { Search } from "lucide-react";
+import { format } from "date-fns";
+import { CalendarIcon, Search } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import ReusableTable from "../ReusableTable/ReusableTable";
 import { Button } from "../ui/button";
+import { Calendar } from "../ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Input } from "../ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Separator } from "../ui/separator";
 import { LegionBountyColumn } from "./LegionBountyColumn";
 
 type DataTableProps = {
   teamMemberProfile: alliance_member_table;
+  totalNetwork?: number;
 };
 
 type FilterFormValues = {
   emailFilter: string;
+  dateFilter: {
+    start: string;
+    end: string;
+  };
 };
 
-const LegionBountyTable = ({ teamMemberProfile }: DataTableProps) => {
+const LegionBountyTable = ({
+  teamMemberProfile,
+  totalNetwork,
+}: DataTableProps) => {
   const supabaseClient = createClientSide();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -54,7 +65,7 @@ const LegionBountyTable = ({ teamMemberProfile }: DataTableProps) => {
 
       const sanitizedData = escapeFormData(getValues());
 
-      const { emailFilter } = sanitizedData;
+      const { emailFilter, dateFilter } = sanitizedData;
 
       const { data, totalCount } = await getLegionBounty({
         teamMemberId: teamMemberProfile.alliance_member_id,
@@ -63,6 +74,10 @@ const LegionBountyTable = ({ teamMemberProfile }: DataTableProps) => {
         columnAccessor: columnAccessor,
         isAscendingSort: isAscendingSort,
         search: emailFilter,
+        dateFilter: {
+          start: dateFilter.start,
+          end: dateFilter.end,
+        },
       });
 
       setRequestData(data || []);
@@ -93,17 +108,23 @@ const LegionBountyTable = ({ teamMemberProfile }: DataTableProps) => {
     },
   });
 
-  const { register, handleSubmit, getValues } = useForm<FilterFormValues>({
-    defaultValues: {
-      emailFilter: "",
-    },
-  });
+  const { register, handleSubmit, getValues, control, watch } =
+    useForm<FilterFormValues>({
+      defaultValues: {
+        emailFilter: "",
+        dateFilter: {
+          start: undefined,
+          end: undefined,
+        },
+      },
+    });
 
   useEffect(() => {
     fetchAdminRequest();
   }, [supabaseClient, teamMemberProfile, activePage, sorting]);
 
   const pageCount = Math.ceil(requestCount / 10);
+  const { dateFilter } = watch();
 
   const handleFilter = async () => {
     try {
@@ -121,7 +142,7 @@ const LegionBountyTable = ({ teamMemberProfile }: DataTableProps) => {
       <CardContent>
         <div className="flex justify-between items-end flex-wrap gap-4">
           <form
-            className="flex gap-2 pt-4 pb-4"
+            className="flex flex-wrap gap-2 pt-4 pb-4"
             onSubmit={handleSubmit(handleFilter)}
           >
             <Input
@@ -129,11 +150,80 @@ const LegionBountyTable = ({ teamMemberProfile }: DataTableProps) => {
               placeholder="Filter username..."
               className="w-full sm:w-auto"
             />
+            <Controller
+              name="dateFilter.start"
+              control={control}
+              render={({ field }) => (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="font-normal w-full md:w-auto justify-start rounded-md"
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {field.value
+                        ? format(new Date(field.value), "PPP")
+                        : "Select Start Date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full md:w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={field.value ? new Date(field.value) : undefined}
+                      onSelect={(date: Date | undefined) =>
+                        field.onChange(date?.toISOString() || "")
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              )}
+            />
+            <Controller
+              name="dateFilter.end"
+              control={control}
+              render={({ field }) => (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="font-normal w-full md:w-auto justify-start rounded-md"
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {field.value
+                        ? format(new Date(field.value), "PPP")
+                        : "Select End Date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full md:w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={field.value ? new Date(field.value) : undefined}
+                      onSelect={(date: Date | undefined) =>
+                        field.onChange(date?.toISOString() || "")
+                      }
+                      fromDate={
+                        dateFilter.start
+                          ? new Date(dateFilter.start)
+                          : undefined
+                      }
+                      disabled={(date) =>
+                        dateFilter.start
+                          ? date < new Date(dateFilter.start)
+                          : false
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              )}
+            />
             <Button
               type="submit"
               disabled={isFetchingList}
               size="sm"
               variant="card"
+              className="w-full sm:w-auto"
             >
               <Search />
             </Button>

@@ -14,6 +14,7 @@ import {
 } from "@prisma/client";
 import { Info } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import TransactionHistoryTable from "../TransactionHistoryPage/TransactionHistoryTable";
@@ -345,8 +346,8 @@ const DashboardBody = ({
           />
         </div>
 
-        <div
-          onClick={() => router.push("/referral")}
+        <Link
+          href="/referral"
           className="flex flex-col items-center cursor-pointer"
         >
           <Image
@@ -356,11 +357,11 @@ const DashboardBody = ({
             height={35}
           />
           <p className="text-sm sm:text-lg font-thin mt-2">REFERRAL</p>
-        </div>
+        </Link>
 
         {/* NETWORK (Bottom Left) */}
-        <div
-          onClick={() => router.push("/network")}
+        <Link
+          href="/network"
           className="flex flex-col items-center cursor-pointer"
         >
           <Image
@@ -370,7 +371,7 @@ const DashboardBody = ({
             height={35}
           />
           <p className="text-sm sm:text-lg font-thin mt-2">NETWORK</p>
-        </div>
+        </Link>
         {isActive && (
           <div className="flex flex-col items-center">
             <DashboardMissionModal />

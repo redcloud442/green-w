@@ -23,6 +23,7 @@ import { useRole } from "@/utils/context/roleContext";
 import { createClientSide } from "@/utils/supabase/client";
 import { BookOpenIcon, DoorOpen, HomeIcon, UserIcon } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import DashboardNotification from "../DashboardPage/DashboardDepositRequest/DashboardDepositModal/DashboardNotification";
@@ -196,47 +197,49 @@ const MobileNavBar = () => {
               className="flex flex-col items-center justify-center w-auto"
             >
               {item.label === "Facebook Group" ? (
-                <Button
-                  onClick={() => handleNavigation(item.href, item.onClick)}
-                  variant="ghost"
-                  className={cn(
-                    "flex flex-col relative items-center font-medium hover:bg-transparent text-center p-0 w-min",
-                    pathname === item.href
-                      ? "text-blue-600 dark:text-blue-400"
-                      : "text-gray-600 dark:text-gray-300"
-                  )}
-                >
-                  <Image
-                    src="/assets/facebook-group.png"
-                    alt="Facebook Group"
-                    width={100}
-                    height={100}
-                    className="absolute bottom-2 left-1/2 transform -translate-x-1/2"
-                  />
+                <Link href={item.href}>
+                  <Button
+                    variant="ghost"
+                    className={cn(
+                      "flex flex-col relative items-center font-medium hover:bg-transparent text-center p-0 w-min",
+                      pathname === item.href
+                        ? "text-blue-600 dark:text-blue-400"
+                        : "text-gray-600 dark:text-gray-300"
+                    )}
+                  >
+                    <Image
+                      src="/assets/facebook-group.png"
+                      alt="Facebook Group"
+                      width={100}
+                      height={100}
+                      className="absolute bottom-2 left-1/2 transform -translate-x-1/2"
+                    />
 
-                  <span className="text-xs sm:text-sm pt-2">
-                    Facebook Group
-                  </span>
-                </Button>
+                    <span className="text-xs sm:text-sm pt-2">
+                      Facebook Group
+                    </span>
+                  </Button>
+                </Link>
               ) : item.label === "Notification" ? (
                 <DashboardNotification
                   handleOpen={handleOnOpen}
                   teamMemberId={teamMemberId}
                 />
               ) : (
-                <Button
-                  onClick={() => handleNavigation(item.href, item.onClick)}
-                  variant="ghost"
-                  className={cn(
-                    "flex flex-col items-center font-medium hover:bg-transparent text-center p-2 w-min",
-                    pathname === item.href
-                      ? "text-blue-600 dark:text-blue-400"
-                      : "text-gray-600 dark:text-gray-300"
-                  )}
-                >
-                  {item.icon}
-                  <span className="text-xs sm:text-sm">{item.label}</span>
-                </Button>
+                <Link href={item.href}>
+                  <Button
+                    variant="ghost"
+                    className={cn(
+                      "flex flex-col items-center font-medium hover:bg-transparent text-center p-2 w-min",
+                      pathname === item.href
+                        ? "text-blue-600 dark:text-blue-400"
+                        : "text-gray-600 dark:text-gray-300"
+                    )}
+                  >
+                    {item.icon}
+                    <span className="text-xs sm:text-sm">{item.label}</span>
+                  </Button>
+                </Link>
               )}
             </li>
           ))}

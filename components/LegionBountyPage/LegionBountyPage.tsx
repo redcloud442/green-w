@@ -5,9 +5,10 @@ import LegionBountyTable from "./LegionBountyTable";
 
 type Props = {
   teamMemberProfile: alliance_member_table;
+  totalNetwork?: number;
 };
 
-const LegionBountyPage = ({ teamMemberProfile }: Props) => {
+const LegionBountyPage = ({ teamMemberProfile, totalNetwork }: Props) => {
   return (
     <div className="md:p-10">
       <div>
@@ -22,7 +23,10 @@ const LegionBountyPage = ({ teamMemberProfile }: Props) => {
         </div>
         {/* Table Section */}
         <section className="rounded-lg ">
-          <LegionBountyTable teamMemberProfile={teamMemberProfile} />
+          <LegionBountyTable
+            teamMemberProfile={teamMemberProfile}
+            totalNetwork={totalNetwork}
+          />
         </section>
       </div>
     </div>
