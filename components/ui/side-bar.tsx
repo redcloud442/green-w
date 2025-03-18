@@ -12,25 +12,18 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
-  SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import { createClientSide } from "@/utils/supabase/client";
 import { alliance_member_table, user_table } from "@prisma/client";
 import {
-  BanknoteIcon,
   BeakerIcon,
   Bell,
-  Calendar,
   ChevronUp,
   File,
-  Group,
   HistoryIcon,
-  Home,
-  Inbox,
   MonitorCheck,
   Package,
-  PiggyBankIcon,
   Receipt,
   Settings,
   Trophy,
@@ -38,8 +31,9 @@ import {
   UserCheckIcon,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 
+import Link from "next/link";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -57,10 +51,6 @@ const AppSidebar = ({ userData, teamMemberProfile }: Props) => {
   const pathname = usePathname();
   const supabase = createClientSide();
 
-  const [isAdmin, setIsAdmin] = useState(
-    teamMemberProfile.alliance_member_role === "ADMIN"
-  );
-
   const handleSignOut = async () => {
     try {
       await supabase.auth.signOut();
@@ -69,49 +59,6 @@ const AppSidebar = ({ userData, teamMemberProfile }: Props) => {
     } finally {
     }
   };
-
-  const menuItems = useMemo(() => {
-    const baseItems = [
-      { title: "Home", url: "/", icon: Home },
-      {
-        title: "Top Up",
-        url: "/top-up",
-        icon: Inbox,
-        subItems: [
-          {
-            icon: HistoryIcon,
-            title: "Top Up History",
-            url: "/top-up/history",
-          },
-        ],
-      },
-      { title: "Packages", url: "/packages", icon: Calendar },
-      {
-        title: "Withdraw",
-        url: "/withdraw",
-        icon: PiggyBankIcon,
-        subItems: [
-          {
-            icon: BanknoteIcon,
-            title: "Withdrawal History",
-            url: "/withdraw/history",
-          },
-        ],
-      },
-      { title: "Ally Bounty", url: "/ally-bounty", icon: User2 },
-      { title: "Legion Bounty", url: "/legion-bounty", icon: Group },
-    ];
-
-    if (teamMemberProfile.alliance_member_role === "MERCHANT") {
-      baseItems.push({
-        title: "Top Up History",
-        url: "/admin/top-up",
-        icon: HistoryIcon,
-      });
-    }
-
-    return baseItems;
-  }, [teamMemberProfile.alliance_member_role]);
 
   const adminMenuItems = [
     { title: "Admin Dashboard", url: "/admin", icon: Settings },
@@ -165,105 +112,94 @@ const AppSidebar = ({ userData, teamMemberProfile }: Props) => {
     },
   ];
 
-  useEffect(() => {
-    setIsAdmin(teamMemberProfile.alliance_member_role === "ADMIN");
-  }, [teamMemberProfile.alliance_member_role]);
-
-  const handleNavigation = (url: string) => {
-    if (pathname !== url) {
-      router.push(url);
-    }
-  };
-
   const isActive = (url: string) => pathname === url;
 
-  const renderMenu = (menu: typeof menuItems) =>
-    menu.map((item) => (
+  const renderedMenu = useMemo(() => {
+    return adminMenuItems.map((item) => (
       <SidebarMenuItem key={item.title}>
-        <SidebarMenuButton
-          size="lg"
-          onClick={() => handleNavigation(item.url)}
-          className={`flex items-center px-4 py-4 rounded-md ${
-            isActive(item.url)
-              ? "bg-blue-100 text-blue-500 font-bold"
-              : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-white"
-          }`}
-        >
-          <item.icon className="w-5 h-5" />
-          <span>{item.title}</span>
-        </SidebarMenuButton>
+        <Link href={item.url}>
+          <SidebarMenuButton
+            size="lg"
+            className={`flex items-center px-4 py-4 rounded-md ${
+              isActive(item.url)
+                ? "bg-blue-100 text-blue-500 font-bold"
+                : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-white"
+            }`}
+          >
+            <item.icon className="w-5 h-5" />
+            {item.title}
+          </SidebarMenuButton>
+        </Link>
         {item.subItems && (
           <SidebarMenuSub>
             {item.subItems.map((subItem) => (
               <SidebarMenuSubItem key={subItem.title}>
-                <SidebarMenuSubButton
-                  size="sm"
-                  onClick={() => handleNavigation(subItem.url)}
-                  className={`flex cursor-pointer items-center px-4 py-2 rounded-md ${
-                    isActive(subItem.url)
-                      ? "bg-blue-50 text-blue-500 font-semibold"
-                      : "hover:bg-gray-50 text-gray-700"
-                  }`}
-                >
-                  <subItem.icon className="w-4 h-4" />
-                  <span>{subItem.title}</span>
-                </SidebarMenuSubButton>
+                <Link href={subItem.url}>
+                  <SidebarMenuButton
+                    size="sm"
+                    className={`flex items-center px-4 py-4 rounded-md ${
+                      isActive(subItem.url)
+                        ? "bg-blue-100 text-blue-500 font-bold"
+                        : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-white"
+                    }`}
+                  >
+                    <subItem.icon className="w-4 h-4" />
+                    <span>{subItem.title}</span>
+                  </SidebarMenuButton>
+                </Link>
               </SidebarMenuSubItem>
             ))}
           </SidebarMenuSub>
         )}
       </SidebarMenuItem>
     ));
+  }, [pathname]);
 
   return (
-    <>
-      <Sidebar>
-        <SidebarHeader>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton>ELEVATEGLOBAL</SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupLabel>Application Menu</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenu>
-                  {renderMenu(isAdmin ? adminMenuItems : menuItems)}
-                </SidebarMenu>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
-        <SidebarFooter>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <SidebarMenuButton>
-                    <div className="flex items-center space-x-2 w-full">
-                      <User2 className="w-5 h-5" />
-                      <span className="truncate">{userData.user_username}</span>
-                      <ChevronUp className="ml-auto w-4 h-4" />
-                    </div>
-                  </SidebarMenuButton>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent side="top">
-                  <DropdownMenuItem onClick={() => router.push("/profile")}>
+    <Sidebar>
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton>ELEVATEGLOBAL</SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Application Menu</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>{renderedMenu}</SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton>
+                  <div className="flex items-center space-x-2 w-full">
+                    <User2 className="w-5 h-5" />
+                    <span className="truncate">{userData.user_username}</span>
+                    <ChevronUp className="ml-auto w-4 h-4" />
+                  </div>
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent side="top">
+                <Link href="/profile">
+                  <DropdownMenuItem>
                     <span>Profile</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleSignOut}>
-                    <span>Log Out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarFooter>
-      </Sidebar>
-    </>
+                </Link>
+                <DropdownMenuItem onClick={handleSignOut}>
+                  <span>Log Out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+    </Sidebar>
   );
 };
 

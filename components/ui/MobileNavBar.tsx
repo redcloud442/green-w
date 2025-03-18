@@ -109,64 +109,53 @@ const MobileNavBar = () => {
     },
   ];
 
-  const handleNavigation = (
-    url: string,
-    onClick?: () => void | Promise<void>
-  ) => {
-    if (onClick) {
-      onClick();
-    } else if (pathname !== url) {
-      router.push(url);
+  const { role, teamMemberId } = useRole();
+
+  const handleFetchUserInformation = async () => {
+    try {
+      if (!teamMemberId) return;
+      setLoading(true);
+
+      const [userEarningsData, isWithdrawalToday, data, notifications] =
+        await Promise.all([
+          getUserEarnings({
+            memberId: teamMemberId,
+          }),
+          getUserWithdrawalToday(),
+
+          getDashboard({
+            teamMemberId: teamMemberId,
+          }),
+          handleFetchMemberNotification({
+            take: 10,
+            skip: 0,
+            teamMemberId: teamMemberId,
+          }),
+        ]);
+
+      setIsWithdrawalToday({
+        referral: isWithdrawalToday.canWithdrawReferral,
+        package: isWithdrawalToday.canWithdrawPackage,
+      });
+      setCanUserDeposit(isWithdrawalToday.canUserDeposit);
+      setTotalEarnings(userEarningsData.totalEarnings);
+
+      setEarnings(userEarningsData.userEarningsData);
+
+      setUserNotification({
+        notifications: notifications.notifications,
+        count: notifications.count,
+      });
+      setChartData(data);
+
+      setLoading(false);
+    } catch (error) {
+    } finally {
+      setLoading(false);
     }
   };
 
-  const { role, teamMemberId } = useRole();
-
   useEffect(() => {
-    const handleFetchUserInformation = async () => {
-      try {
-        if (!teamMemberId) return;
-        setLoading(true);
-
-        const [userEarningsData, isWithdrawalToday, data, notifications] =
-          await Promise.all([
-            getUserEarnings({
-              memberId: teamMemberId,
-            }),
-            getUserWithdrawalToday(),
-
-            getDashboard({
-              teamMemberId: teamMemberId,
-            }),
-            handleFetchMemberNotification({
-              take: 10,
-              skip: 0,
-              teamMemberId: teamMemberId,
-            }),
-          ]);
-
-        setIsWithdrawalToday({
-          referral: isWithdrawalToday.canWithdrawReferral,
-          package: isWithdrawalToday.canWithdrawPackage,
-        });
-        setCanUserDeposit(isWithdrawalToday.canUserDeposit);
-        setTotalEarnings(userEarningsData.totalEarnings);
-
-        setEarnings(userEarningsData.userEarningsData);
-
-        setUserNotification({
-          notifications: notifications.notifications,
-          count: notifications.count,
-        });
-        setChartData(data);
-
-        setLoading(false);
-      } catch (error) {
-      } finally {
-        setLoading(false);
-      }
-    };
-
     handleFetchUserInformation();
   }, [teamMemberId, role]);
 
@@ -255,9 +244,7 @@ const MobileNavBar = () => {
           <DoorOpen className="w-7 h-7 text-black" />
         </Button>
       )}
-      {/* fix logout */}
 
-      {/* Logout Confirmation Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="z-50">
           <DialogHeader>
