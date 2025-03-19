@@ -16,12 +16,19 @@ import {
   VisibilityState,
 } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { CalendarIcon, Loader2, RefreshCw, Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import {
+  CalendarIcon,
+  Loader2,
+  PhilippinePeso,
+  RefreshCw,
+  Search,
+} from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Button } from "../ui/button";
 import { Calendar } from "../ui/calendar";
 import { Card } from "../ui/card";
+import CardAmountAdmin from "../ui/CardAmountAdmin";
 import {
   Dialog,
   DialogClose,
@@ -309,227 +316,255 @@ const AdminWithdrawalHistoryTable = ({
   };
 
   const rejectNote = watch("rejectNote");
+
+  const totalPendingWithdrawal = useMemo(() => {
+    return requestData?.data?.["PENDING"]?.data.reduce(
+      (acc, curr) => acc + Number(curr.alliance_withdrawal_request_amount),
+      0
+    );
+  }, [requestData?.data?.["PENDING"]?.data]);
+
   return (
-    <Card className="w-full rounded-sm p-4">
-      <div className="flex flex-wrap gap-4 items-start py-4">
-        <form
-          className="flex flex-col gap-6 w-full max-w-2xl rounded-md"
-          onSubmit={handleSubmit(handleFilter)}
-        >
-          {isOpenModal && (
-            <Dialog
-              open={isOpenModal.open}
-              onOpenChange={(open) => setIsOpenModal({ ...isOpenModal, open })}
-            >
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>
-                    {isOpenModal.status.charAt(0).toUpperCase() +
-                      isOpenModal.status.slice(1).toLocaleLowerCase()}{" "}
-                    This Request
-                  </DialogTitle>
-                </DialogHeader>
-                {isOpenModal.status === "REJECTED" && (
-                  <Controller
-                    name="rejectNote"
-                    control={control}
-                    rules={{ required: "Rejection note is required" }}
-                    render={({ field, fieldState }) => (
-                      <div className="flex flex-col gap-2">
-                        <Textarea
-                          placeholder="Enter the reason for rejection..."
-                          {...field}
-                        />
-                        {fieldState.error && (
-                          <span className="text-red-500 text-sm">
-                            {fieldState.error.message}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  />
-                )}
-                <div className="flex justify-end gap-2 mt-4">
-                  <DialogClose asChild>
-                    <Button variant="secondary">Cancel</Button>
-                  </DialogClose>
-                  <Button
-                    disabled={isLoading}
-                    onClick={() => {
-                      handleUpdateStatus(
-                        isOpenModal.status,
-                        isOpenModal.requestId,
-                        rejectNote
-                      );
-                    }}
-                  >
-                    {isLoading ? (
-                      <>
-                        {isOpenModal.status.charAt(0).toUpperCase() +
-                          isOpenModal.status.slice(1).toLocaleLowerCase()}{" "}
-                        <Loader2 className="animate-spin" />
-                      </>
-                    ) : isOpenModal.status === "REJECTED" ? (
-                      "Confirm Reject"
-                    ) : (
-                      "Confirm Approve"
-                    )}
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-          )}
-          <div className="flex flex-wrap gap-2 items-center w-full">
-            <Input
-              {...register("referenceId")}
-              placeholder="Filter requestor username..."
-              className="max-w-sm p-2 border rounded"
-            />
-            <Button
-              type="submit"
-              disabled={isFetchingList}
-              size="sm"
-              variant="card"
-            >
-              <Search />
-            </Button>
-            <Button
-              variant="card"
-              onClick={handleRefresh}
-              disabled={isFetchingList}
-              size="sm"
-            >
-              <RefreshCw />
-              Refresh
-            </Button>
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="filter-switch"
-                checked={showFilters}
-                onCheckedChange={handleSwitchChange}
+    <>
+      <CardAmountAdmin
+        title="Total Pending Withdrawal"
+        value={
+          <>
+            <PhilippinePeso />
+            {totalPendingWithdrawal?.toLocaleString("en-US", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            }) ?? "0.00"}
+          </>
+        }
+        description=""
+        descriptionClassName="text-sm text-gray-500 font-bold"
+      />
+      <Card className="w-full rounded-sm p-4">
+        <div className="flex flex-wrap gap-4 items-start py-4">
+          <form
+            className="flex flex-col gap-6 w-full max-w-2xl rounded-md"
+            onSubmit={handleSubmit(handleFilter)}
+          >
+            {isOpenModal && (
+              <Dialog
+                open={isOpenModal.open}
+                onOpenChange={(open) =>
+                  setIsOpenModal({ ...isOpenModal, open })
+                }
+              >
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>
+                      {isOpenModal.status.charAt(0).toUpperCase() +
+                        isOpenModal.status.slice(1).toLocaleLowerCase()}{" "}
+                      This Request
+                    </DialogTitle>
+                  </DialogHeader>
+                  {isOpenModal.status === "REJECTED" && (
+                    <Controller
+                      name="rejectNote"
+                      control={control}
+                      rules={{ required: "Rejection note is required" }}
+                      render={({ field, fieldState }) => (
+                        <div className="flex flex-col gap-2">
+                          <Textarea
+                            placeholder="Enter the reason for rejection..."
+                            {...field}
+                          />
+                          {fieldState.error && (
+                            <span className="text-red-500 text-sm">
+                              {fieldState.error.message}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    />
+                  )}
+                  <div className="flex justify-end gap-2 mt-4">
+                    <DialogClose asChild>
+                      <Button variant="secondary">Cancel</Button>
+                    </DialogClose>
+                    <Button
+                      disabled={isLoading}
+                      onClick={() => {
+                        handleUpdateStatus(
+                          isOpenModal.status,
+                          isOpenModal.requestId,
+                          rejectNote
+                        );
+                      }}
+                    >
+                      {isLoading ? (
+                        <>
+                          {isOpenModal.status.charAt(0).toUpperCase() +
+                            isOpenModal.status
+                              .slice(1)
+                              .toLocaleLowerCase()}{" "}
+                          <Loader2 className="animate-spin" />
+                        </>
+                      ) : isOpenModal.status === "REJECTED" ? (
+                        "Confirm Reject"
+                      ) : (
+                        "Confirm Approve"
+                      )}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            )}
+            <div className="flex flex-wrap gap-2 items-center w-full">
+              <Input
+                {...register("referenceId")}
+                placeholder="Filter requestor username..."
+                className="max-w-sm p-2 border rounded"
               />
-              <Label htmlFor="filter">Filter</Label>
-            </div>
-          </div>
-
-          {showFilters && (
-            <div className="flex flex-wrap gap-2 items-center rounded-md ">
-              <Controller
-                name="userFilter"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    onValueChange={(value) =>
-                      field.onChange(value === field.value ? "" : value)
-                    }
-                    value={field.value || ""}
-                  >
-                    <SelectTrigger className="w-full sm:w-auto">
-                      <SelectValue placeholder="Requestor" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {userOptions.map((opt) => (
-                        <SelectItem key={opt.user_id} value={opt.user_id}>
-                          {opt.user_username}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-
-              <Controller
-                name="dateFilter.start"
-                control={control}
-                render={({ field }) => (
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="card"
-                        className="font-normal justify-start"
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {field.value
-                          ? format(new Date(field.value), "PPP")
-                          : "Select Start Date"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={
-                          field.value ? new Date(field.value) : undefined
-                        }
-                        onSelect={(date: Date | undefined) =>
-                          field.onChange(date?.toISOString() || "")
-                        }
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                )}
-              />
-
-              {/* End Date Picker */}
-
-              <Button variant="card" onClick={fetchRequest}>
-                Submit
+              <Button
+                type="submit"
+                disabled={isFetchingList}
+                size="sm"
+                variant="card"
+              >
+                <Search />
               </Button>
+              <Button
+                variant="card"
+                onClick={handleRefresh}
+                disabled={isFetchingList}
+                size="sm"
+              >
+                <RefreshCw />
+                Refresh
+              </Button>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="filter-switch"
+                  checked={showFilters}
+                  onCheckedChange={handleSwitchChange}
+                />
+                <Label htmlFor="filter">Filter</Label>
+              </div>
             </div>
-          )}
-        </form>
-      </div>
 
-      <Tabs defaultValue="PENDING" onValueChange={handleTabChange}>
-        <TabsList className="mb-4">
-          <TabsTrigger value="PENDING">
-            Pending ({requestData?.data?.["PENDING"]?.count || 0})
-          </TabsTrigger>
-          <TabsTrigger value="APPROVED">
-            Approved ({requestData?.data?.["APPROVED"]?.count || 0})
-          </TabsTrigger>
-          <TabsTrigger value="REJECTED">
-            Rejected ({requestData?.data?.["REJECTED"]?.count || 0})
-          </TabsTrigger>
-        </TabsList>
+            {showFilters && (
+              <div className="flex flex-wrap gap-2 items-center rounded-md ">
+                <Controller
+                  name="userFilter"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      onValueChange={(value) =>
+                        field.onChange(value === field.value ? "" : value)
+                      }
+                      value={field.value || ""}
+                    >
+                      <SelectTrigger className="w-full sm:w-auto">
+                        <SelectValue placeholder="Requestor" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {userOptions.map((opt) => (
+                          <SelectItem key={opt.user_id} value={opt.user_id}>
+                            {opt.user_username}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
 
-        <TabsContent value="PENDING">
-          <AdminWithdrawalTabs
-            table={table}
-            columns={columns}
-            activePage={activePage}
-            totalCount={requestData?.data?.["PENDING"]?.count || 0}
-            isFetchingList={isFetchingList}
-            setActivePage={setActivePage}
-            pageCount={pageCount}
-          />
-        </TabsContent>
+                <Controller
+                  name="dateFilter.start"
+                  control={control}
+                  render={({ field }) => (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="card"
+                          className="font-normal justify-start"
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {field.value
+                            ? format(new Date(field.value), "PPP")
+                            : "Select Start Date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          selected={
+                            field.value ? new Date(field.value) : undefined
+                          }
+                          onSelect={(date: Date | undefined) =>
+                            field.onChange(date?.toISOString() || "")
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  )}
+                />
 
-        <TabsContent value="APPROVED">
-          <AdminWithdrawalTabs
-            table={table}
-            columns={columns}
-            activePage={activePage}
-            isFetchingList={isFetchingList}
-            setActivePage={setActivePage}
-            pageCount={pageCount}
-            totalCount={requestData?.data?.["APPROVED"]?.count || 0}
-          />
-        </TabsContent>
+                {/* End Date Picker */}
 
-        <TabsContent value="REJECTED">
-          <AdminWithdrawalTabs
-            table={table}
-            columns={columns}
-            activePage={activePage}
-            totalCount={requestData?.data?.["REJECTED"]?.count || 0}
-            isFetchingList={isFetchingList}
-            setActivePage={setActivePage}
-            pageCount={pageCount}
-          />
-        </TabsContent>
-      </Tabs>
-    </Card>
+                <Button variant="card" onClick={fetchRequest}>
+                  Submit
+                </Button>
+              </div>
+            )}
+          </form>
+        </div>
+
+        <Tabs defaultValue="PENDING" onValueChange={handleTabChange}>
+          <TabsList className="mb-4">
+            <TabsTrigger value="PENDING">
+              Pending ({requestData?.data?.["PENDING"]?.count || 0})
+            </TabsTrigger>
+            <TabsTrigger value="APPROVED">
+              Approved ({requestData?.data?.["APPROVED"]?.count || 0})
+            </TabsTrigger>
+            <TabsTrigger value="REJECTED">
+              Rejected ({requestData?.data?.["REJECTED"]?.count || 0})
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="PENDING">
+            <AdminWithdrawalTabs
+              table={table}
+              columns={columns}
+              activePage={activePage}
+              totalCount={requestData?.data?.["PENDING"]?.count || 0}
+              isFetchingList={isFetchingList}
+              setActivePage={setActivePage}
+              pageCount={pageCount}
+            />
+          </TabsContent>
+
+          <TabsContent value="APPROVED">
+            <AdminWithdrawalTabs
+              table={table}
+              columns={columns}
+              activePage={activePage}
+              isFetchingList={isFetchingList}
+              setActivePage={setActivePage}
+              pageCount={pageCount}
+              totalCount={requestData?.data?.["APPROVED"]?.count || 0}
+            />
+          </TabsContent>
+
+          <TabsContent value="REJECTED">
+            <AdminWithdrawalTabs
+              table={table}
+              columns={columns}
+              activePage={activePage}
+              totalCount={requestData?.data?.["REJECTED"]?.count || 0}
+              isFetchingList={isFetchingList}
+              setActivePage={setActivePage}
+              pageCount={pageCount}
+            />
+          </TabsContent>
+        </Tabs>
+      </Card>
+    </>
   );
 };
 

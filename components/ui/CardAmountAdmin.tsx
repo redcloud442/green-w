@@ -22,7 +22,7 @@ const CardAmountAdmin = ({
   children,
 }: Props) => {
   return (
-    <Card className="w-full md:min-w-md">
+    <Card className="w-full md:min-w-md border-cyan-700">
       <CardHeader>
         <CardTitle>{title}</CardTitle>
         <CardDescription className="flex gap-x-2 text-xl font-bold">
