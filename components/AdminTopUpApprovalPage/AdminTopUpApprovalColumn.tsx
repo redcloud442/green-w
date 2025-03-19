@@ -281,48 +281,42 @@ export const useAdminTopUpApprovalColumns = (
         </div>
       ),
     },
-    ...(status !== "PENDING"
-      ? [
-          {
-            accessorKey: "approver_username",
-            header: ({ column }: { column: Column<TopUpRequestData> }) => (
-              <Button
-                variant="ghost"
+    {
+      accessorKey: "approver_username",
+      header: ({ column }: { column: Column<TopUpRequestData> }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="p-1"
+        >
+          Approver <ArrowUpDown />
+        </Button>
+      ),
+      cell: ({ row }: { row: Row<TopUpRequestData> }) => (
+        <div className="flex items-center gap-2 text-wrap cursor-pointer hover:underline">
+          {row.original.approver_username ? (
+            <>
+              <Avatar>
+                <AvatarImage
+                  src={row.original.approver_profile_picture ?? ""}
+                />
+                <AvatarFallback>
+                  {row.original.approver_username?.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+              <p
                 onClick={() =>
-                  column.toggleSorting(column.getIsSorted() === "asc")
+                  router.push(`/admin/users/${row.original.approver_id}`)
                 }
-                className="p-1"
+                className="text-wrap text-blue-500 underline"
               >
-                Approver <ArrowUpDown />
-              </Button>
-            ),
-            cell: ({ row }: { row: Row<TopUpRequestData> }) => (
-              <div className="flex items-center gap-2 text-wrap cursor-pointer hover:underline">
-                {row.original.approver_username ? (
-                  <>
-                    <Avatar>
-                      <AvatarImage
-                        src={row.original.approver_profile_picture ?? ""}
-                      />
-                      <AvatarFallback>
-                        {row.original.approver_username?.charAt(0)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <p
-                      onClick={() =>
-                        router.push(`/admin/users/${row.original.approver_id}`)
-                      }
-                      className="text-wrap text-blue-500 underline"
-                    >
-                      {row.getValue("approver_username")}
-                    </p>
-                  </>
-                ) : null}
-              </div>
-            ),
-          },
-        ]
-      : []),
+                {row.getValue("approver_username")}
+              </p>
+            </>
+          ) : null}
+        </div>
+      ),
+    },
     ...(status !== "PENDING"
       ? [
           {
