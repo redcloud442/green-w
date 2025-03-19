@@ -246,23 +246,7 @@ export const useAdminTopUpApprovalColumns = (
         </div>
       ),
     },
-    {
-      accessorKey: "alliance_top_up_request_type",
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          className="p-1"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Bank Name <ArrowUpDown />
-        </Button>
-      ),
-      cell: ({ row }) => (
-        <div className="text-wrap w-56">
-          {row.getValue("alliance_top_up_request_type")}
-        </div>
-      ),
-    },
+
     {
       accessorKey: "alliance_top_up_request_account",
       header: ({ column }) => (

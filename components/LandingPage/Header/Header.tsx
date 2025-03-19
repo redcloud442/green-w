@@ -38,8 +38,10 @@ const Header = () => {
   ];
 
   return (
-    <section className="fixed top-0 left-0 right-0 z-50 flex justify-between items-start p-10">
-      <div className="text-2xl text-white gap-10 flex">
+    <section
+      className={`fixed top-0 left-0 right-0 z-50 flex justify-between items-start p-10`}
+    >
+      <div className="text-3xl text-white gap-10 flex font-ethnocentric">
         {NavigationMenu.map((item) => (
           <Link
             className={`${pathname === item.href ? "text-sky-400 underline underline-offset-4 decoration-sky-400 decoration-2" : "text-white"}`}
