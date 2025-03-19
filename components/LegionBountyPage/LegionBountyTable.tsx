@@ -142,91 +142,106 @@ const LegionBountyTable = ({
       <CardContent>
         <div className="flex justify-between items-end flex-wrap gap-4">
           <form
-            className="flex flex-wrap gap-2 pt-4 pb-4"
+            className="flex flex-wrap justify-between gap-2 pt-4 pb-4 w-full items-center"
             onSubmit={handleSubmit(handleFilter)}
           >
-            <Input
-              {...register("emailFilter")}
-              placeholder="Filter username..."
-              className="w-full sm:w-auto"
-            />
-            <Controller
-              name="dateFilter.start"
-              control={control}
-              render={({ field }) => (
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="font-normal w-full md:w-auto justify-start rounded-md"
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {field.value
-                        ? format(new Date(field.value), "PPP")
-                        : "Select Start Date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-full md:w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={field.value ? new Date(field.value) : undefined}
-                      onSelect={(date: Date | undefined) =>
-                        field.onChange(date?.toISOString() || "")
-                      }
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              )}
-            />
-            <Controller
-              name="dateFilter.end"
-              control={control}
-              render={({ field }) => (
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="font-normal w-full md:w-auto justify-start rounded-md"
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {field.value
-                        ? format(new Date(field.value), "PPP")
-                        : "Select End Date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-full md:w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={field.value ? new Date(field.value) : undefined}
-                      onSelect={(date: Date | undefined) =>
-                        field.onChange(date?.toISOString() || "")
-                      }
-                      fromDate={
-                        dateFilter.start
-                          ? new Date(dateFilter.start)
-                          : undefined
-                      }
-                      disabled={(date) =>
-                        dateFilter.start
-                          ? date < new Date(dateFilter.start)
-                          : false
-                      }
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              )}
-            />
-            <Button
-              type="submit"
-              disabled={isFetchingList}
-              size="sm"
-              variant="card"
-              className="w-full sm:w-auto"
-            >
-              <Search />
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Input
+                {...register("emailFilter")}
+                placeholder="Filter username..."
+                className="w-full sm:w-auto"
+              />
+              <Controller
+                name="dateFilter.start"
+                control={control}
+                render={({ field }) => (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="font-normal w-full md:w-auto justify-start rounded-md"
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {field.value
+                          ? format(new Date(field.value), "PPP")
+                          : "Select Start Date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full md:w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={
+                          field.value ? new Date(field.value) : undefined
+                        }
+                        onSelect={(date: Date | undefined) =>
+                          field.onChange(date?.toISOString() || "")
+                        }
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                )}
+              />
+              <Controller
+                name="dateFilter.end"
+                control={control}
+                render={({ field }) => (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="font-normal w-full md:w-auto justify-start rounded-md"
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {field.value
+                          ? format(new Date(field.value), "PPP")
+                          : "Select End Date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full md:w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={
+                          field.value ? new Date(field.value) : undefined
+                        }
+                        onSelect={(date: Date | undefined) =>
+                          field.onChange(date?.toISOString() || "")
+                        }
+                        fromDate={
+                          dateFilter.start
+                            ? new Date(dateFilter.start)
+                            : undefined
+                        }
+                        disabled={(date) =>
+                          dateFilter.start
+                            ? date < new Date(dateFilter.start)
+                            : false
+                        }
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                )}
+              />
+              <Button
+                type="submit"
+                disabled={isFetchingList}
+                size="sm"
+                variant="card"
+                className="w-full sm:w-auto"
+              >
+                <Search />
+              </Button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <span className="text-sm text-gray-500">
+                Total Network Income: ₱{" "}
+                {totalNetwork?.toLocaleString("en-US", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </span>
+            </div>
           </form>
         </div>
         <ReusableTable
