@@ -25,7 +25,6 @@ export default function RootLayout({
       <body className="h-screen overflow-x-hidden">
         <main className="relative min-h-screen">
           <RouterTransition />
-
           {children}
         </main>
         <Toaster />

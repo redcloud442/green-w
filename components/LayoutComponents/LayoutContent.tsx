@@ -47,27 +47,23 @@ export default function LayoutContent({
     return <MobileNavBar />;
   }, [isAdmin]);
 
-  /** ✅ Memoized Dashboard Notification */
   const dashboardNotification = useMemo(() => {
-    if (isAdmin || pathname !== "/") return null;
+    if (isAdmin || pathname !== "/panel") return null;
     return <DashboardNotification />;
   }, [isAdmin, pathname]);
 
   return (
     <QueryClientProvider client={queryClient}>
       <div className="flex min-h-screen w-full overflow-hidden relative">
-        {/* Sidebar for Admin */}
         {sidebar}
 
         <div className="flex-1 flex flex-col overflow-x-auto relative">
-          {/* Sidebar Toggle for Mobile (Admin Only) */}
           {isAdmin && (
             <div className="p-4 md:hidden">
               <SidebarTrigger />
             </div>
           )}
 
-          {/* Main Content Section */}
           <div
             className={`relative z-50 flex-grow pb-20 ${isAdmin ? "p-4" : "p-0"} sm:pb-0`}
           >
@@ -75,7 +71,6 @@ export default function LayoutContent({
             {children}
           </div>
 
-          {/* Mobile Navigation (Non-Admin Only) */}
           {mobileNav}
         </div>
       </div>

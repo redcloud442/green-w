@@ -1,9 +1,8 @@
-import Header from "@/components/LandingPage/Header/Header";
-
+import HeroBanner from "@/components/LandingPage/HeroBanner/HeroBanner";
 const page = () => {
   return (
     <>
-      <Header />
+      <HeroBanner />
     </>
   );
 };
