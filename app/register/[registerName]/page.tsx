@@ -1,6 +1,7 @@
 import RegisterPage from "@/components/registerPage/registerPage";
 import prisma from "@/utils/prisma";
 import { protectionRegisteredUser } from "@/utils/serversideProtection";
+import Image from "next/image";
 import { redirect } from "next/navigation";
 
 export async function generateMetadata({
@@ -74,6 +75,16 @@ const Page = async ({
 
   return (
     <main className="max-w-full min-h-screen flex flex-col items-center justify-start p-2 pt-10">
+      <div className="absolute inset-0 -z-10 h-full w-full">
+        <Image
+          src="/assets/bg-primary.png"
+          alt="Background"
+          quality={80}
+          fill
+          priority
+          className="object-cover"
+        />
+      </div>
       <RegisterPage referralLink={registerName} />
     </main>
   );

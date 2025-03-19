@@ -6,10 +6,10 @@ import { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
-  title: "Dashboard",
-  description: "Elevate Dashboard",
+  title: "Panel",
+  description: "Elevate Panel",
   openGraph: {
-    url: "/",
+    url: "/panel",
   },
 };
 
