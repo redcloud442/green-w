@@ -1,6 +1,6 @@
 import AllyBountyPage from "@/components/AllyBountyPage/AllyBountyPage";
+import prisma from "@/utils/prisma";
 import { protectionAllUser } from "@/utils/serversideProtection";
-import { createClientServerSide } from "@/utils/supabase/server";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 export const metadata: Metadata = {
@@ -12,21 +12,25 @@ export const metadata: Metadata = {
 };
 
 const Page = async () => {
-  const supabase = await createClientServerSide();
   const { teamMemberProfile } = await protectionAllUser();
 
   if (!teamMemberProfile) return redirect("/500");
 
-  const { data } = await supabase.rpc("get_direct_sponsor", {
-    input_data: {
-      teamMemberId: "",
+  const totalNetwork = await prisma.dashboard_earnings_summary.findUnique({
+    where: {
+      member_id: teamMemberProfile.alliance_member_id,
+    },
+    select: {
+      direct_referral_amount: true,
+      direct_referral_count: true,
     },
   });
 
   return (
     <AllyBountyPage
       teamMemberProfile={teamMemberProfile}
-      sponsor={(data as string) || ""}
+      totalDirectReferral={totalNetwork?.direct_referral_amount ?? 0}
+      totalDirectReferralCount={totalNetwork?.direct_referral_count ?? 0}
     />
   );
 };

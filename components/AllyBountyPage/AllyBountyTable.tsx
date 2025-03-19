@@ -13,26 +13,38 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
-import { Search } from "lucide-react";
+import { format } from "date-fns";
+import { CalendarIcon, Search } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import ReferralModal from "../ReferralModal/ReferralModal";
 import ReusableTable from "../ReusableTable/ReusableTable";
 import { Button } from "../ui/button";
+import { Calendar } from "../ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Input } from "../ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Separator } from "../ui/separator";
 import { AllyBountyColumn } from "./AllyBountyColum";
 type DataTableProps = {
   teamMemberProfile: alliance_member_table;
-  sponsor?: string;
+  totalDirectReferral: number;
+  totalDirectReferralCount: number;
 };
 
 type FilterFormValues = {
   emailFilter: string;
+  dateFilter: {
+    start: string;
+    end: string;
+  };
 };
 
-const AllyBountyTable = ({ teamMemberProfile }: DataTableProps) => {
+const AllyBountyTable = ({
+  teamMemberProfile,
+  totalDirectReferral,
+  totalDirectReferralCount,
+}: DataTableProps) => {
   const supabaseClient = createClientSide();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -45,7 +57,6 @@ const AllyBountyTable = ({ teamMemberProfile }: DataTableProps) => {
     })[]
   >([]);
   const [requestCount, setRequestCount] = useState(0);
-  const [referralCount, setReferralCount] = useState(0);
   const [activePage, setActivePage] = useState(1);
   const [isFetchingList, setIsFetchingList] = useState(false);
 
@@ -60,20 +71,19 @@ const AllyBountyTable = ({ teamMemberProfile }: DataTableProps) => {
 
       const sanitizedData = escapeFormData(getValues());
 
-      const { emailFilter } = sanitizedData;
+      const { emailFilter, dateFilter } = sanitizedData;
 
-      const { data, totalCount, totalReferralCountDirect } =
-        await getAllyBounty({
-          page: activePage,
-          limit: 10,
-          columnAccessor: columnAccessor,
-          isAscendingSort: isAscendingSort,
-          search: emailFilter,
-        });
+      const { data, totalCount } = await getAllyBounty({
+        page: activePage,
+        limit: 10,
+        columnAccessor: columnAccessor,
+        isAscendingSort: isAscendingSort,
+        search: emailFilter,
+        dateFilter: dateFilter,
+      });
 
       setRequestData(data || []);
       setRequestCount(totalCount || 0);
-      setReferralCount(totalReferralCountDirect || 0);
     } catch (e) {
     } finally {
       setIsFetchingList(false);
@@ -100,11 +110,18 @@ const AllyBountyTable = ({ teamMemberProfile }: DataTableProps) => {
     },
   });
 
-  const { getValues, handleSubmit, register } = useForm<FilterFormValues>({
-    defaultValues: {
-      emailFilter: "",
-    },
-  });
+  const { getValues, handleSubmit, register, control, watch } =
+    useForm<FilterFormValues>({
+      defaultValues: {
+        emailFilter: "",
+        dateFilter: {
+          start: "",
+          end: "",
+        },
+      },
+    });
+
+  const dateFilter = watch("dateFilter");
 
   const handleFilter = async () => {
     try {
@@ -127,7 +144,7 @@ const AllyBountyTable = ({ teamMemberProfile }: DataTableProps) => {
       <CardContent className="space-y-4">
         <div className="flex justify-between items-end flex-wrap gap-4">
           <form
-            className="flex gap-2 pt-4 w-full sm:w-auto"
+            className="flex flex-wrap gap-2 pt-4 w-full sm:w-auto"
             onSubmit={handleSubmit(handleFilter)}
           >
             <Input
@@ -135,23 +152,100 @@ const AllyBountyTable = ({ teamMemberProfile }: DataTableProps) => {
               placeholder="Filter username..."
               className="w-full sm:w-auto"
             />
+            <Controller
+              name="dateFilter.start"
+              control={control}
+              render={({ field }) => (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="font-normal w-full md:w-auto justify-start rounded-md"
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {field.value
+                        ? format(new Date(field.value), "PPP")
+                        : "Select Start Date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full md:w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={field.value ? new Date(field.value) : undefined}
+                      onSelect={(date: Date | undefined) =>
+                        field.onChange(date?.toISOString() || "")
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              )}
+            />
+            <Controller
+              name="dateFilter.end"
+              control={control}
+              render={({ field }) => (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="font-normal w-full md:w-auto justify-start rounded-md"
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {field.value
+                        ? format(new Date(field.value), "PPP")
+                        : "Select End Date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full md:w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={field.value ? new Date(field.value) : undefined}
+                      onSelect={(date: Date | undefined) =>
+                        field.onChange(date?.toISOString() || "")
+                      }
+                      fromDate={
+                        dateFilter.start
+                          ? new Date(dateFilter.start)
+                          : undefined
+                      }
+                      disabled={(date) =>
+                        dateFilter.start
+                          ? date < new Date(dateFilter.start)
+                          : false
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              )}
+            />
             <Button
               type="submit"
               disabled={isFetchingList}
               size="sm"
               variant="card"
+              className="w-full sm:w-auto"
             >
               <Search />
             </Button>
           </form>
-
-          <div className="flex items-center gap-4 flex-wrap">
-            <span className="text-sm font-bold ">
-              Total Referral Count: {referralCount}
-            </span>
-            <ReferralModal teamMemberProfile={teamMemberProfile} />
-          </div>
         </div>
+
+        <ReferralModal teamMemberProfile={teamMemberProfile} />
+        <div className="flex flex-col gap-2">
+          <span className="text-sm font-bold ">
+            Total Referral Count: {totalDirectReferralCount}
+          </span>
+          <span className="text-sm font-bold ">
+            Total Referral Amount: ₱
+            {totalDirectReferral.toLocaleString("en-US", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
+          </span>
+        </div>
+
         <ReusableTable
           table={table}
           columns={columns}
