@@ -7,6 +7,10 @@ export const getAllyBounty = async (params: {
   search?: string;
   columnAccessor: string;
   isAscendingSort: boolean;
+  dateFilter: {
+    start: string;
+    end: string;
+  };
 }) => {
   const urlParams = {
     page: params.page,
@@ -14,6 +18,7 @@ export const getAllyBounty = async (params: {
     search: params.search || "",
     columnAccessor: params.columnAccessor,
     isAscendingSort: params.isAscendingSort,
+    dateFilter: params.dateFilter,
   };
 
   const response = await fetch(`/api/v1/referral/direct`, {
@@ -34,7 +39,6 @@ export const getAllyBounty = async (params: {
       package_ally_bounty_log_date_created: string;
     })[];
     totalCount: 0;
-    totalReferralCountDirect: number;
   };
 };
 

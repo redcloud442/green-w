@@ -5,10 +5,15 @@ import AllyBountyTable from "./AllyBountyTable";
 
 type Props = {
   teamMemberProfile: alliance_member_table;
-  sponsor: string;
+  totalDirectReferral: number;
+  totalDirectReferralCount: number;
 };
 
-const AllyBountyPage = ({ teamMemberProfile, sponsor }: Props) => {
+const AllyBountyPage = ({
+  teamMemberProfile,
+  totalDirectReferral,
+  totalDirectReferralCount,
+}: Props) => {
   return (
     <div className="p-4 sm:p-10">
       <div>
@@ -24,7 +29,8 @@ const AllyBountyPage = ({ teamMemberProfile, sponsor }: Props) => {
         <section className=" rounded-lg ">
           <AllyBountyTable
             teamMemberProfile={teamMemberProfile}
-            sponsor={sponsor}
+            totalDirectReferral={totalDirectReferral}
+            totalDirectReferralCount={totalDirectReferralCount}
           />
         </section>
       </div>
