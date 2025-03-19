@@ -113,11 +113,6 @@ const ToolsAndGuides = () => {
       image: "/GUIDES/19.png",
     },
     {
-      alt: "MOP",
-      image: "/GUIDES/MOP.png",
-    },
-
-    {
       alt: "FB PAGE PFP",
       image: "/GUIDES/FB PAGE PFP.png",
     },
