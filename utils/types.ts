@@ -154,6 +154,7 @@ export type AdminWithdrawaldata = {
     REJECTED: StatusDataWithdraw;
     PENDING: StatusDataWithdraw;
   };
+  totalPendingWithdrawal: number;
 };
 
 export type AdminWithdrawalReportData = {

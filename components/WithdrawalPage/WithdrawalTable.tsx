@@ -23,7 +23,7 @@ import {
   RefreshCw,
   Search,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Button } from "../ui/button";
 import { Calendar } from "../ui/calendar";
@@ -131,6 +131,7 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
                 count: 0,
               },
             },
+            totalPendingWithdrawal: requestData?.totalPendingWithdrawal || 0,
           };
         }
 
@@ -144,6 +145,7 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
               count: 0,
             },
           },
+          totalPendingWithdrawal: requestData?.totalPendingWithdrawal || 0,
         };
       });
     } catch (e) {
@@ -181,6 +183,7 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
           REJECTED: { data: [], count: 0 },
           PENDING: { data: [], count: 0 },
         },
+        totalPendingWithdrawal: 0,
       };
       const sanitizedData = escapeFormData(getValues());
 
@@ -302,17 +305,6 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
 
   const rejectNote = watch("rejectNote");
 
-  const totalPendingWithdrawal = useMemo(() => {
-    return requestData?.data?.["PENDING"]?.data.reduce(
-      (acc, curr) =>
-        acc +
-        Number(
-          curr.alliance_withdrawal_request_amount -
-            curr.alliance_withdrawal_request_fee
-        ),
-      0
-    );
-  }, [requestData?.data?.["PENDING"]?.data]);
   return (
     <>
       {" "}
@@ -321,7 +313,7 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
         value={
           <>
             <PhilippinePeso />
-            {totalPendingWithdrawal?.toLocaleString("en-US", {
+            {requestData?.totalPendingWithdrawal?.toLocaleString("en-US", {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
             }) ?? "0.00"}
