@@ -127,6 +127,7 @@ export type AdminTopUpRequestData = {
     PENDING: StatusData;
   };
   merchantBalance?: number;
+  totalPendingDeposit: number;
 };
 
 export type MerchantTopUpRequestData = {

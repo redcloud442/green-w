@@ -221,6 +221,9 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
         };
       }
 
+      updatedData.totalPendingWithdrawal =
+        requestData?.totalPendingWithdrawal || 0;
+
       setRequestData(updatedData);
     } catch (e) {
       if (e instanceof Error) {

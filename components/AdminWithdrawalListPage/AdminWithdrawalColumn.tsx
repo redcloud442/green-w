@@ -89,14 +89,14 @@ export const AdminWithdrawalHistoryColumn = (
                   ]
                 : [],
               count: Number(currentStatusData?.count || 0) + 1,
-              totalPendingWithdrawal:
-                Number(prev.totalPendingWithdrawal) -
-                Number(
-                  updatedItem.alliance_withdrawal_request_amount -
-                    updatedItem.alliance_withdrawal_request_fee
-                ),
             },
           },
+          totalPendingWithdrawal:
+            Number(prev.totalPendingWithdrawal) -
+            Number(
+              updatedItem.alliance_withdrawal_request_amount -
+                updatedItem.alliance_withdrawal_request_fee
+            ),
         };
       });
       reset();

@@ -157,6 +157,7 @@ const AdminWithdrawalHistoryTable = ({
               count: 0,
             },
           },
+          totalPendingWithdrawal: requestData?.totalPendingWithdrawal || 0,
         };
       });
     } catch (e) {
@@ -234,6 +235,9 @@ const AdminWithdrawalHistoryTable = ({
           count: 0,
         };
       }
+
+      updatedData.totalPendingWithdrawal =
+        requestData?.totalPendingWithdrawal || 0;
 
       setRequestData(updatedData);
     } catch (e) {
