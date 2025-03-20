@@ -1,3 +1,4 @@
+import DevMode from "@/components/ui/dev-mode";
 import RouterTransition from "@/components/ui/routerTransition";
 import { Toaster } from "@/components/ui/toaster";
 import type { Metadata } from "next";
@@ -21,11 +22,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={roboto.className}>
+    <html
+      className={`${roboto.className} scroll-smooth`}
+      lang="en"
+      suppressHydrationWarning
+    >
       <body className="h-screen overflow-x-hidden">
         <main className="relative min-h-screen">
           <RouterTransition />
           {children}
+          <DevMode />
         </main>
         <Toaster />
       </body>

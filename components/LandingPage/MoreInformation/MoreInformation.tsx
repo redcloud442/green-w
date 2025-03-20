@@ -47,7 +47,10 @@ const MoreInformation = () => {
   ];
 
   return (
-    <section className="relative min-h-[70vh] h-full w-full flex flex-col font-ethnocentric bg-black text-white bg-[url('/landing/primaryBackground.png')] bg-cover bg-center pt-20">
+    <section
+      id="more-info"
+      className="relative min-h-[70vh] h-full w-full flex flex-col font-ethnocentric overflow-hidden bg-black text-white bg-[url('/landing/primaryBackground.png')] bg-cover bg-center pt-20"
+    >
       <div className="relative flex flex-col items-start justify-start px-20">
         <h2 className="text-6xl md:text-7xl text-white text-start font-black font-airstrike tracking-widest italic drop-shadow-[2px_2px_4px_rgba(0,0,0,0.10)]">
           MORE
@@ -68,7 +71,7 @@ const MoreInformation = () => {
           </div>
         ))}
       </div>
-      <div className="relative w-full h-[50vh] px-10  text-stone-300">
+      <div className="relative w-full h-[60vh] px-10  text-stone-300">
         <div className="flex items-start justify-start">
           <Image
             src="/app-logo.png"
@@ -93,9 +96,10 @@ const MoreInformation = () => {
       <Image
         src="/landing/moreInfoBg.png"
         alt="Elevate Global"
-        width={500}
-        height={400}
-        className="absolute bottom-0 right-20"
+        width={600}
+        height={600}
+        quality={100}
+        className="absolute -bottom-32 right-20"
       />
     </section>
   );

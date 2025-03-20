@@ -1,6 +1,6 @@
 const AboutSection = () => {
   return (
-    <section className="min-h-screen h-full w-full bg-slate-100">
+    <section id="about" className="min-h-screen h-full w-full bg-slate-100">
       <div className="container mx-auto px-4 py-16">
         <h2 className="text-6xl text-black text-center mb-8 font-black font-airstrike tracking-wide drop-shadow-[2px_2px_4px_rgba(0,0,0,0.8)]">
           ABOUT
@@ -27,7 +27,7 @@ const AboutSection = () => {
           </div>
         </div>
 
-        <div className="flex flex-col items-center justify-center ">
+        <div className="flex flex-col items-center justify-center bg-[url('/landing/aboutBg.png')] bg-contain bg-no-repeat bg-center">
           <div className="flex flex-col items-center justify-center">
             <video
               controls

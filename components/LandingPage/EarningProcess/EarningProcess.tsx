@@ -72,7 +72,10 @@ const EarningProcess = () => {
   ];
 
   return (
-    <section className="relative min-h-[90vh] h-full lg:min-h-[80vh] w-full flex flex-col font-ethnocentric bg-black text-white bg-[url('/landing/earningProcessBg.png')] bg-fixed bg-cover bg-center  pt-10 px-10">
+    <section
+      id="earning-process"
+      className="relative min-h-screen h-full lg:min-h-screen w-full flex flex-col font-ethnocentric bg-black text-white bg-[url('/landing/earningProcessBg.png')] bg-fixed bg-cover bg-center  pt-10 px-10"
+    >
       {/* Title */}
       <h2 className="text-6xl md:text-7xl text-cyan-300 text-center mb-4 font-black font-airstrike tracking-widest drop-shadow-[2px_2px_4px_rgba(0,0,0,0.10)]">
         EARNING PROCESS
