@@ -5,33 +5,33 @@ const HeroBanner = () => {
   return (
     <section
       id="home"
-      className="relative h-[100vh] w-full flex flex-col bg-black overflow-hidden bg-[url(/landing/primaryBackground.png)] bg-cover bg-center"
+      className="relative h-[100vh] w-full flex flex-col bg-black overflow-hidden bg-[url(https://imagedelivery.net/vwrXTORU06toqN4y_4Gwgw/7315bcb8-01d2-4705-687b-d83eccd4d500/public)] bg-cover bg-center"
     >
       <div className="relative flex flex-col md:flex-row items-center justify-around w-full h-full px-8">
         {/* Left Side - Text Content */}
         <div className="flex flex-col justify-center items-center lg:items-start text-center lg:text-left w-auto gap-8">
-          <div>
-            <h1 className="text-white text-4xl lg:text-5xl font-extrabold font-airstrike tracking-widest drop-shadow-md">
+          <div className="space-y-2">
+            <h1 className="text-white text-2xl lg:text-5xl font-extrabold font-airstrike tracking-widest drop-shadow-md">
               LEADING THE WAY
             </h1>
-            <h1 className="text-white text-4xl lg:text-5xl font-extrabold font-airstrike leading-tight tracking-widest drop-shadow-md">
+            <h1 className="text-white text-2xl lg:text-5xl font-extrabold font-airstrike leading-tight tracking-widest drop-shadow-md">
               IN CRYPTOCURRENCY
             </h1>
-            <h1 className="text-white text-4xl lg:text-5xl font-extrabold font-airstrike leading-tight drop-shadow-md">
+            <h1 className="text-white text-2xl lg:text-5xl font-extrabold font-airstrike leading-tight drop-shadow-md">
               TO THE FUTURE.
             </h1>
 
             {/* Blue Gradient Text */}
-            <p className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-400 text-4xl lg:text-5xl font-extrabold font-airstrike leading-tight drop-shadow-lg">
+            <p className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-400 text-2xl lg:text-5xl font-extrabold font-airstrike leading-tight drop-shadow-lg">
               ELEVATING VISIONARIES
             </p>
-            <p className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-400 text-4xl lg:text-5xl font-extrabold font-airstrike leading-tight drop-shadow-lg">
+            <p className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-400 text-2xl lg:text-5xl font-extrabold font-airstrike leading-tight drop-shadow-lg">
               TO MILLIONAIRES WITH
             </p>
-            <p className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-400 text-4xl lg:text-5xl font-extrabold font-airstrike leading-tight drop-shadow-lg">
+            <p className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-400 text-2xl lg:text-5xl font-extrabold font-airstrike leading-tight drop-shadow-lg">
               UNMATCHED INNOVATION
             </p>
-            <p className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-400 text-4xl lg:text-5xl font-extrabold font-airstrike leading-tight drop-shadow-lg">
+            <p className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-400 text-2xl lg:text-5xl font-extrabold font-airstrike leading-tight drop-shadow-lg">
               AND UNWAVERING TRUST!
             </p>
           </div>
@@ -41,17 +41,17 @@ const HeroBanner = () => {
               Led by:
             </p>
             <div className="flex flex-row gap-6">
-              <p className="text-white text-3xl lg:text-5xl font-light font-ethnocentric tracking-[0.25em]">
+              <p className="text-white text-xl lg:text-5xl font-light font-ethnocentric tracking-[0.25em]">
                 ANGELICA
               </p>
-              <p className="text-white text-3xl lg:text-5xl font-light font-ethnocentric tracking-[0.25em]">
+              <p className="text-white text-xl lg:text-5xl font-light font-ethnocentric tracking-[0.25em]">
                 SINAMBAL
               </p>
             </div>
           </div>
           <div className="w-full">
             <Button
-              className="w-full text-white font-extralight font-ethnocentric tracking-[0.25em] text-2xl rounded-md h-12"
+              className="w-full max-w-sm lg:max-w-full text-white font-extralight font-ethnocentric tracking-[0.05em] text-md lg:text-2xl rounded-md h-12"
               variant="outline"
             >
               Download Elevateglobal App

@@ -42,7 +42,7 @@ const Insights = () => {
   ];
 
   return (
-    <section className="w-full min-h-screen h-full bg-black p-10 bg-[url(/landing/primaryBackground.png)] bg-cover bg-center">
+    <section className="w-full min-h-screen h-full bg-black p-10 bg-[url(https://imagedelivery.net/vwrXTORU06toqN4y_4Gwgw/7315bcb8-01d2-4705-687b-d83eccd4d500/public)] bg-cover bg-center">
       <div className="w-full flex flex-col items-center text-center">
         <h1 className="text-cyan-300 text-5xl font-extrabold font-airstrike tracking-widest drop-shadow-md">
           CEO INSIGHTS:
