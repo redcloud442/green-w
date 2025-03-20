@@ -319,7 +319,12 @@ const AdminWithdrawalHistoryTable = ({
 
   const totalPendingWithdrawal = useMemo(() => {
     return requestData?.data?.["PENDING"]?.data.reduce(
-      (acc, curr) => acc + Number(curr.alliance_withdrawal_request_amount),
+      (acc, curr) =>
+        acc +
+        Number(
+          curr.alliance_withdrawal_request_amount -
+            curr.alliance_withdrawal_request_fee
+        ),
       0
     );
   }, [requestData?.data?.["PENDING"]?.data]);
