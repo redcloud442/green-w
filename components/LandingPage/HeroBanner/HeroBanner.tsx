@@ -127,7 +127,7 @@ const HeroBanner = () => {
               width={2000}
               height={2000}
               priority
-              quality={80}
+              quality={100}
               className="object-contain"
             />
           </div>
