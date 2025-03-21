@@ -4,6 +4,7 @@ import LayoutContent from "@/components/LayoutComponents/LayoutContent";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { RoleProvider } from "@/utils/context/roleContext";
 import { protectionMemberUser } from "@/utils/serversideProtection";
+import Image from "next/image";
 import { redirect } from "next/navigation";
 
 export default async function AppLayout({
@@ -34,6 +35,16 @@ export default async function AppLayout({
         initialMobileNumber={profile.user_active_mobile ?? ""}
         initialEmail={profile.user_email ?? ""}
       >
+        <div className="absolute inset-0 -z-10 h-full w-full">
+          <Image
+            src="/assets/bg-primary.png"
+            alt="Background"
+            quality={80}
+            fill
+            priority
+            className="object-cover"
+          />
+        </div>
         <LayoutContent profile={profile} teamMemberProfile={teamMemberProfile}>
           {children}
         </LayoutContent>

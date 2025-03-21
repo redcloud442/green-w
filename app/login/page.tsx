@@ -1,6 +1,7 @@
 import LoginPage from "@/components/loginPage/loginPage";
 import { protectionRegisteredUser } from "@/utils/serversideProtection";
 import { Metadata } from "next";
+import Image from "next/image";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
@@ -35,6 +36,16 @@ const Page = async () => {
 
   return (
     <main className="max-w-full min-h-screen flex flex-col items-center justify-center">
+      <div className="absolute inset-0 -z-10 h-full w-full">
+        <Image
+          src="/assets/bg-primary.png"
+          alt="Background"
+          quality={80}
+          fill
+          priority
+          className="object-cover"
+        />
+      </div>
       <LoginPage />
     </main>
   );

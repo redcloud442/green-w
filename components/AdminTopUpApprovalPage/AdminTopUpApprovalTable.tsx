@@ -260,7 +260,6 @@ const AdminTopUpApprovalTable = ({ teamMemberProfile }: DataTableProps) => {
           count: 0,
         };
       }
-
       updatedData.totalPendingDeposit = requestData?.totalPendingDeposit || 0;
 
       setRequestData(updatedData);

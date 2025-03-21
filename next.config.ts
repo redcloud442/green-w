@@ -10,6 +10,11 @@ const nextConfig = {
         port: "",
         pathname: "/storage/v1/object/public/**",
       },
+      {
+        protocol: "https",
+        hostname: "imagedelivery.net",
+        pathname: "/vwrXTORU06toqN4y_4Gwgw/**",
+      },
     ],
   },
   async rewrites() {

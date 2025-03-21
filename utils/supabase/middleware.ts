@@ -4,7 +4,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 export async function updateSession(request: NextRequest) {
   const cookieStore = await cookies();
-
+  // Check if the session validation has already occurred
   if (request.headers.get("x-session-checked")) {
     return addSecurityHeaders(NextResponse.next());
   }
@@ -28,7 +28,7 @@ export async function updateSession(request: NextRequest) {
         setAll(cookiesToSet) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
+              cookieStore.set(name, value, { ...options, sameSite: true })
             );
           } catch {
             // The `setAll` method was called from a Server Component.
@@ -43,64 +43,54 @@ export async function updateSession(request: NextRequest) {
   const isMagicLinkCallback = request.nextUrl.pathname === "/auth/callback";
 
   if (isMagicLinkCallback) {
-    // Bypass session validation for magic link processing
     return addSecurityHeaders(NextResponse.next());
   }
 
-  // Retrieve user session
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Validate the session
-
-  // Define public and private routes
   const publicRoutes = [
     "/login",
     "/register",
-    "/api/auth",
-    "/api/health",
     "/api/v1/auth",
-    "/auth/callback",
-    "/loginSecured",
-  ];
-  const privateRoutes = [
-    "/*",
-    "/dashboard",
-    "/api/auth",
-    "/admin/*",
-    "/loginSecured",
+    "/auth/loginSecured",
     "/api/health",
-    "/client",
+    "/",
+    "/faq",
+    "/proof-and-legalities",
   ];
+  const privateRoutes = ["/panel", "/api/auth", "/admin", "/"];
   const currentPath = request.nextUrl.pathname;
 
-  // Handle routing based on user session
   if (!user) {
+    // 🔹 If user is NOT logged in and they visit a public route, let them pass
     if (publicRoutes.some((route) => currentPath.startsWith(route))) {
       return addSecurityHeaders(NextResponse.next());
     }
 
+    // 🔹 If user is NOT logged in and tries to access private routes, redirect to login
     if (privateRoutes.some((route) => currentPath.startsWith(route))) {
       const loginUrl = request.nextUrl.clone();
       loginUrl.pathname = "/login";
-      const response = NextResponse.redirect(loginUrl);
-      response.headers.set("x-session-checked", "true");
-      return addSecurityHeaders(response);
+      return addSecurityHeaders(NextResponse.redirect(loginUrl));
+    }
+  } else {
+    // 🔹 If user is logged in and visits login/register, send them to /dashboard
+    if (publicRoutes.includes(currentPath)) {
+      if (currentPath !== "/panel") {
+        const homeUrl = request.nextUrl.clone();
+        homeUrl.pathname = "/panel";
+        return addSecurityHeaders(NextResponse.redirect(homeUrl));
+      }
+    }
+
+    // 🔹 If user is logged in and visits a private route, let them pass
+    if (privateRoutes.some((route) => currentPath.startsWith(route))) {
+      return addSecurityHeaders(NextResponse.next());
     }
   }
 
-  if (user) {
-    if (publicRoutes.some((route) => currentPath.startsWith(route))) {
-      const homeUrl = request.nextUrl.clone();
-      homeUrl.pathname = "/";
-      const response = NextResponse.redirect(homeUrl);
-      response.headers.set("x-session-checked", "true");
-      return addSecurityHeaders(response);
-    }
-  }
-
-  // Set session validation header
   supabaseResponse.headers.set("x-session-checked", "true");
   return addSecurityHeaders(supabaseResponse);
 }

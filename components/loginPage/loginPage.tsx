@@ -88,7 +88,7 @@ const LoginPage = () => {
         localStorage.setItem("hasOpenedMissionModal", "false");
       }
 
-      router.push("/");
+      router.push("/panel");
     } catch (e) {
       if (e instanceof Error) {
         toast({

@@ -9,6 +9,14 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        airstrike: ["Airstrike", "sans-serif"],
+        ethnocentric: ["Bankrus", "sans-serif"],
+      },
+      backgroundImage: {
+        "custom-radial":
+          "radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(0, 123, 181, 0.8) 30%, rgba(0, 0, 0, 1) 100%)",
+      },
       colors: {
         pageColor: "#1E1E1E",
         cardColor: "#bae6fd",
