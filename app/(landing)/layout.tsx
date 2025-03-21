@@ -1,3 +1,4 @@
+import Footer from "@/components/LandingPage/Footer/Footer";
 import Header from "@/components/LandingPage/Header/Header";
 
 export default function LandingLayout({
@@ -9,7 +10,7 @@ export default function LandingLayout({
     <>
       <Header />
       {children}
-      {/* <Footer /> */}
+      <Footer />
     </>
   );
 }

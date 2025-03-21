@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import Burger from "./Burger";
 
 const Header = () => {
   const pathname = usePathname();
@@ -58,10 +59,17 @@ const Header = () => {
 
   return (
     <section
-      className={`fixed top-0 left-0 right-0 z-50 flex justify-between items-start p-10 transition-all duration-300 bg-transparent`}
+      className={`fixed top-0 left-0 right-0 z-50 flex justify-between items-center lg:items-start p-5 lg:p-10  transition-all duration-300 bg-transparent`}
     >
+      <Burger
+        NavigationMenu={NavigationMenu}
+        pathname={pathname}
+        currentSection={currentSection}
+        handleScrollToSection={handleScrollToSection}
+        isDark={isDark}
+      />
       <div
-        className={`text-3xl gap-10 flex font-ethnocentric w-full max-w-xs transition-colors duration-300 ${
+        className={`text-3xl gap-10 font-ethnocentric w-full max-w-xs transition-colors duration-300 xl:flex hidden ${
           isDark ? "text-cyan-700" : "text-white"
         }`}
       >
@@ -121,14 +129,14 @@ const Header = () => {
           )
         )}
       </div>
-      <div className="flex items-start justify-center">
-        <Link href="/login">
+      <div className="flex items-end justify-end xl:w-auto ">
+        <Link href="/login" className="w-[100px] xl:w-auto">
           <Image
             src="/app-logo.png"
             alt="Elevate Global"
             width={180}
             height={180}
-            className="object-contain cursor-pointer"
+            className="object-contain cursor-pointer w-full max-w-xs xl:w-full"
           />
         </Link>
       </div>

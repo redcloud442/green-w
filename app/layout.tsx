@@ -1,4 +1,3 @@
-import DevMode from "@/components/ui/dev-mode";
 import RouterTransition from "@/components/ui/routerTransition";
 import { Toaster } from "@/components/ui/toaster";
 import type { Metadata } from "next";
@@ -31,10 +30,11 @@ export default function RootLayout({
         <main className="relative min-h-screen">
           <RouterTransition />
           {children}
-          <DevMode />
+          {/* <DevMode /> */}
         </main>
         <Toaster />
       </body>
     </html>
   );
 }
+

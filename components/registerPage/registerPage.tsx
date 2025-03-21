@@ -192,7 +192,7 @@ const RegisterPage = ({ referralLink }: Props) => {
         description: "Please wait",
       });
 
-      router.push("/");
+      router.push("/panel");
     } catch (e) {
       setIsSuccess(false);
       if (e instanceof Error) {
