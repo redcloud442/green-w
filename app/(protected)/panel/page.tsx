@@ -6,10 +6,10 @@ import { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
-  title: "Panel",
-  description: "Elevate Panel",
+  title: "Panel | Elevate Global",
+  description: "Elevate Global Panel",
   openGraph: {
-    url: "/panel",
+    url: "https://elevateglobal.app/panel",
   },
 };
 

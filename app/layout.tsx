@@ -7,6 +7,9 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Elevate Global App",
   description: "Elevate Global App",
+  openGraph: {
+    url: "https://elevateglobal.app",
+  },
 };
 
 const roboto = Roboto({
@@ -37,4 +40,3 @@ export default function RootLayout({
     </html>
   );
 }
-
