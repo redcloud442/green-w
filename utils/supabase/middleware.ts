@@ -60,7 +60,7 @@ export async function updateSession(request: NextRequest) {
     "/faq",
     "/proof-and-legalities",
   ];
-  const privateRoutes = ["/panel", "/api/auth", "/admin", "/"];
+  const privateRoutes = ["/panel", "/api/auth", "/admin"];
   const currentPath = request.nextUrl.pathname;
 
   if (!user) {
