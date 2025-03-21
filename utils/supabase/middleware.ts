@@ -57,6 +57,8 @@ export async function updateSession(request: NextRequest) {
     "/auth/loginSecured",
     "/api/health",
     "/",
+    "/faq",
+    "/proof-and-legalities",
   ];
   const privateRoutes = ["/panel", "/api/auth", "/admin", "/"];
   const currentPath = request.nextUrl.pathname;
