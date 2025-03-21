@@ -94,6 +94,9 @@ export const useAdminTopUpApprovalColumns = (
               count: Number(currentStatusData?.count || 0) + 1,
             },
           },
+          totalPendingDeposit:
+            Number(prev.totalPendingDeposit || 0) -
+            Number(updatedItem.alliance_top_up_request_amount),
         };
       });
       reset();

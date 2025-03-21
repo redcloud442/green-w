@@ -106,6 +106,9 @@ export const TopUpColumn = (
               count: Number(currentStatusData?.count || 0) + 1,
             },
           },
+          totalPendingDeposit:
+            Number(prev.totalPendingDeposit || 0) -
+            Number(updatedItem.alliance_top_up_request_amount),
           merchantBalance: merchantBalance,
         };
       });
