@@ -28,7 +28,7 @@ const MoreInformation = () => {
             </span>{" "}
             AND OUR MAXIMUM IS{" "}
             <span className="text-blue-500 underline-offset-2 underline font-bold">
-              50,000 PESOS
+              200,000 PESOS
             </span>
             .
           </span>
