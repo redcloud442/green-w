@@ -4,7 +4,6 @@ import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-  useSidebar,
 } from "@/components/ui/sidebar";
 import { ROLE } from "@/utils/constant";
 import { useRole } from "@/utils/context/roleContext";
@@ -34,7 +33,6 @@ export default function LayoutContent({ children }: LayoutContentProps) {
 
   const pathname = usePathname();
   const pathSegments = pathname.split("/").filter(Boolean);
-  const { open, setOpen } = useSidebar();
 
   const queryClient = useMemo(() => new QueryClient(), []);
 

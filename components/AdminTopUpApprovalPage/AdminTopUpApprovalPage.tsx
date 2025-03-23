@@ -1,4 +1,3 @@
-"use client";
 import AdminTopUpApprovalTable from "./AdminTopUpApprovalTable";
 
 const AdminTopUpApprovalPage = () => {
