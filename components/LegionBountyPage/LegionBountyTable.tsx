@@ -42,7 +42,7 @@ type FilterFormValues = {
 
 const LegionBountyTable = ({
   teamMemberProfile,
-  totalNetwork,
+  totalNetwork: initialTotalNetwork,
 }: DataTableProps) => {
   const supabaseClient = createClientSide();
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -53,6 +53,7 @@ const LegionBountyTable = ({
   const [requestCount, setRequestCount] = useState(0);
   const [activePage, setActivePage] = useState(1);
   const [isFetchingList, setIsFetchingList] = useState(false);
+  const [totalNetwork, setTotalNetwork] = useState(initialTotalNetwork || 0);
 
   const columnAccessor = sorting?.[0]?.id || "user_date_created";
   const isAscendingSort =
@@ -67,7 +68,7 @@ const LegionBountyTable = ({
 
       const { emailFilter, dateFilter } = sanitizedData;
 
-      const { data, totalCount } = await getLegionBounty({
+      const { data, totalCount, totalAmount } = await getLegionBounty({
         teamMemberId: teamMemberProfile.alliance_member_id,
         page: activePage,
         limit: 10,
@@ -82,6 +83,10 @@ const LegionBountyTable = ({
 
       setRequestData(data || []);
       setRequestCount(totalCount || 0);
+
+      if (dateFilter.start && dateFilter.end) {
+        setTotalNetwork(totalAmount || 0);
+      }
     } catch (e) {
     } finally {
       setIsFetchingList(false);

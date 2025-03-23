@@ -39,6 +39,8 @@ export const getAllyBounty = async (params: {
       package_ally_bounty_log_date_created: string;
     })[];
     totalCount: 0;
+    totalAmount?: number;
+    totalCountByDate?: number;
   };
 };
 
@@ -78,6 +80,7 @@ export const getLegionBounty = async (params: {
   return result as {
     data: LegionRequestData[];
     totalCount: 0;
+    totalAmount?: number;
   };
 };
 
