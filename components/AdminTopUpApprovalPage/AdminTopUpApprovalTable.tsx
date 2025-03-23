@@ -2,10 +2,10 @@
 
 import { logError } from "@/services/Error/ErrorLogs";
 import { getAdminTopUpRequest } from "@/services/TopUp/Admin";
+import { useRole } from "@/utils/context/roleContext";
 import { escapeFormData } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
 import { AdminTopUpRequestData } from "@/utils/types";
-import { alliance_member_table } from "@prisma/client";
 import { DialogDescription } from "@radix-ui/react-dialog";
 import {
   ColumnFiltersState,
@@ -46,10 +46,6 @@ import { Textarea } from "../ui/textarea";
 import { useAdminTopUpApprovalColumns } from "./AdminTopUpApprovalColumn";
 import AdminTopUpApprovalTabs from "./AdminTopUpTabs";
 
-type DataTableProps = {
-  teamMemberProfile: alliance_member_table;
-};
-
 type FilterFormValues = {
   emailFilter: string;
   merchantFilter: string;
@@ -59,8 +55,9 @@ type FilterFormValues = {
   dateFilter: { start: string; end: string };
 };
 
-const AdminTopUpApprovalTable = ({ teamMemberProfile }: DataTableProps) => {
+const AdminTopUpApprovalTable = () => {
   const supabaseClient = createClientSide();
+  const { teamMemberProfile } = useRole();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});

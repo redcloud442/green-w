@@ -2,6 +2,7 @@ import ToolsAndGuides from "@/components/ToolsAndGuides/ToolsAndGuides";
 import { protectionAllUser } from "@/utils/serversideProtection";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
+
 export const metadata: Metadata = {
   title: "Tools & Guides",
   description: "Tools & Guides Page",

@@ -55,6 +55,7 @@ const Page = async () => {
     ...userData,
     ...allianceData,
   } as UserRequestdata;
+
   return <UserProfilePage userProfile={combinedData} />;
 };
 export default Page;

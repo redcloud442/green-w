@@ -1,9 +1,10 @@
 "use client";
 
 import { getAllyBounty } from "@/services/Bounty/Member";
+import { useRole } from "@/utils/context/roleContext";
 import { escapeFormData } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
-import { alliance_member_table, user_table } from "@prisma/client";
+import { user_table } from "@prisma/client";
 import {
   ColumnFiltersState,
   getCoreRowModel,
@@ -26,8 +27,8 @@ import { Input } from "../ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Separator } from "../ui/separator";
 import { AllyBountyColumn } from "./AllyBountyColum";
+
 type DataTableProps = {
-  teamMemberProfile: alliance_member_table;
   totalDirectReferral: number;
   totalDirectReferralCount: number;
 };
@@ -41,11 +42,11 @@ type FilterFormValues = {
 };
 
 const AllyBountyTable = ({
-  teamMemberProfile,
   totalDirectReferral: initialTotalDirectReferral,
   totalDirectReferralCount: initialTotalDirectReferralCount,
 }: DataTableProps) => {
   const supabaseClient = createClientSide();
+  const { teamMemberProfile } = useRole();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});

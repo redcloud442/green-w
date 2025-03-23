@@ -109,27 +109,27 @@ const MobileNavBar = () => {
     },
   ];
 
-  const { role, teamMemberId } = useRole();
+  const { teamMemberProfile } = useRole();
 
   const handleFetchUserInformation = async () => {
     try {
-      if (!teamMemberId) return;
+      if (!teamMemberProfile.alliance_member_id) return;
       setLoading(true);
 
       const [userEarningsData, isWithdrawalToday, data, notifications] =
         await Promise.all([
           getUserEarnings({
-            memberId: teamMemberId,
+            memberId: teamMemberProfile.alliance_member_id,
           }),
           getUserWithdrawalToday(),
 
           getDashboard({
-            teamMemberId: teamMemberId,
+            teamMemberId: teamMemberProfile.alliance_member_id,
           }),
           handleFetchMemberNotification({
             take: 10,
             skip: 0,
-            teamMemberId: teamMemberId,
+            teamMemberId: teamMemberProfile.alliance_member_id,
           }),
         ]);
 
@@ -157,12 +157,12 @@ const MobileNavBar = () => {
 
   useEffect(() => {
     handleFetchUserInformation();
-  }, [teamMemberId, role]);
+  }, [teamMemberProfile]);
 
   const handleOnOpen = async () => {
     try {
       const data = await handleUpdateMemberNotification({
-        teamMemberId: teamMemberId,
+        teamMemberId: teamMemberProfile.alliance_member_id,
         take: 10,
       });
 
@@ -212,7 +212,7 @@ const MobileNavBar = () => {
               ) : item.label === "Notification" ? (
                 <DashboardNotification
                   handleOpen={handleOnOpen}
-                  teamMemberId={teamMemberId}
+                  teamMemberId={teamMemberProfile.alliance_member_id}
                 />
               ) : (
                 <Link href={item.href}>

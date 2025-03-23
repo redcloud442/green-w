@@ -3,8 +3,8 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getLeaderBoardData } from "@/services/Dasboard/Admin";
 import { logError } from "@/services/Error/ErrorLogs";
+import { useRole } from "@/utils/context/roleContext";
 import { createClientSide } from "@/utils/supabase/client";
-import { alliance_member_table } from "@prisma/client";
 import {
   ColumnFiltersState,
   getCoreRowModel,
@@ -19,12 +19,9 @@ import { Card } from "../ui/card";
 import { leaderBoardColumn } from "./AdminLeaderBoardsColumn";
 import AdminLeaderBoardsTabTable from "./AdminLeaderBoardsTabTable";
 
-type Props = {
-  teamMemberProfile: alliance_member_table;
-};
-
-const AdminLeaderBoardsPage = ({ teamMemberProfile }: Props) => {
+const AdminLeaderBoardsPage = () => {
   const supabaseClient = createClientSide();
+  const { teamMemberProfile } = useRole();
   const [leaderboards, setLeaderboards] = useState<
     { username: string; totalAmount: number }[]
   >([]);

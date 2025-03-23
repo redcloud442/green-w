@@ -16,7 +16,6 @@ export const metadata: Metadata = {
 const Page = async () => {
   const {
     redirect: redirectTo,
-    referal,
     teamMemberProfile,
     profile,
   } = await protectionMemberUser();
@@ -59,15 +58,7 @@ const Page = async () => {
     return redirect("/admin");
   }
 
-  return (
-    <DashboardPage
-      profile={profile}
-      teamMemberProfile={teamMemberProfile}
-      referal={referal}
-      packages={packages}
-      sponsor={sponsorData || ""}
-    />
-  );
+  return <DashboardPage packages={packages} sponsor={sponsorData || ""} />;
 };
 
 export default Page;

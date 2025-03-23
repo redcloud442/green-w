@@ -7,7 +7,7 @@ import { createClientSide } from "@/utils/supabase/client";
 import { merchant_table } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,7 +17,9 @@ import {
 } from "../ui/dropdown-menu";
 import TableLoading from "../ui/tableLoading";
 
-export const useMerchantColumn = (handleFetch: () => void) => {
+export const useMerchantColumn = (
+  setRequestData: Dispatch<SetStateAction<merchant_table[]>>
+) => {
   const { toast } = useToast();
   const supabase = createClientSide();
   const [isLoading, setIsLoading] = useState(false);
@@ -44,7 +46,9 @@ export const useMerchantColumn = (handleFetch: () => void) => {
         variant: "success",
       });
       setIsDeleteModal({ merchantId: "", isOpen: false });
-      handleFetch();
+      setRequestData((prev) =>
+        prev.filter((item) => item.merchant_id !== merchantId)
+      );
     } catch (e) {
       if (e instanceof Error) {
         await logError(supabase, {

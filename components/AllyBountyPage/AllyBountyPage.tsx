@@ -1,16 +1,12 @@
-"use client";
-import { alliance_member_table } from "@prisma/client";
 import Image from "next/image";
 import AllyBountyTable from "./AllyBountyTable";
 
 type Props = {
-  teamMemberProfile: alliance_member_table;
   totalDirectReferral: number;
   totalDirectReferralCount: number;
 };
 
 const AllyBountyPage = ({
-  teamMemberProfile,
   totalDirectReferral,
   totalDirectReferralCount,
 }: Props) => {
@@ -28,7 +24,6 @@ const AllyBountyPage = ({
         </div>
         <section className=" rounded-lg ">
           <AllyBountyTable
-            teamMemberProfile={teamMemberProfile}
             totalDirectReferral={totalDirectReferral}
             totalDirectReferralCount={totalDirectReferralCount}
           />

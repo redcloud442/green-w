@@ -1,12 +1,6 @@
-"use client";
-import { alliance_member_table } from "@prisma/client";
 import AdminUserMonitoringTable from "./AdminUserMonitoringTable";
 
-type Props = {
-  teamMemberProfile: alliance_member_table;
-};
-
-const AdminUserMonitoringPage = ({ teamMemberProfile }: Props) => {
+const AdminUserMonitoringPage = () => {
   return (
     <div className="mx-auto md:p-10 space-y-6">
       <div>
@@ -21,7 +15,7 @@ const AdminUserMonitoringPage = ({ teamMemberProfile }: Props) => {
 
         {/* Table Section */}
         <section className=" rounded-lg ">
-          <AdminUserMonitoringTable teamMemberProfile={teamMemberProfile} />
+          <AdminUserMonitoringTable />
         </section>
       </div>
     </div>

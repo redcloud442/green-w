@@ -8,15 +8,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useUserModalPackageStore } from "@/store/useModalPackageStore";
+import { useRole } from "@/utils/context/roleContext";
 import { useEffect, useState } from "react";
 
-type Props = {
-  isActive: boolean;
-};
-
-const NewlyRegisteredModal = ({ isActive }: Props) => {
+const NewlyRegisteredModal = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { setModalPackage } = useUserModalPackageStore();
+  const { teamMemberProfile } = useRole();
+  const isActive = teamMemberProfile.alliance_member_is_active;
 
   useEffect(() => {
     if (!isActive) {

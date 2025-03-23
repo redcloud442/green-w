@@ -3,11 +3,7 @@
 import { toast } from "@/hooks/use-toast";
 import { useUserDashboardEarningsStore } from "@/store/useUserDashboardEarnings";
 import { RANK_COLORS } from "@/utils/constant";
-import {
-  alliance_member_table,
-  alliance_referral_link_table,
-  user_table,
-} from "@prisma/client";
+import { useRole } from "@/utils/context/roleContext";
 import { Info } from "lucide-react";
 import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
@@ -15,18 +11,9 @@ import { Badge } from "../ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import DashboardGenerateQrCode from "./DashboardDepositRequest/DashboardDepositModal/DashboardGenerateQrCode";
 
-type DashboardHeaderProps = {
-  profile: user_table;
-  teamMemberProfile: alliance_member_table;
-  referal: alliance_referral_link_table;
-};
-
-const DashboardHeader = ({
-  profile,
-  teamMemberProfile,
-  referal,
-}: DashboardHeaderProps) => {
+const DashboardHeader = () => {
   const { totalEarnings } = useUserDashboardEarningsStore();
+  const { teamMemberProfile, profile, referral } = useRole();
 
   const handleCopy = (url: string) => {
     navigator.clipboard.writeText(url);
@@ -85,16 +72,16 @@ const DashboardHeader = ({
                 Referral:{" "}
               </p>
               <p className="text-[10px] sm:text-xs truncate bg-indigo-400 text-white rounded-xl px-1 max-w-[150px] sm:max-w-[250px]">
-                {referal.alliance_referral_link}
+                {referral.alliance_referral_link}
               </p>
 
               <Badge
-                onClick={() => handleCopy(referal.alliance_referral_link)}
+                onClick={() => handleCopy(referral.alliance_referral_link)}
                 className="h-4 sm:h-5 bg-sky-400 text-[9px] sm:text-xs text-white cursor-pointer rounded-sm px-2"
               >
                 Copy
               </Badge>
-              <DashboardGenerateQrCode url={referal.alliance_referral_link} />
+              <DashboardGenerateQrCode url={referral.alliance_referral_link} />
             </div>
           )}
         </div>

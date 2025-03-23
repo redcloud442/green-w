@@ -23,7 +23,7 @@ const Page = async () => {
 
   if (teamMemberProfile) return redirect("/");
 
-  return <WithdrawalHistoryPage teamMemberProfile={teamMemberProfile} />;
+  return <WithdrawalHistoryPage />;
 };
 
 export default Page;

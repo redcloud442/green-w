@@ -1,14 +1,11 @@
-"use client";
-import { alliance_member_table } from "@prisma/client";
 import Image from "next/image";
 import LegionBountyTable from "./LegionBountyTable";
 
 type Props = {
-  teamMemberProfile: alliance_member_table;
   totalNetwork?: number;
 };
 
-const LegionBountyPage = ({ teamMemberProfile, totalNetwork }: Props) => {
+const LegionBountyPage = ({ totalNetwork }: Props) => {
   return (
     <div className="md:p-10">
       <div>
@@ -23,10 +20,7 @@ const LegionBountyPage = ({ teamMemberProfile, totalNetwork }: Props) => {
         </div>
         {/* Table Section */}
         <section className="rounded-lg ">
-          <LegionBountyTable
-            teamMemberProfile={teamMemberProfile}
-            totalNetwork={totalNetwork}
-          />
+          <LegionBountyTable totalNetwork={totalNetwork} />
         </section>
       </div>
     </div>

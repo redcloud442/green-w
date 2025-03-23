@@ -28,7 +28,6 @@ const Page = async () => {
 
   return (
     <AllyBountyPage
-      teamMemberProfile={teamMemberProfile}
       totalDirectReferral={totalNetwork?.direct_referral_amount ?? 0}
       totalDirectReferralCount={totalNetwork?.direct_referral_count ?? 0}
     />

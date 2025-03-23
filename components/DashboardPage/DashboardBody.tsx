@@ -7,11 +7,7 @@ import { useUserDashboardEarningsStore } from "@/store/useUserDashboardEarnings"
 import { useUserEarningsStore } from "@/store/useUserEarningsStore";
 import { useRole } from "@/utils/context/roleContext";
 import { createClientSide } from "@/utils/supabase/client";
-import {
-  alliance_member_table,
-  package_table,
-  user_table,
-} from "@prisma/client";
+import { package_table } from "@prisma/client";
 import { Info } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -30,19 +26,13 @@ import DashboardMissionModal from "./DashboardMissionModal/DashboardMissionModal
 import DashboardPackages from "./DashboardPackages";
 import DashboardWithdrawModalWithdraw from "./DashboardWithdrawRequest/DashboardWithdrawModal/DashboardWithdrawModalWithdraw";
 type DashboardBodyProps = {
-  teamMemberProfile: alliance_member_table;
-  profile: user_table;
   packages: package_table[];
 };
 
-const DashboardBody = ({
-  teamMemberProfile,
-  profile,
-  packages,
-}: DashboardBodyProps) => {
+const DashboardBody = ({ packages }: DashboardBodyProps) => {
   const supabaseClient = createClientSide();
   const router = useRouter();
-  const { role } = useRole();
+  const { teamMemberProfile, profile } = useRole();
   const { chartData } = usePackageChartData();
   const { totalEarnings, setTotalEarnings } = useUserDashboardEarningsStore();
   const { earnings, setEarnings } = useUserEarningsStore();
@@ -304,7 +294,7 @@ const DashboardBody = ({
           </CardContent>
         </Card>
       </div>
-      {role === "CLIENT" && (
+      {teamMemberProfile.alliance_member_role === "CLIENT" && (
         <Button
           onClick={() => router.push("/client")}
           variant="card"

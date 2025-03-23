@@ -2,9 +2,10 @@
 
 import { logError } from "@/services/Error/ErrorLogs";
 import { getUserWithActiveBalance } from "@/services/User/Admin";
+import { useRole } from "@/utils/context/roleContext";
 import { escapeFormData } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
-import { alliance_member_table, user_table } from "@prisma/client";
+import { user_table } from "@prisma/client";
 import {
   ColumnFiltersState,
   getCoreRowModel,
@@ -29,17 +30,15 @@ import {
   SelectValue,
 } from "../ui/select";
 import { AdminUserMonitoringColumn } from "./AdminUserMonitoringColumn";
-type DataTableProps = {
-  teamMemberProfile: alliance_member_table;
-};
 
 type FilterFormValues = {
   usernameFilter: string;
   type: string;
 };
 
-const AdminUserMonitoringTable = ({ teamMemberProfile }: DataTableProps) => {
+const AdminUserMonitoringTable = () => {
   const supabaseClient = createClientSide();
+  const { teamMemberProfile } = useRole();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});

@@ -2,20 +2,18 @@
 
 import { logError } from "@/services/Error/ErrorLogs";
 import { getAdminPackages } from "@/services/Package/Admin";
+import { useRole } from "@/utils/context/roleContext";
 import { createClientSide } from "@/utils/supabase/client";
-import { alliance_member_table, package_table } from "@prisma/client";
+import { package_table } from "@prisma/client";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import EditPackagesModal from "../AdminPackagesPage/EditPackagesModal";
 import { Card } from "../ui/card";
 import CreatePackageModal from "./CreatePackageModal";
 
-type Props = {
-  teamMemberProfile: alliance_member_table;
-};
-
-const AdminPackageList = ({ teamMemberProfile }: Props) => {
+const AdminPackageList = () => {
   const supabase = createClientSide();
+  const { teamMemberProfile } = useRole();
   const [packages, setPackages] = useState<package_table[]>([]);
   const [selectedPackage, setSelectedPackage] = useState<package_table | null>(
     null
