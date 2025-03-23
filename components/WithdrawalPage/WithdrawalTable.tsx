@@ -252,15 +252,15 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
       },
     });
 
+  const status = watch("statusFilter") as "PENDING" | "APPROVED" | "REJECTED";
+
   const {
     columns,
     isOpenModal,
     isLoading,
     setIsOpenModal,
     handleUpdateStatus,
-  } = WithdrawalColumn(reset, setRequestData);
-
-  const status = watch("statusFilter") as "PENDING" | "APPROVED" | "REJECTED";
+  } = WithdrawalColumn(reset, setRequestData, status);
 
   const table = useReactTable({
     data: requestData?.data?.[status]?.data || [],
