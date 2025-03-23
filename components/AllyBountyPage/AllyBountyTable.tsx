@@ -42,8 +42,8 @@ type FilterFormValues = {
 };
 
 const AllyBountyTable = ({
-  totalDirectReferral,
-  totalDirectReferralCount,
+  totalDirectReferral: initialTotalDirectReferral,
+  totalDirectReferralCount: initialTotalDirectReferralCount,
 }: DataTableProps) => {
   const supabaseClient = createClientSide();
   const { teamMemberProfile } = useRole();
@@ -60,6 +60,10 @@ const AllyBountyTable = ({
   const [requestCount, setRequestCount] = useState(0);
   const [activePage, setActivePage] = useState(1);
   const [isFetchingList, setIsFetchingList] = useState(false);
+  const [totalDirectReferral, setTotalDirectReferral] = useState({
+    amount: initialTotalDirectReferral || 0,
+    count: initialTotalDirectReferralCount || 0,
+  });
 
   const columnAccessor = sorting?.[0]?.id || "user_date_created";
   const isAscendingSort =
@@ -74,17 +78,25 @@ const AllyBountyTable = ({
 
       const { emailFilter, dateFilter } = sanitizedData;
 
-      const { data, totalCount } = await getAllyBounty({
-        page: activePage,
-        limit: 10,
-        columnAccessor: columnAccessor,
-        isAscendingSort: isAscendingSort,
-        search: emailFilter,
-        dateFilter: dateFilter,
-      });
+      const { data, totalCount, totalAmount, totalCountByDate } =
+        await getAllyBounty({
+          page: activePage,
+          limit: 10,
+          columnAccessor: columnAccessor,
+          isAscendingSort: isAscendingSort,
+          search: emailFilter,
+          dateFilter: dateFilter,
+        });
 
       setRequestData(data || []);
       setRequestCount(totalCount || 0);
+
+      if (dateFilter.start && dateFilter.end) {
+        setTotalDirectReferral({
+          amount: totalAmount || 0,
+          count: totalCountByDate || 0,
+        });
+      }
     } catch (e) {
     } finally {
       setIsFetchingList(false);
@@ -236,11 +248,11 @@ const AllyBountyTable = ({
         <ReferralModal teamMemberProfile={teamMemberProfile} />
         <div className="flex flex-col gap-2">
           <span className="text-sm font-bold ">
-            Total Referral Count: {totalDirectReferralCount}
+            Total Referral Count: {totalDirectReferral.count}
           </span>
           <span className="text-sm font-bold ">
             Total Referral Amount: ₱
-            {totalDirectReferral.toLocaleString("en-US", {
+            {totalDirectReferral.amount.toLocaleString("en-US", {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
             })}
