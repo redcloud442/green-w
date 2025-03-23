@@ -1,13 +1,10 @@
 "use client";
 
-import { alliance_member_table } from "@prisma/client";
+import { useRole } from "@/utils/context/roleContext";
 import WithdrawalTable from "./WithdrawalTable";
 
-type Props = {
-  teamMemberProfile: alliance_member_table;
-};
-
-const WithdrawalPage = ({ teamMemberProfile }: Props) => {
+const WithdrawalPage = () => {
+  const { teamMemberProfile } = useRole();
   return (
     <div className="mx-auto md:p-10">
       <div>

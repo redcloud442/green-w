@@ -12,10 +12,10 @@ type Props = {
 };
 
 const UserProfilePage = ({ userProfile }: Props) => {
-  const { role } = useRole();
+  const { teamMemberProfile } = useRole();
   const router = useRouter();
   return (
-    <div className="mx-auto py-8 px-2">
+    <div className="mx-auto py-8 px-8">
       <div className="w-full flex flex-col gap-6">
         {/* Page Title */}
         <header>
@@ -25,7 +25,7 @@ const UserProfilePage = ({ userProfile }: Props) => {
           </p>
         </header>
         <div className="flex items-center justify-start gap-x-4">
-          {role === "ACCOUNTING" && (
+          {teamMemberProfile.alliance_member_role === "ACCOUNTING" && (
             <Button
               onClick={() => router.push("/withdraw")}
               variant="card"
@@ -34,7 +34,7 @@ const UserProfilePage = ({ userProfile }: Props) => {
               Accounting
             </Button>
           )}
-          {role === "MERCHANT" && (
+          {teamMemberProfile.alliance_member_role === "MERCHANT" && (
             <>
               <Button
                 onClick={() => router.push("/merchant")}

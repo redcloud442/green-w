@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 };
 
 const Page = async () => {
-  const { teamMemberProfile, referral } = await protectionAdminUser();
+  const { teamMemberProfile } = await protectionAdminUser();
   const today = new Date().toISOString().split("T")[0];
 
   const packageNotification = await prisma.package_notification_logs.findMany({
@@ -30,13 +30,7 @@ const Page = async () => {
 
   if (!teamMemberProfile) return redirect("/login");
 
-  return (
-    <AdminDashboardPage
-      teamMemberProfile={teamMemberProfile}
-      referral={referral}
-      packageNotification={packageNotification}
-    />
-  );
+  return <AdminDashboardPage packageNotification={packageNotification} />;
 };
 
 export default Page;

@@ -1,10 +1,10 @@
 "use client";
-import { alliance_member_table } from "@prisma/client";
 import { Controller, useForm } from "react-hook-form";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 
 import { logError } from "@/services/Error/ErrorLogs";
 import { getAdminTopUpTotalReport } from "@/services/TopUp/Admin";
+import { useRole } from "@/utils/context/roleContext";
 import { adminSalesTotalReportData } from "@/utils/types";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useEffect, useState } from "react";
@@ -17,9 +17,6 @@ import {
   SelectValue,
 } from "../ui/select";
 import AdminSalesReportTable from "./AdminSalesReportTable";
-type Props = {
-  teamMemberProfile: alliance_member_table;
-};
 
 const months = [
   { label: "January", value: "01" },
@@ -49,8 +46,9 @@ type FormData = {
   };
 };
 
-const AdminSalesReportPage = ({ teamMemberProfile }: Props) => {
+const AdminSalesReportPage = () => {
   const supabaseClient = createClientComponentClient();
+  const { teamMemberProfile } = useRole();
   const [isFetchingList, setIsFetchingList] = useState(false);
   const [salesReportData, setSalesReportData] =
     useState<adminSalesTotalReportData>({

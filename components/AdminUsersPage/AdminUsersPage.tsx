@@ -1,12 +1,6 @@
-"use client";
-import { alliance_member_table } from "@prisma/client";
 import AdminUserTable from "./AdminUsersTable";
 
-type Props = {
-  teamMemberProfile: alliance_member_table;
-};
-
-const AdminUserPage = ({ teamMemberProfile }: Props) => {
+const AdminUserPage = () => {
   return (
     <div className="mx-auto md:p-10 space-y-6">
       <div>
@@ -20,7 +14,7 @@ const AdminUserPage = ({ teamMemberProfile }: Props) => {
 
         {/* Table Section */}
         <section className=" rounded-lg ">
-          <AdminUserTable teamMemberProfile={teamMemberProfile} />
+          <AdminUserTable />
         </section>
       </div>
     </div>

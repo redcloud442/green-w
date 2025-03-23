@@ -1,12 +1,9 @@
 "use client";
-import { alliance_member_table } from "@prisma/client";
+import { useRole } from "@/utils/context/roleContext";
 import WithdrawalHistoryTable from "./WithdrawalHistoryTable";
 
-type Props = {
-  teamMemberProfile: alliance_member_table;
-};
-
-const WithdrawalHistoryPage = ({ teamMemberProfile }: Props) => {
+const WithdrawalHistoryPage = () => {
+  const { teamMemberProfile } = useRole();
   return (
     <div className="container mx-auto">
       <div>

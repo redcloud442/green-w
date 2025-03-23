@@ -1,10 +1,10 @@
 "use client";
 
 import { getLegionBounty } from "@/services/Bounty/Member";
+import { useRole } from "@/utils/context/roleContext";
 import { escapeFormData } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
 import { LegionRequestData } from "@/utils/types";
-import { alliance_member_table } from "@prisma/client";
 import {
   ColumnFiltersState,
   getCoreRowModel,
@@ -28,7 +28,6 @@ import { Separator } from "../ui/separator";
 import { LegionBountyColumn } from "./LegionBountyColumn";
 
 type DataTableProps = {
-  teamMemberProfile: alliance_member_table;
   totalNetwork?: number;
 };
 
@@ -40,11 +39,9 @@ type FilterFormValues = {
   };
 };
 
-const LegionBountyTable = ({
-  teamMemberProfile,
-  totalNetwork,
-}: DataTableProps) => {
+const LegionBountyTable = ({ totalNetwork }: DataTableProps) => {
   const supabaseClient = createClientSide();
+  const { teamMemberProfile } = useRole();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});

@@ -1,12 +1,7 @@
 "use client";
-import { alliance_member_table } from "@prisma/client";
 import AdminTopUpApprovalTable from "./AdminTopUpApprovalTable";
 
-type Props = {
-  teamMemberProfile: alliance_member_table;
-};
-
-const AdminTopUpApprovalPage = ({ teamMemberProfile }: Props) => {
+const AdminTopUpApprovalPage = () => {
   return (
     <div className="mx-auto md:p-10">
       <div>
@@ -19,7 +14,7 @@ const AdminTopUpApprovalPage = ({ teamMemberProfile }: Props) => {
 
         {/* Table Section */}
         <section className=" rounded-lg space-y-4">
-          <AdminTopUpApprovalTable teamMemberProfile={teamMemberProfile} />
+          <AdminTopUpApprovalTable />
         </section>
       </div>
     </div>

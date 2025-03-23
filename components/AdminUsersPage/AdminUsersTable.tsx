@@ -7,10 +7,10 @@ import {
   handleUpdateUserRestriction,
 } from "@/services/User/Admin";
 import { handleGenerateLink } from "@/services/User/User";
+import { useRole } from "@/utils/context/roleContext";
 import { escapeFormData, userNameToEmail } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
 import { UserRequestdata } from "@/utils/types";
-import { alliance_member_table } from "@prisma/client";
 import {
   ColumnFiltersState,
   getCoreRowModel,
@@ -49,10 +49,6 @@ import {
 import { Switch } from "../ui/switch";
 import { AdminUsersColumn } from "./AdminUsersColumn";
 
-type DataTableProps = {
-  teamMemberProfile: alliance_member_table;
-};
-
 type FilterFormValues = {
   usernameFilter: string;
   userRestricted?: string;
@@ -61,8 +57,9 @@ type FilterFormValues = {
   bannedUser?: boolean;
 };
 
-const AdminUsersTable = ({ teamMemberProfile }: DataTableProps) => {
+const AdminUsersTable = () => {
   const supabaseClient = createClientSide();
+  const { teamMemberProfile } = useRole();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});

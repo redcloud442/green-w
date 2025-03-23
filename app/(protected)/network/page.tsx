@@ -27,10 +27,7 @@ const Page = async () => {
   });
 
   return (
-    <LegionBountyPage
-      teamMemberProfile={teamMemberProfile}
-      totalNetwork={totalNetwork?.indirect_referral_amount}
-    />
+    <LegionBountyPage totalNetwork={totalNetwork?.indirect_referral_amount} />
   );
 };
 

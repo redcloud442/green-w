@@ -1,12 +1,6 @@
-"use client";
-import { alliance_member_table } from "@prisma/client";
 import AdminLeaderBoardsPage from "./AdminLeaderBoardsTable";
 
-type Props = {
-  teamMemberProfile: alliance_member_table;
-};
-
-const AdminUserPage = ({ teamMemberProfile }: Props) => {
+const AdminUserPage = () => {
   return (
     <div className=" md:p-10">
       <div>
@@ -19,7 +13,7 @@ const AdminUserPage = ({ teamMemberProfile }: Props) => {
 
         {/* Table Section */}
         <section className=" rounded-lg  ">
-          <AdminLeaderBoardsPage teamMemberProfile={teamMemberProfile} />
+          <AdminLeaderBoardsPage />
         </section>
       </div>
     </div>

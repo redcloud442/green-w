@@ -1,3 +1,5 @@
+"use client";
+
 import { useToast } from "@/hooks/use-toast";
 import { logError } from "@/services/Error/ErrorLogs";
 import {
@@ -46,6 +48,7 @@ const changeEmailMobileSchema = z.object({
 });
 
 type ChangeEmailMobileSchema = z.infer<typeof changeEmailMobileSchema>;
+
 export type PersonalInformationSchema = z.infer<typeof schema>;
 const PersonalInformation = ({ userProfile, type = "ADMIN" }: Props) => {
   const supabaseClient = createClientSide();

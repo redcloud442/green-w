@@ -19,7 +19,7 @@ const Page = async () => {
   if (teamMemberProfile.alliance_member_role !== "ACCOUNTING")
     return redirect("/");
 
-  return <WithdrawalPage teamMemberProfile={teamMemberProfile} />;
+  return <WithdrawalPage />;
 };
 
 export default Page;

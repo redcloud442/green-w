@@ -1,8 +1,5 @@
-"use client";
-
 import { UserRequestdata } from "@/utils/types";
 import { user_table } from "@prisma/client";
-import { useState } from "react";
 import TopUpHistoryTable from "../TopUpHistoryPage/TopUpHistoryTable";
 import WithdrawalHistoryTable from "../WithrawalHistoryPage/WithdrawalHistoryTable";
 import ChangePassword from "./ChangePassword";
@@ -15,9 +12,6 @@ type Props = {
 };
 
 const UserAdminProfile = ({ userProfile: initialData, profile }: Props) => {
-  const [userProfileData, setUserProfileData] =
-    useState<UserRequestdata>(initialData);
-
   return (
     <div className="mx-auto p-6 ">
       <div className="w-full flex flex-col gap-6">
@@ -29,16 +23,16 @@ const UserAdminProfile = ({ userProfile: initialData, profile }: Props) => {
           </p>
         </header>
 
-        <PersonalInformation userProfile={userProfileData} />
-        {userProfileData.alliance_member_role === "MERCHANT" && (
-          <MerchantBalance profile={profile} userProfile={userProfileData} />
+        <PersonalInformation userProfile={initialData} />
+        {initialData.alliance_member_role === "MERCHANT" && (
+          <MerchantBalance profile={profile} userProfile={initialData} />
         )}
 
-        <ChangePassword userProfile={userProfileData} />
+        <ChangePassword userProfile={initialData} />
 
-        <TopUpHistoryTable teamMemberProfile={userProfileData} />
+        <TopUpHistoryTable teamMemberProfile={initialData} />
 
-        <WithdrawalHistoryTable teamMemberProfile={userProfileData} />
+        <WithdrawalHistoryTable teamMemberProfile={initialData} />
       </div>
     </div>
   );

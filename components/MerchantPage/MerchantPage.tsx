@@ -1,13 +1,6 @@
-"use client";
-import { alliance_member_table } from "@prisma/client";
-
 import MerchantTable from "./MerchantTable";
 
-type Props = {
-  teamMemberProfile: alliance_member_table;
-};
-
-const MerchantPage = ({ teamMemberProfile }: Props) => {
+const MerchantPage = () => {
   return (
     <div className="mx-auto py-8 md:p-10">
       <div>
@@ -20,7 +13,7 @@ const MerchantPage = ({ teamMemberProfile }: Props) => {
 
         {/* Table Section */}
         <section className=" rounded-lg">
-          <MerchantTable teamMemberProfile={teamMemberProfile} />
+          <MerchantTable />
         </section>
       </div>
     </div>

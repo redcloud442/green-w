@@ -16,7 +16,7 @@ const Page = async () => {
 
   if (!teamMemberProfile) return redirect("/login");
 
-  return <AdminTopUpApprovalPage teamMemberProfile={teamMemberProfile} />;
+  return <AdminTopUpApprovalPage />;
 };
 
 export default Page;
