@@ -439,7 +439,7 @@ const DashboardWithdrawalModalForm = ({
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem className="text-xs" value="PACKAGE">
+                <SelectItem id="package" className="text-xs" value="PACKAGE">
                   Package Income ₱{" "}
                   {earnings?.alliance_olympus_earnings
                     ? earnings?.alliance_olympus_earnings.toLocaleString(
@@ -452,7 +452,7 @@ const DashboardWithdrawalModalForm = ({
                     : 0}
                 </SelectItem>
 
-                <SelectItem className="text-xs" value="REFERRAL">
+                <SelectItem id="referral" className="text-xs" value="REFERRAL">
                   Network + Referral Income ₱{" "}
                   {earnings?.alliance_referral_bounty
                     ? earnings?.alliance_referral_bounty.toLocaleString(
