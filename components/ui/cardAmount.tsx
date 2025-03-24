@@ -5,7 +5,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useUserModalPackageStore } from "@/store/useModalPackageStore";
 import { Info, RefreshCcw } from "lucide-react";
 import { ReactNode } from "react";
 import { Button } from "./button";
@@ -30,7 +29,6 @@ const CardAmount = ({
   handleClick,
   refresh,
 }: Props) => {
-  const { setModalPackage } = useUserModalPackageStore();
   return (
     <Card className="w-full max-w-sm hover:shadow-md bg-opacity-70 space-y-2  hover:shadow-gray-500 dark:hover:shadow-gray-200 transition-all duration-300 p-4">
       <CardHeader className="p-0">
@@ -80,13 +78,6 @@ const CardAmount = ({
           `₱ ${value}`
         )}
       </CardContent>
-      <Button
-        variant="card"
-        className=" px-2 mr-4 rounded-md w-full"
-        onClick={() => setModalPackage(true)}
-      >
-        Click here to REINVEST now!
-      </Button>
     </Card>
   );
 };
