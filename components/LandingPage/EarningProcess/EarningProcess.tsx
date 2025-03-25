@@ -105,7 +105,7 @@ const EarningProcess = () => {
           {earningProcessSteps.map((step, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, y: 40 }}
+              initial={{ opacity: 0, y: 0 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: index * 0.2 }}
               viewport={{ once: true }}

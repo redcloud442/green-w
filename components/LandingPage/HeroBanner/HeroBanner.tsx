@@ -10,7 +10,7 @@ const HeroBanner = () => {
   return (
     <section
       id="home"
-      className="relative h-[100vh] sm:h-[100vh] w-full flex flex-col  sm:pt-0 bg-black overflow-hidden bg-[url(https://imagedelivery.net/vwrXTORU06toqN4y_4Gwgw/7315bcb8-01d2-4705-687b-d83eccd4d500/public)] bg-cover bg-center"
+      className="relative h-[100vh] sm:h-[100vh] w-full flex flex-col xl:pt-20 bg-black overflow-hidden bg-[url(https://imagedelivery.net/vwrXTORU06toqN4y_4Gwgw/7315bcb8-01d2-4705-687b-d83eccd4d500/public)] bg-cover bg-center"
     >
       <div className="relative flex flex-col md:flex-row items-center justify-around w-full h-full px-8">
         {/* Left Side - Text Content */}
@@ -116,19 +116,22 @@ const HeroBanner = () => {
           initial={{ opacity: 0, x: 60 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1, delay: 0.5 }}
-          className="hidden relative w-full md:w-1/2 h-full xl:flex justify-center items-end bg-[url(https://imagedelivery.net/vwrXTORU06toqN4y_4Gwgw/75953815-c805-4e78-5566-85a23c23ec00/public)] bg-no-repeat bg-contain bg-center z-10"
+          className="hidden relative w-full max-w-6xl xl:flex justify-center items-end h-full bg-[url(https://imagedelivery.net/vwrXTORU06toqN4y_4Gwgw/75953815-c805-4e78-5566-85a23c23ec00/public)] bg-no-repeat bg-contain bg-center z-10"
         >
-          <div className="hidden xl:block xl:absolute bottom-10 w-full h-full bg-gradient-to-r from-cyan-300 to-cyan-900 rounded-full blur-[1400px] opacity-60 z-0 animate-pulse"></div>
+          {/* Gradient Blur */}
+          <div className="absolute bottom-10 w-full h-full bg-gradient-to-r from-cyan-300 to-cyan-900 rounded-full blur-[500px] opacity-50 z-0 animate-pulse"></div>
 
-          <div className="w-[500px] hidden xl:block xl:w-[700px] h-auto relative z-20">
+          {/* Hero Image */}
+          <div className="max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl w-full min-h-[300px] lg:min-h-[500px] relative z-20">
             <Image
               src="https://imagedelivery.net/vwrXTORU06toqN4y_4Gwgw/bfc510a8-3dc4-4d1d-3bc6-6ce6eb33fa00/public"
               alt="Hero Banner"
-              width={2000}
-              height={2000}
+              layout="responsive"
               priority
               quality={100}
-              className="object-contain"
+              width={2000}
+              height={2000}
+              className="w-full h-auto object-contain"
             />
           </div>
         </motion.div>
