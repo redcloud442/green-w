@@ -3,7 +3,11 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { logError } from "@/services/Error/ErrorLogs";
 import { updateWithdrawalStatus } from "@/services/Withdrawal/Admin";
-import { formatDateToYYYYMMDD, formatTime } from "@/utils/function";
+import {
+  formatAccountNumber,
+  formatDateToYYYYMMDD,
+  formatTime,
+} from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
 
 import { AdminWithdrawaldata, WithdrawalRequestData } from "@/utils/types";
@@ -270,8 +274,8 @@ export const WithdrawalColumn = (
           "alliance_withdrawal_request_account"
         ) as string;
         return (
-          <div className="flex items-center gap-2 text-wrap">
-            <span>{value}</span>
+          <div className="flex justify-between items-center gap-2 text-wrap w-full">
+            <span>{formatAccountNumber(value)}</span>
             <Button
               variant="card"
               size="icon"
@@ -440,6 +444,3 @@ export const WithdrawalColumn = (
     isLoading,
   };
 };
-
-
-

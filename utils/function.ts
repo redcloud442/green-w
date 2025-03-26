@@ -289,3 +289,12 @@ export const calculateFee = (
 export const userNameToEmail = (userName: string) => {
   return `${userName}@gmail.com`;
 };
+
+export const formatAccountNumber = (value: string): string => {
+  return (
+    value
+      .replace(/\D/g, "") // Remove non-numeric characters
+      .match(/.{1,4}/g) // Split into groups of 4
+      ?.join(" - ") || ""
+  ); // Join with ' - ' and return
+};

@@ -1,7 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { updateWithdrawalStatus } from "@/services/Withdrawal/Admin";
-import { formatDateToYYYYMMDD, formatTime } from "@/utils/function";
+import {
+  formatAccountNumber,
+  formatDateToYYYYMMDD,
+  formatTime,
+} from "@/utils/function";
 import { AdminWithdrawaldata, WithdrawalRequestData } from "@/utils/types";
 import { Column, ColumnDef, Row } from "@tanstack/react-table";
 import { ArrowUpDown, ClipboardCopy } from "lucide-react";
@@ -259,8 +263,8 @@ export const AdminWithdrawalHistoryColumn = (
           "alliance_withdrawal_request_account"
         ) as string;
         return (
-          <div className="flex justify-between items-center gap-2 text-wrap w-full">
-            <span>{value}</span>
+          <div className="flex justify-between items-center border-2 gap-2 text-wrap w-full">
+            <span>{formatAccountNumber(value)}</span>
             <Button
               variant="card"
               size="icon"

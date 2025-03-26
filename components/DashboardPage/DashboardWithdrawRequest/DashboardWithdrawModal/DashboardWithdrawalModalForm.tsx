@@ -16,7 +16,11 @@ import { useUserNotificationStore } from "@/store/userNotificationStore";
 import { useUserTransactionHistoryStore } from "@/store/userTransactionHistoryStore";
 import { useUserEarningsStore } from "@/store/useUserEarningsStore";
 import { BANKS, E_WALLETS, FINANCIAL_SERVICES } from "@/utils/constant";
-import { calculateFinalAmount, escapeFormData } from "@/utils/function";
+import {
+  calculateFinalAmount,
+  escapeFormData,
+  formatAccountNumber,
+} from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -557,15 +561,28 @@ const DashboardWithdrawalModalForm = ({
         <Controller
           name="accountNumber"
           control={control}
-          render={({ field }) => (
-            <Input
-              type="text"
-              id="accountNumber"
-              placeholder="Account Number"
-              {...field}
-            />
-          )}
+          render={({ field: { onChange, value, ...fieldProps } }) => {
+            const rawValue = value?.replace(/\D/g, "");
+            const formattedValue = rawValue
+              ? formatAccountNumber(rawValue)
+              : "";
+
+            return (
+              <Input
+                type="text"
+                id="accountNumber"
+                placeholder="Account Number"
+                {...fieldProps}
+                value={formattedValue}
+                onChange={(e) => {
+                  const cleanedValue = e.target.value.replace(/\D/g, "");
+                  onChange(cleanedValue);
+                }}
+              />
+            );
+          }}
         />
+
         {errors.accountNumber && (
           <p className="text-primaryRed text-sm mt-1">
             {errors.accountNumber.message}
