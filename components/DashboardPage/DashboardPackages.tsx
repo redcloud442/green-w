@@ -173,11 +173,11 @@ const DashboardPackages = ({ chartData, teamMemberProfile }: Props) => {
 
   return (
     <ScrollArea className="w-full pb-0">
-      <div className="flex sm:grid sm:grid-cols-3 gap-6 justify-center items-center overflow-x-hidden sm:overflow-x-hidden">
+      <div className="flex sm:grid sm:grid-cols-3 gap-6 justify-center relative items-center overflow-x-hidden sm:overflow-x-hidden">
         {liveData.map((data) => (
           <Card
             key={data.package_connection_id}
-            className="min-w-[260px] w-full sm:max-w-[600px] h-auto dark:bg-cardColor transition-all duration-300 rounded-2xl shadow-2xl relative overflow-hidden"
+            className="min-w-[260px] w-full sm:max-w-[600px] h-full dark:bg-cardColor transition-all duration-300 rounded-2xl shadow-2xl relative overflow-hidden"
           >
             <Image
               src={data.package_color}
