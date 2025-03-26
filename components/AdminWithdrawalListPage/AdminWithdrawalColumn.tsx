@@ -263,7 +263,7 @@ export const AdminWithdrawalHistoryColumn = (
           "alliance_withdrawal_request_account"
         ) as string;
         return (
-          <div className="flex justify-between items-center border-2 gap-2 text-wrap w-full">
+          <div className="flex justify-between items-center gap-2 text-wrap w-full">
             <span>{formatAccountNumber(value)}</span>
             <Button
               variant="card"

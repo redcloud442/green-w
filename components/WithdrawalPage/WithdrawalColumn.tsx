@@ -274,7 +274,7 @@ export const WithdrawalColumn = (
           "alliance_withdrawal_request_account"
         ) as string;
         return (
-          <div className="flex justify-between items-center gap-2 text-wrap w-full">
+          <div className="flex justify-between items-center gap-2 text-wrap w-52">
             <span>{formatAccountNumber(value)}</span>
             <Button
               variant="card"
