@@ -258,7 +258,7 @@ const DashboardPackages = ({ chartData, teamMemberProfile }: Props) => {
                   }
                 >
                   <DialogTrigger asChild>
-                    <Button className="text-[10px] sm:text-sm dark:bg-black dark:text-white dark:hover:bg-black hover:bg-black hover:text-white bg-white text-black cursor-pointer rounded-lg w-full px-2 sm:px-10 py-2">
+                    <Button className="text-[10px] sm:text-sm bg-amber-400 dark:bg-black dark:text-white hover:bg-yellow-400/20 hover:text-white cursor-pointer rounded-lg w-full px-2 sm:px-10 py-2 text-white">
                       CLICK HERE TO CLAIM
                     </Button>
                   </DialogTrigger>
