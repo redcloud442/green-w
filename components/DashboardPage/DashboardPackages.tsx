@@ -191,7 +191,7 @@ const DashboardPackages = ({ chartData, teamMemberProfile }: Props) => {
             <CardHeader className="py-4 relative z-10 p-4">
               <CardTitle className="flex justify-center items-end">
                 <div className="text-md sm:text-xl text-white font-extrabold">
-                  PEAK PACKAGE
+                  {data.package} PACKAGE
                 </div>
               </CardTitle>
               <CardDescription className="space-y-2 pb-2">
@@ -258,7 +258,7 @@ const DashboardPackages = ({ chartData, teamMemberProfile }: Props) => {
                   }
                 >
                   <DialogTrigger asChild>
-                    <Button className="text-[10px] sm:text-sm bg-amber-400 dark:bg-black dark:text-white hover:bg-yellow-400/20 hover:text-white cursor-pointer rounded-lg w-full px-2 sm:px-10 py-2 text-white">
+                    <Button className="text-[10px] sm:text-sm bg-amber-400 dark:bg-black dark:text-white hover:bg-yellow-400/20 hover:text-white cursor-pointer rounded-lg w-full px-2 sm:px-10 py-2 text-black">
                       CLICK HERE TO CLAIM
                     </Button>
                   </DialogTrigger>
