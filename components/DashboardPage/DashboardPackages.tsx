@@ -25,7 +25,6 @@ import { Button } from "../ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -173,54 +172,53 @@ const DashboardPackages = ({ chartData, teamMemberProfile }: Props) => {
 
   return (
     <ScrollArea className="w-full pb-0">
-      <div className="flex sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-center relative items-start overflow-x-hidden sm:overflow-x-hidden">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 justify-center relative items-start overflow-x-hidden">
         {liveData.map((data) => (
           <Card
             key={data.package_connection_id}
-            className="min-w-[260px] w-full sm:max-w-[600px] h-full dark:bg-cardColor transition-all duration-300 rounded-2xl shadow-2xl relative overflow-hidden"
+            className="min-w-[160px] max-w-[300px] sm:max-w-full h-full dark:bg-cardColor transition-all duration-300 rounded-2xl shadow-2xl relative overflow-hidden"
           >
             <Image
               src={data.package_color}
               alt="package background"
-              layout="fill" // Ensures the image covers the entire card
-              objectFit="cover" // Ensures the image scales properly
-              objectPosition="center" // Centers the image
+              layout="fill"
+              objectFit="cover"
+              objectPosition="center"
               className="absolute inset-0 z-0"
             />
             <div className="bg-black bg-opacity-50 absolute inset-0 z-0" />{" "}
-            {/* Overlay for better text visibility */}
-            <CardHeader className="py-4 relative z-10">
+            {/* Overlay for text visibility */}
+            <CardHeader className="py-4 relative z-10 p-4">
               <CardTitle className="flex justify-center items-end">
-                <div className="text-xl text-white font-extrabold ">
-                  {data.package} PACKAGE
+                <div className="text-md sm:text-xl text-white font-extrabold">
+                  PEAK PACKAGE
                 </div>
               </CardTitle>
               <CardDescription className="space-y-2 pb-2">
                 <div className="flex flex-col items-start">
-                  <span className="text-md font-extrabold text-white">
+                  <span className="text-[10px] sm:text-sm font-extrabold text-white">
                     Date Availed:{" "}
                     {formatMonthDateYear(data.package_date_created)}
                   </span>
-                  <span className="text-sm font-extrabold text-white">
+                  <span className="text-[10px] sm:text-sm font-extrabold text-white">
                     Time Availed: {formatTime(data.package_date_created)}
                   </span>
                 </div>
               </CardDescription>
-
               <Separator />
               <div className="flex flex-col items-start">
-                <span className="text-sm font-extrabold text-white">
+                <span className="text-[10px] sm:text-sm font-extrabold text-white">
                   Date of Claim: {formatMonthDateYear(data.completion_date)}
                 </span>
               </div>
               <Separator />
             </CardHeader>
-            <CardContent className="space-y-4 pt-0 pb-2 relative z-10">
+            <CardContent className="space-y-4 pt-0 pb-2 relative z-10 p-4">
               <div className="flex flex-col items-start">
-                <span className="text-sm font-extrabold text-white">
+                <span className="text-[10px] sm:text-sm font-extrabold text-white">
                   Time of Claim: {formatTime(data.completion_date)}
                 </span>
-                <span className="text-sm font-extrabold text-white">
+                <span className="text-[10px] sm:text-sm font-extrabold text-white">
                   Amount Deposited: ₱{" "}
                   {data.amount.toLocaleString("en-US", {
                     minimumFractionDigits: 2,
@@ -229,8 +227,8 @@ const DashboardPackages = ({ chartData, teamMemberProfile }: Props) => {
                 </span>
               </div>
 
-              <div className="flex flex-col items-center bg-white rounded-xl p-2">
-                <span className="text-sm font-extrabold text-black">
+              <div className="flex flex-col text-[10px] sm:text-sm items-center bg-white rounded-xl p-2">
+                <span className="text-[10px] sm:text-sm font-extrabold text-black">
                   Accumulating Income
                 </span>
                 ₱{" "}
@@ -240,8 +238,8 @@ const DashboardPackages = ({ chartData, teamMemberProfile }: Props) => {
                 })}
               </div>
 
-              <div className="flex flex-col items-center bg-white rounded-xl p-2">
-                <span className="text-sm font-extrabold text-black">
+              <div className="flex flex-col text-[10px] sm:text-sm items-center bg-white rounded-xl p-2">
+                <span className="text-[10px] sm:text-sm font-extrabold text-black">
                   Total Generated Income
                 </span>
                 ₱{" "}
@@ -251,7 +249,7 @@ const DashboardPackages = ({ chartData, teamMemberProfile }: Props) => {
                 })}
               </div>
             </CardContent>
-            <CardFooter className="flex-col gap-2 text-sm relative z-10">
+            <CardFooter className="flex-col gap-2 text-[10px] sm:text-sm relative z-10">
               {data.is_ready_to_claim && (
                 <Dialog
                   open={openDialogId === data.package_connection_id}
@@ -259,9 +257,8 @@ const DashboardPackages = ({ chartData, teamMemberProfile }: Props) => {
                     setOpenDialogId(isOpen ? data.package_connection_id : null)
                   }
                 >
-                  <DialogDescription></DialogDescription>
                   <DialogTrigger asChild>
-                    <Button className="dark:bg-black dark:text-white dark:hover:bg-black hover:bg-black hover:text-white bg-white text-black cursor-pointer rounded-lg w-full px-10 py-2">
+                    <Button className="text-[10px] sm:text-sm dark:bg-black dark:text-white dark:hover:bg-black hover:bg-black hover:text-white bg-white text-black cursor-pointer rounded-lg w-full px-2 sm:px-10 py-2">
                       CLICK HERE TO CLAIM
                     </Button>
                   </DialogTrigger>
