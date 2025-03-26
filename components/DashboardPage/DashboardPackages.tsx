@@ -173,7 +173,7 @@ const DashboardPackages = ({ chartData, teamMemberProfile }: Props) => {
 
   return (
     <ScrollArea className="w-full pb-0">
-      <div className="flex sm:grid sm:grid-cols-3 gap-6 justify-center relative items-center overflow-x-hidden sm:overflow-x-hidden">
+      <div className="flex sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-center relative items-start overflow-x-hidden sm:overflow-x-hidden">
         {liveData.map((data) => (
           <Card
             key={data.package_connection_id}
