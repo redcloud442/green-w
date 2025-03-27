@@ -6,6 +6,7 @@ import { logError } from "@/services/Error/ErrorLogs";
 import { useRole } from "@/utils/context/roleContext";
 import { createClientSide } from "@/utils/supabase/client";
 import {
+  ColumnDef,
   ColumnFiltersState,
   getCoreRowModel,
   getFilteredRowModel,
@@ -19,24 +20,28 @@ import { Card } from "../ui/card";
 import { leaderBoardColumn } from "./AdminLeaderBoardsColumn";
 import AdminLeaderBoardsTabTable from "./AdminLeaderBoardsTabTable";
 
+type LeaderboardData = {
+  username: string;
+  totalAmount: number;
+  totalReferral: number;
+};
+
 const AdminLeaderBoardsPage = () => {
   const supabaseClient = createClientSide();
   const { teamMemberProfile } = useRole();
-  const [leaderboards, setLeaderboards] = useState<
-    { username: string; totalAmount: number }[]
-  >([]);
+  const [leaderboards, setLeaderboards] = useState<LeaderboardData[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [activePage, setActivePage] = useState(1);
-  const [leaderBoardType, setLeaderBoardType] = useState<"DIRECT" | "INDIRECT">(
-    "DIRECT"
-  );
+  const [leaderBoardType, setLeaderBoardType] = useState<
+    "DIRECT" | "INDIRECT" | "PACKAGE"
+  >("DIRECT");
   const [isFetchingList, setIsFetchingList] = useState(false);
   const [rowSelection, setRowSelection] = useState({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const cachedLeaderboards = useRef<{
     [key: string]: {
-      data: { username: string; totalAmount: number }[];
+      data: LeaderboardData[];
       totalCount: number;
     };
   }>({});
@@ -81,11 +86,11 @@ const AdminLeaderBoardsPage = () => {
     getLeaderboards();
   }, [leaderBoardType, activePage]);
 
-  const columns = leaderBoardColumn(activePage, 10);
+  const columns = leaderBoardColumn(activePage, 10, leaderBoardType);
 
   const table = useReactTable({
     data: leaderboards,
-    columns,
+    columns: columns as ColumnDef<LeaderboardData>[],
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -119,6 +124,7 @@ const AdminLeaderBoardsPage = () => {
         <TabsList className="mb-4">
           <TabsTrigger value="DIRECT">Direct Referrals</TabsTrigger>
           <TabsTrigger value="INDIRECT">Indirect Referrals</TabsTrigger>
+          <TabsTrigger value="PACKAGE">Packages</TabsTrigger>
         </TabsList>
 
         <TabsContent value="DIRECT">
@@ -134,6 +140,18 @@ const AdminLeaderBoardsPage = () => {
         </TabsContent>
 
         <TabsContent value="INDIRECT">
+          <AdminLeaderBoardsTabTable
+            table={table}
+            columns={columns}
+            activePage={activePage}
+            totalCount={totalCount}
+            isFetchingList={isFetchingList}
+            setActivePage={setActivePage}
+            pageCount={pageCount}
+          />
+        </TabsContent>
+
+        <TabsContent value="PACKAGE">
           <AdminLeaderBoardsTabTable
             table={table}
             columns={columns}

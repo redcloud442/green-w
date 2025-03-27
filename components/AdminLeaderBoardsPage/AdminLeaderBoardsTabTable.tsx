@@ -5,6 +5,7 @@ import ReusableTable from "../ReusableTable/ReusableTable";
 type LeaderboardData = {
   username: string;
   totalAmount: number;
+  totalReferral: number;
 };
 
 type Props = {

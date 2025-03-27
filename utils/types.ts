@@ -227,3 +227,9 @@ export type ClientDashboard = {
   dailyEarnings: number;
   monthlyEarnings: number;
 };
+
+export type LeaderboardData = {
+  username: string;
+  totalAmount: number;
+  totalReferral: number;
+};

@@ -1,4 +1,8 @@
-import { AdminDashboardData, AdminDashboardDataByDate } from "@/utils/types";
+import {
+  AdminDashboardData,
+  AdminDashboardDataByDate,
+  LeaderboardData,
+} from "@/utils/types";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 export const getAdminDashboardByDate = async (
@@ -45,7 +49,7 @@ export const getAdminDashboard = async (supabaseClient: SupabaseClient) => {
 };
 
 export const getLeaderBoardData = async (params: {
-  leaderBoardType: "DIRECT" | "INDIRECT";
+  leaderBoardType: "DIRECT" | "INDIRECT" | "PACKAGE";
   teamMemberId: string;
   limit: number;
   page: number;
@@ -66,6 +70,6 @@ export const getLeaderBoardData = async (params: {
 
   return data as {
     totalCount: number;
-    data: { username: string; totalAmount: number }[];
+    data: LeaderboardData[];
   };
 };

@@ -1,13 +1,15 @@
 import { Button } from "@/components/ui/button";
-import { ColumnDef } from "@tanstack/react-table";
+import { ColumnDef, Row } from "@tanstack/react-table";
 import { Badge } from "../ui/badge";
 
 export const leaderBoardColumn = (
   pageIndex: number,
-  pageSize: number
+  pageSize: number,
+  tabType: "PACKAGE" | "DIRECT" | "INDIRECT"
 ): ColumnDef<{
   username: string;
   totalAmount: number;
+  totalReferral: number;
 }>[] => {
   return [
     {
@@ -63,15 +65,14 @@ export const leaderBoardColumn = (
       },
     },
     {
-      accessorKey: "totalAmount",
-
+      accessorKey: "totalamount",
       header: () => (
         <Button className="w-full " variant="ghost">
           Amount
         </Button>
       ),
       cell: ({ row }) => {
-        const amount = parseFloat(row.getValue("totalAmount"));
+        const amount = parseFloat(row.getValue("totalamount"));
         const formatted = new Intl.NumberFormat("en-PH", {
           style: "currency",
           currency: "PHP",
@@ -79,17 +80,29 @@ export const leaderBoardColumn = (
         return <div className="text-center">{formatted}</div>;
       },
     },
-    {
-      accessorKey: "totalReferral",
-      header: () => (
-        <Button className="w-full " variant="ghost">
-          Referral Count
-        </Button>
-      ),
-      cell: ({ row }) => {
-        const count = row.getValue("totalReferral");
-        return <div className="text-center">{Number(count)}</div>;
-      },
-    },
+    ...(tabType !== "PACKAGE"
+      ? [
+          {
+            accessorKey: "totalReferral",
+            header: () => (
+              <Button className="w-full " variant="ghost">
+                Referral Count
+              </Button>
+            ),
+            cell: ({
+              row,
+            }: {
+              row: Row<{
+                username: string;
+                totalAmount: number;
+                totalReferral: number;
+              }>;
+            }) => {
+              const count = row.getValue("totalReferral");
+              return <div className="text-center">{Number(count)}</div>;
+            },
+          },
+        ]
+      : []),
   ];
 };
