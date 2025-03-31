@@ -95,3 +95,62 @@ export const getAdminWithdrawalTotalReport = async (params: {
 
   return result;
 };
+
+export const getAdminWithdrawalBanList = async (params: {
+  take: number;
+  skip: number;
+}) => {
+  const response = await fetch(
+    `/api/v1/withdraw/ban-list?take=${params.take}&skip=${params.skip}`,
+    {
+      method: "GET",
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) throw new Error("Failed to fetch withdrawal total report");
+
+  return result as {
+    data: { accountNumber: string }[];
+    totalCount: number;
+  };
+};
+
+export const uploadAdminWithdrawalBanList = async (params: {
+  accountNumber: string;
+}) => {
+  const response = await fetch(`/api/v1/withdraw/ban-list`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(params),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) throw new Error(`${result.message}`);
+
+  return result;
+};
+
+export const deleteAdminWithdrawalBanList = async (params: {
+  accountNumber: string;
+}) => {
+  const response = await fetch(
+    `/api/v1/withdraw/ban-list/` + params.accountNumber,
+    {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) throw new Error(`${result.message}`);
+
+  return result;
+};

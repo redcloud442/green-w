@@ -49,6 +49,7 @@ import {
 import { Switch } from "../ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Textarea } from "../ui/textarea";
+import AdminBanListModal from "./AdminWithdrawalBanList";
 import { AdminWithdrawalHistoryColumn } from "./AdminWithdrawalColumn";
 import AdminWithdrawalTabs from "./AdminWithdrawalTabs";
 
@@ -514,17 +515,20 @@ const AdminWithdrawalHistoryTable = ({
         </div>
 
         <Tabs defaultValue="PENDING" onValueChange={handleTabChange}>
-          <TabsList className="mb-4">
-            <TabsTrigger value="PENDING">
-              Pending ({requestData?.data?.["PENDING"]?.count || 0})
-            </TabsTrigger>
-            <TabsTrigger value="APPROVED">
-              Approved ({requestData?.data?.["APPROVED"]?.count || 0})
-            </TabsTrigger>
-            <TabsTrigger value="REJECTED">
-              Rejected ({requestData?.data?.["REJECTED"]?.count || 0})
-            </TabsTrigger>
-          </TabsList>
+          <div className="flex justify-between flex-wrap gap-2">
+            <TabsList className="mb-4">
+              <TabsTrigger value="PENDING">
+                Pending ({requestData?.data?.["PENDING"]?.count || 0})
+              </TabsTrigger>
+              <TabsTrigger value="APPROVED">
+                Approved ({requestData?.data?.["APPROVED"]?.count || 0})
+              </TabsTrigger>
+              <TabsTrigger value="REJECTED">
+                Rejected ({requestData?.data?.["REJECTED"]?.count || 0})
+              </TabsTrigger>
+            </TabsList>
+            <AdminBanListModal teamMemberProfile={teamMemberProfile} />
+          </div>
 
           <TabsContent value="PENDING">
             <AdminWithdrawalTabs

@@ -25,7 +25,8 @@ const UserProfilePage = ({ userProfile }: Props) => {
           </p>
         </header>
         <div className="flex items-center justify-start gap-x-4">
-          {teamMemberProfile.alliance_member_role === "ACCOUNTING" && (
+          {(teamMemberProfile.alliance_member_role === "ACCOUNTING" ||
+            teamMemberProfile.alliance_member_role === "ACCOUNTING_HEAD") && (
             <Button
               onClick={() => router.push("/withdraw")}
               variant="card"

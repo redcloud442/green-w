@@ -10,6 +10,7 @@ import {
 } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
 
+import { useRole } from "@/utils/context/roleContext";
 import { AdminWithdrawaldata, WithdrawalRequestData } from "@/utils/types";
 import { Column, ColumnDef, Row } from "@tanstack/react-table";
 import { ArrowUpDown, ClipboardCopy } from "lucide-react";
@@ -40,6 +41,7 @@ export const WithdrawalColumn = (
 ) => {
   const router = useRouter();
   const { toast } = useToast();
+  const { teamMemberProfile } = useRole();
   const supabaseClient = createClientSide();
   const [isLoading, setIsLoading] = useState(false);
   const [isOpenModal, setIsOpenModal] = useState({
@@ -325,6 +327,46 @@ export const WithdrawalColumn = (
         </div>
       ),
     },
+    ...(teamMemberProfile.alliance_member_role === "ACCOUNTING_HEAD"
+      ? [
+          {
+            accessorKey: "approver_username",
+            header: ({ column }: { column: Column<WithdrawalRequestData> }) => (
+              <Button
+                variant="ghost"
+                className="p-1"
+                onClick={() =>
+                  column.toggleSorting(column.getIsSorted() === "desc")
+                }
+              >
+                Approver <ArrowUpDown />
+              </Button>
+            ),
+            cell: ({ row }: { row: Row<WithdrawalRequestData> }) => (
+              <div className="flex items-center gap-2 text-wrap cursor-pointer hover:underline">
+                {row.original.approver_username ? (
+                  <>
+                    <Avatar>
+                      <AvatarImage
+                        src={row.original.approver_profile_picture ?? ""}
+                      />
+                      <AvatarFallback>
+                        {row.original.approver_username
+                          ?.charAt(0)
+                          .toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+
+                    <p className="text-wrap text-blue-500 underline">
+                      {row.getValue("approver_username")}
+                    </p>
+                  </>
+                ) : null}
+              </div>
+            ),
+          },
+        ]
+      : []),
     ...(status !== "PENDING"
       ? [
           {

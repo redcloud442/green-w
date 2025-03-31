@@ -151,9 +151,14 @@ export const protectionMemberUser = async (ip?: string) => {
     }
 
     if (
-      !["MEMBER", "MERCHANT", "ACCOUNTING", "ADMIN", "CLIENT"].includes(
-        user.alliance_member_table?.[0]?.alliance_member_role
-      )
+      ![
+        "MEMBER",
+        "MERCHANT",
+        "ACCOUNTING",
+        "ADMIN",
+        "CLIENT",
+        "ACCOUNTING_HEAD",
+      ].includes(user.alliance_member_table?.[0]?.alliance_member_role)
     ) {
       return { redirect: "/404" };
     }
@@ -299,7 +304,7 @@ export const protectionAccountingUser = async (ip?: string) => {
     }
 
     if (
-      !["ADMIN", "ACCOUNTING"].includes(
+      !["ADMIN", "ACCOUNTING", "ACCOUNTING_HEAD"].includes(
         user.alliance_member_table?.[0]?.alliance_member_role
       )
     ) {
@@ -372,9 +377,14 @@ export const protectionAllUser = async (ip?: string) => {
     }
 
     if (
-      !["MEMBER", "MERCHANT", "ACCOUNTING", "ADMIN", "CLIENT"].includes(
-        user.alliance_member_table?.[0]?.alliance_member_role
-      )
+      ![
+        "MEMBER",
+        "MERCHANT",
+        "ACCOUNTING",
+        "ADMIN",
+        "CLIENT",
+        "ACCOUNTING_HEAD",
+      ].includes(user.alliance_member_table?.[0]?.alliance_member_role)
     ) {
       return { redirect: "/" };
     }

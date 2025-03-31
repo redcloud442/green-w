@@ -147,9 +147,14 @@ export const AdminUsersColumn = (
           Role <ArrowUpDown />
         </Button>
       ),
-      cell: ({ row }) => (
-        <div className="text-wrap">{row.getValue("alliance_member_role")}</div>
-      ),
+      cell: ({ row }) => {
+        const role = row.getValue("alliance_member_role") as string;
+        return (
+          <div className="text-wrap">
+            {role.replace("_", " ").toUpperCase()}
+          </div>
+        );
+      },
     },
     {
       accessorKey: "user_first_name",
@@ -303,6 +308,19 @@ export const AdminUsersColumn = (
                   }
                 >
                   Promote as Member
+                </DropdownMenuItem>
+              )}
+
+              {data.alliance_member_role !== "ACCOUNTING_HEAD" && (
+                <DropdownMenuItem
+                  onClick={() =>
+                    handlePromoteToMerchant(
+                      data.alliance_member_id,
+                      "ACCOUNTING_HEAD"
+                    )
+                  }
+                >
+                  Promote as Accounting Head
                 </DropdownMenuItem>
               )}
               {!data.alliance_member_restricted && (

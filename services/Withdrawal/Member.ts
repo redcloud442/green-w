@@ -25,7 +25,7 @@ export const createWithdrawalRequest = async (params: {
 
   if (!response.ok) {
     throw new Error(
-      result.error || "An error occurred while creating the top-up request."
+      result.message || "An error occurred while creating the top-up request."
     );
   }
 
