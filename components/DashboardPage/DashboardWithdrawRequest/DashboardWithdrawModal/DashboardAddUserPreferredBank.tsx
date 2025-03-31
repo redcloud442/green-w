@@ -101,7 +101,7 @@ const DashboardAddUserPreferredBank = ({
         onClick={() => setOpen(true)}
         className="flex items-center justify-center gap-2 border-2 border-white p-2 cursor-pointer"
       >
-        <p className="text-sm">ADD BYBIT ACCOUNT, EWALLET OR BANK DETAILS</p>
+        <p className="text-sm">ADD EWALLET OR BANK DETAILS</p>
         <PlusIcon />
       </div>
 
