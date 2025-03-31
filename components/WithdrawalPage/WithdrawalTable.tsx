@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import AdminBanListModal from "../AdminWithdrawalListPage/AdminWithdrawalBanList";
 import { Button } from "../ui/button";
 import { Calendar } from "../ui/calendar";
 import { Card } from "../ui/card";
@@ -465,17 +466,22 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
         </div>
 
         <Tabs defaultValue="PENDING" onValueChange={handleTabChange}>
-          <TabsList className="mb-4">
-            <TabsTrigger value="PENDING">
-              Pending ({requestData?.data?.PENDING?.count})
-            </TabsTrigger>
-            <TabsTrigger value="APPROVED">
-              Approved ({requestData?.data?.APPROVED?.count})
-            </TabsTrigger>
-            <TabsTrigger value="REJECTED">
-              Rejected ({requestData?.data?.REJECTED?.count})
-            </TabsTrigger>
-          </TabsList>
+          <div className="flex justify-between flex-wrap gap-2">
+            <TabsList className="mb-4">
+              <TabsTrigger value="PENDING">
+                Pending ({requestData?.data?.PENDING?.count})
+              </TabsTrigger>
+              <TabsTrigger value="APPROVED">
+                Approved ({requestData?.data?.APPROVED?.count})
+              </TabsTrigger>
+              <TabsTrigger value="REJECTED">
+                Rejected ({requestData?.data?.REJECTED?.count})
+              </TabsTrigger>
+            </TabsList>
+            {teamMemberProfile.alliance_member_role === "ACCOUNTING_HEAD" && (
+              <AdminBanListModal teamMemberProfile={teamMemberProfile} />
+            )}
+          </div>
 
           <TabsContent value="PENDING">
             <WithdrawalTabs
