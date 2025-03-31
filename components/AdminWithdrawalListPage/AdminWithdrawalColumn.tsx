@@ -314,51 +314,44 @@ export const AdminWithdrawalHistoryColumn = (
         </div>
       ),
     },
-    ...(status !== "PENDING"
-      ? [
-          {
-            accessorKey: "approver_username",
-            header: ({ column }: { column: Column<WithdrawalRequestData> }) => (
-              <Button
-                variant="ghost"
-                className="p-1"
-                onClick={() =>
-                  column.toggleSorting(column.getIsSorted() === "desc")
-                }
-              >
-                Approver <ArrowUpDown />
-              </Button>
-            ),
-            cell: ({ row }: { row: Row<WithdrawalRequestData> }) => (
-              <div className="flex items-center gap-2 text-wrap cursor-pointer hover:underline">
-                {row.original.approver_username ? (
-                  <>
-                    <Avatar>
-                      <AvatarImage
-                        src={row.original.approver_profile_picture ?? ""}
-                      />
-                      <AvatarFallback>
-                        {row.original.approver_username
-                          ?.charAt(0)
-                          .toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
 
-                    <p
-                      onClick={() =>
-                        router.push(`/admin/users/${row.original.approver_id}`)
-                      }
-                      className="text-wrap text-blue-500 underline"
-                    >
-                      {row.getValue("approver_username")}
-                    </p>
-                  </>
-                ) : null}
-              </div>
-            ),
-          },
-        ]
-      : []),
+    {
+      accessorKey: "approver_username",
+      header: ({ column }: { column: Column<WithdrawalRequestData> }) => (
+        <Button
+          variant="ghost"
+          className="p-1"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "desc")}
+        >
+          Approver <ArrowUpDown />
+        </Button>
+      ),
+      cell: ({ row }: { row: Row<WithdrawalRequestData> }) => (
+        <div className="flex items-center gap-2 text-wrap cursor-pointer hover:underline">
+          {row.original.approver_username ? (
+            <>
+              <Avatar>
+                <AvatarImage
+                  src={row.original.approver_profile_picture ?? ""}
+                />
+                <AvatarFallback>
+                  {row.original.approver_username?.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+
+              <p
+                onClick={() =>
+                  router.push(`/admin/users/${row.original.approver_id}`)
+                }
+                className="text-wrap text-blue-500 underline"
+              >
+                {row.getValue("approver_username")}
+              </p>
+            </>
+          ) : null}
+        </div>
+      ),
+    },
     ...(status !== "PENDING"
       ? [
           {
