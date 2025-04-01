@@ -3,7 +3,7 @@
 import { logError } from "@/services/Error/ErrorLogs";
 import { getAdminTopUpRequest } from "@/services/TopUp/Admin";
 import { useRole } from "@/utils/context/roleContext";
-import { escapeFormData } from "@/utils/function";
+import { escapeFormData, formatDateToLocal } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
 import { AdminTopUpRequestData } from "@/utils/types";
 import { DialogDescription } from "@radix-ui/react-dialog";
@@ -90,8 +90,8 @@ const AdminTopUpApprovalTable = () => {
       const startDate = dateFilter.start
         ? new Date(dateFilter.start)
         : undefined;
+      const formattedStartDate = startDate ? formatDateToLocal(startDate) : "";
 
-      const endDate = dateFilter.end ? new Date(dateFilter.end) : undefined;
       const requestData = await getAdminTopUpRequest({
         page: activePage,
         limit: 10,
@@ -102,17 +102,8 @@ const AdminTopUpApprovalTable = () => {
         userFilter,
         statusFilter: statusFilter ?? "PENDING",
         dateFilter: {
-          start:
-            startDate && !isNaN(startDate.getTime())
-              ? new Date(
-                  startDate.setDate(startDate.getDate() + 1)
-                ).toISOString()
-              : undefined,
-
-          end:
-            endDate && !isNaN(endDate.getTime())
-              ? new Date(endDate.setHours(23, 59, 59, 999)).toISOString()
-              : undefined,
+          start: formattedStartDate,
+          end: formattedStartDate,
         },
       });
 
@@ -224,8 +215,7 @@ const AdminTopUpApprovalTable = () => {
       const startDate = dateFilter.start
         ? new Date(dateFilter.start)
         : undefined;
-
-      const endDate = dateFilter.end ? new Date(dateFilter.end) : undefined;
+      const formattedStartDate = startDate ? formatDateToLocal(startDate) : "";
 
       const requestData = await getAdminTopUpRequest({
         page: 1,
@@ -237,17 +227,8 @@ const AdminTopUpApprovalTable = () => {
         userFilter,
         statusFilter: statusFilter ?? "PENDING",
         dateFilter: {
-          start:
-            startDate && !isNaN(startDate.getTime())
-              ? new Date(
-                  startDate.setDate(startDate.getDate() + 1)
-                ).toISOString()
-              : undefined,
-
-          end:
-            endDate && !isNaN(endDate.getTime())
-              ? new Date(endDate.setHours(23, 59, 59, 999)).toISOString()
-              : undefined,
+          start: formattedStartDate,
+          end: formattedStartDate,
         },
       });
 
@@ -472,37 +453,6 @@ const AdminTopUpApprovalTable = () => {
                           {field.value
                             ? format(new Date(field.value), "PPP")
                             : "Select Start Date"}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
-                        <Calendar
-                          mode="single"
-                          selected={
-                            field.value ? new Date(field.value) : undefined
-                          }
-                          onSelect={(date: Date | undefined) =>
-                            field.onChange(date?.toISOString() || "")
-                          }
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  )}
-                />
-                <Controller
-                  name="dateFilter.end"
-                  control={control}
-                  render={({ field }) => (
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="card"
-                          className="font-normal justify-start"
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {field.value
-                            ? format(new Date(field.value), "PPP")
-                            : "Select End Date"}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0">

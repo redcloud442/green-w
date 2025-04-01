@@ -2,7 +2,7 @@
 
 import { logError } from "@/services/Error/ErrorLogs";
 import { getAdminWithdrawalRequest } from "@/services/Withdrawal/Admin";
-import { escapeFormData } from "@/utils/function";
+import { escapeFormData, formatDateToLocal } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
 import { AdminWithdrawaldata } from "@/utils/types";
 import { alliance_member_table } from "@prisma/client";
@@ -84,10 +84,12 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
 
       const { referenceId, userFilter, statusFilter, dateFilter } =
         sanitizedData;
+
       const startDate = dateFilter.start
         ? new Date(dateFilter.start)
         : undefined;
-      const endDate = startDate ? new Date(startDate) : undefined;
+      const formattedStartDate = startDate ? formatDateToLocal(startDate) : "";
+
       const requestData = await getAdminWithdrawalRequest({
         page: activePage,
         limit: 10,
@@ -97,14 +99,8 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
         userFilter,
         statusFilter: statusFilter,
         dateFilter: {
-          start:
-            startDate && !isNaN(startDate.getTime())
-              ? startDate.toISOString()
-              : undefined,
-          end:
-            endDate && !isNaN(endDate.getTime())
-              ? new Date(endDate.setHours(23, 59, 59, 999)).toISOString()
-              : undefined,
+          start: formattedStartDate,
+          end: formattedStartDate,
         },
       });
 
@@ -133,6 +129,7 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
               },
             },
             totalPendingWithdrawal: requestData?.totalPendingWithdrawal || 0,
+            totalApprovedWithdrawal: requestData?.totalApprovedWithdrawal || 0,
           };
         }
 
@@ -147,6 +144,7 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
             },
           },
           totalPendingWithdrawal: requestData?.totalPendingWithdrawal || 0,
+          totalApprovedWithdrawal: requestData?.totalApprovedWithdrawal || 0,
         };
       });
     } catch (e) {
@@ -185,6 +183,7 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
           PENDING: { data: [], count: 0 },
         },
         totalPendingWithdrawal: 0,
+        totalApprovedWithdrawal: 0,
       };
       const sanitizedData = escapeFormData(getValues());
 
@@ -193,7 +192,7 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
       const startDate = dateFilter.start
         ? new Date(dateFilter.start)
         : undefined;
-      const endDate = startDate ? new Date(startDate) : undefined;
+      const formattedStartDate = startDate ? formatDateToLocal(startDate) : "";
 
       const requestData = await getAdminWithdrawalRequest({
         page: activePage,
@@ -204,14 +203,8 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
         userFilter,
         statusFilter: statusFilter,
         dateFilter: {
-          start:
-            startDate && !isNaN(startDate.getTime())
-              ? startDate.toISOString()
-              : undefined,
-          end:
-            endDate && !isNaN(endDate.getTime())
-              ? new Date(endDate.setHours(23, 59, 59, 999)).toISOString()
-              : undefined,
+          start: formattedStartDate,
+          end: formattedStartDate,
         },
       });
 
@@ -224,6 +217,9 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
 
       updatedData.totalPendingWithdrawal =
         requestData?.totalPendingWithdrawal || 0;
+
+      updatedData.totalApprovedWithdrawal =
+        requestData?.totalApprovedWithdrawal || 0;
 
       setRequestData(updatedData);
     } catch (e) {
@@ -285,7 +281,9 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
     fetchRequest();
   }, [supabaseClient, teamMemberProfile, activePage, sorting]);
 
-  const pageCount = Math.ceil(requestData?.data?.[status]?.count || 0 / 10);
+  const count = Number(requestData?.data?.[status]?.count) || 0;
+  const pageSize = 10;
+  const pageCount = Math.ceil(count / pageSize);
 
   const handleSwitchChange = (checked: boolean) => {
     setShowFilters(checked);
@@ -312,6 +310,20 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
   return (
     <>
       {" "}
+      <CardAmountAdmin
+        title="Total Approved Withdrawal"
+        value={
+          <>
+            <PhilippinePeso />
+            {requestData?.totalApprovedWithdrawal?.toLocaleString("en-US", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            }) ?? "0.00"}
+          </>
+        }
+        description=""
+        descriptionClassName="text-sm text-gray-500 font-bold"
+      />
       <CardAmountAdmin
         title="Total Pending Withdrawal"
         value={
@@ -469,13 +481,13 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
           <div className="flex justify-between flex-wrap gap-2">
             <TabsList className="mb-4">
               <TabsTrigger value="PENDING">
-                Pending ({requestData?.data?.PENDING?.count})
+                Pending ({requestData?.data?.["PENDING"]?.count})
               </TabsTrigger>
               <TabsTrigger value="APPROVED">
-                Approved ({requestData?.data?.APPROVED?.count})
+                Approved ({requestData?.data?.["APPROVED"]?.count})
               </TabsTrigger>
               <TabsTrigger value="REJECTED">
-                Rejected ({requestData?.data?.REJECTED?.count})
+                Rejected ({requestData?.data?.["REJECTED"]?.count})
               </TabsTrigger>
             </TabsList>
             {teamMemberProfile.alliance_member_role === "ACCOUNTING_HEAD" && (
@@ -488,7 +500,7 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
               table={table}
               columns={columns}
               activePage={activePage}
-              totalCount={requestData?.data?.PENDING?.count || 0}
+              totalCount={requestData?.data?.["PENDING"]?.count || 0}
               isFetchingList={isFetchingList}
               setActivePage={setActivePage}
               pageCount={pageCount}
@@ -500,7 +512,7 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
               table={table}
               columns={columns}
               activePage={activePage}
-              totalCount={requestData?.data?.APPROVED?.count || 0}
+              totalCount={requestData?.data?.["APPROVED"]?.count || 0}
               isFetchingList={isFetchingList}
               setActivePage={setActivePage}
               pageCount={pageCount}
@@ -512,7 +524,7 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
               table={table}
               columns={columns}
               activePage={activePage}
-              totalCount={requestData?.data?.REJECTED?.count || 0}
+              totalCount={requestData?.data?.["REJECTED"]?.count || 0}
               isFetchingList={isFetchingList}
               setActivePage={setActivePage}
               pageCount={pageCount}

@@ -112,6 +112,14 @@ export const WithdrawalColumn = (
               updatedItem.alliance_withdrawal_request_amount -
                 updatedItem.alliance_withdrawal_request_fee
             ),
+          totalApprovedWithdrawal:
+            status === "APPROVED"
+              ? Number(prev.totalApprovedWithdrawal) +
+                Number(
+                  updatedItem.alliance_withdrawal_request_amount -
+                    updatedItem.alliance_withdrawal_request_fee
+                )
+              : Number(prev.totalApprovedWithdrawal),
         };
       });
 

@@ -2,7 +2,7 @@
 
 import { logError } from "@/services/Error/ErrorLogs";
 import { getAdminWithdrawalRequest } from "@/services/Withdrawal/Admin";
-import { escapeFormData } from "@/utils/function";
+import { escapeFormData, formatDateToLocal } from "@/utils/function";
 import { createClientSide } from "@/utils/supabase/client";
 import { AdminWithdrawaldata } from "@/utils/types";
 import { alliance_member_table, user_table } from "@prisma/client";
@@ -95,10 +95,12 @@ const AdminWithdrawalHistoryTable = ({
 
       const { referenceId, userFilter, statusFilter, dateFilter } =
         sanitizedData;
+
       const startDate = dateFilter.start
         ? new Date(dateFilter.start)
         : undefined;
-      const endDate = startDate ? new Date(startDate) : undefined;
+      const formattedStartDate = startDate ? formatDateToLocal(startDate) : "";
+
       const requestData = await getAdminWithdrawalRequest({
         page: activePage,
         limit: 10,
@@ -108,16 +110,8 @@ const AdminWithdrawalHistoryTable = ({
         userFilter,
         statusFilter: statusFilter || "PENDING",
         dateFilter: {
-          start:
-            startDate && !isNaN(startDate.getTime())
-              ? new Date(
-                  startDate.setDate(startDate.getDate() + 1)
-                ).toISOString()
-              : undefined,
-          end:
-            endDate && !isNaN(endDate.getTime())
-              ? new Date(endDate.setHours(23, 59, 59, 999)).toISOString()
-              : undefined,
+          start: formattedStartDate,
+          end: formattedStartDate,
         },
       });
       setRequestData((prev: AdminWithdrawaldata | null) => {
@@ -206,7 +200,7 @@ const AdminWithdrawalHistoryTable = ({
       const startDate = dateFilter.start
         ? new Date(dateFilter.start)
         : undefined;
-      const endDate = startDate ? new Date(startDate) : undefined;
+      const formattedStartDate = startDate ? formatDateToLocal(startDate) : "";
 
       const requestData = await getAdminWithdrawalRequest({
         page: activePage,
@@ -217,16 +211,8 @@ const AdminWithdrawalHistoryTable = ({
         userFilter,
         statusFilter: statusFilter || "PENDING",
         dateFilter: {
-          start:
-            startDate && !isNaN(startDate.getTime())
-              ? new Date(
-                  startDate.setDate(startDate.getDate() + 1)
-                ).toISOString()
-              : undefined,
-          end:
-            endDate && !isNaN(endDate.getTime())
-              ? new Date(endDate.setHours(23, 59, 59, 999)).toISOString()
-              : undefined,
+          start: formattedStartDate,
+          end: formattedStartDate,
         },
       });
 
