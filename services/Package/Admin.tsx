@@ -84,7 +84,7 @@ export const createPackage = async (params: {
   return data;
 };
 
-export const updateFunds = async (params: { amount: number }) => {
+export const updateFunds = async (params: { amount: number; type: string }) => {
   const response = await fetch(`/api/v1/package/update-funds`, {
     method: "PATCH",
     headers: {
