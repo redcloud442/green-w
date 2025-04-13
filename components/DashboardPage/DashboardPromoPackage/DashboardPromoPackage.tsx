@@ -1,4 +1,3 @@
-import AvailPackagePage from "@/components/AvailPackagePage/AvailPackagePage";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -14,6 +13,7 @@ import { usePromoPackageStore } from "@/store/usePromoPackageStore";
 import { alliance_member_table, package_table } from "@prisma/client";
 import Image from "next/image";
 import { Dispatch, SetStateAction, useState } from "react";
+import AvailPromoPackage from "./AvailPromoPackage";
 
 type Props = {
   className: string;
@@ -101,7 +101,7 @@ const DashboardPromoPackage = ({
               ))}
           </div>
           {selectedPackage && (
-            <AvailPackagePage
+            <AvailPromoPackage
               active={active}
               setActive={setIsActive}
               setSelectedPackage={setSelectedPackage}
