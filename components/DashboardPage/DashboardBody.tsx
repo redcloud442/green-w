@@ -20,16 +20,19 @@ import CardAmount from "../ui/cardAmount";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Separator } from "../ui/separator";
 import { Skeleton } from "../ui/skeleton";
+import CompanyAllotedFunds from "./CompanyAllotedFunds/CompanyAllotedFunds";
 import DashboardDepositModalDeposit from "./DashboardDepositRequest/DashboardDepositModal/DashboardDepositModalDeposit";
 import DashboardDepositModalPackages from "./DashboardDepositRequest/DashboardDepositModal/DashboardDepositPackagesModal";
-import DashboardMissionModal from "./DashboardMissionModal/DashboardMissionModal";
 import DashboardPackages from "./DashboardPackages";
+import DashboardPromoPackage from "./DashboardPromoPackage/DashboardPromoPackage";
 import DashboardWithdrawModalWithdraw from "./DashboardWithdrawRequest/DashboardWithdrawModal/DashboardWithdrawModalWithdraw";
+
 type DashboardBodyProps = {
   packages: package_table[];
+  promoPackages: package_table[];
 };
 
-const DashboardBody = ({ packages }: DashboardBodyProps) => {
+const DashboardBody = ({ packages, promoPackages }: DashboardBodyProps) => {
   const supabaseClient = createClientSide();
   const router = useRouter();
   const { teamMemberProfile, profile } = useRole();
@@ -281,16 +284,7 @@ const DashboardBody = ({ packages }: DashboardBodyProps) => {
 
             <Separator className="text-white" />
 
-            <div className="flex justify-center  gap-2">
-              <div className="flex flex-col bg-gray-200/50 p-2 rounded-xl text-center">
-                <p className="text-md sm:text-lg font-extralight">
-                  DAILY INTEREST RATE
-                </p>
-                <p className="text-md sm:text-lg font-extrabold">
-                  EARN 3.1 % UP TO 4.3 % PER DAY
-                </p>
-              </div>
-            </div>
+            <CompanyAllotedFunds />
           </CardContent>
         </Card>
       </div>
@@ -308,13 +302,16 @@ const DashboardBody = ({ packages }: DashboardBodyProps) => {
           isActive ? "sm:grid-cols-6" : "sm:grid-cols-5"
         }`}
       >
-        {/* NETWORK (Top Left) */}
         <div className="flex flex-col items-center">
-          <DashboardDepositModalDeposit
+          <DashboardPromoPackage
             teamMemberProfile={teamMemberProfile}
             className="w-full"
+            active={isActive}
+            packages={promoPackages}
+            setIsActive={setIsActive}
           />
         </div>
+        {/* NETWORK (Top Left) */}
 
         {/* WITHDRAW */}
         <div className="flex flex-col items-center">
@@ -322,6 +319,13 @@ const DashboardBody = ({ packages }: DashboardBodyProps) => {
             teamMemberProfile={teamMemberProfile}
             earnings={earnings}
             profile={profile}
+          />
+        </div>
+
+        <div className="flex flex-col items-center">
+          <DashboardDepositModalDeposit
+            teamMemberProfile={teamMemberProfile}
+            className="w-full"
           />
         </div>
 
@@ -362,11 +366,6 @@ const DashboardBody = ({ packages }: DashboardBodyProps) => {
           />
           <p className="text-sm sm:text-lg font-thin mt-2">NETWORK</p>
         </Link>
-        {isActive && (
-          <div className="flex flex-col items-center">
-            <DashboardMissionModal />
-          </div>
-        )}
       </div>
 
       {chartData.length > 0 && (

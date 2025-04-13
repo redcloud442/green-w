@@ -136,6 +136,7 @@ const CreatePackageModal = ({ setPackages, closeModal }: Props) => {
           package_color: packageColor ? packageColor : null,
           package_image: packageBanner ? packageBanner : null,
           packages_days: Number(data.packageDays),
+          package_is_promo: false,
         },
       ]);
       closeModal();

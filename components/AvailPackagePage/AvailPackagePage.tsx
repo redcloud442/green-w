@@ -104,18 +104,23 @@ const AvailPackagePage = ({
         teamMemberId: teamMemberProfile.alliance_member_id,
       });
 
+      const isEasterPackage =
+        selectedPackage?.package_name === "Easter"
+          ? Number(result.amount) * 0.15
+          : 0;
+
       const transactionHistory = {
         transaction_id: uuidv4(),
         transaction_date: new Date(),
-        transaction_description: `Package Enrolled ${selectedPackage?.package_name}`,
-        transaction_amount: Number(result.amount),
+        transaction_description: `Package Enrolled ${selectedPackage?.package_name} ${isEasterPackage ? "with 15% bonus" : ""}`,
+        transaction_amount: isEasterPackage,
         transaction_member_id: teamMemberProfile?.alliance_member_id,
       };
 
       setAddTransactionHistory([
         {
           ...transactionHistory,
-          transaction_amount: Number(result.amount),
+          transaction_amount: Number(result.amount) + isEasterPackage,
         },
       ]);
 
@@ -161,7 +166,7 @@ const AvailPackagePage = ({
           package: selectedPackage?.package_name || "",
           completion: 0,
           completion_date: completionDate.toISOString(),
-          amount: Number(amount),
+          amount: Number(amount) + isEasterPackage,
           is_ready_to_claim: false,
           package_connection_id:
             packageConnection.package_member_connection_id || "",
@@ -171,7 +176,7 @@ const AvailPackagePage = ({
           is_notified: false,
           package_member_id: teamMemberProfile?.alliance_member_id,
           package_days: Number(selectedPackage?.packages_days || 0),
-          current_amount: Number(amount),
+          current_amount: Number(amount) + isEasterPackage,
           currentPercentage: 0,
         },
         ...chartData,

@@ -13,6 +13,7 @@ export default {
         airstrike: ["Airstrike", "sans-serif"],
         ethnocentric: ["Bankrus", "sans-serif"],
       },
+
       backgroundImage: {
         "custom-radial":
           "radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(0, 123, 181, 0.8) 30%, rgba(0, 0, 0, 1) 100%)",
@@ -38,8 +39,13 @@ export default {
       },
       animation: {
         "stroke-anim": "stroke-dash 1.6s linear infinite",
+        wiggle: "wiggle 0.5s ease-in-out infinite",
       },
       keyframes: {
+        wiggle: {
+          "0%, 100%": { transform: "rotate(-5deg)" },
+          "50%": { transform: "rotate(5deg)" },
+        },
         "stroke-dash": {
           "0%": { "stroke-dasharray": "1, 200", "stroke-dashoffset": "0" },
           "50%": { "stroke-dasharray": "89, 200", "stroke-dashoffset": "-35" },

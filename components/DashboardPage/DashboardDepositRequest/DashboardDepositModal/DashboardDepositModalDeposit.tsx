@@ -227,6 +227,8 @@ const DashboardDepositModalDeposit = ({
     }
   };
 
+  const bonusAmount = Number(watch("amount")) * 0.1;
+
   return (
     <Dialog
       open={open}
@@ -241,7 +243,7 @@ const DashboardDepositModalDeposit = ({
       <DialogTrigger asChild className={className}>
         {!canUserDeposit ? (
           <Button
-            className="p-0 bg-transparent shadow-none h-full flex flex-col items-center justify-center"
+            className="p-0 bg-transparent shadow-none h-full flex flex-col items-center justify-center relative"
             onClick={() => setOpen(true)}
           >
             <Image
@@ -251,6 +253,9 @@ const DashboardDepositModalDeposit = ({
               height={35}
             />
             <p className="text-sm sm:text-lg font-thin ">DEPOSIT</p>
+            <span className="absolute -top-6 text-[10px] sm:text-xs font-extrabold text-white px-2 py-[2px] rounded-md bg-blue-600 shadow-md ring-2 ring-blue-300 animate-wiggle ring-offset-1">
+              <span className="inline-block">+ 10% Deposit Bonus!</span>
+            </span>
           </Button>
         ) : (
           <Popover>
@@ -430,6 +435,17 @@ const DashboardDepositModalDeposit = ({
                   {errors.amount.message}
                 </p>
               )}
+            </div>
+
+            <div>
+              <Label htmlFor="amount">Bonus Amount</Label>
+
+              <Input
+                variant="default"
+                type="text"
+                id="amount"
+                value={bonusAmount}
+              />
             </div>
 
             {/* <div>

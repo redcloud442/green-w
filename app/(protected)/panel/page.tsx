@@ -29,16 +29,20 @@ const Page = async () => {
   const packages = await prisma.package_table.findMany({
     where: {
       package_is_disabled: false,
+      package_is_promo: false,
     },
-    select: {
-      package_id: true,
-      package_name: true,
-      package_percentage: true,
-      packages_days: true,
-      package_description: true,
-      package_color: true,
-      package_is_disabled: true,
-      package_image: true,
+    orderBy: {
+      package_percentage: "asc",
+    },
+  });
+
+  const promoPackages = await prisma.package_table.findMany({
+    where: {
+      package_is_disabled: false,
+      package_is_promo: true,
+    },
+    orderBy: {
+      package_percentage: "asc",
     },
   });
 
@@ -58,7 +62,13 @@ const Page = async () => {
     return redirect("/admin");
   }
 
-  return <DashboardPage packages={packages} sponsor={sponsorData || ""} />;
+  return (
+    <DashboardPage
+      promoPackages={promoPackages}
+      packages={packages}
+      sponsor={sponsorData || ""}
+    />
+  );
 };
 
 export default Page;

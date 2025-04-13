@@ -287,6 +287,7 @@ const AdminWithdrawalHistoryTable = ({
   }, [supabaseClient, teamMemberProfile, activePage, sorting]);
 
   const pageCount = Math.ceil((requestData?.data?.[status]?.count || 0) / 10);
+  
 
   const handleSwitchChange = (checked: boolean) => {
     setShowFilters(checked);
