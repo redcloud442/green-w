@@ -13,7 +13,6 @@ export default {
         airstrike: ["Airstrike", "sans-serif"],
         ethnocentric: ["Bankrus", "sans-serif"],
       },
-
       backgroundImage: {
         "custom-radial":
           "radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(0, 123, 181, 0.8) 30%, rgba(0, 0, 0, 1) 100%)",
@@ -41,6 +40,8 @@ export default {
         "stroke-anim": "stroke-dash 1.6s linear infinite",
         wiggle: "wiggle 0.5s ease-in-out infinite",
         "circle-glow": "circle-glow 2s linear infinite",
+        "spin-slow": "spin 5s linear infinite",
+        "tracing-border": "tracing-border 2s ease-in-out infinite",
       },
       keyframes: {
         wiggle: {

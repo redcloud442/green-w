@@ -244,7 +244,7 @@ const DashboardDepositModalDeposit = ({
       <DialogTrigger asChild className={className}>
         {!canUserDeposit ? (
           <Button
-            className="p-0 bg-transparent shadow-none h-full flex flex-col items-center justify-center relative border-2 animate-circle-glow"
+            className="p-2 bg-transparent shadow-none h-full flex flex-col items-center justify-center relative"
             onClick={() => setOpen(true)}
           >
             <Image
@@ -261,14 +261,8 @@ const DashboardDepositModalDeposit = ({
           </Button>
         ) : (
           <Popover>
-            <PopoverTrigger
-              className="bg-transparent pt-0 shadow-none h-full flex flex-col items-center justify-center relative"
-              asChild
-            >
-              <Button
-                className="p-0 bg-transparent shadow-none h-full flex flex-col items-center justify-center relative"
-                onClick={() => setOpen(true)}
-              >
+            <PopoverTrigger asChild>
+              <Button className="p-2 bg-transparent shadow-none h-full flex flex-col items-center justify-center relative">
                 <Image
                   src="/assets/deposit.ico"
                   alt="plans"

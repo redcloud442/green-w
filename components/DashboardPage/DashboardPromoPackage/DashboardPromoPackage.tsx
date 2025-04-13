@@ -51,7 +51,7 @@ const DashboardPromoPackage = ({
     >
       <DialogTrigger asChild>
         <Button
-          className="bg-transparent p-0 shadow-none h-full flex flex-col items-center justify-center relative"
+          className="bg-transparent p-2 shadow-none h-full flex flex-col items-center justify-center relative"
           onClick={() => setPromoPackage(true)}
         >
           {/* Wiggle image */}

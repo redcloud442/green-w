@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { createPackageConnection } from "@/services/Package/Member";
 import { useUserModalPackageStore } from "@/store/useModalPackageStore";
 import { usePackageChartData } from "@/store/usePackageChartData";
+import { usePromoPackageStore } from "@/store/usePromoPackageStore";
 import { useUserTransactionHistoryStore } from "@/store/userTransactionHistoryStore";
 import { useUserEarningsStore } from "@/store/useUserEarningsStore";
 import { escapeFormData } from "@/utils/function";
@@ -38,6 +39,7 @@ const AvailPackagePage = ({
   const { earnings, setEarnings } = useUserEarningsStore();
   const { chartData, setChartData } = usePackageChartData();
   const { toast } = useToast();
+  const { setPromoPackage } = usePromoPackageStore();
   const { setModalPackage: setOpen } = useUserModalPackageStore();
   const [maxAmount, setMaxAmount] = useState(
     earnings?.alliance_combined_earnings ?? 0
@@ -81,11 +83,16 @@ const AvailPackagePage = ({
     },
   });
 
+  const selectedPackageName = selectedPackage?.package_name;
+
   const amount = watch("amount");
+  const computationData =
+    selectedPackageName === "EASTER" ? Number(amount) * 0.15 : Number(amount);
+
   const computation = amount
     ? (Number(amount) * Number(selectedPackage?.package_percentage ?? 0)) / 100
     : 0;
-  const sumOfTotal = Number(amount) + computation;
+  const sumOfTotal = Number(amount) + computation + computationData;
 
   const onSubmit = async (data: FormValues) => {
     try {
@@ -187,6 +194,7 @@ const AvailPackagePage = ({
       }
 
       setSelectedPackage(null);
+      setPromoPackage(false);
       setOpen(false);
     } catch (e) {
       toast({
@@ -286,6 +294,28 @@ const AvailPackagePage = ({
               <p className="text-primaryRed text-sm">{errors.amount.message}</p>
             )}
             {/* no. days */}
+
+            {selectedPackageName === "EASTER" && (
+              <div className="flex flex-col gap-2 w-full justify-center items-center text-center">
+                <Label className="font-bold text-center" htmlFor="Gross">
+                  15 % Easter Bonus
+                </Label>
+                <Input
+                  variant="default"
+                  id="Gross"
+                  readOnly
+                  type="text"
+                  className="text-center w-72" // Ensures full-width and text alignment
+                  placeholder="Gross Income"
+                  value={
+                    computationData.toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    }) || ""
+                  }
+                />
+              </div>
+            )}
 
             <div className="flex flex-col gap-2 w-full justify-center items-center text-center">
               <Label className="font-bold text-center" htmlFor="Gross">
