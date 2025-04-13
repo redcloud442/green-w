@@ -6,7 +6,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import PackageCard from "@/components/ui/packageCard";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -35,7 +35,6 @@ const DashboardPromoPackage = ({
   );
   const { promoPackage, setPromoPackage } = usePromoPackageStore();
 
-  
   const handlePackageSelect = (pkg: package_table | null) => {
     setSelectedPackage(pkg);
   };
@@ -52,7 +51,7 @@ const DashboardPromoPackage = ({
     >
       <DialogTrigger asChild>
         <Button
-          className="bg-transparent p-0 shadow-none h-full flex flex-col items-center justify-center relative circle-glow"
+          className="bg-transparent p-0 shadow-none h-full flex flex-col items-center justify-center relative"
           onClick={() => setPromoPackage(true)}
         >
           {/* Wiggle image */}
@@ -76,18 +75,17 @@ const DashboardPromoPackage = ({
         </Button>
       </DialogTrigger>
 
-      <DialogContent
-        className={`sm:max-w-[425px]`}
-      >
+      <DialogContent className={`sm:max-w-[425px]`}>
         <ScrollArea className="h-[650px] sm:h-fit">
-        <DialogHeader>
-          <DialogTitle>
-            Alamin ang panibagong Package dito sa Elevate!
-          </DialogTitle>
-        </DialogHeader>
+          <DialogHeader>
+            <DialogTitle>
+              Alamin ang panibagong Package dito sa Elevate!
+            </DialogTitle>
+          </DialogHeader>
           <div className="flex flex-col justify-between gap-4">
             <p className="text-md text-gray-500 text-center pt-10">
-              Mag Deposit at iavail itong limited time package natin na hanggang APRIL 18 lang!
+              Mag Deposit at iavail itong limited time package natin na hanggang
+              APRIL 18 lang!
             </p>
             {!selectedPackage &&
               initialPackage.map((pkg) => (

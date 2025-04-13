@@ -64,8 +64,9 @@ const topUpFormSchema = z.object({
         .instanceof(File)
         .refine(
           (file) =>
-            ["image/jpeg", "image/png", "image/jpg"].includes(file.type) &&
-            file.size <= 12 * 1024 * 1024,
+            ["image/jpeg", "image/png", "image/jpg", "image/webp"].includes(
+              file.type
+            ) && file.size <= 12 * 1024 * 1024,
           { message: "Each file must be a valid image and less than 12MB." }
         )
     )
@@ -243,7 +244,7 @@ const DashboardDepositModalDeposit = ({
       <DialogTrigger asChild className={className}>
         {!canUserDeposit ? (
           <Button
-            className="p-0 bg-transparent shadow-none h-full flex flex-col items-center justify-center relative"
+            className="p-0 bg-transparent shadow-none h-full flex flex-col items-center justify-center relative border-2 animate-circle-glow"
             onClick={() => setOpen(true)}
           >
             <Image
@@ -260,14 +261,27 @@ const DashboardDepositModalDeposit = ({
           </Button>
         ) : (
           <Popover>
-            <PopoverTrigger className="bg-transparent pt-0 shadow-none h-full flex flex-col items-center justify-center">
-              <Image
-                src="/assets/deposit.ico"
-                alt="plans"
-                width={35}
-                height={35}
-              />
-              <p className="text-sm sm:text-lg font-thin pt-2">DEPOSIT</p>
+            <PopoverTrigger
+              className="bg-transparent pt-0 shadow-none h-full flex flex-col items-center justify-center relative"
+              asChild
+            >
+              <Button
+                className="p-0 bg-transparent shadow-none h-full flex flex-col items-center justify-center relative"
+                onClick={() => setOpen(true)}
+              >
+                <Image
+                  src="/assets/deposit.ico"
+                  alt="plans"
+                  width={35}
+                  height={35}
+                  className="animate-wiggle"
+                />
+
+                <p className="text-sm sm:text-lg font-thin ">DEPOSIT</p>
+                <span className="absolute -top-6 text-[9px] sm:text-[9px] font-extrabold text-white px-2 py-[2px] rounded-md bg-blue-600 shadow-md ring-2 ring-blue-300 animate-wiggle ring-offset-1">
+                  <span className="inline-block">+ 10% Deposit Bonus!</span>
+                </span>
+              </Button>
             </PopoverTrigger>
             <PopoverContent>
               Elevate is currently reviewing your deposit request. Please wait
