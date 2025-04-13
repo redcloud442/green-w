@@ -40,6 +40,7 @@ export default {
       animation: {
         "stroke-anim": "stroke-dash 1.6s linear infinite",
         wiggle: "wiggle 0.5s ease-in-out infinite",
+        'circle-glow': 'circle-glow 2s linear infinite',
       },
       keyframes: {
         wiggle: {
@@ -52,6 +53,18 @@ export default {
           "100%": {
             "stroke-dasharray": "89, 200",
             "stroke-dashoffset": "-124",
+          },
+        },
+        'circle-glow': {
+          '0%': { 
+            transform: 'rotate(0deg)',
+            boxShadow: '0 0 10px 2px rgba(234, 179, 8, 0.7)',
+            clipPath: 'polygon(50% 50%, 0% 0%, 0% 0%)' 
+          },
+          '100%': { 
+            transform: 'rotate(360deg)',
+            boxShadow: '0 0 20px 5px rgba(234, 179, 8, 0.3)',
+            clipPath: 'polygon(50% 50%, 0% 0%, 100% 0%)' 
           },
         },
       },

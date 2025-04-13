@@ -11,7 +11,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useMemo } from "react";
-import DashboardNotification from "../DashboardPage/DashboardNotification/DashboardNotification";
 import MobileNavBar from "../ui/MobileNavBar";
 import {
   Breadcrumb,
@@ -51,11 +50,6 @@ export default function LayoutContent({ children }: LayoutContentProps) {
     return <MobileNavBar />;
   }, [isAdmin]);
 
-  const dashboardNotification = useMemo(() => {
-    if (isAdmin || pathname !== "/panel") return null;
-    return <DashboardNotification />;
-  }, [isAdmin, pathname]);
-
   const breadcrumbs = useMemo(() => {
     return pathSegments.map((segment, i) => {
       const href = "/" + pathSegments.slice(0, i + 1).join("/");
@@ -85,7 +79,7 @@ export default function LayoutContent({ children }: LayoutContentProps) {
             <div
               className={`relative z-50 flex-grow pb-20 bg-[url(/assets/bg-primary.png)] bg-cover bg-center ${isAdmin ? "p-4" : "p-0"} sm:pb-0`}
             >
-              {dashboardNotification}
+             
               {children}
             </div>
 

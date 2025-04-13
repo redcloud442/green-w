@@ -3,14 +3,14 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogTrigger
 } from "@/components/ui/dialog";
 import PackageCard from "@/components/ui/packageCard";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { usePromoPackageStore } from "@/store/usePromoPackageStore";
 import { alliance_member_table, package_table } from "@prisma/client";
 import Image from "next/image";
 import { Dispatch, SetStateAction, useState } from "react";
@@ -33,18 +33,18 @@ const DashboardPromoPackage = ({
   const [selectedPackage, setSelectedPackage] = useState<package_table | null>(
     null
   );
+  const { promoPackage, setPromoPackage } = usePromoPackageStore();
 
-  const [open, setOpen] = useState(true);
-
+  
   const handlePackageSelect = (pkg: package_table | null) => {
     setSelectedPackage(pkg);
   };
 
   return (
     <Dialog
-      open={open}
+      open={promoPackage}
       onOpenChange={(open) => {
-        setOpen(open);
+        setPromoPackage(open);
         if (!open) {
           setSelectedPackage(null);
         }
@@ -52,8 +52,8 @@ const DashboardPromoPackage = ({
     >
       <DialogTrigger asChild>
         <Button
-          className="bg-transparent p-0 shadow-none h-full flex flex-col items-center justify-center relative"
-          onClick={() => setOpen(true)}
+          className="bg-transparent p-0 shadow-none h-full flex flex-col items-center justify-center relative circle-glow"
+          onClick={() => setPromoPackage(true)}
         >
           {/* Wiggle image */}
           <Image
@@ -68,7 +68,7 @@ const DashboardPromoPackage = ({
           <p className="text-sm sm:text-lg font-thin">EASTER PACKAGE</p>
 
           {/* Bouncing promo badge */}
-          <span className="absolute -top-10 text-[10px] sm:text-xs font-extrabold text-white px-2 py-[2px] rounded-md bg-blue-600 shadow-md ring-2 ring-blue-300 animate-wiggle ring-offset-1">
+          <span className="absolute -top-6 text-[10px] sm:text-[9px] font-extrabold text-white px-2 py-[2px] rounded-md bg-blue-600 shadow-md ring-2 ring-blue-300 animate-wiggle ring-offset-1">
             <span className="inline-block text-balance">
               Until April 18 Only + 15% Bonus!
             </span>
@@ -77,14 +77,18 @@ const DashboardPromoPackage = ({
       </DialogTrigger>
 
       <DialogContent
-        className={`sm:max-w-[425px] ${selectedPackage ? "bg-cardColor" : "bg-transparent"} p-0`}
+        className={`sm:max-w-[425px]`}
       >
-        <ScrollArea className="h-[650px] sm:h-full">
-          <DialogHeader className="text-start text-2xl font-bold">
-            <DialogTitle className="text-2xl font-bold"></DialogTitle>
-            <DialogDescription></DialogDescription>
-          </DialogHeader>
+        <ScrollArea className="h-[650px] sm:h-fit">
+        <DialogHeader>
+          <DialogTitle>
+            Alamin ang panibagong Package dito sa Elevate!
+          </DialogTitle>
+        </DialogHeader>
           <div className="flex flex-col justify-between gap-4">
+            <p className="text-md text-gray-500 text-center pt-10">
+              Mag Deposit at iavail itong limited time package natin na hanggang APRIL 18 lang!
+            </p>
             {!selectedPackage &&
               initialPackage.map((pkg) => (
                 <PackageCard

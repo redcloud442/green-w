@@ -3,6 +3,7 @@
 import { logError } from "@/services/Error/ErrorLogs";
 import { getUserEarnings } from "@/services/User/User";
 import { usePackageChartData } from "@/store/usePackageChartData";
+import { usePromoPackageStore } from "@/store/usePromoPackageStore";
 import { useUserDashboardEarningsStore } from "@/store/useUserDashboardEarnings";
 import { useUserEarningsStore } from "@/store/useUserEarningsStore";
 import { useRole } from "@/utils/context/roleContext";
@@ -39,6 +40,8 @@ const DashboardBody = ({ packages, promoPackages }: DashboardBodyProps) => {
   const { chartData } = usePackageChartData();
   const { totalEarnings, setTotalEarnings } = useUserDashboardEarningsStore();
   const { earnings, setEarnings } = useUserEarningsStore();
+  const { setPromoPackage } = usePromoPackageStore();
+
 
   const [isActive, setIsActive] = useState(
     teamMemberProfile.alliance_member_is_active
@@ -83,15 +86,17 @@ const DashboardBody = ({ packages, promoPackages }: DashboardBodyProps) => {
     }
   };
 
+
   return (
     <div
       className="w-full px-2 space-y-4
    md:px-10"
     >
-      <div className="flex flex-col gap-4 justify-center items-center ">
+      <div className="flex flex-col gap-4 justify-center items-center pt-14 sm:pt-24 ">
         <CardAmount
           title="Wallet Balance"
           handleClick={handleRefresh}
+          setOpen={setPromoPackage}
           refresh={refresh}
           value={
             Number(earnings?.alliance_combined_earnings ?? 0).toLocaleString(
@@ -299,7 +304,7 @@ const DashboardBody = ({ packages, promoPackages }: DashboardBodyProps) => {
       )}
       <div
         className={`grid grid-cols-3  gap-4 bg-white p-4 rounded-lg shadow-md ${
-          isActive ? "sm:grid-cols-6" : "sm:grid-cols-5"
+          isActive ? "sm:grid-cols-6" : "sm:grid-cols-6"
         }`}
       >
         <div className="flex flex-col items-center">
@@ -311,7 +316,13 @@ const DashboardBody = ({ packages, promoPackages }: DashboardBodyProps) => {
             setIsActive={setIsActive}
           />
         </div>
-        {/* NETWORK (Top Left) */}
+        
+        <div className="flex flex-col items-center">
+          <DashboardDepositModalDeposit
+            teamMemberProfile={teamMemberProfile}
+            className="w-full"
+          />
+        </div>
 
         {/* WITHDRAW */}
         <div className="flex flex-col items-center">
@@ -322,12 +333,6 @@ const DashboardBody = ({ packages, promoPackages }: DashboardBodyProps) => {
           />
         </div>
 
-        <div className="flex flex-col items-center">
-          <DashboardDepositModalDeposit
-            teamMemberProfile={teamMemberProfile}
-            className="w-full"
-          />
-        </div>
 
         {/* PACKAGES */}
         <div className="flex flex-col items-center">

@@ -251,9 +251,10 @@ const DashboardDepositModalDeposit = ({
               alt="plans"
               width={35}
               height={35}
+              className="animate-wiggle"
             />
             <p className="text-sm sm:text-lg font-thin ">DEPOSIT</p>
-            <span className="absolute -top-6 text-[10px] sm:text-xs font-extrabold text-white px-2 py-[2px] rounded-md bg-blue-600 shadow-md ring-2 ring-blue-300 animate-wiggle ring-offset-1">
+            <span className="absolute -top-6 text-[9px] sm:text-[9px] font-extrabold text-white px-2 py-[2px] rounded-md bg-blue-600 shadow-md ring-2 ring-blue-300 animate-wiggle ring-offset-1">
               <span className="inline-block">+ 10% Deposit Bonus!</span>
             </span>
           </Button>
@@ -314,7 +315,7 @@ const DashboardDepositModalDeposit = ({
                           value={option.merchant_id}
                         >
                           {option.merchant_account_type} -{" "}
-                          {option.merchant_account_name}
+                          {option.merchant_account_name} + 10% Bonus
                         </SelectItem>
                       ))}
                     </SelectContent>

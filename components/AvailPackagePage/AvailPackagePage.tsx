@@ -105,7 +105,7 @@ const AvailPackagePage = ({
       });
 
       const isEasterPackage =
-        selectedPackage?.package_name === "Easter"
+        selectedPackage?.package_name === "EASTER"
           ? Number(result.amount) * 0.15
           : 0;
 
