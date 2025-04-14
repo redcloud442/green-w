@@ -8,6 +8,7 @@ import { useUserModalPackageStore } from "@/store/useModalPackageStore";
 import { usePackageChartData } from "@/store/usePackageChartData";
 import { usePromoPackageStore } from "@/store/usePromoPackageStore";
 import { useUserTransactionHistoryStore } from "@/store/userTransactionHistoryStore";
+import { useSelectedPackage } from "@/store/useSelectedPackage";
 import { useUserEarningsStore } from "@/store/useUserEarningsStore";
 import { escapeFormData } from "@/utils/function";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,8 +23,6 @@ import PackageCard from "../ui/packageCard";
 type Props = {
   pkg: package_table | [];
   teamMemberProfile: alliance_member_table;
-  setSelectedPackage: Dispatch<SetStateAction<package_table | null>>;
-  selectedPackage: package_table | null;
   setActive: Dispatch<SetStateAction<boolean>>;
   active: boolean;
 };
@@ -31,8 +30,6 @@ type Props = {
 const AvailPackagePage = ({
   pkg,
   teamMemberProfile,
-  setSelectedPackage,
-  selectedPackage,
   setActive,
   active,
 }: Props) => {
@@ -44,6 +41,7 @@ const AvailPackagePage = ({
   const [maxAmount, setMaxAmount] = useState(
     earnings?.alliance_combined_earnings ?? 0
   );
+  const { selectedPackage, setSelectedPackageToNull } = useSelectedPackage();
 
   const { setAddTransactionHistory } = useUserTransactionHistoryStore();
 
@@ -86,13 +84,11 @@ const AvailPackagePage = ({
   const selectedPackageName = selectedPackage?.package_name;
 
   const amount = watch("amount");
-  const computationData =
-    selectedPackageName === "EASTER" ? Number(amount) * 0.15 : Number(amount);
 
   const computation = amount
     ? (Number(amount) * Number(selectedPackage?.package_percentage ?? 0)) / 100
     : 0;
-  const sumOfTotal = Number(amount) + computation + computationData;
+  const sumOfTotal = Number(amount) + computation;
 
   const onSubmit = async (data: FormValues) => {
     try {
@@ -193,7 +189,7 @@ const AvailPackagePage = ({
         setActive(true);
       }
 
-      setSelectedPackage(null);
+      setSelectedPackageToNull();
       setPromoPackage(false);
       setOpen(false);
     } catch (e) {
@@ -308,7 +304,7 @@ const AvailPackagePage = ({
                   className="text-center w-72" // Ensures full-width and text alignment
                   placeholder="Gross Income"
                   value={
-                    computationData.toLocaleString("en-US", {
+                    computation.toLocaleString("en-US", {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
                     }) || ""
@@ -355,7 +351,7 @@ const AvailPackagePage = ({
       <Button
         variant="secondary"
         className="w-full rounded-md text-black"
-        onClick={() => setSelectedPackage(null)}
+        onClick={() => setSelectedPackageToNull()}
       >
         Back to Packages
       </Button>

@@ -10,6 +10,7 @@ import { useUserModalPackageStore } from "@/store/useModalPackageStore";
 import { usePackageChartData } from "@/store/usePackageChartData";
 import { usePromoPackageStore } from "@/store/usePromoPackageStore";
 import { useUserTransactionHistoryStore } from "@/store/userTransactionHistoryStore";
+import { useSelectedPackage } from "@/store/useSelectedPackage";
 import { useUserEarningsStore } from "@/store/useUserEarningsStore";
 import { escapeFormData } from "@/utils/function";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,8 +23,7 @@ import * as z from "zod";
 type Props = {
   pkg: package_table | [];
   teamMemberProfile: alliance_member_table;
-  setSelectedPackage: Dispatch<SetStateAction<package_table | null>>;
-  selectedPackage: package_table | null;
+
   setActive: Dispatch<SetStateAction<boolean>>;
   active: boolean;
 };
@@ -31,8 +31,6 @@ type Props = {
 const AvailPromoPackage = ({
   pkg,
   teamMemberProfile,
-  setSelectedPackage,
-  selectedPackage,
   setActive,
   active,
 }: Props) => {
@@ -41,6 +39,9 @@ const AvailPromoPackage = ({
   const { toast } = useToast();
   const { setPromoPackage } = usePromoPackageStore();
   const { setModalPackage: setOpen } = useUserModalPackageStore();
+  const { selectedPackage, setSelectedPackage, setSelectedPackageToNull } =
+    useSelectedPackage();
+
   const maxReinvestment =
     earnings?.alliance_olympus_earnings + earnings?.alliance_referral_bounty;
   const [maxAmount, setMaxAmount] = useState(maxReinvestment ?? 0);
@@ -193,7 +194,7 @@ const AvailPromoPackage = ({
         setActive(true);
       }
 
-      setSelectedPackage(null);
+      setSelectedPackageToNull();
       setPromoPackage(false);
       setOpen(false);
     } catch (e) {
@@ -355,7 +356,7 @@ const AvailPromoPackage = ({
       <Button
         variant="secondary"
         className="w-full rounded-md text-black"
-        onClick={() => setSelectedPackage(null)}
+        onClick={() => setSelectedPackageToNull()}
       >
         Back to Packages
       </Button>

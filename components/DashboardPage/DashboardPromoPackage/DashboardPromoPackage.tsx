@@ -10,11 +10,11 @@ import {
 import PackageCard from "@/components/ui/packageCard";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { usePromoPackageStore } from "@/store/usePromoPackageStore";
+import { useSelectedPackage } from "@/store/useSelectedPackage";
 import { alliance_member_table, package_table } from "@prisma/client";
 import Image from "next/image";
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction } from "react";
 import AvailPromoPackage from "./AvailPromoPackage";
-
 type Props = {
   className: string;
   teamMemberProfile: alliance_member_table;
@@ -30,12 +30,11 @@ const DashboardPromoPackage = ({
   setIsActive,
   active,
 }: Props) => {
-  const [selectedPackage, setSelectedPackage] = useState<package_table | null>(
-    null
-  );
-  const { promoPackage, setPromoPackage } = usePromoPackageStore();
+  const { selectedPackage, setSelectedPackage, setSelectedPackageToNull } =
+    useSelectedPackage();
 
-  const handlePackageSelect = (pkg: package_table | null) => {
+  const { promoPackage, setPromoPackage } = usePromoPackageStore();
+  const handlePackageSelect = (pkg: package_table) => {
     setSelectedPackage(pkg);
   };
 
@@ -45,7 +44,7 @@ const DashboardPromoPackage = ({
       onOpenChange={(open) => {
         setPromoPackage(open);
         if (!open) {
-          setSelectedPackage(null);
+          setSelectedPackageToNull();
         }
       }}
     >
@@ -104,10 +103,8 @@ const DashboardPromoPackage = ({
             <AvailPromoPackage
               active={active}
               setActive={setIsActive}
-              setSelectedPackage={setSelectedPackage}
               pkg={selectedPackage}
               teamMemberProfile={teamMemberProfile}
-              selectedPackage={selectedPackage}
             />
           )}
           <DialogFooter></DialogFooter>

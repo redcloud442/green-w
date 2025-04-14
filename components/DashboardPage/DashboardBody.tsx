@@ -42,7 +42,6 @@ const DashboardBody = ({ packages, promoPackages }: DashboardBodyProps) => {
   const { earnings, setEarnings } = useUserEarningsStore();
   const { setPromoPackage } = usePromoPackageStore();
 
-
   const [isActive, setIsActive] = useState(
     teamMemberProfile.alliance_member_is_active
   );
@@ -85,7 +84,6 @@ const DashboardBody = ({ packages, promoPackages }: DashboardBodyProps) => {
       setRefresh(false);
     }
   };
-
 
   return (
     <div
@@ -316,7 +314,7 @@ const DashboardBody = ({ packages, promoPackages }: DashboardBodyProps) => {
             setIsActive={setIsActive}
           />
         </div>
-        
+
         <div className="flex flex-col items-center">
           <DashboardDepositModalDeposit
             teamMemberProfile={teamMemberProfile}
@@ -333,7 +331,6 @@ const DashboardBody = ({ packages, promoPackages }: DashboardBodyProps) => {
           />
         </div>
 
-
         {/* PACKAGES */}
         <div className="flex flex-col items-center">
           <DashboardDepositModalPackages
@@ -347,7 +344,7 @@ const DashboardBody = ({ packages, promoPackages }: DashboardBodyProps) => {
 
         <Link
           href="/referral"
-          className="flex flex-col items-center cursor-pointer"
+          className="flex flex-col items-center cursor-pointer mt-2"
         >
           <Image
             src="/assets/referral.ico"
@@ -361,7 +358,7 @@ const DashboardBody = ({ packages, promoPackages }: DashboardBodyProps) => {
         {/* NETWORK (Bottom Left) */}
         <Link
           href="/network"
-          className="flex flex-col items-center cursor-pointer"
+          className="flex flex-col items-center cursor-pointer mt-2"
         >
           <Image
             src="/assets/network.ico"

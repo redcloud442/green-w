@@ -14,6 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { logError } from "@/services/Error/ErrorLogs";
 import { getPackageModalData } from "@/services/Package/Member";
 import { useUserModalPackageStore } from "@/store/useModalPackageStore";
+import { useSelectedPackage } from "@/store/useSelectedPackage";
 import { createClientSide } from "@/utils/supabase/client";
 import { alliance_member_table, package_table } from "@prisma/client";
 import Image from "next/image";
@@ -35,9 +36,9 @@ const DashboardDepositModalPackages = ({
   active,
 }: Props) => {
   const supabaseClient = createClientSide();
-  const [selectedPackage, setSelectedPackage] = useState<package_table | null>(
-    null
-  );
+  const { selectedPackage, setSelectedPackage, setSelectedPackageToNull } =
+    useSelectedPackage();
+
   const { setModalPackage: setOpen, modalPackage: open } =
     useUserModalPackageStore();
   const [packages, setPackages] = useState<package_table[]>(initialPackage);
