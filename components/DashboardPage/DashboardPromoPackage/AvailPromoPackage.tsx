@@ -90,8 +90,11 @@ const AvailPromoPackage = ({
     selectedPackageName === "EASTER" ? Number(amount) * 0.15 : Number(amount);
 
   const computation = amount
-    ? (Number(amount) * Number(selectedPackage?.package_percentage ?? 0)) / 100
+    ? ((Number(amount) + computationData) *
+        Number(selectedPackage?.package_percentage ?? 0)) /
+      100
     : 0;
+
   const sumOfTotal = Number(amount) + computation + computationData;
 
   const onSubmit = async (data: FormValues) => {
