@@ -2,8 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import PackageCard from "@/components/ui/packageCard";
 import { useToast } from "@/hooks/use-toast";
-import { createPackageConnection } from "@/services/Package/Member";
+import { createPromoPackageConnection } from "@/services/Package/Member";
 import { useUserModalPackageStore } from "@/store/useModalPackageStore";
 import { usePackageChartData } from "@/store/usePackageChartData";
 import { usePromoPackageStore } from "@/store/usePromoPackageStore";
@@ -18,16 +20,15 @@ import { Dispatch, SetStateAction, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
 import * as z from "zod";
-import { Label } from "../ui/label";
-import PackageCard from "../ui/packageCard";
 type Props = {
   pkg: package_table | [];
   teamMemberProfile: alliance_member_table;
+
   setActive: Dispatch<SetStateAction<boolean>>;
   active: boolean;
 };
 
-const AvailPackagePage = ({
+const AvailPromoPackage = ({
   pkg,
   teamMemberProfile,
   setActive,
@@ -38,10 +39,12 @@ const AvailPackagePage = ({
   const { toast } = useToast();
   const { setPromoPackage } = usePromoPackageStore();
   const { setModalPackage: setOpen } = useUserModalPackageStore();
-  const [maxAmount, setMaxAmount] = useState(
-    earnings?.alliance_combined_earnings ?? 0
-  );
-  const { selectedPackage, setSelectedPackageToNull } = useSelectedPackage();
+  const { selectedPackage, setSelectedPackage, setSelectedPackageToNull } =
+    useSelectedPackage();
+
+  const maxReinvestment =
+    earnings?.alliance_olympus_earnings + earnings?.alliance_referral_bounty;
+  const [maxAmount, setMaxAmount] = useState(maxReinvestment ?? 0);
 
   const { setAddTransactionHistory } = useUserTransactionHistoryStore();
 
@@ -84,11 +87,13 @@ const AvailPackagePage = ({
   const selectedPackageName = selectedPackage?.package_name;
 
   const amount = watch("amount");
+  const computationData =
+    selectedPackageName === "EASTER" ? Number(amount) * 0.15 : Number(amount);
 
   const computation = amount
     ? (Number(amount) * Number(selectedPackage?.package_percentage ?? 0)) / 100
     : 0;
-  const sumOfTotal = Number(amount) + computation;
+  const sumOfTotal = Number(amount) + computation + computationData;
 
   const onSubmit = async (data: FormValues) => {
     try {
@@ -99,7 +104,7 @@ const AvailPackagePage = ({
           Number(selectedPackage?.packages_days ?? 0) * 24 * 60 * 60 * 1000
       );
 
-      const packageConnection = await createPackageConnection({
+      const packageConnection = await createPromoPackageConnection({
         packageData: {
           amount: Number(result.amount),
           packageId: selectedPackage?.package_id || "",
@@ -304,7 +309,7 @@ const AvailPackagePage = ({
                   className="text-center w-72" // Ensures full-width and text alignment
                   placeholder="Gross Income"
                   value={
-                    computation.toLocaleString("en-US", {
+                    computationData.toLocaleString("en-US", {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
                     }) || ""
@@ -359,4 +364,4 @@ const AvailPackagePage = ({
   );
 };
 
-export default AvailPackagePage;
+export default AvailPromoPackage;

@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Banknote,
   Bell,
   BookOpen,
   File,
@@ -131,6 +132,11 @@ const data = {
           title: "Package Notification",
           url: "/admin/package-notification",
           icon: Bell,
+        },
+        {
+          title: "Funds",
+          url: "/admin/funds",
+          icon: Banknote,
         },
       ],
     },

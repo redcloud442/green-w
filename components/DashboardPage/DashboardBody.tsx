@@ -3,6 +3,7 @@
 import { logError } from "@/services/Error/ErrorLogs";
 import { getUserEarnings } from "@/services/User/User";
 import { usePackageChartData } from "@/store/usePackageChartData";
+import { usePromoPackageStore } from "@/store/usePromoPackageStore";
 import { useUserDashboardEarningsStore } from "@/store/useUserDashboardEarnings";
 import { useUserEarningsStore } from "@/store/useUserEarningsStore";
 import { useRole } from "@/utils/context/roleContext";
@@ -20,22 +21,26 @@ import CardAmount from "../ui/cardAmount";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Separator } from "../ui/separator";
 import { Skeleton } from "../ui/skeleton";
+import CompanyAllotedFunds from "./CompanyAllotedFunds/CompanyAllotedFunds";
 import DashboardDepositModalDeposit from "./DashboardDepositRequest/DashboardDepositModal/DashboardDepositModalDeposit";
 import DashboardDepositModalPackages from "./DashboardDepositRequest/DashboardDepositModal/DashboardDepositPackagesModal";
-import DashboardMissionModal from "./DashboardMissionModal/DashboardMissionModal";
 import DashboardPackages from "./DashboardPackages";
+import DashboardPromoPackage from "./DashboardPromoPackage/DashboardPromoPackage";
 import DashboardWithdrawModalWithdraw from "./DashboardWithdrawRequest/DashboardWithdrawModal/DashboardWithdrawModalWithdraw";
+
 type DashboardBodyProps = {
   packages: package_table[];
+  promoPackages: package_table[];
 };
 
-const DashboardBody = ({ packages }: DashboardBodyProps) => {
+const DashboardBody = ({ packages, promoPackages }: DashboardBodyProps) => {
   const supabaseClient = createClientSide();
   const router = useRouter();
   const { teamMemberProfile, profile } = useRole();
   const { chartData } = usePackageChartData();
   const { totalEarnings, setTotalEarnings } = useUserDashboardEarningsStore();
   const { earnings, setEarnings } = useUserEarningsStore();
+  const { setPromoPackage } = usePromoPackageStore();
 
   const [isActive, setIsActive] = useState(
     teamMemberProfile.alliance_member_is_active
@@ -85,10 +90,11 @@ const DashboardBody = ({ packages }: DashboardBodyProps) => {
       className="w-full px-2 space-y-4
    md:px-10"
     >
-      <div className="flex flex-col gap-4 justify-center items-center ">
+      <div className="flex flex-col gap-4 justify-center items-center pt-14 sm:pt-24 ">
         <CardAmount
           title="Wallet Balance"
           handleClick={handleRefresh}
+          setOpen={setPromoPackage}
           refresh={refresh}
           value={
             Number(earnings?.alliance_combined_earnings ?? 0).toLocaleString(
@@ -281,16 +287,7 @@ const DashboardBody = ({ packages }: DashboardBodyProps) => {
 
             <Separator className="text-white" />
 
-            <div className="flex justify-center  gap-2">
-              <div className="flex flex-col bg-gray-200/50 p-2 rounded-xl text-center">
-                <p className="text-md sm:text-lg font-extralight">
-                  DAILY INTEREST RATE
-                </p>
-                <p className="text-md sm:text-lg font-extrabold">
-                  EARN 3.1 % UP TO 4.3 % PER DAY
-                </p>
-              </div>
-            </div>
+            <CompanyAllotedFunds />
           </CardContent>
         </Card>
       </div>
@@ -305,10 +302,19 @@ const DashboardBody = ({ packages }: DashboardBodyProps) => {
       )}
       <div
         className={`grid grid-cols-3  gap-4 bg-white p-4 rounded-lg shadow-md ${
-          isActive ? "sm:grid-cols-6" : "sm:grid-cols-5"
+          isActive ? "sm:grid-cols-6" : "sm:grid-cols-6"
         }`}
       >
-        {/* NETWORK (Top Left) */}
+        <div className="flex flex-col items-center">
+          <DashboardPromoPackage
+            teamMemberProfile={teamMemberProfile}
+            className="w-full"
+            active={isActive}
+            packages={promoPackages}
+            setIsActive={setIsActive}
+          />
+        </div>
+
         <div className="flex flex-col items-center">
           <DashboardDepositModalDeposit
             teamMemberProfile={teamMemberProfile}
@@ -338,7 +344,7 @@ const DashboardBody = ({ packages }: DashboardBodyProps) => {
 
         <Link
           href="/referral"
-          className="flex flex-col items-center cursor-pointer"
+          className="flex flex-col items-center cursor-pointer mt-2"
         >
           <Image
             src="/assets/referral.ico"
@@ -352,7 +358,7 @@ const DashboardBody = ({ packages }: DashboardBodyProps) => {
         {/* NETWORK (Bottom Left) */}
         <Link
           href="/network"
-          className="flex flex-col items-center cursor-pointer"
+          className="flex flex-col items-center cursor-pointer mt-2"
         >
           <Image
             src="/assets/network.ico"
@@ -362,11 +368,6 @@ const DashboardBody = ({ packages }: DashboardBodyProps) => {
           />
           <p className="text-sm sm:text-lg font-thin mt-2">NETWORK</p>
         </Link>
-        {isActive && (
-          <div className="flex flex-col items-center">
-            <DashboardMissionModal />
-          </div>
-        )}
       </div>
 
       {chartData.length > 0 && (

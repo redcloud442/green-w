@@ -18,6 +18,7 @@ type Props = {
   descriptionClassName?: string;
   children?: React.ReactNode;
   handleClick?: () => void;
+  setOpen?: (open: boolean) => void;
   refresh?: boolean;
 };
 
@@ -28,6 +29,7 @@ const CardAmount = ({
   descriptionClassName = "text-sm text-gray-500",
   handleClick,
   refresh,
+  setOpen
 }: Props) => {
   return (
     <Card className="w-full max-w-sm hover:shadow-md bg-opacity-70 space-y-2  hover:shadow-gray-500 dark:hover:shadow-gray-200 transition-all duration-300 p-4">
@@ -78,6 +80,14 @@ const CardAmount = ({
           `₱ ${value}`
         )}
       </CardContent>
+      <Button
+        variant="card"
+        type="button"
+        className="w-full rounded-lg text-black font-semibold py-2 text-balance h-14"
+        onClick={() => setOpen?.(true)}
+      >
+        CLICK HERE TO REINVEST WITH 15% BONUS
+      </Button>
     </Card>
   );
 };
