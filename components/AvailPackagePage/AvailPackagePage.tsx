@@ -6,7 +6,6 @@ import { useToast } from "@/hooks/use-toast";
 import { createPackageConnection } from "@/services/Package/Member";
 import { useUserModalPackageStore } from "@/store/useModalPackageStore";
 import { usePackageChartData } from "@/store/usePackageChartData";
-import { usePromoPackageStore } from "@/store/usePromoPackageStore";
 import { useUserTransactionHistoryStore } from "@/store/userTransactionHistoryStore";
 import { useSelectedPackage } from "@/store/useSelectedPackage";
 import { useUserEarningsStore } from "@/store/useUserEarningsStore";
@@ -25,6 +24,7 @@ type Props = {
   teamMemberProfile: alliance_member_table;
   setActive: Dispatch<SetStateAction<boolean>>;
   active: boolean;
+  setOpen?: Dispatch<SetStateAction<boolean>>;
 };
 
 const AvailPackagePage = ({
@@ -32,11 +32,11 @@ const AvailPackagePage = ({
   teamMemberProfile,
   setActive,
   active,
+  setOpen: modalPackage,
 }: Props) => {
   const { earnings, setEarnings } = useUserEarningsStore();
   const { chartData, setChartData } = usePackageChartData();
   const { toast } = useToast();
-  const { setPromoPackage } = usePromoPackageStore();
   const { setModalPackage: setOpen } = useUserModalPackageStore();
   const [maxAmount, setMaxAmount] = useState(
     earnings?.alliance_combined_earnings ?? 0
@@ -81,8 +81,6 @@ const AvailPackagePage = ({
     },
   });
 
-  const selectedPackageName = selectedPackage?.package_name;
-
   const amount = watch("amount");
 
   const computation = amount
@@ -107,23 +105,18 @@ const AvailPackagePage = ({
         teamMemberId: teamMemberProfile.alliance_member_id,
       });
 
-      const isEasterPackage =
-        selectedPackage?.package_name === "EASTER"
-          ? Number(result.amount) * 0.15
-          : 0;
-
       const transactionHistory = {
         transaction_id: uuidv4(),
         transaction_date: new Date(),
-        transaction_description: `Package Enrolled ${selectedPackage?.package_name} ${isEasterPackage ? "with 15% bonus" : ""}`,
-        transaction_amount: isEasterPackage,
+        transaction_description: `Package Enrolled ${selectedPackage?.package_name}`,
+        transaction_amount: Number(result.amount),
         transaction_member_id: teamMemberProfile?.alliance_member_id,
       };
 
       setAddTransactionHistory([
         {
           ...transactionHistory,
-          transaction_amount: Number(result.amount) + isEasterPackage,
+          transaction_amount: Number(result.amount),
         },
       ]);
 
@@ -136,6 +129,12 @@ const AvailPackagePage = ({
 
       if (earnings) {
         let remainingAmount = Number(result.amount);
+
+        const walletDeduction = Math.min(
+          remainingAmount,
+          Number(earnings.alliance_olympus_wallet)
+        );
+        remainingAmount -= walletDeduction;
 
         const olympusDeduction = Math.min(
           remainingAmount,
@@ -153,6 +152,8 @@ const AvailPackagePage = ({
           ...earnings,
           alliance_combined_earnings:
             Number(earnings.alliance_combined_earnings) - Number(result.amount),
+          alliance_olympus_wallet:
+            Number(earnings.alliance_olympus_wallet) - Number(walletDeduction),
           alliance_olympus_earnings:
             Number(earnings.alliance_olympus_earnings) -
             Number(olympusDeduction),
@@ -169,7 +170,7 @@ const AvailPackagePage = ({
           package: selectedPackage?.package_name || "",
           completion: 0,
           completion_date: completionDate.toISOString(),
-          amount: Number(amount) + isEasterPackage,
+          amount: Number(amount),
           is_ready_to_claim: false,
           package_connection_id:
             packageConnection.package_member_connection_id || "",
@@ -179,7 +180,7 @@ const AvailPackagePage = ({
           is_notified: false,
           package_member_id: teamMemberProfile?.alliance_member_id,
           package_days: Number(selectedPackage?.packages_days || 0),
-          current_amount: Number(amount) + isEasterPackage,
+          current_amount: Number(amount),
           currentPercentage: 0,
         },
         ...chartData,
@@ -189,8 +190,11 @@ const AvailPackagePage = ({
         setActive(true);
       }
 
+      if (modalPackage) {
+        modalPackage(false);
+      }
+
       setSelectedPackageToNull();
-      setPromoPackage(false);
       setOpen(false);
     } catch (e) {
       toast({
@@ -290,28 +294,6 @@ const AvailPackagePage = ({
               <p className="text-primaryRed text-sm">{errors.amount.message}</p>
             )}
             {/* no. days */}
-
-            {selectedPackageName === "EASTER" && (
-              <div className="flex flex-col gap-2 w-full justify-center items-center text-center">
-                <Label className="font-bold text-center" htmlFor="Gross">
-                  15 % Easter Bonus
-                </Label>
-                <Input
-                  variant="default"
-                  id="Gross"
-                  readOnly
-                  type="text"
-                  className="text-center w-72" // Ensures full-width and text alignment
-                  placeholder="Gross Income"
-                  value={
-                    computation.toLocaleString("en-US", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    }) || ""
-                  }
-                />
-              </div>
-            )}
 
             <div className="flex flex-col gap-2 w-full justify-center items-center text-center">
               <Label className="font-bold text-center" htmlFor="Gross">

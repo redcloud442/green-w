@@ -39,8 +39,7 @@ const AvailPromoPackage = ({
   const { toast } = useToast();
   const { setPromoPackage } = usePromoPackageStore();
   const { setModalPackage: setOpen } = useUserModalPackageStore();
-  const { selectedPackage, setSelectedPackage, setSelectedPackageToNull } =
-    useSelectedPackage();
+  const { selectedPackage, setSelectedPackageToNull } = useSelectedPackage();
 
   const maxReinvestment =
     earnings?.alliance_olympus_earnings + earnings?.alliance_referral_bounty;

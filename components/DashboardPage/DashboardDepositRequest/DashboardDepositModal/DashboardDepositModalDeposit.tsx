@@ -137,7 +137,7 @@ const DashboardDepositModalDeposit = ({
       return;
     }
 
-    const sanitizedData = escapeFormData(data);
+    const sanitizedData = escapeFormData(data) as TopUpFormValues;
 
     const files = await Promise.all(
       filesArray.map(async (file) => {

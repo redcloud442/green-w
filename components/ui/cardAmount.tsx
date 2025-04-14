@@ -5,8 +5,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useRole } from "@/utils/context/roleContext";
+import { package_table } from "@prisma/client";
 import { Info, RefreshCcw } from "lucide-react";
-import { ReactNode } from "react";
+import { Dispatch, ReactNode, SetStateAction } from "react";
+import DashboardReinvestPromoPackage from "../DashboardPage/DashboardPromoPackage/DashboardReinvestPromoPackage";
 import { Button } from "./button";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import { Skeleton } from "./skeleton";
@@ -20,6 +23,9 @@ type Props = {
   handleClick?: () => void;
   setOpen?: (open: boolean) => void;
   refresh?: boolean;
+  packages: package_table[];
+  setIsActive: Dispatch<SetStateAction<boolean>>;
+  active: boolean;
 };
 
 const CardAmount = ({
@@ -29,8 +35,12 @@ const CardAmount = ({
   descriptionClassName = "text-sm text-gray-500",
   handleClick,
   refresh,
-  setOpen
+  setOpen,
+  packages,
+  setIsActive,
+  active,
 }: Props) => {
+  const { teamMemberProfile } = useRole();
   return (
     <Card className="w-full max-w-sm hover:shadow-md bg-opacity-70 space-y-2  hover:shadow-gray-500 dark:hover:shadow-gray-200 transition-all duration-300 p-4">
       <CardHeader className="p-0">
@@ -80,14 +90,13 @@ const CardAmount = ({
           `₱ ${value}`
         )}
       </CardContent>
-      <Button
-        variant="card"
-        type="button"
-        className="w-full rounded-lg text-black font-semibold py-2 text-balance h-14"
-        onClick={() => setOpen?.(true)}
-      >
-        CLICK HERE TO REINVEST WITH 15% BONUS
-      </Button>
+      <DashboardReinvestPromoPackage
+        className="w-full"
+        teamMemberProfile={teamMemberProfile}
+        packages={packages}
+        setIsActive={setIsActive}
+        active={active}
+      />
     </Card>
   );
 };

@@ -1,4 +1,3 @@
-import AvailPackagePage from "@/components/AvailPackagePage/AvailPackagePage";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,11 +9,10 @@ import {
 } from "@/components/ui/dialog";
 import PackageCard from "@/components/ui/packageCard";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { usePromoPackageStore } from "@/store/usePromoPackageStore";
 import { useSelectedPackage } from "@/store/useSelectedPackage";
 import { alliance_member_table, package_table } from "@prisma/client";
-import Image from "next/image";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
+import AvailPromoPackage from "./AvailPromoPackage";
 type Props = {
   className: string;
   teamMemberProfile: alliance_member_table;
@@ -23,7 +21,7 @@ type Props = {
   active: boolean;
 };
 
-const DashboardPromoPackage = ({
+const DashboardReinvestPromoPackage = ({
   className,
   packages: initialPackage,
   teamMemberProfile,
@@ -32,46 +30,29 @@ const DashboardPromoPackage = ({
 }: Props) => {
   const { selectedPackage, setSelectedPackage, setSelectedPackageToNull } =
     useSelectedPackage();
+  const [isOpen, setIsOpen] = useState(false);
 
-  const { promoPackage, setPromoPackage } = usePromoPackageStore();
   const handlePackageSelect = (pkg: package_table) => {
     setSelectedPackage(pkg);
   };
 
   return (
     <Dialog
-      open={promoPackage}
+      open={isOpen}
       onOpenChange={(open) => {
-        setPromoPackage(open);
         if (!open) {
           setSelectedPackageToNull();
-          setPromoPackage(false);
+          setIsOpen(false);
         }
       }}
     >
       <DialogTrigger asChild>
         <Button
-          className="bg-transparent p-2 shadow-none h-full flex flex-col items-center justify-center relative"
-          onClick={() => setPromoPackage(true)}
+          className="bg-transparent p-2 shadow-none rounded-lg flex flex-col items-center justify-center relative text-balance h-14"
+          variant="card"
+          onClick={() => setIsOpen(true)}
         >
-          {/* Wiggle image */}
-          <Image
-            src="/assets/easter-egg.ico"
-            alt="Easter Plan"
-            width={35}
-            height={35}
-            className="animate-wiggle"
-          />
-
-          {/* Label */}
-          <p className="text-sm sm:text-lg font-thin">EASTER PACKAGE</p>
-
-          {/* Bouncing promo badge */}
-          <span className="absolute -top-6 text-[10px] sm:text-[9px] font-extrabold text-white px-2 py-[2px] rounded-md bg-blue-600 shadow-md ring-2 ring-blue-300 animate-wiggle ring-offset-1">
-            <span className="inline-block text-balance">
-              Until April 18 Only!
-            </span>
-          </span>
+          CLICK HERE TO REINVEST WITH 15 % BONUS
         </Button>
       </DialogTrigger>
 
@@ -101,12 +82,11 @@ const DashboardPromoPackage = ({
               ))}
           </div>
           {selectedPackage && (
-            <AvailPackagePage
+            <AvailPromoPackage
               active={active}
               setActive={setIsActive}
               pkg={selectedPackage}
               teamMemberProfile={teamMemberProfile}
-              setOpen={() => setPromoPackage(false)}
             />
           )}
           <DialogFooter></DialogFooter>
@@ -116,4 +96,4 @@ const DashboardPromoPackage = ({
   );
 };
 
-export default DashboardPromoPackage;
+export default DashboardReinvestPromoPackage;
