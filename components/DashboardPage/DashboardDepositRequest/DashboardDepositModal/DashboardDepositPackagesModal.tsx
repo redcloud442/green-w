@@ -77,7 +77,7 @@ const DashboardDepositModalPackages = ({
       onOpenChange={(open) => {
         setOpen(open);
         if (!open) {
-          setSelectedPackage(null);
+          setSelectedPackageToNull();
         }
       }}
     >
@@ -122,10 +122,8 @@ const DashboardDepositModalPackages = ({
             <AvailPackagePage
               active={active}
               setActive={setIsActive}
-              setSelectedPackage={setSelectedPackage}
               pkg={selectedPackage}
               teamMemberProfile={teamMemberProfile}
-              selectedPackage={selectedPackage}
             />
           )}
           <DialogFooter></DialogFooter>
