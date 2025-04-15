@@ -56,7 +56,7 @@ const DashboardPromoPackage = ({
         >
           {/* Wiggle image */}
           <Image
-            src="/assets/easter-egg.ico"
+            src="/assets/easter-icon.ico"
             alt="Easter Plan"
             width={35}
             height={35}
