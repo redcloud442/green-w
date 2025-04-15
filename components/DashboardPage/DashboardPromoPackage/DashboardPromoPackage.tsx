@@ -58,13 +58,12 @@ const DashboardPromoPackage = ({
           <Image
             src="/assets/easter-icon.ico"
             alt="Easter Plan"
-            width={35}
-            height={35}
+            width={80}
+            height={80}
             className="animate-wiggle"
           />
 
           {/* Label */}
-          <p className="text-sm sm:text-lg font-thin">EASTER PACKAGE</p>
 
           {/* Bouncing promo badge */}
           <span className="absolute -top-6 text-[10px] sm:text-[9px] font-extrabold text-white px-2 py-[2px] rounded-md bg-blue-600 shadow-md ring-2 ring-blue-300 animate-wiggle ring-offset-1">

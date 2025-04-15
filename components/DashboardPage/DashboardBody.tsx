@@ -304,7 +304,7 @@ const DashboardBody = ({ packages, promoPackages }: DashboardBodyProps) => {
         </Button>
       )}
       <div
-        className={`grid grid-cols-3  gap-4 bg-white p-4 rounded-lg shadow-md ${
+        className={`grid grid-cols-3  gap-4 bg-white p-4 rounded-lg shadow-md items-end justify-end ${
           isActive ? "sm:grid-cols-6" : "sm:grid-cols-6"
         }`}
       >
