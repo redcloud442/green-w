@@ -48,11 +48,14 @@ const DashboardReinvestPromoPackage = ({
     >
       <DialogTrigger asChild>
         <Button
-          className="bg-transparent p-2 shadow-none rounded-lg flex flex-col items-center justify-center relative text-balance h-14"
+          className="bg-transparent p-2 shadow-none rounded-lg flex flex-col items-center justify-center relative text-balance h-10 w-full"
           variant="card"
           onClick={() => setIsOpen(true)}
         >
-          CLICK HERE TO REINVEST WITH 15 % BONUS
+          REINVEST WITH 15 % BONUS
+          <span className="absolute -top-6 -right-6 sm:-right-10 text-[9px] sm:text-[9px] font-extrabold text-white px-2 py-[2px] rounded-md bg-blue-600 shadow-md ring-2 ring-blue-300 animate-wiggle ring-offset-1">
+            <span className="inline-block">+ 15% Bonus!</span>
+          </span>
         </Button>
       </DialogTrigger>
 

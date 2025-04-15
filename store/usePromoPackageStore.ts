@@ -2,7 +2,6 @@ import { create } from "zustand";
 
 interface promoPackageState {
   promoPackage: boolean;
-
   setPromoPackage: (promoPackage: boolean) => void;
 }
 

@@ -10,7 +10,7 @@ type Props = {
 
 const DashboardPage = ({ packages, promoPackages }: Props) => {
   return (
-    <div className="relative min-h-screen mx-auto space-y-4 sm:px-0 sm:mb-20 overflow-x-hidden">
+    <div className="relative min-h-screen mx-auto space-y-4 sm:px-0 sm:mb-20 pt-24 overflow-x-hidden">
       <DashboardHeader />
 
       <DashboardBody packages={packages} promoPackages={promoPackages} />
