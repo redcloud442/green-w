@@ -347,7 +347,7 @@ const DashboardBody = ({ packages, promoPackages }: DashboardBodyProps) => {
 
         <Link
           href="/referral"
-          className="flex flex-col items-center cursor-pointer mt-2 pt-2"
+          className="flex flex-col items-center cursor-pointer mt-2"
         >
           <Image
             src="/assets/referral.ico"
@@ -361,7 +361,7 @@ const DashboardBody = ({ packages, promoPackages }: DashboardBodyProps) => {
         {/* NETWORK (Bottom Left) */}
         <Link
           href="/network"
-          className="flex flex-col items-center cursor-pointer mt-2 pt-2"
+          className="flex flex-col items-center cursor-pointer mt-2"
         >
           <Image
             src="/assets/network.ico"
