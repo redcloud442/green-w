@@ -34,7 +34,7 @@ export const AdminWithdrawalHistoryColumn = (
   reset: () => void,
   profile: user_table,
   setRequestData: Dispatch<SetStateAction<AdminWithdrawaldata | null>>,
-  status: "PENDING" | "APPROVED" | "REJECTED"
+  status: "PENDING" | "APPROVED" | "REJECTED" | "HOLD"
 ) => {
   const { toast } = useToast();
   const router = useRouter();
@@ -415,45 +415,61 @@ export const AdminWithdrawalHistoryColumn = (
           },
         ]
       : []),
-    ...(status === "PENDING"
+    ...(status === "PENDING" || status === "HOLD"
       ? [
           {
             header: "Actions",
             cell: ({ row }: { row: Row<WithdrawalRequestData> }) => {
               const data = row.original;
-              return (
-                <>
-                  {data.alliance_withdrawal_request_status === "PENDING" && (
-                    <div className="flex justify-center gap-2">
-                      <Button
-                        className="bg-green-500 hover:bg-green-600 dark:bg-green-500 dark:text-white "
-                        onClick={() =>
-                          setIsOpenModal({
-                            open: true,
-                            requestId: data.alliance_withdrawal_request_id,
-                            status: "APPROVED",
-                          })
-                        }
-                      >
-                        Approve
-                      </Button>
 
-                      <Button
-                        variant="destructive"
-                        onClick={() =>
-                          setIsOpenModal({
-                            open: true,
-                            requestId: data.alliance_withdrawal_request_id,
-                            status: "REJECTED",
-                          })
-                        }
-                      >
-                        Reject
-                      </Button>
-                    </div>
+              const showActions =
+                data.alliance_withdrawal_request_status === "PENDING" ||
+                data.alliance_withdrawal_request_status === "HOLD";
+
+              return showActions ? (
+                <div className="flex justify-center gap-2">
+                  <Button
+                    className="bg-green-500 hover:bg-green-600 dark:bg-green-500 dark:text-white"
+                    onClick={() =>
+                      setIsOpenModal({
+                        open: true,
+                        requestId: data.alliance_withdrawal_request_id,
+                        status: "APPROVED",
+                      })
+                    }
+                  >
+                    Approve
+                  </Button>
+
+                  <Button
+                    variant="destructive"
+                    onClick={() =>
+                      setIsOpenModal({
+                        open: true,
+                        requestId: data.alliance_withdrawal_request_id,
+                        status: "REJECTED",
+                      })
+                    }
+                  >
+                    Reject
+                  </Button>
+
+                  {data.alliance_withdrawal_request_status === "PENDING" && (
+                    <Button
+                      variant="secondary"
+                      onClick={() =>
+                        setIsOpenModal({
+                          open: true,
+                          requestId: data.alliance_withdrawal_request_id,
+                          status: "HOLD",
+                        })
+                      }
+                    >
+                      HOLD WITHDRAWAL
+                    </Button>
                   )}
-                </>
-              );
+                </div>
+              ) : null;
             },
           },
         ]

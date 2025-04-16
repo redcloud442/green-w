@@ -130,6 +130,10 @@ const AdminWithdrawalHistoryTable = ({
                 data: [],
                 count: requestData?.data?.PENDING?.count || 0,
               },
+              HOLD: {
+                data: [],
+                count: requestData?.data?.HOLD?.count || 0,
+              },
               [statusFilter as "PENDING" | "APPROVED" | "REJECTED"]: requestData
                 ?.data?.[
                 statusFilter as "PENDING" | "APPROVED" | "REJECTED"
@@ -179,10 +183,11 @@ const AdminWithdrawalHistoryTable = ({
     try {
       setIsFetchingList(true);
 
-      const statuses: Array<"PENDING" | "APPROVED" | "REJECTED"> = [
+      const statuses: Array<"PENDING" | "APPROVED" | "REJECTED" | "HOLD"> = [
         "PENDING",
         "APPROVED",
         "REJECTED",
+        "HOLD",
       ];
 
       const updatedData: AdminWithdrawaldata = {
@@ -190,6 +195,7 @@ const AdminWithdrawalHistoryTable = ({
           APPROVED: { data: [], count: 0 },
           REJECTED: { data: [], count: 0 },
           PENDING: { data: [], count: 0 },
+          HOLD: { data: [], count: 0 },
         },
         totalPendingWithdrawal: 0,
       };
@@ -254,7 +260,11 @@ const AdminWithdrawalHistoryTable = ({
       },
     });
 
-  const status = watch("statusFilter") as "PENDING" | "APPROVED" | "REJECTED";
+  const status = watch("statusFilter") as
+    | "PENDING"
+    | "APPROVED"
+    | "REJECTED"
+    | "HOLD";
 
   const {
     columns,
@@ -287,7 +297,6 @@ const AdminWithdrawalHistoryTable = ({
   }, [supabaseClient, teamMemberProfile, activePage, sorting]);
 
   const pageCount = Math.ceil((requestData?.data?.[status]?.count || 0) / 10);
-  
 
   const handleSwitchChange = (checked: boolean) => {
     setShowFilters(checked);
@@ -298,10 +307,13 @@ const AdminWithdrawalHistoryTable = ({
   };
 
   const handleTabChange = async (type?: string) => {
-    setValue("statusFilter", type as "PENDING" | "APPROVED" | "REJECTED");
+    setValue(
+      "statusFilter",
+      type as "PENDING" | "APPROVED" | "REJECTED" | "HOLD"
+    );
     if (
-      requestData?.data?.[type as "PENDING" | "APPROVED" | "REJECTED"]?.data
-        ?.length
+      requestData?.data?.[type as "PENDING" | "APPROVED" | "REJECTED" | "HOLD"]
+        ?.data?.length
     ) {
       return;
     }
@@ -513,6 +525,9 @@ const AdminWithdrawalHistoryTable = ({
               <TabsTrigger value="REJECTED">
                 Rejected ({requestData?.data?.["REJECTED"]?.count || 0})
               </TabsTrigger>
+              <TabsTrigger value="HOLD">
+                Hold ({requestData?.data?.["HOLD"]?.count || 0})
+              </TabsTrigger>
             </TabsList>
             <AdminBanListModal teamMemberProfile={teamMemberProfile} />
           </div>
@@ -547,6 +562,18 @@ const AdminWithdrawalHistoryTable = ({
               columns={columns}
               activePage={activePage}
               totalCount={requestData?.data?.["REJECTED"]?.count || 0}
+              isFetchingList={isFetchingList}
+              setActivePage={setActivePage}
+              pageCount={pageCount}
+            />
+          </TabsContent>
+
+          <TabsContent value="HOLD">
+            <AdminWithdrawalTabs
+              table={table}
+              columns={columns}
+              activePage={activePage}
+              totalCount={requestData?.data?.["HOLD"]?.count || 0}
               isFetchingList={isFetchingList}
               setActivePage={setActivePage}
               pageCount={pageCount}

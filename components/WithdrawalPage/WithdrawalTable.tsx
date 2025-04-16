@@ -120,13 +120,17 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
                 data: [],
                 count: requestData?.data?.PENDING?.count || 0,
               },
-              [statusFilter as "PENDING" | "APPROVED" | "REJECTED"]: requestData
-                ?.data?.[
-                statusFilter as "PENDING" | "APPROVED" | "REJECTED"
-              ] || {
+              HOLD: {
                 data: [],
-                count: 0,
+                count: requestData?.data?.HOLD?.count || 0,
               },
+              [statusFilter as "PENDING" | "APPROVED" | "REJECTED" | "HOLD"]:
+                requestData?.data?.[
+                  statusFilter as "PENDING" | "APPROVED" | "REJECTED" | "HOLD"
+                ] || {
+                  data: [],
+                  count: 0,
+                },
             },
             totalPendingWithdrawal: requestData?.totalPendingWithdrawal || 0,
             totalApprovedWithdrawal: requestData?.totalApprovedWithdrawal || 0,
@@ -170,10 +174,11 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
     try {
       setIsFetchingList(true);
 
-      const statuses: Array<"PENDING" | "APPROVED" | "REJECTED"> = [
+      const statuses: Array<"PENDING" | "APPROVED" | "REJECTED" | "HOLD"> = [
         "PENDING",
         "APPROVED",
         "REJECTED",
+        "HOLD",
       ];
 
       const updatedData: AdminWithdrawaldata = {
@@ -181,6 +186,7 @@ const WithdrawalTable = ({ teamMemberProfile }: DataTableProps) => {
           APPROVED: { data: [], count: 0 },
           REJECTED: { data: [], count: 0 },
           PENDING: { data: [], count: 0 },
+          HOLD: { data: [], count: 0 },
         },
         totalPendingWithdrawal: 0,
         totalApprovedWithdrawal: 0,
