@@ -24,6 +24,7 @@ import { Skeleton } from "../ui/skeleton";
 
 import DashboardDepositModalDeposit from "./DashboardDepositRequest/DashboardDepositModal/DashboardDepositModalDeposit";
 import DashboardDepositModalPackages from "./DashboardDepositRequest/DashboardDepositModal/DashboardDepositPackagesModal";
+import DashboardMissionModal from "./DashboardMissionModal/DashboardMissionModal";
 import DashboardPackages from "./DashboardPackages";
 import DashboardWithdrawModalWithdraw from "./DashboardWithdrawRequest/DashboardWithdrawModal/DashboardWithdrawModalWithdraw";
 
@@ -302,7 +303,7 @@ const DashboardBody = ({ packages, promoPackages }: DashboardBodyProps) => {
       )}
       <div
         className={`grid grid-cols-3  gap-4 bg-white p-4 rounded-lg shadow-md items-end justify-end ${
-          isActive ? "sm:grid-cols-5" : "sm:grid-cols-5"
+          isActive ? "sm:grid-cols-6" : "sm:grid-cols-5"
         }`}
       >
         {/* <div className="flex flex-col items-center">
@@ -368,6 +369,11 @@ const DashboardBody = ({ packages, promoPackages }: DashboardBodyProps) => {
           />
           <p className="text-sm sm:text-lg font-thin mt-2">NETWORK</p>
         </Link>
+        {isActive && (
+          <div className="flex flex-col items-center">
+            <DashboardMissionModal />
+          </div>
+        )}
       </div>
 
       {chartData.length > 0 && (
