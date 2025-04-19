@@ -21,11 +21,10 @@ import CardAmount from "../ui/cardAmount";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Separator } from "../ui/separator";
 import { Skeleton } from "../ui/skeleton";
-import CompanyAllotedFunds from "./CompanyAllotedFunds/CompanyAllotedFunds";
+
 import DashboardDepositModalDeposit from "./DashboardDepositRequest/DashboardDepositModal/DashboardDepositModalDeposit";
 import DashboardDepositModalPackages from "./DashboardDepositRequest/DashboardDepositModal/DashboardDepositPackagesModal";
 import DashboardPackages from "./DashboardPackages";
-import DashboardPromoPackage from "./DashboardPromoPackage/DashboardPromoPackage";
 import DashboardWithdrawModalWithdraw from "./DashboardWithdrawRequest/DashboardWithdrawModal/DashboardWithdrawModalWithdraw";
 
 type DashboardBodyProps = {
@@ -187,7 +186,6 @@ const DashboardBody = ({ packages, promoPackages }: DashboardBodyProps) => {
                 </p>
               </div>
             </div>
-
             <Separator className="text-white" />
             {/* test */}
             <div className="flex flex-row  sm:flex-row justify-evenly gap-1 sm:gap-8  sm:px-6">
@@ -287,10 +285,9 @@ const DashboardBody = ({ packages, promoPackages }: DashboardBodyProps) => {
                 </p>
               </div>
             </div>
-
+            3
             <Separator className="text-white" />
-
-            <CompanyAllotedFunds />
+            {/* <CompanyAllotedFunds /> */}
           </CardContent>
         </Card>
       </div>
@@ -305,10 +302,10 @@ const DashboardBody = ({ packages, promoPackages }: DashboardBodyProps) => {
       )}
       <div
         className={`grid grid-cols-3  gap-4 bg-white p-4 rounded-lg shadow-md items-end justify-end ${
-          isActive ? "sm:grid-cols-6" : "sm:grid-cols-6"
+          isActive ? "sm:grid-cols-5" : "sm:grid-cols-5"
         }`}
       >
-        <div className="flex flex-col items-center">
+        {/* <div className="flex flex-col items-center">
           <DashboardPromoPackage
             teamMemberProfile={teamMemberProfile}
             className="w-full"
@@ -316,7 +313,7 @@ const DashboardBody = ({ packages, promoPackages }: DashboardBodyProps) => {
             packages={promoPackages}
             setIsActive={setIsActive}
           />
-        </div>
+        </div> */}
 
         <div className="flex flex-col items-center">
           <DashboardDepositModalDeposit

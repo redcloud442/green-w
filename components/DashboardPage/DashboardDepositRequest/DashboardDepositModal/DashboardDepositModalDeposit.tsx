@@ -252,12 +252,11 @@ const DashboardDepositModalDeposit = ({
               alt="plans"
               width={35}
               height={35}
-              className="animate-wiggle"
             />
             <p className="text-sm sm:text-lg font-thin ">DEPOSIT</p>
-            <span className="absolute -top-6 text-[9px] sm:text-[9px] font-extrabold text-white px-2 py-[2px] rounded-md bg-blue-600 shadow-md ring-2 ring-blue-300 animate-wiggle ring-offset-1">
+            {/* <span className="absolute -top-6 text-[9px] sm:text-[9px] font-extrabold text-white px-2 py-[2px] rounded-md bg-blue-600 shadow-md ring-2 ring-blue-300 animate-wiggle ring-offset-1">
               <span className="inline-block">+ 10% Deposit Bonus!</span>
-            </span>
+            </span> */}
           </Button>
         ) : (
           <Popover>
@@ -268,13 +267,12 @@ const DashboardDepositModalDeposit = ({
                   alt="plans"
                   width={35}
                   height={35}
-                  className="animate-wiggle"
                 />
 
                 <p className="text-sm sm:text-lg font-thin ">DEPOSIT</p>
-                <span className="absolute -top-6 text-[9px] sm:text-[9px] font-extrabold text-white px-2 py-[2px] rounded-md bg-blue-600 shadow-md ring-2 ring-blue-300 animate-wiggle ring-offset-1">
+                {/* <span className="absolute -top-6 text-[9px] sm:text-[9px] font-extrabold text-white px-2 py-[2px] rounded-md bg-blue-600 shadow-md ring-2 ring-blue-300 animate-wiggle ring-offset-1">
                   <span className="inline-block">+ 10% Deposit Bonus!</span>
-                </span>
+                </span> */}
               </Button>
             </PopoverTrigger>
             <PopoverContent>
@@ -323,7 +321,7 @@ const DashboardDepositModalDeposit = ({
                           value={option.merchant_id}
                         >
                           {option.merchant_account_type} -{" "}
-                          {option.merchant_account_name} + 10% Bonus
+                          {option.merchant_account_name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -446,7 +444,7 @@ const DashboardDepositModalDeposit = ({
               )}
             </div>
 
-            <div>
+            {/* <div>
               <Label htmlFor="amount">Bonus Amount</Label>
 
               <Input
@@ -455,7 +453,7 @@ const DashboardDepositModalDeposit = ({
                 id="amount"
                 value={bonusAmount}
               />
-            </div>
+            </div> */}
 
             {/* <div>
               <Label htmlFor="receipt">

@@ -9,7 +9,6 @@ import { useRole } from "@/utils/context/roleContext";
 import { package_table } from "@prisma/client";
 import { Info, RefreshCcw } from "lucide-react";
 import { Dispatch, ReactNode, SetStateAction } from "react";
-import DashboardReinvestPromoPackage from "../DashboardPage/DashboardPromoPackage/DashboardReinvestPromoPackage";
 import { Button } from "./button";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import { Skeleton } from "./skeleton";
@@ -90,13 +89,13 @@ const CardAmount = ({
           `₱ ${value}`
         )}
       </CardContent>
-      <DashboardReinvestPromoPackage
+      {/* <DashboardReinvestPromoPackage
         className="w-full"
         teamMemberProfile={teamMemberProfile}
         packages={packages}
         setIsActive={setIsActive}
         active={active}
-      />
+      /> */}
     </Card>
   );
 };
