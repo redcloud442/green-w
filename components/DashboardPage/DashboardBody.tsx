@@ -286,7 +286,7 @@ const DashboardBody = ({ packages, promoPackages }: DashboardBodyProps) => {
                 </p>
               </div>
             </div>
-            3
+
             <Separator className="text-white" />
             {/* <CompanyAllotedFunds /> */}
           </CardContent>
